@@ -1,0 +1,11 @@
+<header class="masthead">
+  <a class="masthead__brand" href="/">
+    <span class="masthead__word">Tastemaker</span>
+    <span class="masthead__tag">Masterpieces, endlessly</span>
+  </a>
+  <span class="masthead__count"><%= @total %> works · Mia</span>
+</header>
+
+<main class="feed">
+  <%= render "page", paintings: @paintings, page: @page, next_page: @next_page %>
+</main>

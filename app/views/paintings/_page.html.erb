@@ -1,0 +1,23 @@
+<%= turbo_frame_tag "feed-page-#{page}", target: "_top" do %>
+  <%= render partial: "painting", collection: paintings %>
+
+  <% if next_page %>
+    <%= turbo_frame_tag "feed-page-#{next_page}", src: root_path(page: next_page), loading: :lazy do %>
+      <div class="sentinel" aria-label="Loading more paintings">
+        <span class="sentinel__ring" aria-hidden="true"></span>
+        <span class="sentinel__label">Fetching more masterpieces</span>
+      </div>
+    <% end %>
+  <% else %>
+    <footer class="colophon">
+      <div class="ornament" aria-hidden="true">✦</div>
+      <p class="colophon__title">You have walked the whole gallery.</p>
+      <p class="colophon__note">
+        Every work here is in the public domain, from the collection of the
+        <a href="https://collections.artsmia.org" target="_blank" rel="noopener">Minneapolis Institute of Art</a>.
+        Metadata CC0 via <a href="https://github.com/artsmia/collection" target="_blank" rel="noopener">artsmia/collection</a>.
+      </p>
+      <a class="colophon__top" href="#top" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">Back to the beginning ↑</a>
+    </footer>
+  <% end %>
+<% end %>

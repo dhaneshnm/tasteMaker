@@ -1,0 +1,35 @@
+<article class="post" data-controller="reveal" id="painting_<%= painting.mia_id %>">
+  <figure class="art" <%= tag.attributes(style: "--ar: #{painting.aspect_ratio}") if painting.aspect_ratio %>>
+    <% if painting.display_image? %>
+      <%= image_tag painting.image.attached? ? url_for(painting.image) : painting.image_url_800,
+            alt: "#{painting.title} — #{painting.artist_display}",
+            width: painting.image_width, height: painting.image_height,
+            loading: (painting_counter < 2 ? "eager" : "lazy"),
+            decoding: "async" %>
+    <% end %>
+  </figure>
+
+  <div class="label">
+    <h2 class="label__title"><%= painting.title %></h2>
+    <p class="label__artist">
+      <span class="label__artist-name"><%= painting.artist_display %></span>
+      <% if painting.life_date.present? %>
+        <span class="label__artist-dates"><%= painting.life_date %></span>
+      <% end %>
+    </p>
+    <% if painting.meta_line.present? %>
+      <p class="label__meta"><%= painting.meta_line %></p>
+    <% end %>
+
+    <% if painting.description.present? %>
+      <div class="label__body" data-controller="expand">
+        <p class="label__text" data-expand-target="text"><%= painting.description %></p>
+        <button type="button" class="label__more" data-expand-target="button" data-action="expand#toggle" hidden>More</button>
+      </div>
+    <% end %>
+
+    <p class="label__credit">
+      <%= [ painting.creditline.presence, painting.accession_number.presence ].compact.join(" · ") %>
+    </p>
+  </div>
+</article>
