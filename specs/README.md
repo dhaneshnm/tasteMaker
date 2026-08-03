@@ -33,7 +33,8 @@ As <who>, I want <capability>, so that <outcome>.
 
 ```
 # NNNN — Implementation plan
-Status: Draft | Reviewed (/plan-eng-review) | Building | Done
+Status: Draft | Design-reviewed (/plan-design-review, if significant UI) |
+        Reviewed (/plan-eng-review) | Building | Done
 
 ## Approach
 <short; models, routes, jobs, views touched>

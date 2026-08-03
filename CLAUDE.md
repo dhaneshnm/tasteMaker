@@ -42,13 +42,15 @@ leader's review failures, see `specs/personas.md`). Not extra features:
    Full ≤ 3-day core) → `specs/NNNN-slug/story.md`. The spec IS the intake card.
 2. Generate implementation plan → `specs/NNNN-slug/plan.md`. Implement-time deviations
    get noted back into the plan file.
-3. `/plan-eng-review` on the plan. Direction-level changes → `decisions/` entry (R4).
-4. Implement **with Minitest coverage as you go**; `bin/ci` green before QA. Tests are
+3. `/plan-design-review` on the plan — only for features with significant UI. Skipping it
+   on a UI-light story is fine; note the skip.
+4. `/plan-eng-review` on the plan. Direction-level changes → `decisions/` entry (R4).
+5. Implement **with Minitest coverage as you go**; `bin/ci` green before QA. Tests are
    part of implementation, not a later step (R1).
-5. `/qa` → fix findings.
-6. `/simplify`, then `/code-review` → fix findings.
-7. Re-verify: `bin/ci` + quick smoke — steps 5–6 mutated code after QA passed.
-8. Ship: commit, deploy when live, `SHIPLOG.md` line with receipt. Done = shipped and
+6. `/qa` → fix findings.
+7. `/simplify`, then `/code-review` → fix findings.
+8. Re-verify: `bin/ci` + quick smoke — steps 6–7 mutated code after QA passed.
+9. Ship: commit, deploy when live, `SHIPLOG.md` line with receipt. Done = shipped and
    logged, not reviewed (R7).
 
 Size stories to lane: each shippable in ≤ 2 days. WIP = 1 means one story in flight, ever.
