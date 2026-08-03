@@ -90,6 +90,25 @@ class DailyTest < ActionDispatch::IntegrationTest
     assert_select "img[src=?]", paintings(:sunflowers).image_url_800
   end
 
+  # The lazy frame used to point at the root. After the root swap that URL
+  # fetches the daily page, which has no frame to swap in, and the infinite
+  # scroll dies silently. It only renders when there is a second page, so the
+  # test has to fill one.
+  test "the gallery's next page still comes from /feed, not the front door" do
+    (PaintingsController::PER_PAGE + 1).times do |i|
+      Painting.create!(mia_id: 910_000 + i, title: "Filler #{i}", image_url_800: "https://example.test/#{i}.jpg")
+    end
+
+    get feed_path
+
+    assert_select "turbo-frame[src=?]", feed_path(page: 2)
+
+    get feed_path(page: 2)
+
+    assert_response :success
+    assert_select "article.post", minimum: 1
+  end
+
   test "the root is no longer the gallery" do
     get root_path
 

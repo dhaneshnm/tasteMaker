@@ -12,6 +12,7 @@
   <% if @picks.empty? %>
     <p class="adm__empty">Nothing scheduled yet. The site is showing its empty state.</p>
   <% else %>
+    <div class="adm__queue-scroll">
     <table class="adm__queue">
       <thead>
         <tr>
@@ -45,5 +46,6 @@
         <% end %>
       </tbody>
     </table>
+    </div>
   <% end %>
 </div>

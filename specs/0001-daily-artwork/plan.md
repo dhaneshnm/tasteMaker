@@ -1,5 +1,7 @@
 # 0001 — Implementation plan
-Status: Reviewed — /plan-design-review + /plan-eng-review (2026-08-03). Ready to build.
+Status: **Built** (2026-08-03, commit 4221f55 + audit fixes). All 21 tasks done, `bin/ci`
+green including system tests. Not deployed — step 10's pre-launch content checklist and a
+Kamal setup story stand between this and a live site.
 
 ## Data flow
 ```
@@ -197,34 +199,68 @@ only routes.rb (trivial conflict). Steps 6, 8–10 after lanes merge.
 
 ## Implementation Tasks
 Synthesized from review findings; checkbox as shipped.
-- [ ] **T1 (P1)** — masthead + honest date (P1-issue1) — `daily/show.html.erb`
-- [ ] **T2 (P1)** — scoped linen palette, AA contrast (P4-issue6) — `application.css`
-- [ ] **T3 (P1)** — contain/55dvh/never-crop image treatment (P4-issue7) — view + CSS
-- [ ] **T4 (P1)** — fold-budget system test, bounding rect (P4-issue7) — system test
-- [ ] **T5 (P1)** — zoom controller + a11y contract + test (P6-issue9) — new Stimulus
-- [ ] **T6 (P2)** — loading: reserved box + preload (P2-issue2) — view/head
-- [ ] **T7 (P2)** — error/empty states + admin no-image validation (P2-issue3)
-- [ ] **T8 (P2)** — ETag + must-revalidate caching (P2-issue4) — controller
-- [ ] **T9 (P2)** — blurb contract: simple_format, no clamp, word counter (P4-issue8)
-- [ ] **T10 (P2)** — closing beat + honest gallery link (P3-issue5) — view
-- [ ] **T11 (P2)** — admin preview route + labeled select + thumbnail (P7-issue11)
-- [ ] **T12 (P3)** — README note (existing step)
-- [ ] **T13 (P1)** — set `config.time_zone` + midnight boundary test (Codex #3)
-- [ ] **T14 (P1)** — preview as authed member action + tests (Eng-1, Eng-2)
-- [ ] **T15 (P1)** — cache: `fresh_when` + no-cache, drop max-age plan (Eng-6)
-- [ ] **T16 (P2)** — admin edit keeps own painting in select; date default ≥ today (Codex #8, #9)
-- [ ] **T17 (P2)** — img `onerror` placeholder guard (Codex #10)
-- [ ] **T18 (P2)** — layout title/meta + PWA manifest truth pass (Codex #7)
-- [ ] **T19 (P2)** — enable `test:system` in bin/ci (Codex #5)
-- [ ] **T20 (P1, deploy-blocking)** — pre-launch content checklist: pick live + 7 queued (Codex #4)
-- [ ] **T21 (P2)** — eager-load painting/attachment in daily#show + admin (Eng-3)
+- [x] **T1 (P1)** — masthead + honest date (P1-issue1) — `daily/show.html.erb`
+- [x] **T2 (P1)** — scoped linen palette, AA contrast (P4-issue6) — `application.css`
+- [x] **T3 (P1)** — contain/55dvh/never-crop image treatment (P4-issue7) — view + CSS
+- [x] **T4 (P1)** — fold-budget system test, bounding rect (P4-issue7) — system test
+- [x] **T5 (P1)** — zoom controller + a11y contract + test (P6-issue9) — new Stimulus
+- [x] **T6 (P2)** — loading: reserved box + preload (P2-issue2) — view/head
+- [x] **T7 (P2)** — error/empty states + admin no-image validation (P2-issue3)
+- [x] **T8 (P2)** — ETag + must-revalidate caching (P2-issue4) — controller
+- [x] **T9 (P2)** — blurb contract: simple_format, no clamp, word counter (P4-issue8)
+- [x] **T10 (P2)** — closing beat + honest gallery link (P3-issue5) — view
+- [x] **T11 (P2)** — admin preview route + labeled select + thumbnail (P7-issue11)
+- [x] **T12 (P3)** — README note (existing step)
+- [x] **T13 (P1)** — set `config.time_zone` + midnight boundary test (Codex #3)
+- [x] **T14 (P1)** — preview as authed member action + tests (Eng-1, Eng-2)
+- [x] **T15 (P1)** — cache: `fresh_when` + no-cache, drop max-age plan (Eng-6)
+- [x] **T16 (P2)** — admin edit keeps own painting in select; date default ≥ today (Codex #8, #9)
+- [x] **T17 (P2)** — img `onerror` placeholder guard (Codex #10)
+- [x] **T18 (P2)** — layout title/meta + PWA manifest truth pass (Codex #7)
+- [x] **T19 (P2)** — enable `test:system` in bin/ci (Codex #5)
+- [x] **T20 (P1, deploy-blocking)** — pre-launch content checklist: pick live + 7 queued (Codex #4)
+- [x] **T21 (P2)** — eager-load painting/attachment in daily#show + admin (Eng-3)
+
+### Post-build audit fixes (six-lens adversarial review, 2026-08-03)
+27 findings raised, 22 refuted by skeptics, 4 confirmed — all P3, all fixed:
+- [x] **A1** — admin painting picker was still N+1 (109 → 5 queries); T21 had missed it
+- [x] **A2** — the feed lazy-frame regression the plan claimed to test was untested:
+      5 fixtures vs `PER_PAGE = 10` meant the next-page frame never rendered in any test.
+      Added a test that fills a second page; mutation-checked (reverting to `root_path`
+      now fails it).
+- [x] **A3** — admin queue table forced the whole page to scroll sideways at 375px;
+      now the table scrolls inside its own container and the row links wrap
+- [x] **A4** — zoom's tap-to-dismiss (the primary phone gesture) and the body scroll
+      lock had no test; both added and mutation-checked
 
 ## Estimate
 ~2–3 days (eng review honesty pass — Codex #6; scope confirmed twice, not cut).
 Fits Full lane ceiling.
 
 ## Deviations (added during build)
-- (none yet)
+- **Stimulus controller named `artwork`, not `zoom`.** It owns the broken-image fallback
+  as well, because the two behaviours have to agree: a placeholder must not stay
+  zoomable. Two controllers would have needed to coordinate that.
+- **Painting picker ordered by title, not "newest first".** The curator searches for a
+  work by name; recency of import is not a thing they know.
+- **Global `[hidden] { display: none !important }`.** A system test caught the zoom
+  trigger staying visible after an image error: `.daily-figure__zoom { display: block }`
+  was overriding the `hidden` attribute. One rule kills the whole bug class, and it
+  replaced the `.zoom[hidden]` special case.
+- **Rails 8.1.3 → 8.1.3.1.** `bundler-audit` blocked CI on CVE-2026-66066, arbitrary file
+  read / RCE in Active Storage variant processing — which is exactly the path our artwork
+  images take. Patch-level bump, suite green after.
+- **`artwork_src` helper extracted and used by the feed partial too.** Pure refactor, no
+  behaviour change; the feed integration test now asserts the image src so the frozen
+  feed stays covered.
+- **Extra `picker` Stimulus controller** to make the plan's "thumbnail of selected
+  painting" live rather than only-after-save.
+- **CI uploads screenshots** from failed system tests, since fold-budget failures are
+  only legible as pictures.
+- Observed while dogfooding, not fixed (no spec, out of scope): on a phone the zoom
+  overlay mostly removes chrome rather than magnifying, because the artwork already
+  spans the width. Real detail comes from pinching the 1600px asset (≈4× at 390 CSS px)
+  and from the overlay on desktop. Worth a look during `/qa`.
 
 ## GSTACK REVIEW REPORT
 

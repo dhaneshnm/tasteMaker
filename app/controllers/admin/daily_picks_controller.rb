@@ -57,7 +57,9 @@ module Admin
     # already holds — otherwise a record disappears from its own edit form.
     def load_selectable_paintings
       spoken_for = DailyPick.where.not(id: @pick&.id).select(:painting_id)
-      @paintings = Painting.where.not(id: spoken_for).order(:title)
+      # The picker renders a thumbnail per option, so load the attachments with
+      # the list rather than one lookup per painting.
+      @paintings = Painting.with_attached_image.where.not(id: spoken_for).order(:title)
     end
 
     def pick_params

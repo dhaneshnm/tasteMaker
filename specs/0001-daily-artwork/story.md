@@ -1,7 +1,7 @@
 # 0001 — Artwork of the Day
 Date: 2026-08-03
 Lane: Full (core, target ≤ 2 days)
-Status: Draft
+Status: Built 2026-08-03 — code complete and merged, awaiting deploy
 
 ## Who
 **Maya** — Daily Ritual Learner, persona 1 (`specs/personas.md`). 33, pediatric nurse in

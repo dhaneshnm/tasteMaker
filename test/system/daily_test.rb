@@ -48,12 +48,29 @@ class DailyTest < ApplicationSystemTestCase
     find(".daily-figure__zoom").click
     assert_selector ".zoom", visible: true
     assert_selector ".zoom__close", visible: true
+    assert page.evaluate_script("document.documentElement.classList.contains('zoom-open')"),
+      "the page behind the overlay was left scrollable"
 
     find("body").send_keys(:escape)
 
     assert_no_selector ".zoom", visible: true
     focused = page.evaluate_script("document.activeElement.className")
     assert_includes focused, "daily-figure__zoom", "focus did not return to the artwork"
+    assert_not page.evaluate_script("document.documentElement.classList.contains('zoom-open')"),
+      "the scroll lock outlived the overlay"
+  end
+
+  # On a phone, tapping the picture is the gesture people reach for first.
+  test "tapping anywhere in the full screen view closes it" do
+    visit root_path
+
+    find(".daily-figure__zoom").click
+    assert_selector ".zoom", visible: true
+
+    find(".zoom__img").click
+
+    assert_no_selector ".zoom", visible: true
+    assert_not page.evaluate_script("document.documentElement.classList.contains('zoom-open')")
   end
 
   test "the page holds together when the picture does not load" do

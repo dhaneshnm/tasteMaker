@@ -678,6 +678,9 @@ html.zoom-open body { overflow: hidden; }
 }
 .adm__button:hover { color: var(--gold-bright); border-color: var(--gold-bright); }
 
+/* The queue is wide and the curator opens it on a phone: scroll the table, not
+ * the whole page. */
+.adm__queue-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .adm__queue { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
 .adm__queue th {
   text-align: left;
@@ -691,5 +694,5 @@ html.zoom-open body { overflow: hidden; }
 }
 .adm__queue td { padding: 0.7rem 0.6rem; border-bottom: 1px solid var(--frame-edge); vertical-align: top; }
 .adm__queue tr.is-upcoming td { color: var(--ink-dim); }
-.adm__queue .adm__row-links { display: flex; gap: 0.8rem; font-size: 0.78rem; }
+.adm__queue .adm__row-links { display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; font-size: 0.78rem; }
 .adm__empty { color: var(--ink-faint); font-style: italic; }
