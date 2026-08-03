@@ -29,3 +29,13 @@
 
 en:
   hello: "Hello world"
+
+  activerecord:
+    attributes:
+      daily_pick:
+        # Rails prefixes error messages with the humanized column name, and
+        # "Scheduled on already has an artwork scheduled" reads like a riddle.
+        scheduled_on: "Date"
+        painting: "Artwork"
+        painting_id: "Artwork"
+        blurb: "Today's note"
