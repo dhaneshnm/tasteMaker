@@ -25,6 +25,17 @@ Proven baseline:
 Content pipeline: CC0 museum APIs → curated queue → daily publish job (Solid Queue).
 **BANNED: AI-generated artwork descriptions.** Editorial text is written by the user.
 
+Better bucket — execution quality bars applied while building the baseline (evidence:
+leader's review failures, see `specs/personas.md`). Not extra features:
+1. Blurb craft: accurate, specific, proportioned, zero promo cruft.
+2. Art + text visible together — text never swallows the artwork.
+3. Fast: images cached locally, no stutter, instant open.
+4. Calm: no ads, no upsell interrupts, nothing between push and art (free by baseline — protect it).
+5. "Today" rolls over correctly per timezone.
+6. Curation range: beyond Euro-canon greatest hits.
+7. Zoomable, high-quality images.
+(iOS widget appears in evidence but is a new surface, not a quality bar — own spec, post-baseline.)
+
 ## Build flow — every feature follows this, in order
 1. User describes who the user is + their problem → write user story with intake fields
    (problem, evidence, success-signal prediction, lane: Express same-day reversible /
