@@ -485,7 +485,9 @@ body.daily ::selection { background: rgba(125, 95, 24, 0.25); color: var(--ink);
 /* Long museum titles step down rather than get cut — never truncate a title. */
 .daily-title--long { font-size: clamp(1.2rem, 3.8vw, 1.45rem); }
 
-.daily-artist { margin: 0 0 0.3rem; font-size: 1.02rem; }
+/* Artist plus life dates wraps to two lines on plenty of works, and at the
+ * default line-height those lines collide with each other and with the meta. */
+.daily-artist { margin: 0 0 0.55rem; font-size: 1.02rem; line-height: 1.4; }
 .daily-artist__name { color: var(--gold); letter-spacing: 0.02em; }
 .daily-artist__dates { color: var(--ink-faint); font-style: italic; }
 .daily-artist__dates::before { content: " · "; font-style: normal; }
