@@ -4,20 +4,21 @@ Lane: Full (core, target ≤ 2 days)
 Status: Draft
 
 ## Who
-Persona 1 — Daily Ritual Learner (`specs/personas.md`). Art-curious, not expert. Opens
-once a day, has 1–3 minutes, wants to feel smarter and calmer, then get on with their day.
+**Maya** — Daily Ritual Learner, persona 1 (`specs/personas.md`). 33, pediatric nurse in
+Columbus. Art-curious, not expert. Opens once a day with her morning tea, has 1–3 minutes,
+wants to feel a little more cultured, then get on with her shift.
 Secondary actor: the curator (Dhanesh), who picks the works and writes every blurb.
 
 ## Problem
-They want a small daily dose of art with a human voice — "my daily dash of culture,"
-"keeps me regularly dosed" — without ads, upsells, or an endless feed that turns a ritual
-into a scroll session. The category leader serves this persona but buries the moment under
+Maya wants a small daily dose of art with a human voice — "my daily dash of culture,"
+"keeps me regularly dosed" — without ads, upsells, or an endless feed that turns her
+ritual into a scroll session. The category leader serves her but buries the moment under
 monetization noise. Our current app has no "today" at all — only infinite scroll.
 
 ## Story
-As a daily ritual learner, I want to open the app and immediately see today's single
-artwork with a short hand-written note on why it matters, so that I get my art moment in
-under three minutes and come back tomorrow.
+As Maya, I want to open the app and immediately see today's single artwork with a short
+hand-written note on why it matters, so that I get my art moment in under three minutes
+and come back tomorrow.
 
 ## Intake
 - Evidence: largest persona cluster (~8 negative + 4 positive reviews); "one artwork per
