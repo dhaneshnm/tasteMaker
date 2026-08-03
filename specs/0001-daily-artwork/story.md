@@ -34,7 +34,10 @@ and come back tomorrow.
 - Artwork and blurb text are visible together — reading never hides the art (Better bar 2).
 - "Today" is computed correctly for the visitor-relevant timezone rule the plan defines
   (Better bar 5) — no tomorrow-leak, no blank days.
-- A day with nothing published shows the most recent published day (graceful, no error).
+- A day with nothing published shows the most recent published day (graceful, no error),
+  dated honestly with the pick's own date.
+- Masthead names the moment: wordmark, "Artwork of the Day", date.
+- Artwork is tap-to-zoomable full screen (Better bar 7), keyboard-accessible.
 - Curator can queue future days: artwork + blurb + publish date.
 - Existing infinite-scroll feed remains reachable but is no longer the root (decision 0002:
   frozen, untouched).
