@@ -5,6 +5,8 @@ module Admin
   # back to CURATOR_PASSWORD for local and CI runs. When neither is set the
   # check fails closed rather than erroring.
   class BaseController < ApplicationController
+    USERNAME = "curator"
+
     before_action :authenticate_curator
 
     private
@@ -14,14 +16,9 @@ module Admin
         expected_password = curator_password
         next false if expected_password.blank?
 
-        ActiveSupport::SecurityUtils.secure_compare(username.to_s, curator_username) &
+        ActiveSupport::SecurityUtils.secure_compare(username.to_s, USERNAME) &
           ActiveSupport::SecurityUtils.secure_compare(password.to_s, expected_password)
       end
-    end
-
-    def curator_username
-      Rails.application.credentials.dig(:curator, :username).presence ||
-        ENV.fetch("CURATOR_USERNAME", "curator")
     end
 
     def curator_password

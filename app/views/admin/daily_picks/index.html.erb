@@ -7,10 +7,10 @@
     <p class="adm__flash"><%= flash[:notice] %></p>
   <% end %>
 
-  <p><%= link_to "Schedule a day →", new_admin_daily_pick_path, class: "daily-close__link" %></p>
+  <p><%= link_to "Schedule a day →", new_admin_daily_pick_path, class: "caps-link" %></p>
 
   <% if @picks.empty? %>
-    <p class="adm__empty">Nothing scheduled yet. The site is showing its empty state.</p>
+    <p class="adm__muted">Nothing scheduled yet. The site is showing its empty state.</p>
   <% else %>
     <div class="adm__queue-scroll">
     <table class="adm__queue">
@@ -26,12 +26,12 @@
         <% @picks.each do |pick| %>
           <tr class="<%= "is-upcoming" unless pick.published? %>">
             <td>
-              <%= pick.scheduled_on.strftime("%a, %b %-d") %>
-              <%= tag.span("upcoming", class: "adm__empty") unless pick.published? %>
+              <%= pick.scheduled_on.to_fs(:daily) %>
+              <%= tag.span("upcoming", class: "adm__muted") unless pick.published? %>
             </td>
             <td>
               <%= pick.painting.title %><br>
-              <span class="adm__empty"><%= pick.painting.artist_display %></span>
+              <span class="adm__muted"><%= pick.painting.artist_display %></span>
             </td>
             <td><%= pick.blurb_word_count %></td>
             <td>
@@ -39,7 +39,7 @@
                 <%= link_to "Preview", preview_admin_daily_pick_path(pick) %>
                 <%= link_to "Edit", edit_admin_daily_pick_path(pick) %>
                 <%= link_to "Remove", admin_daily_pick_path(pick),
-                      data: { turbo_method: :delete, turbo_confirm: "Remove #{pick.painting.title} from #{pick.scheduled_on.strftime("%b %-d")}?" } %>
+                      data: { turbo_method: :delete, turbo_confirm: "Remove #{pick.painting.title} from #{pick.scheduled_on.to_fs(:daily)}?" } %>
               </div>
             </td>
           </tr>

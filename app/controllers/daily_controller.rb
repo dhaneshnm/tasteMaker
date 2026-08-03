@@ -7,7 +7,7 @@ class DailyController < ApplicationController
   # today's blurb would have stayed invisible until the cache expired.
   def show
     @pick = DailyPick.current
-    return if @pick.nil?
+    return render :empty if @pick.nil?
 
     fresh_when(@pick, public: true)
     response.cache_control[:no_cache] = true

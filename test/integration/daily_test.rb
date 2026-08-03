@@ -6,7 +6,7 @@ class DailyTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h1.daily-title", text: paintings(:sunflowers).title
-    assert_select ".daily-artist__name", text: paintings(:sunflowers).artist
+    assert_select ".daily-artist .label__artist-name", text: paintings(:sunflowers).artist
     assert_select ".daily-note", /fortnight/
   end
 
@@ -30,7 +30,7 @@ class DailyTest < ActionDispatch::IntegrationTest
     get root_path
 
     assert_select ".daily-close__line", text: "See you tomorrow."
-    assert_select ".daily-close__link[href=?]", feed_path, text: /Wander the full gallery/
+    assert_select ".daily-close .caps-link[href=?]", feed_path, text: /Wander the full gallery/
   end
 
   test "a missed day keeps the last artwork up, dated honestly" do

@@ -14,9 +14,7 @@ module Admin
     end
 
     test "a wrong password does not open it" do
-      credentials = ActionController::HttpAuthentication::Basic.encode_credentials("curator", "guess")
-
-      get admin_daily_picks_path, headers: { "HTTP_AUTHORIZATION" => credentials }
+      get admin_daily_picks_path, headers: curator_headers(password: "guess")
 
       assert_response :unauthorized
     end

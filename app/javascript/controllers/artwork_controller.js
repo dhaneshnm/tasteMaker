@@ -9,7 +9,6 @@ export default class extends Controller {
   static targets = ["trigger", "image", "placeholder", "overlay", "close"]
 
   connect() {
-    this.onKeydown = this.keydown.bind(this)
     // An image that failed before Stimulus booted never fires `error` for us.
     if (this.hasImageTarget && this.imageTarget.complete && this.imageTarget.naturalWidth === 0) {
       this.imageFailed()
@@ -25,7 +24,7 @@ export default class extends Controller {
 
     this.overlayTarget.hidden = false
     document.documentElement.classList.add("zoom-open")
-    document.addEventListener("keydown", this.onKeydown)
+    document.addEventListener("keydown", this.keydown)
     this.closeTarget.focus()
   }
 
@@ -34,7 +33,8 @@ export default class extends Controller {
     if (this.hasTriggerTarget) this.triggerTarget.focus()
   }
 
-  keydown(event) {
+  // A field, not a method: the same reference has to come off `document` again.
+  keydown = (event) => {
     if (event.key === "Escape") {
       event.preventDefault()
       this.close()
@@ -54,6 +54,6 @@ export default class extends Controller {
   releaseModal() {
     if (this.hasOverlayTarget) this.overlayTarget.hidden = true
     document.documentElement.classList.remove("zoom-open")
-    document.removeEventListener("keydown", this.onKeydown)
+    document.removeEventListener("keydown", this.keydown)
   }
 }

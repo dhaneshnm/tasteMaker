@@ -1,9 +1,11 @@
 module Admin
   class DailyPicksController < BaseController
-    before_action :set_pick, only: %i[edit update destroy preview]
+    before_action :set_pick, only: %i[edit update destroy]
+    before_action :set_pick_with_artwork, only: :preview
 
     def index
-      @picks = DailyPick.with_artwork.order(scheduled_on: :desc)
+      # The queue lists titles, not pictures, so the images stay unloaded.
+      @picks = DailyPick.includes(:painting).order(scheduled_on: :desc).to_a
     end
 
     def new
@@ -15,7 +17,7 @@ module Admin
       @pick = DailyPick.new(pick_params)
 
       if @pick.save
-        redirect_to admin_daily_picks_path, notice: "Scheduled for #{@pick.scheduled_on.to_fs(:long)}."
+        redirect_to admin_daily_picks_path, notice: "Scheduled for #{@pick.scheduled_on.to_fs(:daily_long)}."
       else
         load_selectable_paintings
         render :new, status: :unprocessable_entity
@@ -28,7 +30,7 @@ module Admin
 
     def update
       if @pick.update(pick_params)
-        redirect_to admin_daily_picks_path, notice: "Updated #{@pick.scheduled_on.to_fs(:long)}."
+        redirect_to admin_daily_picks_path, notice: "Updated #{@pick.scheduled_on.to_fs(:daily_long)}."
       else
         load_selectable_paintings
         render :edit, status: :unprocessable_entity
@@ -50,16 +52,16 @@ module Admin
     private
 
     def set_pick
+      @pick = DailyPick.find(params[:id])
+    end
+
+    # Only the preview renders the artwork itself.
+    def set_pick_with_artwork
       @pick = DailyPick.with_artwork.find(params[:id])
     end
 
-    # Paintings that have not had their day yet, plus whichever one this pick
-    # already holds — otherwise a record disappears from its own edit form.
     def load_selectable_paintings
-      spoken_for = DailyPick.where.not(id: @pick&.id).select(:painting_id)
-      # The picker renders a thumbnail per option, so load the attachments with
-      # the list rather than one lookup per painting.
-      @paintings = Painting.with_attached_image.where.not(id: spoken_for).order(:title)
+      @paintings = DailyPick.selectable_paintings(@pick)
     end
 
     def pick_params

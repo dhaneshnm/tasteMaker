@@ -2,7 +2,7 @@
   <figure class="art" <%= tag.attributes(style: "--ar: #{painting.aspect_ratio}") if painting.aspect_ratio %>>
     <% if painting.display_image? %>
       <%= image_tag artwork_src(painting),
-            alt: "#{painting.title} — #{painting.artist_display}",
+            alt: painting.alt_text,
             width: painting.image_width, height: painting.image_height,
             loading: (painting_counter < 2 ? "eager" : "lazy"),
             decoding: "async" %>
@@ -28,8 +28,6 @@
       </div>
     <% end %>
 
-    <p class="label__credit">
-      <%= [ painting.creditline.presence, painting.accession_number.presence ].compact.join(" · ") %>
-    </p>
+    <p class="label__credit"><%= painting.credit_line %></p>
   </div>
 </article>

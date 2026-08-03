@@ -1,7 +1,7 @@
-<% content_for :title, "Edit #{@pick.scheduled_on.strftime("%b %-d")} — Tastemaker" %>
+<% content_for :title, "Edit #{@pick.scheduled_on.to_fs(:daily)} — Tastemaker" %>
 
 <div class="adm">
-  <h1>Editing <%= @pick.scheduled_on.strftime("%A, %B %-d") %></h1>
-  <p><%= link_to "Preview this day →", preview_admin_daily_pick_path(@pick), class: "daily-close__link" %></p>
+  <h1>Editing <%= @pick.scheduled_on.to_fs(:daily_long) %></h1>
+  <p><%= link_to "Preview this day →", preview_admin_daily_pick_path(@pick), class: "caps-link" %></p>
   <%= render "form", pick: @pick, submit_label: "Save this day" %>
 </div>

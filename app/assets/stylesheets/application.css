@@ -24,6 +24,14 @@
 /* `hidden` is a promise; a later `display` rule must not be able to break it. */
 [hidden] { display: none !important; }
 
+/* Small-caps link. Reads on the linen page and on the dark curator's desk,
+ * because the colour comes from whichever --gold is in scope. */
+.caps-link {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -487,10 +495,9 @@ body.daily ::selection { background: rgba(125, 95, 24, 0.25); color: var(--ink);
 
 /* Artist plus life dates wraps to two lines on plenty of works, and at the
  * default line-height those lines collide with each other and with the meta. */
+/* The name and dates themselves reuse .label__artist-*, which is already
+ * written in var()s the linen palette re-points. */
 .daily-artist { margin: 0 0 0.55rem; font-size: 1.02rem; line-height: 1.4; }
-.daily-artist__name { color: var(--gold); letter-spacing: 0.02em; }
-.daily-artist__dates { color: var(--ink-faint); font-style: italic; }
-.daily-artist__dates::before { content: " · "; font-style: normal; }
 
 .daily-meta {
   margin: 0 0 1.25rem;
@@ -532,11 +539,6 @@ body.daily ::selection { background: rgba(125, 95, 24, 0.25); color: var(--ink);
   color: var(--ink-dim);
 }
 
-.daily-close__link {
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-}
 
 .daily-main--empty {
   padding-top: clamp(4rem, 18vh, 8rem);
@@ -697,4 +699,4 @@ html.zoom-open body { overflow: hidden; }
 .adm__queue td { padding: 0.7rem 0.6rem; border-bottom: 1px solid var(--frame-edge); vertical-align: top; }
 .adm__queue tr.is-upcoming td { color: var(--ink-dim); }
 .adm__queue .adm__row-links { display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; font-size: 0.78rem; }
-.adm__empty { color: var(--ink-faint); font-style: italic; }
+.adm__muted { color: var(--ink-faint); font-style: italic; }

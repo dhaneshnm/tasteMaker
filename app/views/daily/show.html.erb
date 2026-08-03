@@ -1,84 +1,75 @@
+<% painting = @pick.painting
+   src = artwork_src(painting) %>
+
 <% content_for :body_class, "daily" %>
 <% content_for :theme_color, "#f4efe6" %>
-
-<% if @pick.nil? %>
-  <%= render "daily/empty" %>
-<% else %>
-  <% painting = @pick.painting %>
-  <% content_for :title, "#{painting.title} — Tastemaker" %>
-  <% content_for :description, "#{painting.title} by #{painting.artist_display}, today's artwork on Tastemaker." %>
-  <% content_for :head do %>
-    <link rel="preload" as="image" href="<%= artwork_src(painting) %>">
-  <% end %>
-
-  <header class="daily-masthead">
-    <a class="daily-masthead__brand" href="<%= root_path %>">Tastemaker</a>
-    <p class="daily-masthead__label">Artwork of the Day</p>
-    <time class="daily-masthead__date" datetime="<%= @pick.scheduled_on.iso8601 %>">
-      <%= @pick.scheduled_on.strftime("%a, %b %-d") %>
-    </time>
-  </header>
-
-  <main class="daily-main" data-controller="artwork">
-    <figure class="daily-figure">
-      <button type="button" class="daily-figure__zoom"
-              data-artwork-target="trigger"
-              data-action="artwork#open"
-              aria-label="View <%= painting.title %> full screen">
-        <%= image_tag artwork_src(painting),
-              alt: "#{painting.title} — #{painting.artist_display}",
-              width: painting.image_width, height: painting.image_height,
-              loading: "eager", decoding: "async",
-              class: "daily-figure__img",
-              aria: { describedby: "daily-note" },
-              data: { artwork_target: "image", action: "error->artwork#imageFailed" } %>
-      </button>
-
-      <p class="daily-figure__resting" data-artwork-target="placeholder" hidden>
-        This work is resting — read today's note.
-      </p>
-    </figure>
-
-    <div class="daily-label">
-      <h1 class="daily-title <%= "daily-title--long" if painting.title.to_s.length > 60 %>"><%= painting.title %></h1>
-
-      <p class="daily-artist">
-        <span class="daily-artist__name"><%= painting.artist_display %></span>
-        <% if painting.life_date.present? %>
-          <span class="daily-artist__dates"><%= painting.life_date %></span>
-        <% end %>
-      </p>
-
-      <% if painting.meta_line.present? %>
-        <p class="daily-meta"><%= painting.meta_line %></p>
-      <% end %>
-
-      <div class="daily-note" id="daily-note"><%= simple_format(@pick.blurb) %></div>
-
-      <% if painting.creditline.present? || painting.accession_number.present? %>
-        <p class="daily-credit">
-          <%= [ painting.creditline.presence, painting.accession_number.presence ].compact.join(" · ") %>
-        </p>
-      <% end %>
-
-      <footer class="daily-close">
-        <div class="ornament" aria-hidden="true">✦</div>
-        <p class="daily-close__line">See you tomorrow.</p>
-        <a class="daily-close__link" href="<%= feed_path %>">Wander the full gallery →</a>
-      </footer>
-    </div>
-
-    <div class="zoom" hidden
-         role="dialog" aria-modal="true"
-         aria-label="<%= painting.title %>, full screen"
-         data-artwork-target="overlay"
-         data-action="click->artwork#close">
-      <%= image_tag artwork_src(painting),
-            alt: "#{painting.title} — #{painting.artist_display}",
-            class: "zoom__img", decoding: "async" %>
-      <button type="button" class="zoom__close"
-              data-artwork-target="close"
-              aria-label="Close full screen view">Close</button>
-    </div>
-  </main>
+<% content_for :title, "#{painting.title} — Tastemaker" %>
+<% content_for :description, "#{painting.title} by #{painting.artist_display}, today's artwork on Tastemaker." %>
+<% content_for :head do %>
+  <link rel="preload" as="image" href="<%= src %>">
 <% end %>
+
+<header class="daily-masthead">
+  <a class="daily-masthead__brand" href="<%= root_path %>">Tastemaker</a>
+  <p class="daily-masthead__label">Artwork of the Day</p>
+  <time class="daily-masthead__date" datetime="<%= @pick.scheduled_on.iso8601 %>">
+    <%= @pick.scheduled_on.to_fs(:daily) %>
+  </time>
+</header>
+
+<main class="daily-main" data-controller="artwork">
+  <figure class="daily-figure">
+    <button type="button" class="daily-figure__zoom"
+            data-artwork-target="trigger"
+            data-action="artwork#open"
+            aria-label="View <%= painting.title %> full screen">
+      <%= image_tag src,
+            alt: painting.alt_text,
+            width: painting.image_width, height: painting.image_height,
+            loading: "eager", decoding: "async",
+            class: "daily-figure__img",
+            aria: { describedby: "daily-note" },
+            data: { artwork_target: "image", action: "error->artwork#imageFailed" } %>
+    </button>
+
+    <p class="daily-figure__resting" data-artwork-target="placeholder" hidden>
+      This work is resting — read today's note.
+    </p>
+  </figure>
+
+  <div class="daily-label">
+    <h1 class="daily-title <%= "daily-title--long" if painting.long_title? %>"><%= painting.title %></h1>
+
+    <p class="daily-artist">
+      <span class="label__artist-name"><%= painting.artist_display %></span>
+      <% if painting.life_date.present? %>
+        <span class="label__artist-dates"><%= painting.life_date %></span>
+      <% end %>
+    </p>
+
+    <% if painting.meta_line.present? %>
+      <p class="daily-meta"><%= painting.meta_line %></p>
+    <% end %>
+
+    <div class="daily-note" id="daily-note"><%= simple_format(@pick.blurb) %></div>
+
+    <%= tag.p(painting.credit_line, class: "daily-credit") if painting.credit_line.present? %>
+
+    <footer class="daily-close">
+      <div class="ornament" aria-hidden="true">✦</div>
+      <p class="daily-close__line">See you tomorrow.</p>
+      <a class="caps-link" href="<%= feed_path %>">Wander the full gallery →</a>
+    </footer>
+  </div>
+
+  <div class="zoom" hidden
+       role="dialog" aria-modal="true"
+       aria-label="<%= painting.title %>, full screen"
+       data-artwork-target="overlay"
+       data-action="click->artwork#close">
+    <%= image_tag src, alt: painting.alt_text, class: "zoom__img", decoding: "async" %>
+    <button type="button" class="zoom__close"
+            data-artwork-target="close"
+            aria-label="Close full screen view">Close</button>
+  </div>
+</main>

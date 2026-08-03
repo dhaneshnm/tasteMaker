@@ -24,4 +24,20 @@ class Painting < ApplicationRecord
   def meta_line
     [ dated.presence, medium.presence ].compact.join(" — ")
   end
+
+  def credit_line
+    [ creditline.presence, accession_number.presence ].compact.join(" · ")
+  end
+
+  def alt_text
+    "#{title} — #{artist_display}"
+  end
+
+  # Museum titles run long. Past this the daily page steps the type down
+  # rather than truncating — a title is never cut.
+  LONG_TITLE = 60
+
+  def long_title?
+    title.to_s.length > LONG_TITLE
+  end
 end

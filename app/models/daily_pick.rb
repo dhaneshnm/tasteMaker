@@ -27,17 +27,34 @@ class DailyPick < ApplicationRecord
 
   # The artwork of the day: the most recent pick that has actually arrived.
   # Falls back to the last published day when today was never scheduled.
+  #
+  # Deliberately not eager-loaded: `includes` is a no-op for a single record,
+  # and the daily page revalidates on every visit, so preloading the painting
+  # would cost three throwaway queries on each 304.
   def self.current
-    published.with_artwork.order(scheduled_on: :desc).first
+    published.order(scheduled_on: :desc).first
   end
 
   # The first day from today forward that has no artwork yet — never a
   # historical gap, never a date that is already taken.
   def self.first_open_date
-    taken = where(scheduled_on: Date.current..).pluck(:scheduled_on).to_set
+    taken = where(scheduled_on: Date.current..).pluck(:scheduled_on)
     date = Date.current
     date += 1 while taken.include?(date)
     date
+  end
+
+  # The paintings a curator can still choose. This mirrors the "one day per
+  # painting" rule above, plus whichever painting `pick` already holds so a
+  # record never vanishes from its own edit form. Kept here so the rule has
+  # one home when the pool grows and the constraint relaxes.
+  def self.selectable_paintings(pick = nil)
+    spoken_for = where.not(id: pick&.id).select(:painting_id)
+
+    Painting.with_attached_image
+            .select(:id, :title, :artist, :culture, :dated, :image_url_800)
+            .where.not(id: spoken_for)
+            .order(:title)
   end
 
   def blurb_word_count
@@ -45,7 +62,7 @@ class DailyPick < ApplicationRecord
   end
 
   def published?
-    scheduled_on.present? && scheduled_on <= Date.current
+    scheduled_on <= Date.current
   end
 
   private
