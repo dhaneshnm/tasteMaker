@@ -109,9 +109,9 @@ module Admin
       get preview_admin_daily_pick_path(daily_picks(:tomorrow)), headers: curator_headers
 
       assert_response :success
-      assert_select "h1.daily-title", text: paintings(:bronze).title
-      assert_select ".daily-masthead__date[datetime=?]", 1.day.from_now.to_date.iso8601
-      assert_select ".daily-note", /ritual meal/
+      assert_select "h1.label__title", text: paintings(:bronze).title
+      assert_select "time.masthead__aside[datetime=?]", 1.day.from_now.to_date.iso8601
+      assert_select ".label__note", /ritual meal/
     end
   end
 end

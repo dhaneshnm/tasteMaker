@@ -12,11 +12,6 @@ class Painting < ApplicationRecord
     image.attached? || image_url_800.present?
   end
 
-  def aspect_ratio
-    return nil unless image_width.to_i.positive? && image_height.to_i.positive?
-    "#{image_width} / #{image_height}"
-  end
-
   def artist_display
     artist.presence || culture.presence || "Unknown artist"
   end

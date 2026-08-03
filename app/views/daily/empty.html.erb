@@ -1,14 +1,12 @@
-<% content_for :body_class, "daily" %>
-<% content_for :theme_color, "#f4efe6" %>
 <% content_for :title, "Tastemaker" %>
 
-<header class="daily-masthead">
-  <span class="daily-masthead__brand">Tastemaker</span>
-  <p class="daily-masthead__label">Artwork of the Day</p>
+<header class="masthead">
+  <span class="masthead__brand">Tastemaker</span>
+  <p class="masthead__label">Artwork of the Day</p>
 </header>
 
-<main class="daily-main daily-main--empty">
+<main class="page page--empty">
   <div class="ornament" aria-hidden="true">✦</div>
-  <p class="daily-empty">The first artwork arrives soon.</p>
+  <p class="coda__line">The first artwork arrives soon.</p>
   <a class="caps-link" href="<%= feed_path %>">Wander the full gallery →</a>
 </main>

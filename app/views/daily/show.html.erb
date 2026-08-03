@@ -1,25 +1,23 @@
 <% painting = @pick.painting
    src = artwork_src(painting) %>
 
-<% content_for :body_class, "daily" %>
-<% content_for :theme_color, "#f4efe6" %>
 <% content_for :title, "#{painting.title} — Tastemaker" %>
 <% content_for :description, "#{painting.title} by #{painting.artist_display}, today's artwork on Tastemaker." %>
 <% content_for :head do %>
   <link rel="preload" as="image" href="<%= src %>">
 <% end %>
 
-<header class="daily-masthead">
-  <a class="daily-masthead__brand" href="<%= root_path %>">Tastemaker</a>
-  <p class="daily-masthead__label">Artwork of the Day</p>
-  <time class="daily-masthead__date" datetime="<%= @pick.scheduled_on.iso8601 %>">
+<header class="masthead">
+  <a class="masthead__brand" href="<%= root_path %>">Tastemaker</a>
+  <p class="masthead__label">Artwork of the Day</p>
+  <time class="masthead__aside" datetime="<%= @pick.scheduled_on.iso8601 %>">
     <%= @pick.scheduled_on.to_fs(:daily) %>
   </time>
 </header>
 
-<main class="daily-main" data-controller="artwork">
-  <figure class="daily-figure">
-    <button type="button" class="daily-figure__zoom"
+<main class="page" data-controller="artwork">
+  <figure class="plate">
+    <button type="button" class="plate__zoom"
             data-artwork-target="trigger"
             data-action="artwork#open"
             aria-label="View <%= painting.title %> full screen">
@@ -27,20 +25,20 @@
             alt: painting.alt_text,
             width: painting.image_width, height: painting.image_height,
             loading: "eager", decoding: "async",
-            class: "daily-figure__img",
+            class: "plate__img",
             aria: { describedby: "daily-note" },
             data: { artwork_target: "image", action: "error->artwork#imageFailed" } %>
     </button>
 
-    <p class="daily-figure__resting" data-artwork-target="placeholder" hidden>
+    <p class="plate__resting" data-artwork-target="placeholder" hidden>
       This work is resting — read today's note.
     </p>
   </figure>
 
-  <div class="daily-label">
-    <h1 class="daily-title <%= "daily-title--long" if painting.long_title? %>"><%= painting.title %></h1>
+  <div class="label">
+    <h1 class="label__title <%= "label__title--long" if painting.long_title? %>"><%= painting.title %></h1>
 
-    <p class="daily-artist">
+    <p class="label__artist">
       <span class="label__artist-name"><%= painting.artist_display %></span>
       <% if painting.life_date.present? %>
         <span class="label__artist-dates"><%= painting.life_date %></span>
@@ -48,16 +46,16 @@
     </p>
 
     <% if painting.meta_line.present? %>
-      <p class="daily-meta"><%= painting.meta_line %></p>
+      <p class="label__meta"><%= painting.meta_line %></p>
     <% end %>
 
-    <div class="daily-note" id="daily-note"><%= simple_format(@pick.blurb) %></div>
+    <div class="label__note" id="daily-note"><%= simple_format(@pick.blurb) %></div>
 
-    <%= tag.p(painting.credit_line, class: "daily-credit") if painting.credit_line.present? %>
+    <%= tag.p(painting.credit_line, class: "label__credit") if painting.credit_line.present? %>
 
-    <footer class="daily-close">
+    <footer class="coda">
       <div class="ornament" aria-hidden="true">✦</div>
-      <p class="daily-close__line">See you tomorrow.</p>
+      <p class="coda__line">See you tomorrow.</p>
       <a class="caps-link" href="<%= feed_path %>">Wander the full gallery →</a>
     </footer>
   </div>

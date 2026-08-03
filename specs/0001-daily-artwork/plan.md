@@ -238,6 +238,12 @@ Synthesized from review findings; checkbox as shipped.
 Fits Full lane ceiling.
 
 ## Deviations (added during build)
+- **Reversed post-ship (2026-08-03): the two-skin theme is gone.** Design decision 6A
+  below ("morning room / gallery at night", linen scoped to `body.daily`, dark feed
+  untouched) shipped and then read as two apps side by side. The linen palette is now
+  the only palette; the `.daily-*` and feed component sets merged into one vocabulary
+  (`.masthead`, `.page`, `.plate`, `.label`, `.coda`). Written up in `DESIGN.md`,
+  decided in `decisions/0003-one-skin.md`, enforced by `test/system/design_test.rb`.
 - **Stimulus controller named `artwork`, not `zoom`.** It owns the broken-image fallback
   as well, because the two behaviours have to agree: a placeholder must not stay
   zoomable. Two controllers would have needed to coordinate that.

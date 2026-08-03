@@ -1,22 +1,31 @@
 /*
- * Tastemaker — "museum at night"
- * Warm near-black walls, ivory type, old-gold accents.
- * Display: Fraunces · Body: Newsreader
+ * Tastemaker — "the morning room"
+ *
+ * One room, one light. Warm linen paper, ink type, an old gold dark enough to
+ * clear 4.5:1 on that paper. Display: Fraunces · Body: Newsreader.
+ *
+ * There used to be two skins here — a near-black gallery for the archive and
+ * this linen page for the daily pick — and moving between them read as two
+ * apps. Every screen now uses the components below. The only surface allowed
+ * to go dark is the full-screen view, where the surround is the mount board.
+ *
+ * Style decisions and the reasons behind them: DESIGN.md.
  */
 
 :root {
-  --bg: #0f0d0b;
-  --bg-lift: #16130f;
-  --ink: #ece5d8;
-  --ink-dim: #b3a892;
-  --ink-faint: #7c7263;
-  --gold: #c8a463;
-  --gold-bright: #e0c185;
-  --hairline: rgba(200, 164, 99, 0.22);
-  --frame-edge: rgba(255, 255, 255, 0.07);
+  --bg: #f4efe6;
+  --bg-lift: #ece5d8;
+  --ink: #2a241c;       /* 13.4:1 on linen */
+  --ink-dim: #635a4c;   /*  6.0:1 */
+  --ink-faint: #6f6456; /*  5.1:1 — still AA at small sizes */
+  --gold: #7d5f18;      /*  5.3:1 */
+  --gold-deep: #5f4711;
+  --warn: #a33f28;
+  --hairline: rgba(125, 95, 24, 0.3);
+  --frame-edge: rgba(42, 36, 28, 0.18);
   --serif-display: "Fraunces", "Iowan Old Style", Georgia, serif;
   --serif-body: "Newsreader", Georgia, serif;
-  --feed-width: 42.5rem;
+  --measure: 42.5rem;
 }
 
 * { box-sizing: border-box; }
@@ -24,8 +33,41 @@
 /* `hidden` is a promise; a later `display` rule must not be able to break it. */
 [hidden] { display: none !important; }
 
-/* Small-caps link. Reads on the linen page and on the dark curator's desk,
- * because the colour comes from whichever --gold is in scope. */
+html {
+  background: var(--bg);
+  scrollbar-color: #cdc3b2 var(--bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--serif-body);
+  color: var(--ink);
+  background:
+    radial-gradient(120% 55% at 50% 0%, rgba(125, 95, 24, 0.05), transparent 62%),
+    var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Paper tooth over everything, very quiet */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::selection { background: rgba(125, 95, 24, 0.25); color: var(--ink); }
+
+a { color: var(--gold); text-decoration: none; }
+a:hover { color: var(--gold-deep); }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 2px; }
+
+/* Small-caps link — the one link style in the product. */
 .caps-link {
   font-size: 0.78rem;
   text-transform: uppercase;
@@ -43,98 +85,73 @@
   white-space: nowrap;
 }
 
-html {
-  background: var(--bg);
-  scrollbar-color: #3a332a var(--bg);
-}
-
-body {
-  margin: 0;
-  min-height: 100dvh;
-  font-family: var(--serif-body);
-  color: var(--ink);
-  background:
-    radial-gradient(120% 60% at 50% 0%, rgba(200, 164, 99, 0.05), transparent 60%),
-    var(--bg);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-/* Film grain over everything, very quiet */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 3;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-::selection { background: rgba(200, 164, 99, 0.35); color: var(--ink); }
-
-a { color: var(--gold); text-decoration: none; }
-a:hover { color: var(--gold-bright); }
-:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 2px; }
-
-/* ---------- Masthead ---------- */
+/* ---------- Masthead ----------
+ * One bar for every screen: what this is on the left, where you are on the
+ * right. Never sticky — nothing is allowed to hover over a painting.
+ */
 
 .masthead {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "brand aside"
+    "label aside";
   align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.1rem clamp(1.25rem, 4vw, 2.5rem) 1rem;
-  background: color-mix(in srgb, var(--bg) 78%, transparent);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  column-gap: 1rem;
+  row-gap: 0.15rem;
+  padding: 0.9rem clamp(1.15rem, 5vw, 2rem) 0.75rem;
   border-bottom: 1px solid var(--hairline);
 }
 
 .masthead__brand {
-  display: flex;
-  align-items: baseline;
-  gap: 0.9rem;
-  color: var(--ink);
-  min-width: 0;
-}
-.masthead__brand:hover { color: var(--ink); }
-
-.masthead__word {
+  grid-area: brand;
   font-family: var(--serif-display);
-  font-size: 1.35rem;
-  font-weight: 550;
-  letter-spacing: 0.16em;
+  font-size: 1.02rem;
+  font-weight: 560;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
+  color: var(--ink);
   font-variation-settings: "opsz" 60;
 }
-.masthead__word::first-letter { color: var(--gold); }
+.masthead__brand:hover { color: var(--ink); }
+.masthead__brand::first-letter { color: var(--gold); }
 
-.masthead__tag,
-.masthead__count {
-  font-family: var(--serif-body);
+.masthead__label {
+  grid-area: label;
+  margin: 0;
   font-style: italic;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   color: var(--ink-faint);
+}
+
+/* The date on the daily page, the count in the archive. On a fallback day the
+ * date is the pick's own, never today's. */
+.masthead__aside {
+  grid-area: aside;
+  align-self: center;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-dim);
   white-space: nowrap;
 }
 
-/* ---------- Feed ---------- */
+/* ---------- Page column ---------- */
 
-.feed {
-  max-width: var(--feed-width);
+.page {
+  max-width: var(--measure);
   margin: 0 auto;
-  padding: clamp(2.5rem, 6vw, 4.5rem) 0 4rem;
+  padding: clamp(1rem, 3.5vw, 1.9rem) clamp(1.15rem, 5vw, 1.5rem) 3.5rem;
 }
 
-.post {
-  margin: 0 0 clamp(4.5rem, 10vw, 7rem);
+.page--empty {
+  padding-top: clamp(4rem, 18vh, 8rem);
+  text-align: center;
 }
 
-/* Ornamental divider after each label */
+/* One item in the archive. The rule under the label is the only separator. */
+.post { margin: 0 0 clamp(4.5rem, 10vw, 7rem); }
+
 .post .label::after {
   content: "";
   display: block;
@@ -157,45 +174,64 @@ a:hover { color: var(--gold-bright); }
 
 /* ---------- The artwork ---------- */
 
-.art {
-  margin: 0 0 1.75rem;
-  aspect-ratio: var(--ar, auto);
-  background: var(--bg-lift);
-  border: 1px solid var(--frame-edge);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.04) inset,
-    0 12px 30px -12px rgba(0, 0, 0, 0.85),
-    0 40px 80px -30px rgba(0, 0, 0, 0.7);
-}
+.plate { margin: 0 0 clamp(1.2rem, 4.5vw, 1.75rem); }
 
-.art img {
+.plate__zoom {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
 }
 
-/* ---------- Wall label ---------- */
-
-.label {
-  padding: 0 clamp(0.25rem, 2vw, 0.75rem);
+/*
+ * Never cropped. `contain` plus a viewport-relative cap means a tall scroll
+ * and a wide panorama both arrive whole, letterboxed against the paper — and
+ * the cap leaves the opening of the note above the fold on a small phone.
+ */
+.plate__img {
+  display: block;
+  margin-inline: auto;
+  max-width: 100%;
+  max-height: min(55vh, 55dvh);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  background: var(--bg-lift);
+  border: 1px solid var(--frame-edge);
 }
+
+.plate__resting {
+  margin: 0;
+  padding: 2.5rem 1.5rem;
+  border: 1px solid var(--frame-edge);
+  background: var(--bg-lift);
+  text-align: center;
+  font-style: italic;
+  color: var(--ink-dim);
+}
+
+/* ---------- Wall label ----------
+ * Same label under every picture. Prose is ink; everything that is metadata
+ * about the prose — dates, medium, credit — steps back to dim.
+ */
 
 .label__title {
-  margin: 0 0 0.45rem;
+  margin: 0 0 0.4rem;
   font-family: var(--serif-display);
-  font-size: clamp(1.6rem, 4.5vw, 2.1rem);
+  font-size: clamp(1.5rem, 5vw, 2rem);
   font-weight: 480;
-  line-height: 1.15;
-  letter-spacing: 0.005em;
+  line-height: 1.16;
   font-variation-settings: "opsz" 100;
   text-wrap: balance;
 }
+/* Long museum titles step down rather than get cut — never truncate a title. */
+.label__title--long { font-size: clamp(1.2rem, 3.8vw, 1.45rem); }
 
-.label__artist {
-  margin: 0 0 0.3rem;
-  font-size: 1.02rem;
-}
+/* Artist plus life dates wraps to two lines on plenty of works, and at the
+ * default line-height those lines collide with each other and with the meta. */
+.label__artist { margin: 0 0 0.55rem; font-size: 1.02rem; line-height: 1.4; }
 .label__artist-name {
   color: var(--gold);
   letter-spacing: 0.02em;
@@ -207,22 +243,28 @@ a:hover { color: var(--gold-bright); }
 .label__artist-dates::before { content: " · "; font-style: normal; }
 
 .label__meta {
-  margin: 0 0 1.1rem;
-  font-family: var(--serif-body);
-  font-size: 0.78rem;
+  margin: 0 0 1.25rem;
+  font-size: 0.76rem;
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: var(--ink-dim);
 }
 
-.label__body { position: relative; }
-
+/* Body copy: the hand-written note on the daily page, the museum's own
+ * description in the archive. One type treatment for both. */
+.label__note p,
 .label__text {
-  margin: 0;
+  margin: 0 0 0.9rem;
   font-size: 1.06rem;
-  font-weight: 380;
-  line-height: 1.68;
-  color: var(--ink-dim);
+  font-weight: 400;
+  line-height: 1.66;
+  color: var(--ink);
+}
+.label__note p:last-child { margin-bottom: 0; }
+
+/* Only the archive clamps: museum catalogue copy runs to paragraphs and the
+ * point of the archive is the pictures. The daily note is never clamped. */
+.label__text {
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
@@ -246,12 +288,51 @@ a:hover { color: var(--gold-bright); }
   letter-spacing: 0.2em;
   color: var(--gold);
 }
-.label__more:hover { color: var(--gold-bright); }
+.label__more:hover { color: var(--gold-deep); }
 
 .label__credit {
-  margin: 1.2rem 0 0;
+  margin: 1.3rem 0 0;
   font-size: 0.82rem;
   font-style: italic;
+  color: var(--ink-faint);
+}
+
+/* ---------- Closing beat ----------
+ * Ends the daily ritual, ends the archive, and carries the empty state.
+ */
+
+.coda {
+  margin-top: clamp(2.5rem, 8vw, 3.5rem);
+  text-align: center;
+}
+
+.ornament {
+  color: var(--gold);
+  font-size: 0.9rem;
+  letter-spacing: 0.5em;
+  margin-bottom: 1.6rem;
+}
+.ornament::before, .ornament::after {
+  content: "———";
+  color: var(--hairline);
+  font-size: 0.7rem;
+  vertical-align: 0.15em;
+  margin: 0 0.9rem;
+}
+
+.coda__line {
+  margin: 0 0 1.4rem;
+  font-family: var(--serif-display);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--ink-dim);
+}
+
+.coda__note {
+  max-width: 34rem;
+  margin: 0 auto 2rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
   color: var(--ink-faint);
 }
 
@@ -283,276 +364,10 @@ a:hover { color: var(--gold-bright); }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ---------- End of gallery ---------- */
-
-.colophon {
-  text-align: center;
-  padding: 3rem clamp(1.25rem, 5vw, 3rem) 5rem;
-}
-
-.ornament {
-  color: var(--gold);
-  font-size: 0.9rem;
-  letter-spacing: 0.5em;
-  margin-bottom: 1.6rem;
-}
-.ornament::before, .ornament::after {
-  content: "———";
-  color: var(--hairline);
-  font-size: 0.7rem;
-  vertical-align: 0.15em;
-  margin: 0 0.9rem;
-}
-
-.colophon__title {
-  font-family: var(--serif-display);
-  font-size: 1.5rem;
-  font-weight: 480;
-  margin: 0 0 1rem;
-}
-
-.colophon__note {
-  max-width: 34rem;
-  margin: 0 auto 2rem;
-  font-size: 0.95rem;
-  line-height: 1.7;
-  color: var(--ink-faint);
-}
-
-.colophon__top {
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-}
-
-/* ---------- Mobile ---------- */
-
-@media (max-width: 640px) {
-  .masthead { padding: 0.9rem 1.1rem 0.75rem; }
-  .masthead__tag { display: none; }
-  .masthead__word { font-size: 1.1rem; }
-  .masthead__count { font-size: 0.75rem; }
-
-  .feed { padding-top: 1.75rem; }
-
-  /* Paintings run edge-to-edge; the label keeps a comfortable gutter */
-  .art {
-    border-left: 0;
-    border-right: 0;
-  }
-  .label { padding: 0 1.25rem; }
-}
-
-@media (min-width: 641px) {
-  .feed { padding-left: 1.5rem; padding-right: 1.5rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sentinel__ring { animation: none; }
-}
-
-/* ==========================================================================
- * Artwork of the Day — "the morning room"
- *
- * The gallery is open at night; the daily page is open with the morning tea.
- * Same typefaces, inverted light: warm linen paper, ink type, a gold dark
- * enough to clear 4.5:1 on that paper. Leaving here for the feed is meant to
- * feel like stepping out of a lit room into the gallery after hours.
- * ========================================================================== */
-
-html:has(body.daily) {
-  background: #f4efe6;
-  scrollbar-color: #cdc3b2 #f4efe6;
-}
-
-body.daily {
-  --bg: #f4efe6;
-  --bg-lift: #ece5d8;
-  --ink: #2a241c;      /* 13.4:1 on linen */
-  --ink-dim: #635a4c;  /*  6.0:1 */
-  --ink-faint: #6f6456; /* 5.1:1 — still AA at small sizes */
-  --gold: #7d5f18;     /*  5.3:1 */
-  --gold-bright: #5f4711;
-  --hairline: rgba(125, 95, 24, 0.3);
-  --frame-edge: rgba(42, 36, 28, 0.18);
-
-  color: var(--ink);
-  background:
-    radial-gradient(120% 55% at 50% 0%, rgba(125, 95, 24, 0.05), transparent 62%),
-    var(--bg);
-}
-
-body.daily ::selection { background: rgba(125, 95, 24, 0.25); color: var(--ink); }
-
-/* ---------- Masthead: what this is, and which day ---------- */
-
-.daily-masthead {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas:
-    "brand date"
-    "label date";
-  align-items: baseline;
-  column-gap: 1rem;
-  row-gap: 0.15rem;
-  padding: 0.9rem clamp(1.15rem, 5vw, 2rem) 0.75rem;
-  border-bottom: 1px solid var(--hairline);
-}
-
-.daily-masthead__brand {
-  grid-area: brand;
-  font-family: var(--serif-display);
-  font-size: 1.02rem;
-  font-weight: 560;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink);
-  font-variation-settings: "opsz" 60;
-}
-.daily-masthead__brand:hover { color: var(--ink); }
-.daily-masthead__brand::first-letter { color: var(--gold); }
-
-.daily-masthead__label {
-  grid-area: label;
-  margin: 0;
-  font-style: italic;
-  font-size: 0.86rem;
-  color: var(--ink-faint);
-}
-
-/* The pick's own date, never today's — on a fallback day the page says so. */
-.daily-masthead__date {
-  grid-area: date;
-  align-self: center;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--ink-dim);
-  white-space: nowrap;
-}
-
-/* ---------- The artwork ---------- */
-
-.daily-main {
-  max-width: var(--feed-width);
-  margin: 0 auto;
-  padding: clamp(1rem, 3.5vw, 1.9rem) 0 3.5rem;
-}
-
-.daily-figure { margin: 0; }
-
-.daily-figure__zoom {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: zoom-in;
-}
-
-/*
- * Never cropped. `contain` plus a viewport-relative cap means a tall scroll
- * and a wide panorama both arrive whole, letterboxed against the paper — and
- * the cap leaves the opening of the note above the fold on a small phone.
+/* ---------- Full-screen view ----------
+ * The one dark surface: at full screen the picture is the room, and a linen
+ * surround would bounce light into it. Mount board, not wall.
  */
-.daily-figure__img {
-  display: block;
-  margin-inline: auto;
-  max-width: 100%;
-  max-height: min(55vh, 55dvh);
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  background: var(--bg-lift);
-  border: 1px solid var(--frame-edge);
-}
-
-.daily-figure__resting {
-  margin: 0 clamp(1.15rem, 5vw, 1.5rem);
-  padding: 2.5rem 1.5rem;
-  border: 1px solid var(--frame-edge);
-  background: var(--bg-lift);
-  text-align: center;
-  font-style: italic;
-  color: var(--ink-dim);
-}
-
-/* ---------- Wall label ---------- */
-
-.daily-label { padding: clamp(1.2rem, 4.5vw, 1.75rem) clamp(1.15rem, 5vw, 1.5rem) 0; }
-
-.daily-title {
-  margin: 0 0 0.4rem;
-  font-family: var(--serif-display);
-  font-size: clamp(1.5rem, 5vw, 2rem);
-  font-weight: 480;
-  line-height: 1.16;
-  font-variation-settings: "opsz" 100;
-  text-wrap: balance;
-}
-/* Long museum titles step down rather than get cut — never truncate a title. */
-.daily-title--long { font-size: clamp(1.2rem, 3.8vw, 1.45rem); }
-
-/* Artist plus life dates wraps to two lines on plenty of works, and at the
- * default line-height those lines collide with each other and with the meta. */
-/* The name and dates themselves reuse .label__artist-*, which is already
- * written in var()s the linen palette re-points. */
-.daily-artist { margin: 0 0 0.55rem; font-size: 1.02rem; line-height: 1.4; }
-
-.daily-meta {
-  margin: 0 0 1.25rem;
-  font-size: 0.76rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--ink-dim);
-}
-
-/* The hand-written part. Full ink, never clamped: this is the whole point. */
-.daily-note p {
-  margin: 0 0 0.9rem;
-  font-size: 1.08rem;
-  font-weight: 400;
-  line-height: 1.65;
-  color: var(--ink);
-}
-.daily-note p:last-child { margin-bottom: 0; }
-
-.daily-credit {
-  margin: 1.3rem 0 0;
-  font-size: 0.82rem;
-  font-style: italic;
-  color: var(--ink-faint);
-}
-
-/* ---------- The closing beat ---------- */
-
-.daily-close {
-  margin-top: clamp(2.5rem, 8vw, 3.5rem);
-  text-align: center;
-}
-
-.daily-close__line {
-  margin: 0 0 1.4rem;
-  font-family: var(--serif-display);
-  font-style: italic;
-  font-size: 1.15rem;
-  color: var(--ink-dim);
-}
-
-
-.daily-main--empty {
-  padding-top: clamp(4rem, 18vh, 8rem);
-  text-align: center;
-}
-
-.daily-empty {
-  font-family: var(--serif-display);
-  font-size: 1.4rem;
-  font-weight: 480;
-  margin: 0 0 1.8rem;
-}
-
-/* ---------- Full-screen view ---------- */
 
 html.zoom-open,
 html.zoom-open body { overflow: hidden; }
@@ -598,10 +413,6 @@ html.zoom-open body { overflow: hidden; }
 
 @keyframes zoom-fade { from { opacity: 0; } to { opacity: 1; } }
 
-@media (prefers-reduced-motion: reduce) {
-  .zoom { animation: none; }
-}
-
 /* ---------- The curator's desk ---------- */
 
 .adm {
@@ -628,7 +439,7 @@ html.zoom-open body { overflow: hidden; }
 .adm__errors {
   margin: 0 0 1.5rem;
   padding: 0.8rem 0.9rem;
-  border-left: 2px solid #c46a5a;
+  border-left: 2px solid var(--warn);
   background: var(--bg-lift);
   color: var(--ink);
   font-size: 0.92rem;
@@ -659,7 +470,7 @@ html.zoom-open body { overflow: hidden; }
 .adm__field textarea { min-height: 11rem; line-height: 1.6; resize: vertical; }
 
 .adm__hint { margin: 0.35rem 0 0; font-size: 0.8rem; color: var(--ink-faint); }
-.adm__hint.is-off-target { color: var(--gold-bright); }
+.adm__hint.is-off-target { color: var(--warn); }
 
 .adm__thumb {
   margin-top: 0.6rem;
@@ -680,7 +491,7 @@ html.zoom-open body { overflow: hidden; }
   letter-spacing: 0.2em;
   cursor: pointer;
 }
-.adm__button:hover { color: var(--gold-bright); border-color: var(--gold-bright); }
+.adm__button:hover { color: var(--gold-deep); border-color: var(--gold-deep); }
 
 /* The queue is wide and the curator opens it on a phone: scroll the table, not
  * the whole page. */
@@ -700,3 +511,10 @@ html.zoom-open body { overflow: hidden; }
 .adm__queue tr.is-upcoming td { color: var(--ink-dim); }
 .adm__queue .adm__row-links { display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; font-size: 0.78rem; }
 .adm__muted { color: var(--ink-faint); font-style: italic; }
+
+/* ---------- Motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .sentinel__ring { animation: none; }
+  .zoom { animation: none; }
+}

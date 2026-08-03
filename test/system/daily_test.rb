@@ -6,11 +6,11 @@ class DailyTest < ApplicationSystemTestCase
   test "the artwork and the note share the first screen on a small phone" do
     visit root_path
 
-    assert_selector "h1.daily-title", text: paintings(:sunflowers).title
+    assert_selector "h1.label__title", text: paintings(:sunflowers).title
 
     two_lines_visible = page.evaluate_script(<<~JS)
       (() => {
-        const p = document.querySelector(".daily-note p");
+        const p = document.querySelector(".label__note p");
         if (!p) return false;
         const rect = p.getBoundingClientRect();
         const lineHeight = parseFloat(getComputedStyle(p).lineHeight);
@@ -26,7 +26,7 @@ class DailyTest < ApplicationSystemTestCase
 
     measurements = page.evaluate_script(<<~JS)
       (() => {
-        const img = document.querySelector(".daily-figure__img");
+        const img = document.querySelector(".plate__img");
         const rect = img.getBoundingClientRect();
         return {
           fit: getComputedStyle(img).objectFit,
@@ -45,7 +45,7 @@ class DailyTest < ApplicationSystemTestCase
 
     assert_no_selector ".zoom", visible: true
 
-    find(".daily-figure__zoom").click
+    find(".plate__zoom").click
     assert_selector ".zoom", visible: true
     assert_selector ".zoom__close", visible: true
     assert_selector "html.zoom-open", visible: :all
@@ -53,7 +53,7 @@ class DailyTest < ApplicationSystemTestCase
     find("body").send_keys(:escape)
 
     assert_no_selector ".zoom", visible: true
-    assert_selector ".daily-figure__zoom:focus", visible: :all
+    assert_selector ".plate__zoom:focus", visible: :all
     assert_no_selector "html.zoom-open", visible: :all
   end
 
@@ -61,7 +61,7 @@ class DailyTest < ApplicationSystemTestCase
   test "tapping anywhere in the full screen view closes it" do
     visit root_path
 
-    find(".daily-figure__zoom").click
+    find(".plate__zoom").click
     assert_selector ".zoom", visible: true
 
     find(".zoom__img").click
@@ -74,11 +74,11 @@ class DailyTest < ApplicationSystemTestCase
     visit root_path
 
     page.execute_script(<<~JS)
-      document.querySelector(".daily-figure__img").dispatchEvent(new Event("error"))
+      document.querySelector(".plate__img").dispatchEvent(new Event("error"))
     JS
 
-    assert_selector ".daily-figure__resting", text: "This work is resting"
-    assert_no_selector ".daily-figure__zoom", visible: true
-    assert_selector ".daily-note", text: /fortnight/
+    assert_selector ".plate__resting", text: "This work is resting"
+    assert_no_selector ".plate__zoom", visible: true
+    assert_selector ".label__note", text: /fortnight/
   end
 end

@@ -5,23 +5,23 @@ class DailyTest < ActionDispatch::IntegrationTest
     get root_path
 
     assert_response :success
-    assert_select "h1.daily-title", text: paintings(:sunflowers).title
-    assert_select ".daily-artist .label__artist-name", text: paintings(:sunflowers).artist
-    assert_select ".daily-note", /fortnight/
+    assert_select "h1.label__title", text: paintings(:sunflowers).title
+    assert_select ".label__artist .label__artist-name", text: paintings(:sunflowers).artist
+    assert_select ".label__note", /fortnight/
   end
 
   test "the page says what it is and which day it belongs to" do
     get root_path
 
-    assert_select ".daily-masthead__brand", text: "Tastemaker"
-    assert_select ".daily-masthead__label", text: "Artwork of the Day"
-    assert_select ".daily-masthead__date[datetime=?]", Date.current.iso8601
+    assert_select ".masthead__brand", text: "Tastemaker"
+    assert_select ".masthead__label", text: "Artwork of the Day"
+    assert_select "time.masthead__aside[datetime=?]", Date.current.iso8601
   end
 
   test "the artwork is reachable full screen" do
     get root_path
 
-    assert_select "button.daily-figure__zoom[aria-label=?]",
+    assert_select "button.plate__zoom[aria-label=?]",
       "View #{paintings(:sunflowers).title} full screen"
     assert_select ".zoom[role=dialog][aria-modal=true]"
   end
@@ -29,8 +29,8 @@ class DailyTest < ActionDispatch::IntegrationTest
   test "the ritual ends with an ending, and the gallery is a choice" do
     get root_path
 
-    assert_select ".daily-close__line", text: "See you tomorrow."
-    assert_select ".daily-close .caps-link[href=?]", feed_path, text: /Wander the full gallery/
+    assert_select ".coda__line", text: "See you tomorrow."
+    assert_select ".coda .caps-link[href=?]", feed_path, text: /Wander the full gallery/
   end
 
   test "a missed day keeps the last artwork up, dated honestly" do
@@ -39,8 +39,8 @@ class DailyTest < ActionDispatch::IntegrationTest
     get root_path
 
     assert_response :success
-    assert_select "h1.daily-title", text: paintings(:harbour).title
-    assert_select ".daily-masthead__date[datetime=?]", 1.day.ago.to_date.iso8601
+    assert_select "h1.label__title", text: paintings(:harbour).title
+    assert_select "time.masthead__aside[datetime=?]", 1.day.ago.to_date.iso8601
   end
 
   test "tomorrow's artwork never leaks" do
@@ -56,7 +56,7 @@ class DailyTest < ActionDispatch::IntegrationTest
     get root_path
 
     assert_response :success
-    assert_select ".daily-empty", text: "The first artwork arrives soon."
+    assert_select ".coda__line", text: "The first artwork arrives soon."
   end
 
   test "the page revalidates instead of going stale" do
@@ -79,7 +79,7 @@ class DailyTest < ActionDispatch::IntegrationTest
 
     get root_path, headers: { "HTTP_IF_NONE_MATCH" => etag }
     assert_response :success
-    assert_select ".daily-note", /completely different note/
+    assert_select ".label__note", /completely different note/
   end
 
   test "the gallery moved to /feed and still scrolls" do
