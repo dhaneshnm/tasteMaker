@@ -1,8 +1,8 @@
 # Personas — evidence base for story "Who" sections
 
-Source: 24 negative App Store reviews of DailyArt (category leader), screenshots analyzed
-2026-08-03 (`~/Desktop/bad_reviews`, IMG_9152–9179). Negative reviews only — these show
-where the leader fails its users, i.e. where expectations are sharpest.
+Source: 24 negative + 7 positive App Store reviews of DailyArt (category leader), analyzed
+2026-08-03 (`~/Desktop/bad_reviews` IMG_9152–9179 + positive-review screenshot). Negatives
+show where the leader fails; positives show what winning looks like.
 
 ## 1. Daily Ritual Learner — CORE persona (~8 reviews)
 Opens from the daily push or widget, reads the blurb in 1–3 minutes, closes. Art-curious,
@@ -11,6 +11,10 @@ not expert. Values calm and simplicity.
 - "It doesn't try to steal all of my attention. A great way to massage the mind."
 - "Art with tea… this is the first thing I open"
 - Does the "extra-curricular" readings when offered; wants "to be schooled."
+What winning looks like (positive reviews): time-poor micro-dose. "Perfectly proportioned
+little description, perfect for very busy people" (med student); "enough info to be
+interesting but not so much my eyes glaze over"; "keeps me regularly dosed"; "my daily
+dash of culture"; "no audio required." Blurb length is a feature — calibrate, don't pad.
 Serve with: baseline items 1–3. Guard the calm — no interruptions, no upsell noise.
 
 ## 2. Collector / Wishlist-keeper (~6 reviews — loudest pain)
@@ -44,6 +48,8 @@ NOT baseline. New-slot candidate at Phase 3 gate.
 Wants art matching their taste/vibe: genre, era, color scheme; widget as home-screen decor.
 - "Allow users to pick a favorite genre… or specific color scheme… all I get are paintings
   from before 1900AD and I just don't like them."
+- Positive side confirms widget-as-decor: iOS 26 Liquid Glass tint made widget art invisible
+  → complaint; widget color customization arrived → "Yay!! This was the only thing…"
 NOT baseline. New-slot candidate at Phase 3 gate.
 
 ## 6. Burned Loyalist (lifecycle state, ~7 reviews)
@@ -59,9 +65,18 @@ Ideological rant about a women-artists collection — not a target persona. One 
 inside it: blurbs formatted like promo newsletters (links/emoji top and bottom) cheapen the
 editorial voice.
 
+## Monetization note — the Patron (from positive reviews)
+The willing payer in this category pays to SUPPORT, not to unlock: "The upgrade… is very
+affordable and worth it to support the app." Related evidence: users tolerate — even like —
+a tasteful related-product mention at the end of a blurb ("feels like the app is made by
+people truly passionate"). When premium gets specced, frame it as patronage + extras, never
+as gating retention features (see persona 6).
+
 ## Standing implications for Tastemaker
 1. Baseline serves persona 1; persona 2 defines the favorites contract (free, permanent).
 2. Persona 3 sets the hand-written-blurb bar and argues for range beyond Euro-canon hits.
+   Positive reviews double this: novices AND self-described experts both prize discovering
+   artists they'd never heard of — curate for discovery, not greatest hits.
 3. Personas 4–5 are the strongest evidenced New-slot candidates — decide at Phase 3 gate.
 4. DailyArt's negative reviews are ~monetization self-inflicted wounds; our free-at-launch
    baseline sidesteps all of them. Keep it that way until premium is a real spec.
