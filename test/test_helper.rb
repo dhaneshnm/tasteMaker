@@ -1,6 +1,17 @@
 ENV["RAILS_ENV"] ||= "test"
+ENV["CURATOR_PASSWORD"] ||= "test-curator-password"
 require_relative "../config/environment"
 require "rails/test_help"
+
+module CuratorAuth
+  # The curator's desk is behind HTTP basic auth; tests knock politely.
+  def curator_headers
+    credentials = ActionController::HttpAuthentication::Basic.encode_credentials(
+      "curator", ENV.fetch("CURATOR_PASSWORD")
+    )
+    { "HTTP_AUTHORIZATION" => credentials }
+  end
+end
 
 module ActiveSupport
   class TestCase
@@ -12,4 +23,8 @@ module ActiveSupport
 
     # Add more helper methods to be used by all tests here...
   end
+end
+
+class ActionDispatch::IntegrationTest
+  include CuratorAuth
 end

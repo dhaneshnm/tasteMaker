@@ -33,7 +33,10 @@ module TasteMaker
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    # The day rolls over at midnight Eastern for everyone. One clock, no
+    # per-visitor timezone logic: `DailyPick.current` is only correct if
+    # `Date.current` means "today in New York".
+    config.time_zone = "America/New_York"
     # config.eager_load_paths << Rails.root.join("extras")
 
     # No libvips/imagemagick on this machine; image dimensions come from MIA

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title><%= content_for(:title) || "Tastemaker — Masterpieces, endlessly" %></title>
+    <title><%= content_for(:title) || "Tastemaker — One artwork a day" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="description" content="An endless feed of famous paintings — public-domain works from the Minneapolis Institute of Art, with the stories behind them.">
-    <meta name="theme-color" content="#0f0d0b">
+    <meta name="description" content="<%= content_for(:description) || "One public-domain artwork a day, from the collection of the Minneapolis Institute of Art, with a short hand-written note on why it matters." %>">
+    <meta name="theme-color" content="<%= content_for(:theme_color) || "#0f0d0b" %>">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Tastemaker">
     <meta name="mobile-web-app-capable" content="yes">
@@ -25,7 +25,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body class="<%= content_for(:body_class) %>">
     <%= yield %>
   </body>
 </html>

@@ -2,7 +2,7 @@
   <%= render partial: "painting", collection: paintings %>
 
   <% if next_page %>
-    <%= turbo_frame_tag "feed-page-#{next_page}", src: root_path(page: next_page), loading: :lazy do %>
+    <%= turbo_frame_tag "feed-page-#{next_page}", src: feed_path(page: next_page), loading: :lazy do %>
       <div class="sentinel" aria-label="Loading more paintings">
         <span class="sentinel__ring" aria-hidden="true"></span>
         <span class="sentinel__label">Fetching more masterpieces</span>

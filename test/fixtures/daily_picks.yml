@@ -1,0 +1,22 @@
+today:
+  painting: sunflowers
+  scheduled_on: <%= Date.current.to_fs(:db) %>
+  blurb: |
+    Van Gogh painted these in a fortnight, waiting for a friend who would leave
+    within months. The yellows are doing something strange: they are not
+    describing sunlight so much as standing in for it.
+
+yesterday:
+  painting: harbour
+  scheduled_on: <%= 1.day.ago.to_date.to_fs(:db) %>
+  blurb: |
+    Morisot worked outdoors when that was still faintly scandalous for a woman
+    of her class, and the wet grey here was mixed in the open air.
+
+# Queued, and invisible until its own day arrives.
+tomorrow:
+  painting: bronze
+  scheduled_on: <%= 1.day.from_now.to_date.to_fs(:db) %>
+  blurb: |
+    Cast for a ritual meal with the dead, this vessel was buried, dug up, and
+    collected — three separate ideas of what it was for.

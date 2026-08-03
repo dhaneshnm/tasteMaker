@@ -1,10 +1,27 @@
 # Tastemaker
 
-An Instagram-style infinite-scroll feed of famous paintings — public-domain
-works from the [Minneapolis Institute of Art](https://collections.artsmia.org),
-each with the curatorial text that explains what it is and why it matters.
+One public-domain artwork a day, with a short hand-written note on why it
+matters. Works come from the [Minneapolis Institute of
+Art](https://collections.artsmia.org); the notes are written by hand, never
+generated.
 
-No users, no likes, one view: the gallery.
+- `/` — **Artwork of the Day.** The front door: one painting, one note, one date.
+- `/feed` — the original infinite-scroll gallery, one quiet link away.
+- `/admin/daily_picks` — the curator's queue (HTTP basic auth).
+
+## Publishing a day
+
+The queue lives at `/admin/daily_picks`. Pick a painting, set a date, write the
+note; the form nudges toward 60–180 words and previews the real page before you
+publish. A day with nothing scheduled keeps the previous artwork up, dated
+honestly, rather than going blank.
+
+Set the password before the site is reachable by anyone else:
+
+```sh
+bin/rails credentials:edit     # curator:\n  password: ...
+export CURATOR_PASSWORD=...    # or this, for local and CI runs
+```
 
 ## Stack
 

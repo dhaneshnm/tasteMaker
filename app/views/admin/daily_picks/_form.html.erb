@@ -1,0 +1,45 @@
+<%= form_with model: [ :admin, pick ] do |form| %>
+  <% if pick.errors.any? %>
+    <div class="adm__errors">
+      <strong>That day did not save.</strong>
+      <ul>
+        <% pick.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="adm__field" data-controller="picker">
+    <%= form.label :painting_id, "Artwork" %>
+    <%= form.select :painting_id,
+          @paintings.map { |painting|
+            [ [ painting.title, painting.artist_display, painting.dated.presence ].compact.join(" — "),
+              painting.id,
+              { "data-thumb" => artwork_src(painting) } ]
+          },
+          { include_blank: "Choose a painting" },
+          { data: { picker_target: "select", action: "picker#show" } } %>
+    <img class="adm__thumb" alt="" hidden data-picker-target="image">
+  </div>
+
+  <div class="adm__field">
+    <%= form.label :scheduled_on, "Publishes on" %>
+    <%= form.date_field :scheduled_on %>
+  </div>
+
+  <div class="adm__field"
+       data-controller="word-count"
+       data-word-count-min-value="<%= DailyPick::BLURB_WORDS.min %>"
+       data-word-count-max-value="<%= DailyPick::BLURB_WORDS.max %>">
+    <%= form.label :blurb, "Today's note" %>
+    <%= form.text_area :blurb,
+          data: { word_count_target: "input", action: "input->word-count#count" } %>
+    <p class="adm__hint" data-word-count-target="output" aria-live="polite"></p>
+  </div>
+
+  <div class="adm__actions">
+    <%= form.submit submit_label, class: "adm__button" %>
+    <%= link_to "Back to the queue", admin_daily_picks_path %>
+  </div>
+<% end %>

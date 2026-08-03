@@ -1,0 +1,50 @@
+# A tiny inline PNG stands in for the museum CDN: real pixels for system tests,
+# no network for anyone.
+DEFAULTS: &DEFAULTS
+  image_url_800: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+  image_width: 800
+  image_height: 1000
+  department: Paintings
+
+sunflowers:
+  <<: *DEFAULTS
+  mia_id: 900001
+  title: Sunflowers in a Blue Vase
+  artist: Vincent van Gogh
+  life_date: 1853–1890
+  dated: "1888"
+  medium: Oil on canvas
+  creditline: The William Hood Dunwoody Fund
+  accession_number: 62.36
+
+harbour:
+  <<: *DEFAULTS
+  mia_id: 900002
+  title: Harbour at Dawn
+  artist: Berthe Morisot
+  life_date: 1841–1895
+  dated: "1875"
+  medium: Oil on canvas
+
+bronze:
+  <<: *DEFAULTS
+  mia_id: 900003
+  title: Bronze Ritual Vessel
+  culture: Chinese
+  dated: 11th century BCE
+  medium: Bronze
+
+woodcut:
+  <<: *DEFAULTS
+  mia_id: 900004
+  title: Rain at Shono
+  artist: Utagawa Hiroshige
+  dated: "1833"
+  medium: Woodblock print
+
+# Deliberately has no image at all: nothing to attach, nothing to hotlink.
+imageless:
+  mia_id: 900005
+  title: Lost Panel
+  artist: Unknown
+  department: Paintings

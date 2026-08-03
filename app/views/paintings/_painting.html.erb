@@ -1,7 +1,7 @@
 <article class="post" data-controller="reveal" id="painting_<%= painting.mia_id %>">
   <figure class="art" <%= tag.attributes(style: "--ar: #{painting.aspect_ratio}") if painting.aspect_ratio %>>
     <% if painting.display_image? %>
-      <%= image_tag painting.image.attached? ? url_for(painting.image) : painting.image_url_800,
+      <%= image_tag artwork_src(painting),
             alt: "#{painting.title} — #{painting.artist_display}",
             width: painting.image_width, height: painting.image_height,
             loading: (painting_counter < 2 ? "eager" : "lazy"),
