@@ -25,9 +25,26 @@ Proven baseline:
 Content pipeline: CC0 museum APIs → curated queue → daily publish job (Solid Queue).
 **BANNED: AI-generated artwork descriptions.** Editorial text is written by the user.
 
+## Build flow — every feature follows this, in order
+1. User describes who the user is + their problem → write user story with intake fields
+   (problem, evidence, success-signal prediction, lane: Express same-day reversible /
+   Full ≤ 3-day core) → `specs/NNNN-slug/story.md`. The spec IS the intake card.
+2. Generate implementation plan → `specs/NNNN-slug/plan.md`. Implement-time deviations
+   get noted back into the plan file.
+3. `/plan-eng-review` on the plan. Direction-level changes → `decisions/` entry (R4).
+4. Implement **with Minitest coverage as you go**; `bin/ci` green before QA. Tests are
+   part of implementation, not a later step (R1).
+5. `/qa` → fix findings.
+6. `/simplify`, then `/code-review` → fix findings.
+7. Re-verify: `bin/ci` + quick smoke — steps 5–6 mutated code after QA passed.
+8. Ship: commit, deploy when live, `SHIPLOG.md` line with receipt. Done = shipped and
+   logged, not reviewed (R7).
+
+Size stories to lane: each shippable in ≤ 2 days. WIP = 1 means one story in flight, ever.
+
 ## Do NOT build
-- Any feature outside baseline without an intake card: problem, evidence, success-signal
-  prediction, lane (Express: same-day reversible / Full: 3-day core).
+- Any feature without a spec in `specs/` (story + intake fields — see Build flow).
+  Out-of-baseline features must carry evidence that actually argues for the exception.
 - **"Infrastructure for later"** — the user's named historical failure pattern. If asked for
   speculative scaffolding or abstractions the current phase doesn't need, name it out loud
   and push back.
@@ -45,7 +62,7 @@ Content pipeline: CC0 museum APIs → curated queue → daily publish job (Solid
 - Kamal 2 (single VPS) + Thruster — add at first deploy, not before.
 - Minitest + fixtures + Capybara system tests. No RSpec.
 - Rails 8 built-in auth generator if accounts become necessary. Device-local favorites vs
-  accounts = intake card, not assumption.
+  accounts = spec decision with evidence, not assumption.
 - Active Storage on local disk for cached artwork images.
 - Parked, do not build: StoreKit/IAP for premium unlock inside the Hotwire Native shell.
 
@@ -73,7 +90,7 @@ Content pipeline: CC0 museum APIs → curated queue → daily publish job (Solid
 1. `BET.md` complete and committed? No → no feature work this session.
 2. Inside month boundary? Kill review Aug 31, 2026.
 3. WIP = 1?
-4. Anything in flight without an intake card?
+4. Anything in flight without a spec in `specs/`?
 5. `SHIPLOG.md` current? A week with shipped code and zero initiated user contact →
    name it as builder's gravity.
 6. Before first external user: backups + logged restore test, secrets in Rails
@@ -85,7 +102,7 @@ Content pipeline: CC0 museum APIs → curated queue → daily publish job (Solid
   otherwise make the call and note it.
 - Mid-session direction choices → `decisions/` entry before session end.
 - Session end: update `SHIPLOG.md` if anything shipped or published; surface drift —
-  reopened settled questions, second analysis threads, cardless features,
+  reopened settled questions, second analysis threads, spec-less features,
   infrastructure for later.
 
 ## Skills
