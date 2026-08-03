@@ -1,6 +1,6 @@
 # BET.md — Tastemaker (Month 1, Aug 2026)
 
-**Status: INCOMPLETE — blocks all feature commits (R2).**
+**Status: COMPLETE — committed 2026-08-03. Feature commits unblocked (R2).**
 
 ## Bet
 - Fork: B — practice vehicle, not a revenue bet.
@@ -8,17 +8,17 @@
 - Kill review date: **Aug 31, 2026.** Evaluated against the thresholds below only.
 
 ## Numeric thresholds (evaluated at kill review)
-- App live on App Store (yes/no): **REQUIRED — blocks first feature commit**
-- Published build-in-public teardown posts (count + cadence): **REQUIRED — blocks first feature commit**
-- Ranked ASO keywords (count + target rank): **REQUIRED — blocks first feature commit**
-- Initiated user conversations (count): **REQUIRED — blocks first feature commit**
-- Install floor (count): **REQUIRED — blocks first feature commit**
+- App live on App Store: **yes, by Aug 14, 2026** (submit ~Aug 11; leaves ~2.5 weeks live for ASO indexing).
+- Published build-in-public teardown posts: **4, weekly cadence** (one per remaining week of August, logged in SHIPLOG.md).
+- Ranked ASO keywords: **3 keywords ranked top 100** in App Store search.
+- Initiated user conversations: **5 two-way exchanges** — I initiate, they reply with substance about the app or category. Sent-but-unanswered outreach does not count.
+- Install floor: **50 App Store installs.**
 
-## Distribution channel (exactly one, named)
-- **REQUIRED — blocks first feature commit**
+## Distribution channel (exactly one)
+- **ASO / App Store search.** Rank for daily-art keywords; matches category finding that distribution decides and the leader grew this way.
 
-## "New" differentiator (one slot, named before Phase 3)
-- **REQUIRED — blocks Phase 3 work** (may stay blank until then)
+## "New" differentiator (one slot)
+- **Deferred — named at the Phase 3 gate**, after baseline ships and first user conversations. Not invented mid-build.
 
 ## Prediction (falsifiable, time-bound)
-- **REQUIRED — blocks first feature commit**
+- **App Store search alone — no paid acquisition, no viral mechanics — gets a brand-new daily-art app to 50 installs by Aug 31, 2026.** Falsified if installs < 50 or if hitting 50 requires a second channel.
