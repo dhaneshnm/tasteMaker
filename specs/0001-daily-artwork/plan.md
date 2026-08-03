@@ -1,5 +1,21 @@
 # 0001 — Implementation plan
-Status: Design-reviewed (/plan-design-review, 2026-08-03) — pending /plan-eng-review
+Status: Reviewed — /plan-design-review + /plan-eng-review (2026-08-03). Ready to build.
+
+## Data flow
+```
+                      ┌────────────── curator (basic auth) ──────────────┐
+                      │  /admin/daily_picks: form → validate → save      │
+                      │  (dup date? no image? → inline error)            │
+                      │  member GET :preview → renders daily/show        │
+                      ▼                                                  │
+  paintings (110) ──▶ daily_picks (painting_id ∪, scheduled_on ∪, blurb) │
+                      │                                                  │
+                      ▼ DailyPick.current  = latest scheduled_on ≤ Date.current
+  visitor ──▶ GET / ──▶ daily#show ── fresh_when(pick) ──▶ 304 | render
+                      │                                     (no-cache + ETag)
+                      └─ none at all ──▶ empty state ("first artwork arrives soon")
+  Fallback timeline:  Aug1✓  Aug2✓  [Aug3 unscheduled → Aug2 shown, dated Aug 2]
+```
 
 ## Approach
 New `DailyPick` model joins a `Painting` to a calendar date and carries the curator's
@@ -11,7 +27,9 @@ arriving.
 
 ## Data
 `daily_picks`:
-- `painting_id` — FK, null: false, unique (a painting is featured at most once)
+- `painting_id` — FK, null: false, unique (a painting is featured at most once —
+  kept as a DB constraint through the kill review; revisit trigger: relax via
+  migration when the museum-API ingestion story grows the pool, per eng review Eng-7)
 - `scheduled_on` — date, null: false, unique (one pick per day)
 - `blurb` — text, null: false (hand-written; no generated text on this path)
 
@@ -22,17 +40,21 @@ Date.current` (fallback for unscheduled days comes free: yesterday's pick stays 
 honestly dated — see masthead).
 
 ## "Today" rule (Better bar 5)
-**Confirmed at design review:** day rolls at midnight `America/New_York`
-(`config.time_zone`). Maya's persona is Columbus = Eastern. No per-visitor timezone
-logic. No tomorrow-leak: `current` never selects `scheduled_on > Date.current`.
+**Confirmed at design review:** day rolls at midnight `America/New_York`. NOTE:
+`config/application.rb:36` currently has the timezone COMMENTED OUT — setting
+`config.time_zone = "America/New_York"` is an explicit implementation step, with a
+midnight-boundary model test (pick scheduled tomorrow ET invisible at 23:59, visible
+at 00:00). No per-visitor timezone logic. No tomorrow-leak: `current` never selects
+`scheduled_on > Date.current`.
 
 ## Routes
 - `root "daily#show"` (was `paintings#index`)
 - `get "feed" => "paintings#index"` — feed reachable, frozen; fix its lazy-frame
   next-page URLs if they assume root
-- `namespace :admin { resources :daily_picks, except: :show }` plus
-  `get "admin/daily_picks/:id/preview"` → renders the pick through the public
-  `daily#show` view (curator sees exact fold behavior before publishing)
+- `namespace :admin { resources :daily_picks, except: :show do member { get :preview } end }`
+  — preview is an action ON the authed admin controller (auth inherited; a public
+  preview route would leak unpublished picks — eng review Eng-1). It renders the
+  `daily/show` template for that pick.
 
 ## Today view — design spec (from /plan-design-review 2026-08-03, 11 decisions)
 
@@ -77,14 +99,16 @@ gallery link. What Maya sees first/second/third: art, title, opening lines of th
    departure, not the default continuation.
 10. **Accessibility** — descriptive alt ("Title — Artist"); blurb linked to image via
     `aria-describedby`; zoom keyboard-reachable; all linen colors AA.
-11. **Caching** — `Cache-Control: public, max-age=<seconds to EOD ET>,
-    must-revalidate` + ETag on `[pick.id, pick.updated_at]`. Typo fixes revalidate
-    instantly; no stale art after midnight.
+11. **Caching (corrected at eng review — Eng-6)** — `Cache-Control: public, no-cache`
+    + ETag via `fresh_when(@pick)`. Every request revalidates; unchanged content is a
+    cheap 304; blurb edits and midnight rollover propagate instantly. (Original
+    max-age-to-EOD plan was wrong: fresh public caches never revalidate, typo fixes
+    would have stalled until midnight.)
 
 ### Interaction states
 | Feature | Loading | Empty | Error | Success |
 |---|---|---|---|---|
-| Today artwork | reserved linen box, no CLS | pre-launch: wordmark + "The first artwork arrives soon." | image missing/404: framed placeholder "This work is resting — read today's note", title+blurb still render | art + blurb co-visible |
+| Today artwork | reserved linen box, no CLS | pre-launch: wordmark + "The first artwork arrives soon." | no local image + CDN 404: `onerror` swaps to framed placeholder "This work is resting — read today's note" (`display_image?` trusts the URL, so onerror is the real guard — Codex #10); title+blurb still render | art + blurb co-visible at open |
 | Zoom overlay | instant (same asset) | n/a | n/a | full-bleed, Escape/tap closes |
 | Admin form | n/a | empty select = all paintings picked, say so | duplicate date / picked painting / no-image: inline messages naming the field | redirect to queue, flash confirms date |
 
@@ -92,32 +116,49 @@ gallery link. What Maya sees first/second/third: art, title, opening lines of th
 1. **Today** (`daily#show`): per design spec above.
 2. **Admin queue** (`admin/daily_picks`): `http_basic_authenticate_with`, password in
    Rails credentials. Index = upcoming + past picks. Form: painting select labeled
-   "Title — Artist (Year)" (unpicked only, newest first) + thumbnail of selected
-   painting, date field defaulting to first unscheduled date, blurb textarea with
-   live word count + soft warning outside 60–180 words. Clear inline validation
-   errors. Preview link per pick (renders public view). Plain otherwise — curator is
-   the only user.
+   "Title — Artist (Year)" — unpicked paintings PLUS the record's own current
+   painting on edit (otherwise it vanishes from its own form — Codex #8) — with
+   thumbnail of selected painting; date field defaulting to the first unscheduled
+   date **≥ today** (never a historical gap — Codex #9); blurb textarea with live
+   word count + soft warning outside 60–180 words. Clear inline validation errors.
+   Preview link per pick (renders public view). Plain otherwise — curator is the
+   only user.
 
 ## Steps
-1. Migration + `DailyPick` model (incl. `display_image?` schedulability validation) +
-   fixtures + model tests.
-2. Linen palette scoped to `body.daily` (CSS variables, AA-checked values).
-3. `DailyController#show` + view per design spec + ETag/cache headers + integration
-   tests + system tests (fold-budget bounding-rect assert; fallback day; empty state).
-4. `zoom` Stimulus controller + overlay + system test (open, Escape-dismiss).
-5. Route move: root swap, `/feed`, fix feed frame URLs; test feed still paginates.
-6. Admin controller + views (labeled select, thumbnail, word count, errors, preview
-   route) + auth + tests (401 without credentials; create/edit; duplicate rejection).
-7. README root-URL note; `bin/ci` green.
+1. `config.time_zone = "America/New_York"` (application.rb — currently commented out)
+   + midnight-boundary test.
+2. Migration + `DailyPick` model (incl. `display_image?` schedulability validation) +
+   fixtures + model tests. ASCII timeline comment on the model (fallback behavior).
+3. Linen palette scoped to `body.daily` (CSS variables, AA-checked values).
+4. `DailyController#show` (eager-load painting + attachment — Eng-3) + view per design
+   spec + `fresh_when` no-cache/ETag + integration tests + system tests (fold-budget
+   bounding-rect assert; fallback day; empty state; broken-image placeholder).
+5. `zoom` Stimulus controller + overlay + system test (open, Escape-dismiss).
+6. Route move: root swap, `/feed`, fix feed frame URLs (`_page.html.erb:5` uses
+   `root_path` — confirmed break); regression test: feed still paginates.
+7. Admin controller + views (labeled select incl. own painting on edit, thumbnail,
+   word count, errors, `preview` member action) + auth + tests (401; create/edit;
+   duplicate rejection; preview auth + render).
+8. Truth pass on chrome (Codex #7): layout `<title>`/meta description reflect daily
+   app, PWA manifest name/colors match linen theme, feed keeps its own masthead.
+9. Enable `test:system` step in `bin/ci` (currently commented out — fold/zoom
+   regressions invisible to CI without it, Codex #5); README root-URL note; CI green.
+10. **Pre-launch content checklist (Codex #4, blocks deploy, not merge):** admin
+    password in credentials, today's pick published, ≥ 7 future days queued —
+    root must never show the empty state to App Review or a first visitor.
 
 ## Tests
 - Model: unique date, unique painting, blurb presence, no-image schedulability
   rejection, `current` selection incl. no-future-leak.
+- Model additionally: midnight ET boundary (tomorrow's pick invisible at 23:59 ET).
 - Integration: root renders today's pick; unscheduled day falls back with honest
   date; feed at `/feed` paginates; admin 401 without credentials; admin create;
-  duplicate-date error; ETag revalidation (304 on match, fresh after update).
+  duplicate-date error; preview requires auth + renders future pick (Eng-2);
+  ETag revalidation (304 on match, fresh after blurb edit).
 - System (Capybara): fold budget at 375×667 (blurb rect in viewport); zoom
-  open/dismiss; empty-state copy.
+  open/dismiss; empty-state copy; broken-image placeholder (Eng-2).
+- Manual (/qa): word-counter nudge behavior (decision Eng-2 — not worth a JS-driving
+  automated test).
 
 ## NOT in scope (design decisions considered, deferred with rationale)
 - Dark variant of the linen screen — linen is paper; revisit only on user complaint.
@@ -135,7 +176,24 @@ gallery link. What Maya sees first/second/third: art, title, opening lines of th
 ## Approved Mockups
 | Screen | Path | Direction | Notes |
 |---|---|---|---|
-| Today view | `~/.gstack/projects/tasteMaker/designs/today-view-20260803/wireframe.html` (Option A) + `approved.json` | "Gallery wall" — art leads ~55vh letterboxed, blurb peeks above fold | Theme decision 6A overlays this: linen palette, dark feed untouched |
+| Today view | `specs/0001-daily-artwork/wireframe.html` (Option A; committed to repo per Codex #11 — gstack copy at `~/.gstack/projects/tasteMaker/designs/today-view-20260803/`) | "Gallery wall" — art leads ~55vh letterboxed, blurb peeks above fold | Theme decision 6A overlays this: linen palette, dark feed untouched |
+
+## Failure modes (eng review)
+| Codepath | Realistic failure | Test? | Handled? | User sees |
+|---|---|---|---|---|
+| `DailyPick.current` | server TZ ≠ ET, tomorrow leaks | yes (boundary) | yes (config.time_zone) | correct day |
+| Root render, no pick today | curator missed a day | yes (fallback) | yes | yesterday's art, honest date |
+| Image blob missing / CDN 404 | disk loss, museum URL rot | yes (placeholder) | yes (onerror) | "This work is resting" + blurb |
+| Feed lazy frames after root swap | frames fetch daily view | yes (regression) | yes (step 6) | feed keeps scrolling |
+| Preview without auth | URL guessing | yes (401 test) | yes (member route) | 401, nothing leaks |
+| Stale cached page after blurb edit | broken max-age plan | yes (ETag test) | yes (no-cache) | fresh content |
+| Double-schedule same date/painting | race or fat-finger | yes (dup tests) | yes (DB + validation) | inline form error |
+No critical gaps: every identified failure has a test AND handling AND a visible state.
+
+## Parallelization
+Solo dev, one machine — mostly sequential. If splitting: Lane A steps 1–2 (model/TZ),
+then Lane B steps 3–5 (public view/theme/zoom) ∥ Lane C step 7 (admin) — B and C share
+only routes.rb (trivial conflict). Steps 6, 8–10 after lanes merge.
 
 ## Implementation Tasks
 Synthesized from review findings; checkbox as shipped.
@@ -151,9 +209,19 @@ Synthesized from review findings; checkbox as shipped.
 - [ ] **T10 (P2)** — closing beat + honest gallery link (P3-issue5) — view
 - [ ] **T11 (P2)** — admin preview route + labeled select + thumbnail (P7-issue11)
 - [ ] **T12 (P3)** — README note (existing step)
+- [ ] **T13 (P1)** — set `config.time_zone` + midnight boundary test (Codex #3)
+- [ ] **T14 (P1)** — preview as authed member action + tests (Eng-1, Eng-2)
+- [ ] **T15 (P1)** — cache: `fresh_when` + no-cache, drop max-age plan (Eng-6)
+- [ ] **T16 (P2)** — admin edit keeps own painting in select; date default ≥ today (Codex #8, #9)
+- [ ] **T17 (P2)** — img `onerror` placeholder guard (Codex #10)
+- [ ] **T18 (P2)** — layout title/meta + PWA manifest truth pass (Codex #7)
+- [ ] **T19 (P2)** — enable `test:system` in bin/ci (Codex #5)
+- [ ] **T20 (P1, deploy-blocking)** — pre-launch content checklist: pick live + 7 queued (Codex #4)
+- [ ] **T21 (P2)** — eager-load painting/attachment in daily#show + admin (Eng-3)
 
 ## Estimate
-~2 days (was ~1; zoom + admin polish + state coverage added). Fits Full lane.
+~2–3 days (eng review honesty pass — Codex #6; scope confirmed twice, not cut).
+Fits Full lane ceiling.
 
 ## Deviations (added during build)
 - (none yet)
@@ -163,13 +231,13 @@ Synthesized from review findings; checkbox as shipped.
 | Review | Trigger | Why | Runs | Status | Findings |
 |--------|---------|-----|------|--------|----------|
 | CEO Review | `/plan-ceo-review` | Scope & strategy | 0 | — | — |
-| Codex Review | `/codex review` | Independent 2nd opinion | 1 (via design outside voices) | issues absorbed | 5 findings, 1 hard rejection — all resolved into plan |
-| Eng Review | `/plan-eng-review` | Architecture & tests (required) | 0 | — | pending |
+| Codex Review | `/codex review` | Independent 2nd opinion | 2 (outside voices: design + eng) | issues absorbed | design: 5 findings; eng: 12 findings — 11 absorbed, 1 rejected (scope re-argument) |
+| Eng Review | `/plan-eng-review` | Architecture & tests (required) | 1 | CLEAN | 3 issues (preview auth leak, 2 test gaps, N+1) + 11 Codex absorptions; 0 critical gaps |
 | Design Review | `/plan-design-review` | UI/UX gaps | 1 | CLEAN | score: 4/10 → 9/10, 11 decisions |
 | DX Review | `/plan-devex-review` | Developer experience gaps | 0 | — | — |
 
-**CODEX:** flagged weak first-screen brand (hard rejection), missing zoom, thin art-direction spec, admin friction — all 5 findings absorbed as decisions 1, 9, 6/7, 11.
-**CROSS-MODEL:** Codex and blind Claude subagent independently converged on brand-absence and zoom-absence; Claude subagent uniquely caught the object-fit:cover crop hazard and the linen-vs-dark theme contradiction — both resolved (decisions 7, 6).
-**VERDICT:** DESIGN CLEARED (4/10 → 9/10, 11/11 decisions resolved) — eng review required before build.
+**CODEX:** eng outside voice caught 2 review errors — broken cache semantics (max-age never revalidates → switched to no-cache+ETag) and unimplementable acceptance wording (reworded) — plus 8 mechanical gaps (TZ config commented out, CI system tests disabled, admin edit select bug, date-default ≥ today, onerror guard, metadata truth pass, pre-launch content checklist, mockup committed to repo).
+**CROSS-MODEL:** design phase — both models converged on brand/zoom absence; Claude subagent uniquely caught cover-crop and theme contradiction. Eng phase — Codex #6 (cut zoom/cache scope) rejected: scope was user-confirmed at design review and the complexity gate; estimate honesty applied instead (2–3 days).
+**VERDICT:** DESIGN + ENG CLEARED — ready to implement.
 
 NO UNRESOLVED DECISIONS

@@ -31,7 +31,9 @@ and come back tomorrow.
 ## Acceptance
 - Root URL shows today's artwork: image, title, artist, year, and the curator's blurb.
 - Blurb is hand-written (typed/pasted by curator; no generated text anywhere in the path).
-- Artwork and blurb text are visible together — reading never hides the art (Better bar 2).
+- Artwork and the blurb's opening share the initial viewport (Better bar 2); the full
+  blurb reads in ≤ 2 scrolls; zoom is one tap away while reading. (Reworded at eng
+  review — "never hides" was unimplementable without sticky art; Option A layout stands.)
 - "Today" is computed correctly for the visitor-relevant timezone rule the plan defines
   (Better bar 5) — no tomorrow-leak, no blank days.
 - A day with nothing published shows the most recent published day (graceful, no error),
