@@ -1,0 +1,13 @@
+<%# One overlay per page, filled in on open. A copy per artwork would put a hidden
+    full-size <img src> next to every work in the archive, and the browser fetches
+    those — the collection would download twice. %>
+<div class="zoom" hidden
+     role="dialog" aria-modal="true"
+     aria-label="Artwork, full screen"
+     data-artwork-target="overlay"
+     data-action="click->artwork#close">
+  <img class="zoom__img" alt="" decoding="async" data-artwork-target="image">
+  <button type="button" class="zoom__close"
+          data-artwork-target="close"
+          aria-label="Close full screen view">Close</button>
+</div>

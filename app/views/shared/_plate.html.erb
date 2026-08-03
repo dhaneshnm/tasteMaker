@@ -1,0 +1,25 @@
+<%# The artwork, on every screen that shows one. Tapping it opens the page's
+    single zoom overlay; a picture the museum CDN has lost shows the resting
+    note instead, and stops being tappable.
+    Locals: painting, eager:, describedby: (id or nil), resting: (copy) %>
+<figure class="plate">
+  <% if painting.display_image? %>
+    <button type="button" class="plate__zoom"
+            data-action="artwork#open"
+            data-artwork-title="<%= painting.title %>"
+            aria-label="View <%= painting.title %> full screen">
+      <%= image_tag artwork_src(painting),
+            alt: painting.alt_text,
+            width: painting.image_width, height: painting.image_height,
+            loading: (eager ? "eager" : "lazy"),
+            decoding: "async",
+            class: "plate__img",
+            aria: { describedby: describedby },
+            data: { action: "error->artwork#imageFailed" } %>
+    </button>
+  <% end %>
+
+  <p class="plate__resting" <%= tag.attributes(hidden: true) if painting.display_image? %>>
+    <%= resting %>
+  </p>
+</figure>

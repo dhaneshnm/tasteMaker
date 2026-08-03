@@ -16,24 +16,8 @@
 </header>
 
 <main class="page" data-controller="artwork">
-  <figure class="plate">
-    <button type="button" class="plate__zoom"
-            data-artwork-target="trigger"
-            data-action="artwork#open"
-            aria-label="View <%= painting.title %> full screen">
-      <%= image_tag src,
-            alt: painting.alt_text,
-            width: painting.image_width, height: painting.image_height,
-            loading: "eager", decoding: "async",
-            class: "plate__img",
-            aria: { describedby: "daily-note" },
-            data: { artwork_target: "image", action: "error->artwork#imageFailed" } %>
-    </button>
-
-    <p class="plate__resting" data-artwork-target="placeholder" hidden>
-      This work is resting — read today's note.
-    </p>
-  </figure>
+  <%= render "shared/plate", painting: painting, eager: true,
+        describedby: "daily-note", resting: "This work is resting — read today's note." %>
 
   <div class="label">
     <h1 class="label__title <%= "label__title--long" if painting.long_title? %>"><%= painting.title %></h1>
@@ -60,14 +44,5 @@
     </footer>
   </div>
 
-  <div class="zoom" hidden
-       role="dialog" aria-modal="true"
-       aria-label="<%= painting.title %>, full screen"
-       data-artwork-target="overlay"
-       data-action="click->artwork#close">
-    <%= image_tag src, alt: painting.alt_text, class: "zoom__img", decoding: "async" %>
-    <button type="button" class="zoom__close"
-            data-artwork-target="close"
-            aria-label="Close full screen view">Close</button>
-  </div>
+  <%= render "shared/zoom" %>
 </main>

@@ -1,26 +1,44 @@
 import { Controller } from "@hotwired/stimulus"
 
-// The daily artwork: opens full screen, and steps aside when the image is gone.
+// The artworks on a page, and the one overlay they all open into.
+//
+// One artwork on the daily page, a hundred in the archive: the overlay is a
+// page-level singleton whose src is filled in on open, because a copy per work
+// would put a hidden full-size <img src> next to every one of them, and the
+// browser fetches those.
 //
 // Zoom is a modal: focus moves to Close, Tab stays trapped there, Escape or a
-// tap anywhere closes it, and focus returns to the artwork. The page behind it
-// does not scroll.
+// tap anywhere closes it, and focus returns to the artwork that was tapped. The
+// page behind it does not scroll.
 export default class extends Controller {
-  static targets = ["trigger", "image", "placeholder", "overlay", "close"]
+  static targets = ["image", "overlay", "close"]
+
+  opener = null
 
   connect() {
     // An image that failed before Stimulus booted never fires `error` for us.
-    if (this.hasImageTarget && this.imageTarget.complete && this.imageTarget.naturalWidth === 0) {
-      this.imageFailed()
-    }
+    // Works that arrive later with infinite scroll load after this point, so
+    // they fire it normally.
+    this.element.querySelectorAll(".plate__img").forEach((image) => {
+      if (image.complete && image.naturalWidth === 0) this.rest(image)
+    })
   }
 
   disconnect() {
     this.releaseModal()
   }
 
-  open() {
+  open(event) {
     if (!this.hasOverlayTarget) return
+
+    const trigger = event.currentTarget
+    const artwork = trigger.querySelector(".plate__img")
+    if (!artwork?.currentSrc) return
+
+    this.opener = trigger
+    this.imageTarget.src = artwork.currentSrc
+    this.imageTarget.alt = artwork.alt
+    this.overlayTarget.setAttribute("aria-label", `${trigger.dataset.artworkTitle}, full screen`)
 
     this.overlayTarget.hidden = false
     document.documentElement.classList.add("zoom-open")
@@ -30,7 +48,8 @@ export default class extends Controller {
 
   close() {
     this.releaseModal()
-    if (this.hasTriggerTarget) this.triggerTarget.focus()
+    if (this.opener?.isConnected) this.opener.focus()
+    this.opener = null
   }
 
   // A field, not a method: the same reference has to come off `document` again.
@@ -46,9 +65,19 @@ export default class extends Controller {
   }
 
   // The museum CDN can 404 on us. Show the note instead of a broken frame.
-  imageFailed() {
-    if (this.hasTriggerTarget) this.triggerTarget.hidden = true
-    if (this.hasPlaceholderTarget) this.placeholderTarget.hidden = false
+  imageFailed(event) {
+    this.rest(event.target)
+  }
+
+  // Scoped to the one artwork that failed: the archive has a hundred of them,
+  // and a placeholder must not stay tappable.
+  rest(image) {
+    const plate = image.closest(".plate")
+    if (!plate) return
+
+    const trigger = plate.querySelector(".plate__zoom")
+    if (trigger) trigger.hidden = true
+    plate.querySelector(".plate__resting").hidden = false
   }
 
   releaseModal() {
