@@ -429,12 +429,22 @@ a:hover { color: var(--gold-deep); }
 .walk {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 1rem;
-  margin-bottom: 1.4rem;
+  margin-bottom: 0.4rem;
 }
-.walk__step { color: var(--gold); }
+
+/* 44px minimum, the same bar `.zoom__close` holds. The type is 15px tall; on a
+ * phone the walk is the primary control and a 15px target is a miss waiting to
+ * happen. */
+.walk__step,
+.walk__today {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--gold);
+}
 .walk__step:only-child { margin-inline: auto; }
-.walk__today { display: inline-block; }
 
 /* ---------- Lazy-load sentinel ---------- */
 

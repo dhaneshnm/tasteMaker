@@ -46,6 +46,26 @@ class DaysSystemTest < ApplicationSystemTestCase
     assert_no_selector ".zoom", visible: true
   end
 
+  # Regression: ISSUE-002 — the walk links rendered as 15px-tall touch targets on
+  # a phone, while .zoom__close in the same product holds a 44px minimum. The
+  # walk is the primary control on a past day.
+  # Found by /qa on 2026-08-04.
+  # Report: .gstack/qa-reports/qa-report-localhost-2026-08-04.md
+  test "the walk's controls are thumb-sized on a phone" do
+    DailyPick.create!(painting: paintings(:woodcut), scheduled_on: 2.days.ago.to_date,
+      blurb: "Two days back, so the walk has both a previous and a next link to measure.")
+
+    visit day_path(1.day.ago.to_date.iso8601)
+
+    heights = page.evaluate_script(<<~JS)
+      [...document.querySelectorAll(".walk__step, .walk__today")]
+        .map(el => Math.round(el.getBoundingClientRect().height))
+    JS
+
+    assert_equal 3, heights.size, "expected previous, next and today"
+    heights.each { |h| assert_operator h, :>=, 44, "walk controls must clear a 44px touch target" }
+  end
+
   test "a thumbnail that dies leaves its row readable and navigable" do
     visit days_path
 
