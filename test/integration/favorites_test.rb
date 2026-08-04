@@ -245,6 +245,19 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     assert_select "a.caps-link", text: "Today →"
   end
 
+  # Regression: ISSUE-001 — the empty collection offered only "Today →", so a
+  # first-time reader who followed the archive's countless door had no way back
+  # to the archive. The one screen in the product with no route to where the
+  # reader came from.
+  # Found by /qa on 2026-08-04
+  # Report: .gstack/qa-reports/qa-report-localhost-2026-08-04-favorites.md
+  test "an empty collection is still a sibling of the archive" do
+    get collection_path
+
+    assert_select "a.caps-link[href=?]", days_path, text: "The days behind you →"
+    assert_select "a.caps-link[href=?]", root_path, text: "Today →"
+  end
+
   test "a collection that holds something says how it is held, and where else to go" do
     keep(@painting)
 

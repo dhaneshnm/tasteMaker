@@ -359,12 +359,14 @@ a:hover { color: var(--gold-deep); }
  * read as one long string. Rule 9: they are also targets, so they get the 44px
  * `.walk__step` already holds — `.caps-link` sets size and tracking, never
  * height, and assuming otherwise is how ISSUE-002 shipped 15px targets. */
-.coda .caps-link {
+.coda .caps-link,
+.page--empty .caps-link {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
 }
-.coda .caps-link + .caps-link { margin-inline-start: 1.6rem; }
+.coda .caps-link + .caps-link,
+.page--empty .caps-link + .caps-link { margin-inline-start: 1.6rem; }
 
 /* ---------- The days behind you ----------
  * A contents list, not a gallery — /feed is the gallery. Rows are separated by a

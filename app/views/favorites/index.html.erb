@@ -12,6 +12,11 @@
     <div class="ornament" aria-hidden="true">✦</div>
     <p class="coda__line">The works you keep will gather here.</p>
     <p class="coda__note">Keep this sits under every artwork.</p>
+    <%# Both doors, same as the populated state. A first-time reader arrives here
+        from the archive's countless "Your collection →", and without this the
+        empty page is the one screen in the product with no way back to where
+        they came from. %>
+    <a class="caps-link" href="<%= days_path %>">The days behind you →</a>
     <a class="caps-link" href="<%= root_path %>">Today →</a>
   <% else %>
     <%# Their order, newest kept first — not ours. No month headings: "the month
