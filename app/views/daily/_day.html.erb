@@ -1,5 +1,6 @@
 <%# One day, on every screen that shows one.
-    Locals: pick, chrome: — :front_door (/), :archive (/days/:date), :preview (curator).
+    Locals: pick, chrome: — :front_door (/), :archive (/days/:date), :preview (curator),
+    published_count: and current: — both counted by the controller, never re-queried here.
 
     The three modes differ in four places and nothing else:
 
@@ -29,7 +30,7 @@
       "which day", so the archive needs no new chrome. It only becomes a link once
       there is more than the current pick to see. %>
   <time class="masthead__aside" datetime="<%= pick.scheduled_on.iso8601 %>">
-    <% if archive || (chrome == :front_door && DailyPick.published.count > 1) %>
+    <% if archive || (chrome == :front_door && published_count.to_i > 1) %>
       <%= link_to pick.scheduled_on.to_fs(:daily), days_path, aria: { label: "See past days" } %>
     <% else %>
       <%= pick.scheduled_on.to_fs(:daily) %>
@@ -63,7 +64,7 @@
       <div class="ornament" aria-hidden="true">✦</div>
 
       <% if archive %>
-        <%= render "days/walk", pick: pick %>
+        <%= render "days/walk", pick: pick, current: current %>
       <% else %>
         <p class="coda__line">See you tomorrow.</p>
         <a class="caps-link" href="<%= feed_path %>">Wander the full gallery →</a>

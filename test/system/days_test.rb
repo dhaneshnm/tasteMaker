@@ -52,10 +52,12 @@ class DaysSystemTest < ApplicationSystemTestCase
   # Found by /qa on 2026-08-04.
   # Report: .gstack/qa-reports/qa-report-localhost-2026-08-04.md
   test "the walk's controls are thumb-sized on a phone" do
-    DailyPick.create!(painting: paintings(:woodcut), scheduled_on: 2.days.ago.to_date,
-      blurb: "Two days back, so the walk has both a previous and a next link to measure.")
+    # Two days back so the middle one has a previous, a next that is not the
+    # front door, and therefore its own "Today" link — all three controls.
+    publish_day(2.days.ago.to_date)
+    publish_day(3.days.ago.to_date)
 
-    visit day_path(1.day.ago.to_date.iso8601)
+    visit day_path(2.days.ago.to_date.iso8601)
 
     heights = page.evaluate_script(<<~JS)
       [...document.querySelectorAll(".walk__step, .walk__today")]

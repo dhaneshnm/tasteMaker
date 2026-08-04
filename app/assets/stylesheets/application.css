@@ -190,7 +190,8 @@ a:hover { color: var(--gold-deep); }
  * and a wide panorama both arrive whole, letterboxed against the paper — and
  * the cap leaves the opening of the note above the fold on a small phone.
  */
-.plate__img {
+.plate__img,
+.days__thumb img {
   display: block;
   margin-inline: auto;
   max-width: 100%;
@@ -409,15 +410,10 @@ a:hover { color: var(--gold-deep); }
   justify-content: center;
   height: 4.5rem;
 }
-.days__thumb img {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  background: var(--bg-lift);
-  border: 1px solid var(--frame-edge);
-}
+/* Frame, fill and never-crop come from `.plate__img` above — the same treatment
+ * every artwork in the product gets. Only the cap differs: this one fills its
+ * row box rather than a share of the viewport. */
+.days__thumb img { max-height: 100%; }
 
 @media (min-width: 641px) {
   .days__link { grid-template-columns: 1fr 7rem; }
@@ -442,9 +438,9 @@ a:hover { color: var(--gold-deep); }
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  color: var(--gold);
 }
-.walk__step:only-child { margin-inline: auto; }
+/* Holds the right edge whether or not there is a previous day to sit opposite. */
+.walk__step--next { margin-inline-start: auto; }
 
 /* ---------- Lazy-load sentinel ---------- */
 

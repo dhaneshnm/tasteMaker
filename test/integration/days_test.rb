@@ -166,9 +166,23 @@ class DaysTest < ActionDispatch::IntegrationTest
     assert_select ".walk__step--next[href=?]", root_path
   end
 
-  test "the walk always offers the way back to today" do
+  # The way home is offered once, not twice: on the day before the current pick,
+  # "Next day →" already points at the front door, so a "Today →" beneath it
+  # would be a second link to the same page one line down.
+  test "the way back to today is offered once" do
     get day_path(@yesterday.scheduled_on.iso8601)
 
+    assert_select ".walk__step--next[href=?]", root_path
+    assert_select ".walk__today", count: 0
+  end
+
+  test "a day further back offers the way home separately" do
+    older = DailyPick.create!(painting: paintings(:woodcut), scheduled_on: 2.days.ago.to_date,
+      blurb: "Two days back, so the next day is not the front door and Today earns its link.")
+
+    get day_path(older.scheduled_on.iso8601)
+
+    assert_select ".walk__step--next[href=?]", day_path(@yesterday.scheduled_on.iso8601)
     assert_select ".walk__today[href=?]", root_path, text: /Today/
   end
 

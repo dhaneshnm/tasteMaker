@@ -11,7 +11,23 @@ module ActiveSupport
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
-    # Add more helper methods to be used by all tests here...
+    # One more published day, with a painting of its own.
+    #
+    # A DailyPick needs a painting no other pick has taken (`painting_id` is
+    # unique) and that painting needs a usable image, which leaves exactly one
+    # free fixture — :woodcut. Any test wanting a second extra day hits
+    # "Artwork has already had its day" with no hint why, so this makes its own
+    # painting rather than competing for the fixtures.
+    def publish_day(date, blurb: "A note long enough to read the way a real one does.")
+      painting = Painting.create!(
+        mia_id: (Painting.maximum(:mia_id).to_i + 1),
+        title: "A Day in #{date.strftime("%B")}",
+        artist: "Unknown Hand",
+        image_url_800: paintings(:woodcut).image_url_800,
+        image_width: 800, image_height: 1000
+      )
+      DailyPick.create!(painting: painting, scheduled_on: date, blurb: blurb)
+    end
   end
 end
 

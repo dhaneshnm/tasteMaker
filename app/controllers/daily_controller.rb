@@ -9,11 +9,16 @@ class DailyController < ApplicationController
     @pick = DailyPick.current
     return render :empty if @pick.nil?
 
-    # The count is in the key because the page depends on it: the date is only a
-    # link once there is more than one published day. Without it, a curator
-    # backfilling a *past* day leaves `current` unchanged, and every returning
-    # visitor keeps a 304 with no way into the archive that just appeared.
-    fresh_when(etag: [ @pick, DailyPick.published.count ],
+    @chrome = :front_door
+    # Counted once, then used twice: for the key and for the decision it covers.
+    # The date is only a link once there is more than one published day, so
+    # without the count in the key a curator backfilling a *past* day leaves
+    # `current` unchanged and every returning visitor keeps a 304 with no way
+    # into the archive that just appeared. The painting is in the key because
+    # the page renders its title, artist and image.
+    @published_count = DailyPick.published.count
+
+    fresh_when(etag: [ @pick, @pick.painting, @published_count ],
       last_modified: @pick.updated_at, public: true)
     response.cache_control[:no_cache] = true
   end

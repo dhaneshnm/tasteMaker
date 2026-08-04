@@ -1,26 +1,27 @@
 <%# The catch-up walk. Somebody back from three shifts moves day to day rather than
     returning to the list between each one.
 
-    "Next day" targets the front door when the next published day is the pick the
-    front door is showing — otherwise the last step of every walk pays a 301. %>
+    Locals: pick, current — the pick the front door is showing, handed down by the
+    controller that already looked it up for the redirect check.
+
+    `day_link_path` is what keeps "next" from pointing at a URL that immediately
+    301s: the current pick's canonical address is the front door. %>
 <% previous_day = pick.previous_published
-   next_day = pick.next_published
-   current = DailyPick.current %>
+   next_day = pick.next_published %>
 
 <nav class="walk" aria-label="Move between days">
   <% if previous_day %>
-    <%= link_to "← Previous day", day_path(previous_day.scheduled_on.iso8601), class: "caps-link walk__step" %>
-  <% else %>
-    <span class="walk__step"></span>
+    <%= link_to "← Previous day", day_link_path(previous_day, current), class: "caps-link walk__step" %>
   <% end %>
 
   <% if next_day %>
-    <%= link_to "Next day →",
-          next_day == current ? root_path : day_path(next_day.scheduled_on.iso8601),
+    <%= link_to "Next day →", day_link_path(next_day, current),
           class: "caps-link walk__step walk__step--next" %>
   <% end %>
 </nav>
 
-<% if current && pick != current %>
+<%# Only when "next" is not already the way home — otherwise this is a second
+    link to the same page, one line below the first. %>
+<% if current && next_day != current %>
   <a class="caps-link walk__today" href="<%= root_path %>">Today →</a>
 <% end %>

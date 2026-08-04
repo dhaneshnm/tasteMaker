@@ -27,6 +27,14 @@ module ApplicationHelper
     painting.image_url_800
   end
 
+  # Where a day lives. One day has one address: the pick the front door is
+  # showing is `/`, every other published day is `/days/:date`. Written once so
+  # a link never points at a URL that immediately 301s — `DaysController#show`
+  # enforces the same rule from the other side.
+  def day_link_path(pick, current)
+    pick == current ? root_path : day_path(pick.scheduled_on.iso8601)
+  end
+
   # Resizing needs libvips or ImageMagick on the box, and this machine has
   # neither — see the analyzer note in `config/application.rb`. Asking for a
   # variant anyway does not raise here: it raises later, inside Active Storage's

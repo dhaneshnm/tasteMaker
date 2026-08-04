@@ -13,24 +13,22 @@
     <p class="coda__line">The days will collect here.</p>
     <a class="caps-link" href="<%= feed_path %>">Wander the full gallery →</a>
   <% else %>
+    <% today = Date.current %>
     <% @months.each do |month, picks| %>
       <h2 class="days__month"><%= month.strftime("%B %Y") %></h2>
 
       <ol class="days">
         <% picks.each_with_index do |pick, i| %>
-          <% painting = pick.painting
-             today = pick.scheduled_on == Date.current
-             here = pick == @current %>
+          <% painting = pick.painting %>
           <li class="days__day">
             <%# One link per row, named in full: a screen reader hears the date, the
                 work and the artist, not a list of bare titles. %>
-            <a class="days__link" href="<%= here ? root_path : day_path(pick.scheduled_on.iso8601) %>"
+            <a class="days__link" href="<%= day_link_path(pick, @current) %>"
                aria-label="<%= pick.scheduled_on.to_fs(:daily_long) %>: <%= painting.title %>, <%= painting.artist_display %>">
               <span class="days__text">
-                <span class="days__date <%= "days__date--now" if here %>">
-                  <% if today %>Today · <% end %>
-                  <time datetime="<%= pick.scheduled_on.iso8601 %>"><%= pick.scheduled_on.to_fs(:daily) %></time>
-                </span>
+                <time class="days__date <%= "days__date--now" if pick == @current %>"
+                      datetime="<%= pick.scheduled_on.iso8601 %>"><%
+                  %><% if pick.scheduled_on == today %>Today · <% end %><%= pick.scheduled_on.to_fs(:daily) %></time>
                 <span class="days__title <%= "days__title--long" if painting.long_title? %>"><%= painting.title %></span>
                 <span class="days__artist"><%= painting.artist_display %></span>
               </span>
