@@ -53,6 +53,15 @@ week of shifts does not cost me the week of art.
   than showing an empty page.
 - The front door still shows today first. Nothing about the daily ritual changes.
 
+Added at design review (2026-08-04):
+- The way in is the date in the front door's masthead, and it only becomes a link once
+  there is more than one published day — no door onto the room you are standing in.
+- A past day carries `← Previous day` / `Next day →`, bounded by the published range, so
+  catching up on three missed days is a walk rather than three round trips to the list.
+- One day has exactly one URL: `/days/<today>` redirects to the front door.
+- A date with no artwork lands on a linen 404 in the product's voice, not the stock Rails
+  page — this is the first story that routes people to a 404 by design.
+
 ## Out of scope
 - Calendar / month-grid picker. A list is the smallest thing that answers "what did I
   miss"; a calendar is a different question and needs its own evidence.
