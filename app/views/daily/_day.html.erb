@@ -2,16 +2,19 @@
     Locals: pick, chrome: — :front_door (/), :archive (/days/:date), :preview (curator),
     published_count: and current: — both counted by the controller, never re-queried here.
 
-    The three modes differ in four places and nothing else:
+    The three modes differ in five places and nothing else:
 
-      chrome:        masthead label      date links to     coda line          coda links
-      ------------   -----------------   ---------------   ----------------   ----------------------
-      :front_door    Artwork of the Day  /days, if >1 day  See you tomorrow.  the gallery
-      :archive       From the archive    /days             (none)             prev · next · today
-      :preview       Artwork of the Day  nothing           See you tomorrow.  the gallery
+      chrome:        masthead label      date links to     keep control  coda line          coda links
+      ------------   -----------------   ---------------   ------------  ----------------   ----------------------
+      :front_door    Artwork of the Day  /days, if >1 day  yes           See you tomorrow.  the gallery
+      :archive       From the archive    /days             yes           (none)             prev · next · today
+      :preview       Artwork of the Day  nothing           NO            See you tomorrow.  the gallery
 
     :preview exists so a curator checking a queued day sees the reader's page, not a page
-    with a live archive link that means nothing in a preview. %>
+    with a live archive link that means nothing in a preview. Same reason it gets no keep
+    control: the day is not published, so no reader can act on it, and a curator keeping
+    unpublished works would be the first thing polluting the only usage signal this
+    feature has. %>
 <% painting = pick.painting
    src = artwork_src(painting)
    archive = chrome == :archive %>
@@ -73,6 +76,18 @@
     <% end %>
 
     <%= tag.p(painting.credit_line, class: "label__credit") if painting.credit_line.present? %>
+
+    <%# The last line of the wall label: keeping is an act on the artwork, not a way
+        out of the page, so it sits with the label and leaves the coda as the single
+        ending. Lazy, because it is below a 55vh plate plus the whole note — a reader
+        who bounces at the picture costs no extra request.
+
+        The frame src is the same bytes for every visitor, which is what keeps this
+        page publicly cacheable. Everything personal arrives in the fragment. %>
+    <% unless chrome == :preview %>
+      <%= turbo_frame_tag "keep_#{painting.id}", src: favorite_control_path(painting),
+            loading: "lazy" %>
+    <% end %>
 
     <footer class="coda">
       <div class="ornament" aria-hidden="true">✦</div>

@@ -1,0 +1,42 @@
+<%# The keep control: the one per-visitor thing on an otherwise public page.
+    Locals: painting, kept, count, autofocus
+
+    It carries its own <turbo-frame> rather than only the contents, because a
+    frame-targeted response has to hand back a matching frame id or Turbo reports
+    missing content.
+
+    `autofocus` is true ONLY on the write responses. Turbo replaces the whole
+    frame on submit, which destroys the focused button and drops focus to <body>;
+    autofocus puts it back, and focus landing on a toggle is also what makes a
+    screen reader announce the new state. On the initial lazy GET it is false —
+    a fragment arriving mid-scroll must not steal focus, which is the same reason
+    there is no aria-live here.
+
+    No glyph in the kept state. `✦` is the product's only ornament (DESIGN.md
+    rule 6) and using it here put two of them a few centimetres apart meaning
+    different things. The words carry the state instead, with the middle dot
+    `.label__credit` already uses. %>
+<%= turbo_frame_tag "keep_#{painting.id}" do %>
+  <div class="keep">
+    <%= button_to favorite_path(painting), method: (kept ? :delete : :post),
+          form: { class: "keep__form" },
+          class: "caps-link keep__toggle",
+          autofocus: autofocus,
+          aria: {
+            pressed: kept,
+            label: kept ? "Remove #{painting.title} from your collection"
+                        : "Keep #{painting.title} in your collection"
+          } do %><%= kept ? "Kept · Remove" : "Keep this" %><% end %>
+
+    <%# Only once there is something to see. The countless door on /days covers
+        discovery at zero; this one is the count climbing, which is the reward.
+
+        `turbo_frame: "_top"` because a link inside a frame navigates the frame by
+        default — without it, tapping this loads the whole collection page into a
+        44px box and the reader goes nowhere. %>
+    <% if count.positive? %>
+      <%= link_to "#{count} kept →", collection_path, class: "caps-link keep__link",
+            data: { turbo_frame: "_top" } %>
+    <% end %>
+  </div>
+<% end %>

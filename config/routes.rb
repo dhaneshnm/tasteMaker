@@ -15,6 +15,19 @@ Rails.application.routes.draw do
   resources :days, only: %i[index show], param: :date,
     constraints: { date: /\d{4}-\d{2}-\d{2}/ }
 
+  # A reader's own collection. `control` is the only per-visitor fragment in the
+  # product: the day pages stay byte-identical for everyone and publicly
+  # cacheable, and this endpoint — private, no-store — carries the personal part.
+  # It is also where the reader's cookie is issued, so every write already has an
+  # identity and two cold-start tabs cannot mint two.
+  get    "collection" => "favorites#index", as: :collection
+  get    "collection/:painting_id/control" => "favorites#control", as: :favorite_control,
+    constraints: { painting_id: /\d+/ }
+  post   "collection/:painting_id" => "favorites#create",
+    constraints: { painting_id: /\d+/ }
+  delete "collection/:painting_id" => "favorites#destroy", as: :favorite,
+    constraints: { painting_id: /\d+/ }
+
   namespace :admin do
     root "daily_picks#index"
 

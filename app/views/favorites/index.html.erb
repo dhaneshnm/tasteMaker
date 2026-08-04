@@ -1,0 +1,40 @@
+<% content_for :title, "Your collection — Tastemaker" %>
+<% content_for :description, "The works you have kept on Tastemaker." %>
+
+<header class="masthead">
+  <a class="masthead__brand" href="<%= root_path %>">Tastemaker</a>
+  <p class="masthead__label">Your collection</p>
+  <span class="masthead__aside"><%= pluralize(@kept_count, "work") %></span>
+</header>
+
+<main class="page <%= "page--empty" if @rows.empty? %>">
+  <% if @rows.empty? %>
+    <div class="ornament" aria-hidden="true">✦</div>
+    <p class="coda__line">The works you keep will gather here.</p>
+    <p class="coda__note">Keep this sits under every artwork.</p>
+    <a class="caps-link" href="<%= root_path %>">Today →</a>
+  <% else %>
+    <%# Their order, newest kept first — not ours. No month headings: "the month
+        I kept it" is not a fact anybody wants. A row with no pick is a work whose
+        day the curator removed; it renders unlinked and carries its own Remove,
+        because it is the only row whose owner has no other way to let it go. %>
+    <ol class="days">
+      <% @rows.each_with_index do |(painting, pick), i| %>
+        <%= render "days/row", painting: painting, pick: pick,
+              current: @current, eager: i < 4, remove: pick.nil? %>
+      <% end %>
+    </ol>
+
+    <footer class="coda">
+      <div class="ornament" aria-hidden="true">✦</div>
+      <p class="coda__line">To let one go, open it and unkeep it.</p>
+      <%# Said once, quietly, before it can be discovered the hard way. Kept works
+          live in a cookie on this device; deleting the app takes them with it.
+          Stating the limit up front is what keeps it from reading as a betrayal
+          later — see specs/personas.md, persona 6. %>
+      <p class="coda__note">Kept on this device — free, and yours.</p>
+      <a class="caps-link" href="<%= days_path %>">The days behind you →</a>
+      <a class="caps-link" href="<%= root_path %>">Today →</a>
+    </footer>
+  <% end %>
+</main>

@@ -354,6 +354,18 @@ a:hover { color: var(--gold-deep); }
   color: var(--ink-faint);
 }
 
+/* A coda used to end with one way out. The archive and the collection now offer
+ * two, and two small-caps links sharing a line with only a space between them
+ * read as one long string. Rule 9: they are also targets, so they get the 44px
+ * `.walk__step` already holds — `.caps-link` sets size and tracking, never
+ * height, and assuming otherwise is how ISSUE-002 shipped 15px targets. */
+.coda .caps-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.coda .caps-link + .caps-link { margin-inline-start: 1.6rem; }
+
 /* ---------- The days behind you ----------
  * A contents list, not a gallery — /feed is the gallery. Rows are separated by a
  * hairline and whitespace: no card, no fill, no radius, no shadow, on any state.
@@ -436,6 +448,76 @@ a:hover { color: var(--gold-deep); }
   .days__link { grid-template-columns: 1fr 7rem; }
   .days__thumb { height: 7rem; }
 }
+
+/* A kept work whose day the curator removed. Same row, no link, and the only
+ * row that carries a button — nesting one inside the row's own <a> would be an
+ * accessibility defect, and this is the one row whose owner has no other way to
+ * let it go. */
+.days__link--gone { cursor: default; }
+.days__date--gone { color: var(--ink-faint); }
+/* Gold is what "this navigates" looks like everywhere in the product, and this
+ * row does not. The title steps back to ink so the only gold left on it belongs
+ * to the one thing that still acts: Remove. */
+.days__link--gone .days__title { color: var(--ink); }
+
+.days__remove-form { margin: 0 0 1.25rem; }
+.days__remove {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  font-family: var(--serif-body);
+  color: var(--gold);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.days__remove:hover { color: var(--gold-deep); }
+
+/* ---------- Keeping a work ----------
+ *
+ * The last row of the wall label, not a second ending. Keeping is an act on the
+ * artwork, so the control belongs to the label and the coda stays the one way
+ * out. 2.2rem above it, deliberately more than the credit's own 1.3rem: equal
+ * spacing would group it with the credit block, and that gap is the whole
+ * signal that this is an action rather than another line of metadata.
+ *
+ * Left-grouped, never space-between. Spread across the 680px measure put the
+ * toggle and the collection link 466px apart, which stops reading as a pair and
+ * starts reading as the `.walk` nav row further down the same page.
+ *
+ * No glyph in the kept state — see DESIGN.md. Both states are `--gold`, because
+ * gold is what "this does something" looks like everywhere else here. */
+.keep {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.6rem;
+  margin-top: 2.2rem;
+  min-height: 2.75rem;
+}
+
+.keep__form { margin: 0; }
+
+/* 44px, the bar `.walk__step` and `.zoom__close` already hold. `.caps-link`
+ * carries no height of its own — ISSUE-002 (commit 866bbc2) shipped 15px targets
+ * once by assuming it did. */
+.keep__toggle,
+.keep__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.keep__toggle {
+  padding: 0;
+  font-family: var(--serif-body);
+  color: var(--gold);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.keep__toggle:hover { color: var(--gold-deep); }
 
 /* ---------- The walk between days ---------- */
 

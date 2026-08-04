@@ -85,6 +85,23 @@ title is the *target* and gold is the link colour; on the day page the title is
 the *subject* and the artist carries the accent. Without the inversion the only
 gold in the row belongs to the one part that does not navigate.
 
+`.keep` — the last row of the wall label, where a reader keeps a work. A
+`.caps-link`-scale button in `--gold`, and once there is something to count, the
+way into the collection beside it. It sits **inside `.label`**, `2.2rem` below
+the credit — deliberately more air than the credit's own `1.3rem`, because equal
+spacing would group it with the credit block instead of reading as an action.
+
+**Left-grouped, never spread.** `justify-content: flex-start` with a `1.6rem`
+gap. Spread across the measure the two items sit 466px apart at 1280, which stops
+reading as a pair and starts reading as `.walk`, which is a different kind of
+thing one screen further down.
+
+**No glyph in the kept state.** `Keep this` becomes `Kept · Remove` — words and
+the middle dot `.label__credit` already uses. `✦` was tried and rejected: it is
+the product's only ornament (rule 6), and using it as a state mark put two of
+them within one screen meaning different things. The state is carried by the
+words, the colour, and `aria-pressed`.
+
 `.walk` — previous / next day at the foot of a past day. Two `.caps-link`s, and
 nothing else; the way back to today sits under them.
 
@@ -112,6 +129,10 @@ curator's desk.
 8. **Text is never clamped on the daily page.** The archive clamps museum
    catalogue copy to four lines with a `More` toggle, because there the point is
    the pictures. The hand-written note is the whole point and is shown whole.
+9. **Anything you can tap is at least 44px tall.** `.caps-link` sets size and
+   tracking, not height, so every control built on it adds `min-height: 44px`
+   itself — `.walk__step`, `.zoom__close`, `.keep__toggle`, `.days__remove`.
+   ISSUE-002 (commit 866bbc2) shipped 15px targets once by assuming otherwise.
 
 ---
 

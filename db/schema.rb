@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_04_154017) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_04_205713) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -49,6 +49,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_04_154017) do
     t.index ["scheduled_on"], name: "index_daily_picks_on_scheduled_on", unique: true
   end
 
+  create_table "favorites", force: :cascade do |t|
+    t.string "collector_digest", null: false
+    t.datetime "created_at", null: false
+    t.integer "painting_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["collector_digest", "painting_id"], name: "index_favorites_on_collector_digest_and_painting_id", unique: true
+    t.index ["painting_id"], name: "index_favorites_on_painting_id"
+  end
+
   create_table "paintings", force: :cascade do |t|
     t.string "accession_number"
     t.string "artist"
@@ -77,4 +86,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_04_154017) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "daily_picks", "paintings"
+  add_foreign_key "favorites", "paintings"
 end

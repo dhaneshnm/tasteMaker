@@ -1,0 +1,7 @@
+# Somebody else's collection. It exists so tests can prove one reader never sees
+# another's rows, and so the model test has something loaded that it did not
+# create itself. The digest is a real SHA256 because that is what the column
+# holds — the raw token never leaves the cookie.
+strangers_sunflowers:
+  collector_digest: <%= Digest::SHA256.hexdigest("a-different-reader-entirely") %>
+  painting: sunflowers
