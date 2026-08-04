@@ -1,0 +1,19 @@
+<%# The inside of a row, identical whether or not the row is a link. Split out so
+    the linked and unlinked shapes cannot drift apart.
+    Locals: painting, pick (nil = the day is gone), current, eager %>
+<span class="days__text">
+  <% if pick %>
+    <time class="days__date <%= "days__date--now" if pick == current %>"
+          datetime="<%= pick.scheduled_on.iso8601 %>"><%
+      %><% if pick.scheduled_on == Date.current %>Today · <% end %><%= pick.scheduled_on.to_fs(:daily) %></time>
+  <% else %>
+    <span class="days__date days__date--gone">No longer a day</span>
+  <% end %>
+  <span class="days__title <%= "days__title--long" if painting.long_title? %>"><%= painting.title %></span>
+  <span class="days__artist"><%= painting.artist_display %></span>
+</span>
+
+<span class="days__thumb">
+  <%= image_tag artwork_src(painting, size: 240), alt: "",
+        loading: (eager ? "eager" : "lazy"), decoding: "async" %>
+</span>

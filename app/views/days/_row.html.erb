@@ -1,0 +1,40 @@
+<%# One work in a list. Rendered by the archive (/days) and by a reader's
+    collection (/collection), which are the same object seen twice: a work, a
+    date, a recognition mark.
+
+    Locals:
+      painting:  the work
+      pick:      its day, or nil when the curator removed the day out from under
+                 a kept work. A nil pick is the only unlinked row.
+      current:   the pick the front door is showing, so a link never points at a
+                 URL that immediately 301s (see ApplicationHelper#day_link_path)
+      eager:     load the thumbnail eagerly (the first few rows only)
+      remove:    render a Remove control. Only ever true on an unlinked row —
+                 nesting a button inside the row's own <a> would be an
+                 accessibility defect, and an orphan is the one row whose owner
+                 has no other way to let it go.
+
+    The whole row is one link, and its accessible name carries date, title and
+    artist: a list of bare titles is useless to somebody navigating by link.
+    `size: 240` and not the original — ISSUE-001 (commit 2da2f7a) shipped
+    full-size JPEGs into 112px boxes once already. %>
+<% remove = false unless defined?(remove) %>
+<li class="days__day">
+  <% if pick %>
+    <a class="days__link" href="<%= day_link_path(pick, current) %>"
+       aria-label="<%= pick.scheduled_on.to_fs(:daily_long) %>: <%= painting.title %>, <%= painting.artist_display %>">
+      <%= render "days/row_body", painting: painting, pick: pick, current: current, eager: eager %>
+    </a>
+  <% else %>
+    <div class="days__link days__link--gone">
+      <%= render "days/row_body", painting: painting, pick: nil, current: current, eager: eager %>
+    </div>
+
+    <% if remove %>
+      <%= button_to "Remove", favorite_path(painting), method: :delete,
+            class: "caps-link days__remove",
+            form: { class: "days__remove-form" },
+            aria: { label: "Remove #{painting.title} from your collection" } %>
+    <% end %>
+  <% end %>
+</li>
