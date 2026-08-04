@@ -11,6 +11,21 @@ module ActiveSupport
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
+    # `config/environments/test.rb` turns forgery protection off for the whole
+    # suite. That means `csrf_meta_tags` renders nothing at all — it returns early
+    # without ever calling `form_authenticity_token` — and a POST with no token is
+    # accepted. So any test whose subject IS the CSRF machinery passes without
+    # asserting anything unless it turns protection back on first. That includes
+    # the tests proving public pages emit no session cookie: with protection off,
+    # the *old* layout emitted none either.
+    def with_forgery_protection
+      was = ActionController::Base.allow_forgery_protection
+      ActionController::Base.allow_forgery_protection = true
+      yield
+    ensure
+      ActionController::Base.allow_forgery_protection = was
+    end
+
     # One more published day, with a painting of its own.
     #
     # A DailyPick needs a painting no other pick has taken (`painting_id` is

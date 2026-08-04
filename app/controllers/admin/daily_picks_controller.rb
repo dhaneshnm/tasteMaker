@@ -48,8 +48,12 @@ module Admin
     def preview
       # :preview, not :front_door — the curator should see the reader's page, not
       # one carrying a live link into an archive this day is not in yet.
+      #
+      # `layout: "application"` for the same reason: the namespace now defaults to
+      # the admin layout, and a preview wrapped in admin chrome stops being a
+      # preview of what a reader sees.
       @chrome = :preview
-      render template: "daily/show"
+      render template: "daily/show", layout: "application"
     end
 
     private

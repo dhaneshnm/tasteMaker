@@ -1,0 +1,34 @@
+<%# Everything both layouts put in <head>, minus the one thing that differs.
+
+    `csrf_meta_tags` is NOT here. It calls `form_authenticity_token`, which writes
+    `session[:_csrf_token]`, which forces a session cookie onto every response that
+    renders it. `/` and `/days` are `Cache-Control: public`, and production runs
+    behind Thruster's HTTP cache (Dockerfile, 64MB, on by default), so a public
+    response carrying a `Set-Cookie` is a shared cache waiting to hand one reader's
+    session — and the matching masked CSRF token from the same body — to the next
+    one. See specs/0007-no-session-cookie-on-public-pages/.
+
+    The admin layout adds the tag back, because the curator's queue deletes a day
+    with `data: { turbo_method: :delete }` and Turbo reads it from the meta tag.
+    Reader-facing forms do not need it: `form_with` embeds its own hidden token. %>
+<title><%= content_for(:title) || "Tastemaker — One artwork a day" %></title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="<%= content_for(:description) || "One public-domain artwork a day, from the collection of the Minneapolis Institute of Art, with a short hand-written note on why it matters." %>">
+<meta name="theme-color" content="#f4efe6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Tastemaker">
+<meta name="mobile-web-app-capable" content="yes">
+<%= csp_meta_tag %>
+
+<%= yield :head %>
+
+<link rel="icon" href="/icon.png" type="image/png">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap" rel="stylesheet">
+
+<%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+<%= javascript_importmap_tags %>

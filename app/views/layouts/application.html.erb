@@ -1,28 +1,10 @@
+<%# Every reader-facing page. No CSRF meta tag: these pages carry no forms of
+    their own, and emitting one would put a session cookie on a publicly cached
+    response. The reasoning lives in layouts/_head.html.erb. %>
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title><%= content_for(:title) || "Tastemaker — One artwork a day" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="description" content="<%= content_for(:description) || "One public-domain artwork a day, from the collection of the Minneapolis Institute of Art, with a short hand-written note on why it matters." %>">
-    <meta name="theme-color" content="#f4efe6">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Tastemaker">
-    <meta name="mobile-web-app-capable" content="yes">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
-
-    <%= yield :head %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap" rel="stylesheet">
-
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
+    <%= render "layouts/head" %>
   </head>
 
   <body>

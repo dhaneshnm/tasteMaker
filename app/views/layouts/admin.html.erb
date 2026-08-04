@@ -1,0 +1,18 @@
+<%# The curator's desk. Same head as the reader's pages plus the CSRF meta tag,
+    which the queue's delete link needs: it is `data: { turbo_method: :delete }`,
+    a JS-initiated request, and Turbo reads the token from the meta tag.
+
+    This hangs off Admin::BaseController, not off a single controller, so the next
+    thing added under /admin inherits it instead of quietly falling back to the
+    reader layout and losing the tag. Nothing here is publicly cached. %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%= render "layouts/head" %>
+    <%= csrf_meta_tags %>
+  </head>
+
+  <body>
+    <%= yield %>
+  </body>
+</html>

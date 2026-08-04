@@ -144,5 +144,33 @@ module Admin
       assert_select "time.masthead__aside[datetime=?]", 1.day.from_now.to_date.iso8601
       assert_select ".label__note", /ritual meal/
     end
+
+    # Story 0007. The namespace now defaults to the admin layout, so the preview
+    # has to opt back out or the curator is looking at admin chrome and calling it
+    # a preview of the reader's page.
+    test "preview renders in the reader's layout, not the admin one" do
+      with_forgery_protection do
+        get preview_admin_daily_pick_path(daily_picks(:tomorrow)), headers: curator_headers
+
+        assert_select "meta[name=?]", "csrf-token", count: 0,
+          message: "the preview rendered the admin layout"
+        assert_select "a.masthead__brand", text: "Tastemaker"
+      end
+    end
+
+    # The queue deletes a day with `data: { turbo_method: :delete }`, which is
+    # JS reading `meta[name=csrf-token]`. An integration DELETE proves nothing
+    # about that, because it never runs the JS — assert the tag itself is there.
+    # test/system/admin_test.rb drives the real thing.
+    test "the curator's desk still carries the CSRF meta tag the delete link needs" do
+      with_forgery_protection do
+        get admin_daily_picks_path, headers: curator_headers
+
+        assert_select "meta[name=?]", "csrf-token", count: 1
+        assert_select("meta[name=?]", "csrf-token").first["content"].then do |token|
+          assert token.present?, "the CSRF meta tag rendered with no token in it"
+        end
+      end
+    end
   end
 end

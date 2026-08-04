@@ -7,6 +7,11 @@ module Admin
   class BaseController < ApplicationController
     USERNAME = "curator"
 
+    # The whole namespace, not one controller: the admin layout is where the CSRF
+    # meta tag lives now, and a controller added here later must inherit it rather
+    # than fall back to the reader layout that deliberately has none.
+    layout "admin"
+
     before_action :authenticate_curator
 
     private
