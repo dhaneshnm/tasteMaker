@@ -58,9 +58,15 @@ Added at design review (2026-08-04):
   there is more than one published day — no door onto the room you are standing in.
 - A past day carries `← Previous day` / `Next day →`, bounded by the published range, so
   catching up on three missed days is a walk rather than three round trips to the list.
-- One day has exactly one URL: `/days/<today>` redirects to the front door.
-- A date with no artwork lands on a linen 404 in the product's voice, not the stock Rails
-  page — this is the first story that routes people to a 404 by design.
+- One day has exactly one URL: the date the front door is showing redirects to `/`.
+
+Corrected at eng review (2026-08-04):
+- The rules key on **the pick the front door is showing**, not on today's date. On a day
+  with no pick the front door holds the previous one over (story 0001), so "today" and
+  "the current pick" are different things and the archive must not confuse them.
+- The linen 404 moved to its own story, `specs/0004-linen-404/`. This story asserts that a
+  bad date returns 404; what that page looks like is 0004's job, because
+  `config.exceptions_app` is an app-wide change.
 
 ## Out of scope
 - Calendar / month-grid picker. A list is the smallest thing that answers "what did I
