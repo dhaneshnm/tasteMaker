@@ -1,0 +1,75 @@
+<%# One day, on every screen that shows one.
+    Locals: pick, chrome: — :front_door (/), :archive (/days/:date), :preview (curator).
+
+    The three modes differ in four places and nothing else:
+
+      chrome:        masthead label      date links to     coda line          coda links
+      ------------   -----------------   ---------------   ----------------   ----------------------
+      :front_door    Artwork of the Day  /days, if >1 day  See you tomorrow.  the gallery
+      :archive       From the archive    /days             (none)             prev · next · today
+      :preview       Artwork of the Day  nothing           See you tomorrow.  the gallery
+
+    :preview exists so a curator checking a queued day sees the reader's page, not a page
+    with a live archive link that means nothing in a preview. %>
+<% painting = pick.painting
+   src = artwork_src(painting)
+   archive = chrome == :archive %>
+
+<% content_for :title, "#{painting.title} — Tastemaker" %>
+<% content_for :description, "#{painting.title} by #{painting.artist_display}, #{archive ? "from the Tastemaker archive" : "today's artwork on Tastemaker"}." %>
+<% content_for :head do %>
+  <link rel="preload" as="image" href="<%= src %>">
+<% end %>
+
+<header class="masthead">
+  <a class="masthead__brand" href="<%= root_path %>">Tastemaker</a>
+  <p class="masthead__label"><%= archive ? "From the archive" : "Artwork of the Day" %></p>
+
+  <%# The date is the door to the other days — the one element already meaning
+      "which day", so the archive needs no new chrome. It only becomes a link once
+      there is more than the current pick to see. %>
+  <time class="masthead__aside" datetime="<%= pick.scheduled_on.iso8601 %>">
+    <% if archive || (chrome == :front_door && DailyPick.published.count > 1) %>
+      <%= link_to pick.scheduled_on.to_fs(:daily), days_path, aria: { label: "See past days" } %>
+    <% else %>
+      <%= pick.scheduled_on.to_fs(:daily) %>
+    <% end %>
+  </time>
+</header>
+
+<main class="page" data-controller="artwork">
+  <%= render "shared/plate", painting: painting, eager: true,
+        describedby: "daily-note", resting: "This work is resting — read the note." %>
+
+  <div class="label">
+    <h1 class="label__title <%= "label__title--long" if painting.long_title? %>"><%= painting.title %></h1>
+
+    <p class="label__artist">
+      <span class="label__artist-name"><%= painting.artist_display %></span>
+      <% if painting.life_date.present? %>
+        <span class="label__artist-dates"><%= painting.life_date %></span>
+      <% end %>
+    </p>
+
+    <% if painting.meta_line.present? %>
+      <p class="label__meta"><%= painting.meta_line %></p>
+    <% end %>
+
+    <div class="label__note" id="daily-note"><%= simple_format(pick.blurb) %></div>
+
+    <%= tag.p(painting.credit_line, class: "label__credit") if painting.credit_line.present? %>
+
+    <footer class="coda">
+      <div class="ornament" aria-hidden="true">✦</div>
+
+      <% if archive %>
+        <%= render "days/walk", pick: pick %>
+      <% else %>
+        <p class="coda__line">See you tomorrow.</p>
+        <a class="caps-link" href="<%= feed_path %>">Wander the full gallery →</a>
+      <% end %>
+    </footer>
+  </div>
+
+  <%= render "shared/zoom" %>
+</main>

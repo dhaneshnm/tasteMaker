@@ -46,6 +46,9 @@ module Admin
     # fold behaviour — title length against aspect ratio against blurb — before
     # it goes live.
     def preview
+      # :preview, not :front_door — the curator should see the reader's page, not
+      # one carrying a live link into an archive this day is not in yet.
+      @chrome = :preview
       render template: "daily/show"
     end
 

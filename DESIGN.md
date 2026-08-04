@@ -73,6 +73,21 @@ state.
 
 `.post` — one item in the archive. Adds the spacing and the rule between works.
 
+`.days` — the contents list of past days. One row per day: the date in small caps,
+the title, the artist, and an uncropped thumbnail on the right (112px desktop,
+72px phone; fixed height, free width, so a hanging scroll stays a scroll). Rows
+are separated by a hairline and whitespace — **never a card**: no fill, no border
+box, no radius, no shadow, on any state including hover. Month names are `<h2>`.
+
+**The one place the label's colours invert.** In `.days` the title takes `--gold`
+and the artist steps back to `--ink-dim` — the opposite of `.label`. In a list the
+title is the *target* and gold is the link colour; on the day page the title is
+the *subject* and the artist carries the accent. Without the inversion the only
+gold in the row belongs to the one part that does not navigate.
+
+`.walk` — previous / next day at the foot of a past day. Two `.caps-link`s, and
+nothing else; the way back to today sits under them.
+
 `.sentinel`, `.zoom`, `.adm` — infinite-scroll spinner, full-screen view,
 curator's desk.
 

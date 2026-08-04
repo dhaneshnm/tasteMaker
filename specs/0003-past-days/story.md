@@ -1,7 +1,7 @@
 # 0003 — The days behind you
 Date: 2026-08-03
 Lane: Full (core, target ≤ 2 days)
-Status: Draft — awaiting /plan-design-review
+Status: Built 2026-08-04 — code complete, bin/ci green, awaiting deploy
 
 ## Who
 **Maya** — Daily Ritual Learner, persona 1 (`specs/personas.md`). 33, pediatric nurse in

@@ -35,6 +35,21 @@ class DailyPick < ApplicationRecord
     published.order(scheduled_on: :desc).first
   end
 
+  # The neighbours a reader walks to. Bounded by `published`, so the walk never
+  # steps into the queue and never lands on a day that was skipped: a gap is
+  # simply not there, and the next published day is the next step.
+  #
+  #   Aug 1 ✓ ── Aug 2 ✓ ── (Aug 3 none) ── Aug 4 ✓
+  #     └─ next ────┘             next ────────┘
+  #
+  def previous_published
+    self.class.published.where(scheduled_on: ...scheduled_on).order(scheduled_on: :desc).first
+  end
+
+  def next_published
+    self.class.published.where(scheduled_on: (scheduled_on + 1)..).order(:scheduled_on).first
+  end
+
   # The first day from today forward that has no artwork yet — never a
   # historical gap, never a date that is already taken.
   def self.first_open_date

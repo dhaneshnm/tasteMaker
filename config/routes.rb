@@ -9,6 +9,12 @@ Rails.application.routes.draw do
   # The infinite-scroll gallery, moved off the root (decisions/0002).
   get "feed" => "paintings#index", as: :feed
 
+  # The days behind you. The constraint keeps obvious junk out of the controller;
+  # a well-formed date that is not a real one (2026-02-31) still reaches #show
+  # and 404s there.
+  resources :days, only: %i[index show], param: :date,
+    constraints: { date: /\d{4}-\d{2}-\d{2}/ }
+
   namespace :admin do
     root "daily_picks#index"
 

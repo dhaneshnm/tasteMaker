@@ -1,7 +1,7 @@
 # 0003 — Implementation plan
 Status: Design-reviewed (`/plan-design-review` 2026-08-04 — 7 decisions, 5/10 → 9/10) and
 Eng-reviewed (`/plan-eng-review` 2026-08-04 — 9 findings, scope reduced, 0 critical gaps).
-Ready to implement.
+Built 2026-08-04 — all 15 tasks done, bin/ci green, dogfooded at 1280 and 375.
 
 ## Approach
 
@@ -489,7 +489,37 @@ Synthesized from both reviews. Each task derives from a specific finding.
   - Verify: manual, at 375
 
 ## Deviations (added during build)
-- <date>: <what changed vs plan, why>
+
+- 2026-08-04: **No libvips on this machine, so variants cannot be generated at all.**
+  `config/application.rb:42` already says so for the analyzers; the plan missed the same
+  fact applying to `resize_to_limit`. `ActiveStorage.variant_transformer` is `nil` here,
+  and asking for a variant anyway does **not** raise in the helper — it raises inside
+  Active Storage's redirect controller, so every thumbnail 500s and the narrow rescue the
+  eng review specified never sees it. Dogfooding caught it; tests did not, because the
+  tests only build the variant and never resolve it. Fixed with a capability check
+  (`resizing_available?`) that falls back to the whole image, so the archive works with or
+  without an image processor on the box. Production will have one (the Rails 8 Dockerfile
+  installs libvips), and the page is correct either way.
+- 2026-08-04: `fresh_when([record, count])` treats the array as records and calls
+  `updated_at` on the Integer. The front door uses `fresh_when(etag:, last_modified:)`
+  instead.
+- 2026-08-04: `days#show` renders explicitly, and `fresh_when` sends its own 304, so the
+  two together raise `DoubleRenderError` on a revalidated request. Switched to
+  `render ... if stale?(...)`. The system test caught it; the integration test had not
+  been sending `If-None-Match` on a day page, so a test for that was added.
+- 2026-08-04: the paintings' `maximum(:updated_at)` goes into the ETag as `.to_f`.
+  Interpolating a `Time` renders it at second precision, so a title edited in the same
+  second as the previous request produced an identical key and a stale 304 — which the
+  test for exactly that behaviour caught.
+- 2026-08-04: **year suffix on rows dropped.** The month heading reads "August 2026", so a
+  per-row year was the same fact twice. One place shows the year. `day_label` was removed
+  with it; the row uses `to_fs(:daily)` directly.
+- 2026-08-04: `minitest/mock` is not available under Minitest 6, so the helper test swaps
+  `ActiveStorage.variant_transformer` directly and restores it in an `ensure`.
+- 2026-08-04: noted, not fixed — a **helper-only** change does not bust either page's ETag,
+  because Rails' template digest covers templates and partials but not helpers. Harmless
+  in production (deploys move the importmap, and `stale_when_importmap_changes` is already
+  on) but it will confuse anyone dogfooding a helper edit locally, as it did here.
 
 ## GSTACK REVIEW REPORT
 

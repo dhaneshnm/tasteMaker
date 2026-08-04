@@ -336,6 +336,106 @@ a:hover { color: var(--gold-deep); }
   color: var(--ink-faint);
 }
 
+/* ---------- The days behind you ----------
+ * A contents list, not a gallery — /feed is the gallery. Rows are separated by a
+ * hairline and whitespace: no card, no fill, no radius, no shadow, on any state.
+ *
+ * The title carries --gold here and the artist steps back, inverted from the wall
+ * label. In a list the title is the target; on the day page it is the subject.
+ */
+
+.days { list-style: none; margin: 0; padding: 0; }
+
+.days__month {
+  margin: 2.6rem 0 0.4rem;
+  padding-bottom: 0.5rem;
+  font-family: var(--serif-body);
+  font-size: 0.72rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ink-dim);
+  border-bottom: 1px solid var(--hairline);
+}
+.days__month:first-of-type { margin-top: 0.6rem; }
+
+.days__day { border-bottom: 1px solid var(--frame-edge); }
+
+.days__link {
+  display: grid;
+  grid-template-columns: 1fr 4.5rem;
+  column-gap: 1.25rem;
+  align-items: start;
+  padding: 1.15rem 0 1.25rem;
+  color: inherit;
+}
+
+.days__text { display: block; min-width: 0; }
+
+.days__date {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-dim);
+}
+.days__date--now { color: var(--gold); }
+
+/* Never clamped, never truncated: museum titles run past 100 characters and the
+ * row grows to hold them (rule 3). Past 60 the type steps down instead. */
+.days__title {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-family: var(--serif-display);
+  font-size: 1.22rem;
+  font-weight: 480;
+  line-height: 1.2;
+  font-variation-settings: "opsz" 100;
+  color: var(--gold);
+  text-wrap: balance;
+}
+.days__title--long { font-size: 0.92rem; }
+
+.days__artist { display: block; font-size: 0.95rem; line-height: 1.4; color: var(--ink-dim); }
+
+.days__link:hover .days__title { color: var(--gold-deep); }
+
+/* Fixed height, free width: a hanging scroll stays tall and narrow, a folding
+ * screen stays wide and short, and every text column still starts at the same x. */
+.days__thumb {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  height: 4.5rem;
+}
+.days__thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  background: var(--bg-lift);
+  border: 1px solid var(--frame-edge);
+}
+
+@media (min-width: 641px) {
+  .days__link { grid-template-columns: 1fr 7rem; }
+  .days__thumb { height: 7rem; }
+}
+
+/* ---------- The walk between days ---------- */
+
+.walk {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+.walk__step { color: var(--gold); }
+.walk__step:only-child { margin-inline: auto; }
+.walk__today { display: inline-block; }
+
 /* ---------- Lazy-load sentinel ---------- */
 
 .sentinel {

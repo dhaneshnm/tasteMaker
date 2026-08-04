@@ -101,6 +101,23 @@ class DailyPickTest < ActiveSupport::TestCase
     assert_not_predicate daily_picks(:tomorrow), :published?
   end
 
+  test "the walk steps over a gap rather than into it" do
+    older = DailyPick.create!(painting: paintings(:woodcut), scheduled_on: Date.current - 4,
+      blurb: "Four days back, with nothing scheduled in between.")
+    yesterday = daily_picks(:yesterday)
+
+    assert_equal older, yesterday.previous_published
+    assert_equal daily_picks(:today), yesterday.next_published
+  end
+
+  test "the walk stops at the ends and never steps into the queue" do
+    oldest = daily_picks(:yesterday)
+    newest = daily_picks(:today)
+
+    assert_nil oldest.previous_published
+    assert_nil newest.next_published, "tomorrow is queued, so today has nowhere forward to go"
+  end
+
   test "blurb_word_count counts what the curator wrote" do
     pick = DailyPick.new(blurb: "Three  little words")
 
