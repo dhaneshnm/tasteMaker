@@ -31,12 +31,24 @@ class ApplicationHelperTest < ActionView::TestCase
 
   # No libvips on this box. Asking for a variant anyway does not fail here — it
   # fails inside Active Storage's redirect controller, so every thumbnail 500s
-  # and the row's fallback never gets a chance. Serve the whole image instead.
-  test "with no image processor on the box, the whole image is served" do
+  # and the row's fallback never gets a chance.
+  #
+  # Regression: ISSUE-001 — the fallback served the locally stored ORIGINAL for a
+  # 112px box (640-755 KB each, measured on /days), which is the 20 MB phone page
+  # the size argument exists to prevent. The museum's 800px copy is ~112 KB.
+  # Found by /qa on 2026-08-04.
+  # Report: .gstack/qa-reports/qa-report-localhost-2026-08-04.md
+  test "with no image processor on the box, a thumbnail takes the smaller CDN copy" do
     attach
     assert_not resizing_available?
 
-    assert_not_kind_of ActiveStorage::VariantWithRecord, artwork_src(@painting, size: 240)
+    assert_equal @painting.image_url_800, artwork_src(@painting, size: 240)
+  end
+
+  test "with no image processor and no CDN copy, the local original is the only option" do
+    @painting.update!(image_url_800: nil)
+    attach
+
     assert_match @painting.image.filename.to_s, artwork_src(@painting, size: 240)
   end
 

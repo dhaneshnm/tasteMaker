@@ -14,7 +14,12 @@ module ApplicationHelper
   # full-size images forever.
   def artwork_src(painting, size: nil)
     return painting.image_url_800 unless painting.image.attached?
-    return url_for(painting.image) if size.nil? || !resizing_available?
+    return url_for(painting.image) if size.nil?
+    # Asked for a thumbnail on a box with no image processor: the museum's 800px
+    # copy is the smaller of the two things we can serve. The locally stored
+    # original runs to 750 KB, and a page of them is the 20 MB phone load this
+    # size argument exists to prevent.
+    return painting.image_url_800.presence || url_for(painting.image) unless resizing_available?
 
     painting.image.variant(resize_to_limit: [ size, size ])
   rescue ActiveStorage::Error => e
