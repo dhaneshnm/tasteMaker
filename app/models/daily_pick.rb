@@ -1,7 +1,9 @@
-# One painting, one calendar day, one hand-written note.
+# One painting, one calendar day, one note.
 #
 # `blurb` is the curator's own writing and is deliberately separate from
-# `paintings.description`, which is museum copy.
+# `paintings.description`, which is museum copy. It is optional: a day with no
+# note falls back to the museum's text, attributed as the museum's, rather than
+# holding the day hostage to a blank field (decisions/0004).
 #
 #   Aug 1 ✓        Aug 2 ✓        Aug 3 (none)      Aug 4 ✓ queued
 #   ├─ pick        ├─ pick        ├─ nothing        ├─ exists in the table
@@ -19,8 +21,8 @@ class DailyPick < ApplicationRecord
   validates :painting_id, uniqueness: { message: "has already had its day" }
   validates :scheduled_on, presence: true,
     uniqueness: { message: "already has an artwork scheduled" }
-  validates :blurb, presence: true
   validate :painting_must_have_an_image
+  validate :day_must_have_something_to_read
 
   scope :published, -> { where(scheduled_on: ..Date.current) }
   scope :with_artwork, -> { includes(painting: { image_attachment: :blob }) }
@@ -80,7 +82,29 @@ class DailyPick < ApplicationRecord
     scheduled_on <= Date.current
   end
 
+  # What the day actually says, and in whose voice. The curator's note when
+  # there is one; the museum's own copy when there is not. The caller has to
+  # know which it got, because the page attributes museum text as the museum's
+  # rather than passing it off as the editorial voice.
+  def note
+    return [ blurb, :curator ] if blurb.present?
+
+    [ painting.description, :museum ]
+  end
+
+  def hand_written?
+    blurb.present?
+  end
+
   private
+
+  # The note is optional, but a day with nothing to read at all is not a day.
+  # If the curator writes nothing, the painting has to bring its own words.
+  def day_must_have_something_to_read
+    return if blurb.present? || painting&.description.present?
+
+    errors.add(:blurb, "is needed — this painting has no museum text to fall back on")
+  end
 
   # A day with no picture is not a day worth publishing. Catching it here keeps
   # the broken-image state on the public page nearly unreachable.

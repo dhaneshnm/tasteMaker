@@ -64,11 +64,29 @@ class DailyPickTest < ActiveSupport::TestCase
     assert_includes repeat.errors.full_messages.join, "already had its day"
   end
 
-  test "a day without a note is not a day" do
+  # The note is optional, but the day still has to say something.
+  test "a day with no note borrows the museum's words, and says whose they are" do
     pick = DailyPick.new(painting: paintings(:woodcut), scheduled_on: 1.week.from_now.to_date)
 
+    assert_predicate pick, :valid?
+    assert_not_predicate pick, :hand_written?
+    assert_equal [ paintings(:woodcut).description, :museum ], pick.note
+  end
+
+  test "a note the curator wrote is the curator's, and nothing is borrowed" do
+    pick = daily_picks(:today)
+
+    assert_predicate pick, :hand_written?
+    assert_equal [ pick.blurb, :curator ], pick.note
+  end
+
+  test "a day with neither a note nor museum text is not a day" do
+    wordless = Painting.create!(mia_id: 930_001, title: "No Words At All",
+      image_url_800: paintings(:woodcut).image_url_800, image_width: 800, image_height: 1000)
+    pick = DailyPick.new(painting: wordless, scheduled_on: 1.week.from_now.to_date)
+
     assert_not pick.valid?
-    assert_includes pick.errors[:blurb], "can't be blank"
+    assert_includes pick.errors[:blurb].join, "no museum text to fall back on"
   end
 
   test "a painting with no picture cannot be scheduled" do

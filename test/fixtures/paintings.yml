@@ -16,6 +16,8 @@ sunflowers:
   medium: Oil on canvas
   creditline: The William Hood Dunwoody Fund
   accession_number: 62.36
+  # Museum copy, the fallback when a day has no hand-written note.
+  description: The museum's own catalogue text, written by a curator who is not ours.
 
 harbour:
   <<: *DEFAULTS
@@ -41,6 +43,7 @@ woodcut:
   artist: Utagawa Hiroshige
   dated: "1833"
   medium: Woodblock print
+  description: Museum copy for the day nobody wrote a note.
 
 # Deliberately has no image at all: nothing to attach, nothing to hotlink.
 imageless:

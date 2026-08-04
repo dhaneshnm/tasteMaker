@@ -298,6 +298,17 @@ a:hover { color: var(--gold-deep); }
   color: var(--ink-faint);
 }
 
+/* Whose words these are. Only appears on a day the curator did not write, and
+ * it is metadata about the prose above it, so it steps back like the rest of
+ * the metadata does (rule 4). */
+.label__source {
+  margin: 0.7rem 0 0;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-dim);
+}
+
 /* ---------- Closing beat ----------
  * Ends the daily ritual, ends the archive, and carries the empty state.
  */

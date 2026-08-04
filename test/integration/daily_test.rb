@@ -10,6 +10,25 @@ class DailyTest < ActionDispatch::IntegrationTest
     assert_select ".label__note", /fortnight/
   end
 
+  # The moat is the hand-written voice, so borrowed words never wear it. A day
+  # the curator did not write runs the museum's text under the museum's name.
+  test "a day the curator wrote carries no attribution" do
+    get root_path
+
+    assert_select ".label__note", /fortnight/
+    assert_select ".label__source", count: 0
+  end
+
+  test "a day with no note runs the museum's text, marked as theirs" do
+    daily_picks(:today).update!(blurb: nil)
+
+    get root_path
+
+    assert_response :success
+    assert_select ".label__note", /catalogue text/
+    assert_select ".label__source", text: "From the Minneapolis Institute of Art"
+  end
+
   test "the page says what it is and which day it belongs to" do
     get root_path
 

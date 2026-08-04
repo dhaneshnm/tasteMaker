@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_03_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_04_154017) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -40,7 +40,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_03_120000) do
   end
 
   create_table "daily_picks", force: :cascade do |t|
-    t.text "blurb", null: false
+    t.text "blurb"
     t.datetime "created_at", null: false
     t.integer "painting_id", null: false
     t.date "scheduled_on", null: false
