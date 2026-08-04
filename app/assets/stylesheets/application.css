@@ -300,10 +300,16 @@ a:hover { color: var(--gold-deep); }
 
 /* Whose words these are. Only appears on a day the curator did not write, and
  * it is metadata about the prose above it, so it steps back like the rest of
- * the metadata does (rule 4). */
+ * the metadata does (rule 4).
+ *
+ * Scoped under `.label__body` on purpose: a bare `.label__source` loses to
+ * `.label__note p` and `.label__text` on specificity and renders as full-size
+ * ink prose, which is the opposite of stepping back. */
+.label__body .label__source,
 .label__source {
-  margin: 0.7rem 0 0;
+  margin: 0.9rem 0 0;
   font-size: 0.72rem;
+  line-height: 1.4;
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: var(--ink-dim);

@@ -14,7 +14,8 @@
     <%= form.label :painting_id, "Artwork" %>
     <%= form.select :painting_id,
           @paintings.map { |painting|
-            [ [ painting.title, painting.artist_display, painting.dated.presence ].compact.join(" — "),
+            [ [ painting.title, painting.artist_display, painting.dated.presence,
+                ("no museum text" unless painting.description.present?) ].compact.join(" — "),
               painting.id,
               { "data-thumb" => artwork_src(painting) } ]
           },
@@ -37,9 +38,11 @@
           data: { word_count_target: "input", action: "input->word-count#count" } %>
     <p class="adm__hint" data-word-count-target="output" aria-live="polite"></p>
     <p class="adm__hint">
-      Leave it empty and the day runs the museum's own text, marked as theirs.
-      Your words are the reason anyone comes back — this is the escape hatch,
-      not the plan.
+      Leave it empty and a painting that has museum text runs that instead,
+      marked as theirs and clamped like it is in the gallery. Paintings marked
+      “no museum text” in the list above have nothing to fall back on and need
+      a note. Your words are the reason anyone comes back — this is the escape
+      hatch, not the plan.
     </p>
   </div>
 

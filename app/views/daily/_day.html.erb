@@ -56,16 +56,21 @@
       <p class="label__meta"><%= painting.meta_line %></p>
     <% end %>
 
-    <%# The curator's note when there is one. When there is not, the museum's own
-        words stand in — and say so, because passing museum copy off as the
-        editorial voice would be the one dishonest thing this page could do. %>
-    <% text, voice = pick.note %>
-    <div class="label__note" id="daily-note">
-      <%= simple_format(text) %>
-      <% unless voice == :curator %>
+    <%# The curator's note is shown whole — it is the whole point, and it is
+        written to a 60-180 word target. Museum copy is not: it runs to 324
+        words in this pool, which would push the artwork off a phone screen. So
+        borrowed words get the same clamped treatment they get in the archive,
+        and they say whose they are. %>
+    <% if pick.hand_written? %>
+      <div class="label__note" id="daily-note"><%= simple_format(pick.note) %></div>
+    <% else %>
+      <div class="label__body" id="daily-note" data-controller="expand">
+        <p class="label__text" data-expand-target="text"><%= pick.note %></p>
+        <button type="button" class="label__more" data-expand-target="button"
+                data-action="expand#toggle" hidden>More</button>
         <p class="label__source">From the Minneapolis Institute of Art</p>
-      <% end %>
-    </div>
+      </div>
+    <% end %>
 
     <%= tag.p(painting.credit_line, class: "label__credit") if painting.credit_line.present? %>
 

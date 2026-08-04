@@ -19,6 +19,37 @@ module Admin
       assert_response :unauthorized
     end
 
+    # The receipt for decisions/0004. A museum day reads "0" in a word count,
+    # which is indistinguishable from a data error, and the prediction the kill
+    # review turns on is a ratio nobody will compute by hand.
+    test "the queue names museum days and states the ratio against the bet" do
+      daily_picks(:today).update!(blurb: nil)
+
+      get admin_daily_picks_path, headers: curator_headers
+
+      assert_select ".adm__queue td", text: "museum text"
+      assert_select ".adm__hint", /1 of 2 published days/
+      assert_select ".adm__hint", /50%/
+      assert_select ".adm__hint.is-off-target"
+    end
+
+    test "a queue where every day was written says nothing about ratios" do
+      get admin_daily_picks_path, headers: curator_headers
+
+      assert_select ".adm__hint", count: 0
+    end
+
+    test "a day with no note can be scheduled from the desk" do
+      assert_difference -> { DailyPick.count } do
+        post admin_daily_picks_path, headers: curator_headers, params: {
+          daily_pick: { painting_id: paintings(:woodcut).id,
+                        scheduled_on: 3.days.from_now.to_date, blurb: "" }
+        }
+      end
+
+      assert_nil DailyPick.order(:created_at).last.blurb
+    end
+
     test "the queue lists what is scheduled, newest first" do
       get admin_daily_picks_path, headers: curator_headers
 

@@ -70,14 +70,27 @@ class DailyPickTest < ActiveSupport::TestCase
 
     assert_predicate pick, :valid?
     assert_not_predicate pick, :hand_written?
-    assert_equal [ paintings(:woodcut).description, :museum ], pick.note
+    assert_equal paintings(:woodcut).description, pick.note
+  end
+
+  test "a blank note is stored as nothing at all, not as an empty string" do
+    pick = daily_picks(:today)
+
+    pick.update!(blurb: "  \n ")
+
+    assert_nil pick.reload.blurb
+    assert_not_predicate pick, :hand_written?
+  end
+
+  test "asking an unsaved pick what it says does not blow up" do
+    assert_nothing_raised { DailyPick.new.note }
   end
 
   test "a note the curator wrote is the curator's, and nothing is borrowed" do
     pick = daily_picks(:today)
 
     assert_predicate pick, :hand_written?
-    assert_equal [ pick.blurb, :curator ], pick.note
+    assert_equal pick.blurb, pick.note
   end
 
   test "a day with neither a note nor museum text is not a day" do

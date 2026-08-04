@@ -18,6 +18,11 @@ class DailyPick < ApplicationRecord
 
   belongs_to :painting
 
+  # The admin textarea posts "" when a curator clears it, and a record created
+  # without the key stores NULL. One empty is enough — otherwise "how many days
+  # ran museum text" has two answers depending on how the day was made.
+  normalizes :blurb, with: ->(blurb) { blurb&.strip.presence }
+
   validates :painting_id, uniqueness: { message: "has already had its day" }
   validates :scheduled_on, presence: true,
     uniqueness: { message: "already has an artwork scheduled" }
@@ -69,7 +74,7 @@ class DailyPick < ApplicationRecord
     spoken_for = where.not(id: pick&.id).select(:painting_id)
 
     Painting.with_attached_image
-            .select(:id, :title, :artist, :culture, :dated, :image_url_800)
+            .select(:id, :title, :artist, :culture, :dated, :image_url_800, :description)
             .where.not(id: spoken_for)
             .order(:title)
   end
@@ -82,14 +87,12 @@ class DailyPick < ApplicationRecord
     scheduled_on <= Date.current
   end
 
-  # What the day actually says, and in whose voice. The curator's note when
-  # there is one; the museum's own copy when there is not. The caller has to
-  # know which it got, because the page attributes museum text as the museum's
-  # rather than passing it off as the editorial voice.
+  # What the day says: the curator's note when there is one, the museum's own
+  # copy when there is not. Ask `hand_written?` for whose voice it is — the page
+  # attributes museum text rather than passing it off as the editorial voice,
+  # and museum copy is clamped where a hand-written note never is.
   def note
-    return [ blurb, :curator ] if blurb.present?
-
-    [ painting.description, :museum ]
+    hand_written? ? blurb : painting&.description
   end
 
   def hand_written?

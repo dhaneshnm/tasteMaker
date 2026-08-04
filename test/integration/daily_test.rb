@@ -8,25 +8,35 @@ class DailyTest < ActionDispatch::IntegrationTest
     assert_select "h1.label__title", text: paintings(:sunflowers).title
     assert_select ".label__artist .label__artist-name", text: paintings(:sunflowers).artist
     assert_select ".label__note", /fortnight/
+    # The curator's own words are shown whole and wear nobody else's name.
+    assert_select ".label__source", count: 0
+    assert_select ".label__more", count: 0
   end
 
   # The moat is the hand-written voice, so borrowed words never wear it. A day
-  # the curator did not write runs the museum's text under the museum's name.
-  test "a day the curator wrote carries no attribution" do
-    get root_path
-
-    assert_select ".label__note", /fortnight/
-    assert_select ".label__source", count: 0
-  end
-
-  test "a day with no note runs the museum's text, marked as theirs" do
+  # the curator did not write runs the museum's text under the museum's name,
+  # and clamped — museum copy runs to 324 words in the real pool against a
+  # 60-180 target, so shown whole it would push the artwork off a phone.
+  test "a day with no note runs the museum's text, marked as theirs and clamped" do
     daily_picks(:today).update!(blurb: nil)
 
     get root_path
 
     assert_response :success
-    assert_select ".label__note", /catalogue text/
-    assert_select ".label__source", text: "From the Minneapolis Institute of Art"
+    assert_select ".label__note", count: 0
+    assert_select ".label__body#daily-note[data-controller=expand]" do
+      assert_select "p.label__text", /catalogue text/
+      assert_select "button.label__more"
+      assert_select "p.label__source", text: "From the Minneapolis Institute of Art"
+    end
+  end
+
+  test "an emptied note is stored as nothing, so museum days stay countable" do
+    pick = daily_picks(:today)
+    pick.update!(blurb: "   ")
+
+    assert_nil pick.reload.blurb
+    assert_equal 1, DailyPick.published.where(blurb: nil).count
   end
 
   test "the page says what it is and which day it belongs to" do

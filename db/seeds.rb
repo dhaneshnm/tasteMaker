@@ -31,7 +31,10 @@ shuffled.each_with_index do |attrs, i|
     country: attrs["country"],
     culture: attrs["culture"],
     department: attrs["department"],
-    description: attrs["description"],
+    # Never blank out museum text we already hold: a published day with no
+    # hand-written note is reading it, and the model's "something to read"
+    # check only runs when the pick is saved, not when the painting changes.
+    description: attrs["description"].presence || painting.description,
     creditline: attrs["creditline"],
     accession_number: attrs["accession_number"],
     image_width: attrs["image_width"],

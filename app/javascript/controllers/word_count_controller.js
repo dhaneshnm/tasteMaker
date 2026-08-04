@@ -14,8 +14,10 @@ export default class extends Controller {
     const words = this.inputTarget.value.split(/\s+/).filter(Boolean).length
     const inRange = words >= this.minValue && words <= this.maxValue
 
+    // Empty is a supported state now — the day runs museum text — so saying
+    // "aim for 60" here would contradict the hint directly below it.
     this.outputTarget.textContent = words === 0
-      ? `Aim for ${this.minValue}–${this.maxValue} words`
+      ? `Empty — this day will run the museum's text. Aim for ${this.minValue}–${this.maxValue} words to write your own.`
       : `${words} words${inRange ? "" : ` — aim for ${this.minValue}–${this.maxValue}`}`
     this.outputTarget.classList.toggle("is-off-target", words > 0 && !inRange)
   }

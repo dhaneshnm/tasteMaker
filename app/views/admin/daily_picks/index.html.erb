@@ -12,6 +12,19 @@
   <% if @picks.empty? %>
     <p class="adm__muted">Nothing scheduled yet. The site is showing its empty state.</p>
   <% else %>
+    <%# The receipt for decisions/0004: the prediction is that fewer than one
+        published day in five runs museum text. Countable at a glance, not by
+        writing a query at the kill review. %>
+    <% published = @picks.select(&:published?) %>
+    <% borrowed = published.reject(&:hand_written?).size %>
+    <% if borrowed.positive? %>
+      <p class="adm__hint <%= "is-off-target" if borrowed * 5 > published.size %>">
+        <%= borrowed %> of <%= pluralize(published.size, "published day") %>
+        <%= borrowed == 1 ? "is running" : "are running" %> museum text
+        (<%= (borrowed * 100.0 / published.size).round %>%). The bet in
+        decisions/0004 is that this stays under 20%.
+      </p>
+    <% end %>
     <div class="adm__queue-scroll">
     <table class="adm__queue">
       <thead>
@@ -33,7 +46,16 @@
               <%= pick.painting.title %><br>
               <span class="adm__muted"><%= pick.painting.artist_display %></span>
             </td>
-            <td><%= pick.blurb_word_count %></td>
+            <td>
+              <%# A museum day reads "0" otherwise, which is indistinguishable
+                  from a data error — and counting these is how decisions/0004's
+                  prediction gets checked at the kill review. %>
+              <% if pick.hand_written? %>
+                <%= pick.blurb_word_count %>
+              <% else %>
+                <span class="adm__muted">museum text</span>
+              <% end %>
+            </td>
             <td>
               <div class="adm__row-links">
                 <%= link_to "Preview", preview_admin_daily_pick_path(pick) %>

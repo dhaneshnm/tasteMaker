@@ -22,6 +22,18 @@ the product admitting the daily note is not actually being written — and at th
 honest move is to fix the publishing cadence or kill the daily format, not to keep
 shipping borrowed words under a masthead that promises a curator.
 
-Enforcement: `test/integration/daily_test.rb` covers both voices and the attribution;
-`DailyPick#note` returns the voice alongside the text so no caller can render museum copy
-without knowing it did.
+Museum copy is clamped on the daily page, the way it already is in the archive. The
+hand-written note is never clamped — that rule is about the curator's words, and it does
+not transfer to borrowed ones. Descriptions in the current pool run to 324 words against a
+60–180 target, so shown whole they would push the artwork off a phone screen and break
+Better bar 2.
+
+Enforcement: `test/integration/daily_test.rb` covers both voices, the attribution and the
+clamp. The **receipt for the prediction** is on the curator's queue: a day with no note
+reads "museum text" rather than "0 words", and the page states the running ratio against
+the 20% line. Counting is a glance, not a query written on Aug 31.
+
+Not changed, deliberately: the PWA manifest and the default meta description still promise
+"a short hand-written note". That is what the product is; the fallback is the bounded
+exception this decision allows, and the prediction above is the thing that keeps it
+bounded. If the ratio breaks 20%, the copy is not what needs fixing.
