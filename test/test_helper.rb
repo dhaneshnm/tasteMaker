@@ -26,6 +26,17 @@ module ActiveSupport
       ActionController::Base.allow_forgery_protection = was
     end
 
+    # The curator's credentials, in one place. Integration tests want them as a
+    # header hash (`curator_headers` below); the system test hands the same string
+    # to Chrome over CDP. `ActionDispatch::SystemTestCase` descends from
+    # ActiveSupport::TestCase, not from IntegrationTest, so this is the only
+    # ancestor both can reach.
+    def curator_credentials(password: ENV.fetch("CURATOR_PASSWORD"))
+      ActionController::HttpAuthentication::Basic.encode_credentials(
+        Admin::BaseController::USERNAME, password
+      )
+    end
+
     # One more published day, with a painting of its own.
     #
     # A DailyPick needs a painting no other pick has taken (`painting_id` is
@@ -49,9 +60,6 @@ end
 class ActionDispatch::IntegrationTest
   # The curator's desk is behind HTTP basic auth; tests knock politely.
   def curator_headers(password: ENV.fetch("CURATOR_PASSWORD"))
-    credentials = ActionController::HttpAuthentication::Basic.encode_credentials(
-      Admin::BaseController::USERNAME, password
-    )
-    { "HTTP_AUTHORIZATION" => credentials }
+    { "HTTP_AUTHORIZATION" => curator_credentials(password: password) }
   end
 end

@@ -30,7 +30,6 @@ class FavoriteTest < ActiveSupport::TestCase
     mine = Favorite.create!(collector_digest: DIGEST, painting: paintings(:harbour))
 
     assert_equal [ mine ], Favorite.collected_by(DIGEST).to_a
-    assert_not_includes Favorite.collected_by(DIGEST), favorites(:strangers_sunflowers)
   end
 
   # The whole point of the digest column: a database copy is not a set of

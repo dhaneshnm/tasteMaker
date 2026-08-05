@@ -104,7 +104,7 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     returning.cookies[:collector] = carried
     returning.get collection_path
 
-    assert_select_in returning, ".days__title", text: @painting.title
+    returning.assert_select ".days__title", text: @painting.title
   end
 
   test "the table stores a digest, never anything the cookie carries" do
@@ -165,11 +165,11 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     stranger = open_session
     stranger.get favorite_control_path(@painting)
 
-    assert_select_in stranger, "button[aria-pressed=?]", "false"
+    stranger.assert_select "button[aria-pressed=?]", "false"
 
     stranger.get collection_path
 
-    assert_select_in stranger, ".days__title", count: 0
+    stranger.assert_select ".days__title", count: 0
   end
 
   test "keeping something that does not exist is a 404" do
@@ -327,10 +327,5 @@ class FavoritesTest < ActionDispatch::IntegrationTest
 
     def set_cookie_header
       Array(response.headers["Set-Cookie"]).join("\n")
-    end
-
-    def assert_select_in(session, *args, **kwargs)
-      assert_select Rails::Dom::Testing.html_document_fragment.parse(session.response.body),
-        *args, **kwargs
     end
 end

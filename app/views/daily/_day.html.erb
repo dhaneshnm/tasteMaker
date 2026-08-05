@@ -86,7 +86,7 @@
         page publicly cacheable. Everything personal arrives in the fragment. %>
     <% unless chrome == :preview %>
       <%= turbo_frame_tag "keep_#{painting.id}", src: favorite_control_path(painting),
-            loading: "lazy" %>
+            loading: "lazy", class: "keep-frame" %>
     <% end %>
 
     <footer class="coda">

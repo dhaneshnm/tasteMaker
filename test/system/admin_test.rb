@@ -13,12 +13,9 @@ class AdminTest < ApplicationSystemTestCase
   # module scripts on a URL with embedded auth, so Turbo would never boot and this
   # test would pass for the wrong reason.
   def authenticate_curator!
-    credentials = ActionController::HttpAuthentication::Basic.encode_credentials(
-      Admin::BaseController::USERNAME, ENV.fetch("CURATOR_PASSWORD")
-    )
     page.driver.browser.execute_cdp("Network.enable")
     page.driver.browser.execute_cdp("Network.setExtraHTTPHeaders",
-      headers: { "Authorization" => credentials })
+      headers: { "Authorization" => curator_credentials })
   end
 
   # Runs with forgery protection ON. With it off — the suite default — the server

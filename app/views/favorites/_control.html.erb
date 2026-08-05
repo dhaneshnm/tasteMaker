@@ -16,7 +16,7 @@
     rule 6) and using it here put two of them a few centimetres apart meaning
     different things. The words carry the state instead, with the middle dot
     `.label__credit` already uses. %>
-<%= turbo_frame_tag "keep_#{painting.id}" do %>
+<%= turbo_frame_tag "keep_#{painting.id}", class: "keep-frame" do %>
   <div class="keep">
     <%= button_to favorite_path(painting), method: (kept ? :delete : :post),
           form: { class: "keep__form" },

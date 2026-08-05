@@ -4,7 +4,7 @@
 <header class="masthead">
   <a class="masthead__brand" href="<%= root_path %>">Tastemaker</a>
   <p class="masthead__label">Your collection</p>
-  <span class="masthead__aside"><%= pluralize(@kept_count, "work") %></span>
+  <span class="masthead__aside"><%= pluralize(@rows.size, "work") %></span>
 </header>
 
 <main class="page <%= "page--empty" if @rows.empty? %>">
@@ -26,7 +26,7 @@
     <ol class="days">
       <% @rows.each_with_index do |(painting, pick), i| %>
         <%= render "days/row", painting: painting, pick: pick,
-              current: @current, eager: i < 4, remove: pick.nil? %>
+              current: @current, eager: i < 4 %>
       <% end %>
     </ol>
 

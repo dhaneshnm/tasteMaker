@@ -42,7 +42,6 @@ class FavoritesTest < ApplicationSystemTestCase
   # also why it carries no aria-live.
   test "the frame landing on scroll does not steal focus" do
     visit root_path
-    assert_selector "body"
     reveal_keep_control
 
     assert_button "Keep this"
@@ -51,10 +50,7 @@ class FavoritesTest < ApplicationSystemTestCase
   end
 
   test "the collection is reachable from the artwork and from the archive" do
-    visit root_path
-    reveal_keep_control
-    click_on "Keep this"
-    assert_button "Kept · Remove"
+    keep_todays_artwork
 
     click_on "1 kept →"
 
@@ -68,10 +64,7 @@ class FavoritesTest < ApplicationSystemTestCase
   end
 
   test "the control is a real target on a phone, and its row does not wrap" do
-    visit root_path
-    reveal_keep_control
-    click_on "Keep this"
-    assert_button "Kept · Remove"
+    keep_todays_artwork
 
     assert_operator find(".keep__toggle").native.size.height, :>=, 44
     assert_operator find(".keep__link").native.size.height, :>=, 44
@@ -89,14 +82,13 @@ class FavoritesTest < ApplicationSystemTestCase
   # caught: a coda used to end with one way out, and two small-caps links sharing
   # a line with nothing between them read as one long string.
   test "a coda with two ways out separates them, and both are real targets" do
-    visit root_path
-    reveal_keep_control
-    click_on "Keep this"
-    assert_button "Kept · Remove"
+    keep_todays_artwork
     click_on "1 kept →"
 
+    # assert_selector waits for the navigation; `all` does not, and reading it
+    # straight after a click races the page in.
+    assert_selector ".coda .caps-link", count: 2
     links = all(".coda .caps-link")
-    assert_equal 2, links.size
 
     links.each { |link| assert_operator link.native.size.height, :>=, 44 }
     assert_operator links.last.native.location.x - (links.first.native.location.x +
@@ -115,6 +107,13 @@ class FavoritesTest < ApplicationSystemTestCase
   end
 
   private
+    def keep_todays_artwork
+      visit root_path
+      reveal_keep_control
+      click_on "Keep this"
+      assert_button "Kept · Remove"
+    end
+
     def reveal_keep_control
       page.execute_script("window.scrollTo(0, document.body.scrollHeight)")
       assert_selector ".keep__toggle"

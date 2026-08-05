@@ -9,16 +9,17 @@
       current:   the pick the front door is showing, so a link never points at a
                  URL that immediately 301s (see ApplicationHelper#day_link_path)
       eager:     load the thumbnail eagerly (the first few rows only)
-      remove:    render a Remove control. Only ever true on an unlinked row —
-                 nesting a button inside the row's own <a> would be an
-                 accessibility defect, and an orphan is the one row whose owner
-                 has no other way to let it go.
+
+    A row with no pick is a kept work whose day the curator removed. It renders
+    unlinked and carries its own Remove, because nesting a button inside the
+    row's own <a> would be an accessibility defect and an orphan is the one row
+    whose owner has no other way to let it go. `/days` iterates published picks,
+    so it never reaches that branch.
 
     The whole row is one link, and its accessible name carries date, title and
     artist: a list of bare titles is useless to somebody navigating by link.
     `size: 240` and not the original — ISSUE-001 (commit 2da2f7a) shipped
     full-size JPEGs into 112px boxes once already. %>
-<% remove = false unless defined?(remove) %>
 <li class="days__day">
   <% if pick %>
     <a class="days__link" href="<%= day_link_path(pick, current) %>"
@@ -30,11 +31,9 @@
       <%= render "days/row_body", painting: painting, pick: nil, current: current, eager: eager %>
     </div>
 
-    <% if remove %>
-      <%= button_to "Remove", favorite_path(painting), method: :delete,
-            class: "caps-link days__remove",
-            form: { class: "days__remove-form" },
-            aria: { label: "Remove #{painting.title} from your collection" } %>
-    <% end %>
+    <%= button_to "Remove", favorite_path(painting), method: :delete,
+          class: "caps-link days__remove",
+          form: { class: "days__remove-form" },
+          aria: { label: "Remove #{painting.title} from your collection" } %>
   <% end %>
 </li>

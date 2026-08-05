@@ -14,12 +14,14 @@
 #              (static markup, lazy)                  the same frame
 #
 class FavoritesController < ApplicationController
+  # Never cached anywhere, by anyone — a class-wide rule rather than a line at the
+  # top of each action, so a fifth action cannot ship a storable per-visitor
+  # response by forgetting it.
+  before_action :no_store
   before_action :set_painting, except: :index
 
-  # The reader's own room. Never cached anywhere, by anyone.
+  # The reader's own room.
   def index
-    no_store
-
     favorites = Favorite.collected_by(collector_digest)
                         .includes(painting: { image_attachment: :blob })
                         .order(created_at: :desc).to_a
@@ -36,29 +38,29 @@ class FavoritesController < ApplicationController
     # holds the previous pick over, and the helper keys on the pick, not the date.
     @current = DailyPick.current
     @rows = favorites.map { |favorite| [ favorite.painting, picks[favorite.painting_id] ] }
-    @kept_count = favorites.size
   end
 
   # The per-visitor fragment, and the only place the cookie is issued.
   def control
-    no_store
     render_control
   end
 
   def create
-    no_store
     Favorite.create!(collector_digest: collector_digest, painting: @painting)
-    render_control(autofocus: true)
+    render_control(kept: true, autofocus: true)
   rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid
     # Already kept — two taps that raced, or two tabs. Not an error: the reader
-    # asked for it to be kept and it is kept.
-    render_control(autofocus: true)
+    # asked for it to be kept and it is kept. Both classes are live: the model's
+    # uniqueness validation raises RecordInvalid on an ordinary second tap, and
+    # only a genuine race past that read reaches the index and raises NotUnique.
+    render_control(kept: true, autofocus: true)
   end
 
   def destroy
-    no_store
-    Favorite.collected_by(collector_digest).where(painting: @painting).destroy_all
-    render_control(autofocus: true)
+    # delete_all, not destroy_all: no callbacks and no dependents, so loading the
+    # row to throw it away is a wasted query.
+    Favorite.collected_by(collector_digest).where(painting: @painting).delete_all
+    render_control(kept: false, autofocus: true)
   end
 
   private
@@ -68,17 +70,18 @@ class FavoritesController < ApplicationController
       @painting = Painting.find(params[:painting_id])
     end
 
-    def render_control(autofocus: false)
-      render partial: "favorites/control",
-        locals: { painting: @painting, kept: kept?, count: kept_count, autofocus: autofocus }
-    end
+    # `kept:` is passed by the write actions, which already know the answer —
+    # asking the database to re-derive what we just decided is a query for
+    # nothing. Only `control` has to look, and one pluck answers both questions
+    # it has (is this one kept, and how many are there) off the same index.
+    def render_control(kept: nil, autofocus: false)
+      kept_ids = Favorite.collected_by(collector_digest).pluck(:painting_id) if kept.nil?
+      kept = kept_ids.include?(@painting.id) if kept.nil?
 
-    def kept?
-      Favorite.collected_by(collector_digest).exists?(painting: @painting)
-    end
-
-    def kept_count
-      Favorite.collected_by(collector_digest).count
+      render partial: "favorites/control", locals: {
+        painting: @painting, kept: kept, autofocus: autofocus,
+        count: kept_ids&.size || Favorite.collected_by(collector_digest).count
+      }
     end
 
     # Private and uncacheable, always. `Vary: Cookie` is belt to the no-store

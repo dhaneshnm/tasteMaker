@@ -167,9 +167,8 @@ module Admin
         get admin_daily_picks_path, headers: curator_headers
 
         assert_select "meta[name=?]", "csrf-token", count: 1
-        assert_select("meta[name=?]", "csrf-token").first["content"].then do |token|
-          assert token.present?, "the CSRF meta tag rendered with no token in it"
-        end
+        assert css_select("meta[name=csrf-token]").first["content"].present?,
+          "the CSRF meta tag rendered with no token in it"
       end
     end
   end
