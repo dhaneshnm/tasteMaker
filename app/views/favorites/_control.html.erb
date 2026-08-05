@@ -16,7 +16,12 @@
     rule 6) and using it here put two of them a few centimetres apart meaning
     different things. The words carry the state instead, with the middle dot
     `.label__credit` already uses. %>
-<%= turbo_frame_tag "keep_#{painting.id}", class: "keep-frame" do %>
+<%# No `class:` here, deliberately. Turbo replaces a frame by transplanting this
+    element's CHILDREN into the one already on the page — the response frame's own
+    attributes are discarded. The `.keep-frame` class that reserves the 44px lives
+    on the frame in `daily/_day.html.erb`, which is the element that stays. Adding
+    it here too looks load-bearing and is not. %>
+<%= turbo_frame_tag "keep_#{painting.id}" do %>
   <div class="keep">
     <%= button_to favorite_path(painting), method: (kept ? :delete : :post),
           form: { class: "keep__form" },

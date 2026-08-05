@@ -40,7 +40,9 @@ class FavoritesController < ApplicationController
     @rows = favorites.map { |favorite| [ favorite.painting, picks[favorite.painting_id] ] }
   end
 
-  # The per-visitor fragment, and the only place the cookie is issued.
+  # The per-visitor fragment. In practice this is where the cookie gets issued,
+  # because Turbo always fetches it before a reader can tap anything — but the
+  # writes below mint it too, for a client that posts without loading the frame.
   def control
     render_control
   end
@@ -53,13 +55,22 @@ class FavoritesController < ApplicationController
     # asked for it to be kept and it is kept. Both classes are live: the model's
     # uniqueness validation raises RecordInvalid on an ordinary second tap, and
     # only a genuine race past that read reaches the index and raises NotUnique.
-    render_control(kept: true, autofocus: true)
+    #
+    # No `kept:` here, unlike the success path. Uniqueness is the only reachable
+    # failure today, so `true` would be right — but it would be an assumption
+    # about which validation fired, and the whole point of this branch is that a
+    # write did NOT happen. Let the database say what is stored. `autofocus`
+    # stays: the reader still pressed a button, and focus still has to come back.
+    render_control(autofocus: true)
   end
 
   def destroy
-    # delete_all, not destroy_all: no callbacks and no dependents, so loading the
-    # row to throw it away is a wasted query.
-    Favorite.collected_by(collector_digest).where(painting: @painting).delete_all
+    # destroy_all, not delete_all: it costs one indexed row read, and it keeps
+    # this path inside the callback chain. The saving was a single SELECT on at
+    # most one row; the cost of the faster version is that the day it grows an
+    # `after_destroy` — a counter, a tombstone — both unkeep paths skip it with
+    # no test failing.
+    Favorite.collected_by(collector_digest).where(painting: @painting).destroy_all
 
     # Two callers, two right answers.
     #
@@ -86,17 +97,22 @@ class FavoritesController < ApplicationController
       @painting = Painting.find(params[:painting_id])
     end
 
-    # `kept:` is passed by the write actions, which already know the answer —
-    # asking the database to re-derive what we just decided is a query for
-    # nothing. Only `control` has to look, and one pluck answers both questions
-    # it has (is this one kept, and how many are there) off the same index.
+    # `kept:` is passed by a write that already knows the answer, so it does not
+    # re-ask; every other caller reads it.
+    #
+    # Both reads are index-only aggregates against `collector_digest`, which is
+    # the leading column of the unique index — constant cost whatever the size of
+    # the collection. An earlier version pulled the whole id set with one `pluck`
+    # to save a round trip; that traded two constant probes for transferring and
+    # allocating every painting_id the reader has ever kept, on the endpoint the
+    # lazy frame hits on every single day-page view.
     def render_control(kept: nil, autofocus: false)
-      kept_ids = Favorite.collected_by(collector_digest).pluck(:painting_id) if kept.nil?
-      kept = kept_ids.include?(@painting.id) if kept.nil?
+      collection = Favorite.collected_by(collector_digest)
 
       render partial: "favorites/control", locals: {
-        painting: @painting, kept: kept, autofocus: autofocus,
-        count: kept_ids&.size || Favorite.collected_by(collector_digest).count
+        painting: @painting, autofocus: autofocus,
+        kept: kept.nil? ? collection.exists?(painting: @painting) : kept,
+        count: collection.count
       }
     end
 

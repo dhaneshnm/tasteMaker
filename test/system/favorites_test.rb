@@ -42,6 +42,11 @@ class FavoritesTest < ApplicationSystemTestCase
   # also why it carries no aria-live.
   test "the frame landing on scroll does not steal focus" do
     visit root_path
+    # This test's subject is `document.activeElement`, which is the kind of
+    # negative assertion that passes for free if it runs before the page is
+    # really there. Wait on the artwork — a real element this page renders — so
+    # the scroll below happens against a settled document.
+    assert_selector ".plate__img"
     reveal_keep_control
 
     assert_button "Keep this"

@@ -148,6 +148,9 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     end
     assert_response :success
     assert_select "button[aria-pressed=?]", "true"
+    # The rescue path is still a write the reader triggered, so focus comes back
+    # to the toggle exactly as it does on the success path.
+    assert_select "button[autofocus]"
   end
 
   # destroy has two callers with two different needs, and answering both the same

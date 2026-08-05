@@ -166,9 +166,13 @@ module Admin
       with_forgery_protection do
         get admin_daily_picks_path, headers: curator_headers
 
-        assert_select "meta[name=?]", "csrf-token", count: 1
-        assert css_select("meta[name=csrf-token]").first["content"].present?,
-          "the CSRF meta tag rendered with no token in it"
+        # The block form keeps the assertion an assertion: reading `["content"]`
+        # off a `.first` that came back nil raises NoMethodError instead of
+        # failing with the message written here.
+        assert_select "meta[name=?]", "csrf-token", count: 1 do |tag|
+          assert tag.first["content"].present?,
+            "the CSRF meta tag rendered with no token in it"
+        end
       end
     end
   end

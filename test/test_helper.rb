@@ -26,6 +26,15 @@ module ActiveSupport
       ActionController::Base.allow_forgery_protection = was
     end
 
+    # The whole-file form, for a test case whose every test needs it. One
+    # implementation, so the two cannot drift: a file that hand-rolls its own
+    # save/set/restore keeps the old semantics the day this helper has to do more.
+    def self.with_forgery_protection!
+      setup    { @forgery_protection_was = ActionController::Base.allow_forgery_protection
+                 ActionController::Base.allow_forgery_protection = true }
+      teardown { ActionController::Base.allow_forgery_protection = @forgery_protection_was }
+    end
+
     # The curator's credentials, in one place. Integration tests want them as a
     # header hash (`curator_headers` below); the system test hands the same string
     # to Chrome over CDP. `ActionDispatch::SystemTestCase` descends from
@@ -58,8 +67,10 @@ module ActiveSupport
 end
 
 class ActionDispatch::IntegrationTest
-  # The curator's desk is behind HTTP basic auth; tests knock politely.
-  def curator_headers(password: ENV.fetch("CURATOR_PASSWORD"))
-    { "HTTP_AUTHORIZATION" => curator_credentials(password: password) }
+  # The curator's desk is behind HTTP basic auth; tests knock politely. The
+  # password's default lives on `curator_credentials` alone — repeating it here
+  # would put the thing that was just extracted back in two places.
+  def curator_headers(**options)
+    { "HTTP_AUTHORIZATION" => curator_credentials(**options) }
   end
 end

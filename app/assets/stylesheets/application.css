@@ -354,13 +354,20 @@ a:hover { color: var(--gold-deep); }
   color: var(--ink-faint);
 }
 
-/* DESIGN.md rule 9, in one place. `.caps-link` sets size and tracking, never
- * height, so anything built on it that you can tap states the 44px bar here —
- * assuming `.caps-link` carried it is how ISSUE-002 shipped 15px targets.
+/* DESIGN.md rule 9 for everything built on `.caps-link`. That class sets size
+ * and tracking, never height, so each tappable thing built on it states the 44px
+ * bar here — assuming `.caps-link` carried it is how ISSUE-002 shipped 15px
+ * targets.
  *
  * Listed explicitly rather than nested under `.coda`: the walk happens to render
  * inside a coda today, and a target size should not depend on where a partial
- * gets called from. */
+ * gets called from.
+ *
+ * NOT the only place in the file. `.zoom__close` is the one tappable control
+ * that is not a caps-link — a fixed-position button on the dark overlay with its
+ * own border, background and `min-width` — so it states its own bar next to the
+ * rest of its chrome. Two homes, on purpose; adding a third for a caps-link is
+ * the mistake. */
 .coda .caps-link,
 .page--empty .caps-link,
 .walk__step,
@@ -388,9 +395,15 @@ a:hover { color: var(--gold-deep); }
 
 /* A coda used to end with one way out. The archive and the collection now offer
  * two, and two small-caps links sharing a line with only a space between them
- * read as one long string. */
-.coda .caps-link + .caps-link,
-.page--empty .caps-link + .caps-link { margin-inline-start: 1.6rem; }
+ * read as one long string.
+ *
+ * `>` on purpose. Descendant scope also matched the two links inside `.walk`,
+ * where it outranked `.walk__step--next { margin-inline-start: auto }` (0,3,0
+ * against 0,1,0) and only looked right because `.walk`'s own space-between was
+ * doing the work. That made the walk's layout depend on it rendering inside a
+ * coda. Direct children are the codas' own ways out; the walk styles its own. */
+.coda > .caps-link + .caps-link,
+.page--empty > .caps-link + .caps-link { margin-inline-start: 1.6rem; }
 
 /* ---------- The days behind you ----------
  * A contents list, not a gallery — /feed is the gallery. Rows are separated by a
@@ -534,10 +547,10 @@ a:hover { color: var(--gold-deep); }
 
 /* Target size comes from the rule-9 block above, which names these two. */
 
-/* Holds the right edge when there is no previous day to sit opposite. With both
- * links present `.walk`'s space-between already does it — and `.coda .caps-link
- * + .caps-link` outranks this at (0,3,0), so `auto` only ever applies in the
- * one-link case. That is the case it exists for. */
+/* Holds the right edge when there is no previous day to sit opposite; with both
+ * links present `.walk`'s own space-between already does it. This now applies in
+ * both cases — the coda's sibling-spacing rule is scoped to direct children, so
+ * it no longer reaches inside the walk and outranks this. */
 .walk__step--next { margin-inline-start: auto; }
 
 /* ---------- Lazy-load sentinel ---------- */

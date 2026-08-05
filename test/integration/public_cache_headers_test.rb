@@ -20,15 +20,8 @@ class PublicCacheHeadersTest < ActionDispatch::IntegrationTest
   # without ever calling `form_authenticity_token`. So a test written here
   # without it would pass against the OLD layout too, proving nothing. This
   # file's entire subject is CSRF and session behaviour, so making that
-  # impossible to forget beats remembering it eight times.
-  setup do
-    @forgery_protection_was = ActionController::Base.allow_forgery_protection
-    ActionController::Base.allow_forgery_protection = true
-  end
-
-  teardown do
-    ActionController::Base.allow_forgery_protection = @forgery_protection_was
-  end
+  # impossible to forget beats remembering it once per test.
+  with_forgery_protection!
 
   test "no public page sets a cookie" do
     PUBLIC_PAGES.each do |path|
@@ -52,6 +45,31 @@ class PublicCacheHeadersTest < ActionDispatch::IntegrationTest
       assert_select "meta[name=?]", "csrf-token", count: 0,
         message: "#{path} rendered a CSRF meta tag, which is what writes the session"
     end
+  end
+
+  # The general form of the rule, and the one that survives refactoring.
+  #
+  # A form is the other way a page writes the session: `form_with` and
+  # `button_to` both emit `form_authenticity_token`, which writes
+  # `session[:_csrf_token]`, which emits `Set-Cookie` — on a response a shared
+  # cache is allowed to store and replay.
+  #
+  # This exists because `days/_row.html.erb` renders a Remove button for any row
+  # whose pick is nil. `/days` iterates published picks so it never reaches that
+  # branch today, but that is a property of the caller, not of the partial: the
+  # moment any publicly cached page renders a pick-less row, the defect is back.
+  # A comment cannot catch that. This can.
+  test "no public page contains a form at all" do
+    PUBLIC_PAGES.each do |path|
+      get path
+
+      assert_select "form", count: 0,
+        message: "#{path} rendered a form, which writes the session on a cached page"
+    end
+
+    get day_path(daily_picks(:yesterday).scheduled_on.iso8601)
+
+    assert_select "form", count: 0, message: "a past day rendered a form"
   end
 
   # The cookie is the defect; the caching is deliberate and must survive the fix.

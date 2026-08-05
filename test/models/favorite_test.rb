@@ -30,6 +30,12 @@ class FavoriteTest < ActiveSupport::TestCase
     mine = Favorite.create!(collector_digest: DIGEST, painting: paintings(:harbour))
 
     assert_equal [ mine ], Favorite.collected_by(DIGEST).to_a
+    # Subsumed by the line above, kept for the failure message: this is the
+    # model-level guard for the privacy property the digest column exists for,
+    # and a leak should name the reader whose row leaked rather than dumping two
+    # arrays at whoever broke it.
+    assert_not_includes Favorite.collected_by(DIGEST), favorites(:strangers_sunflowers),
+      "collected_by leaked another reader's row"
   end
 
   # The whole point of the digest column: a database copy is not a set of
