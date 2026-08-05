@@ -3,6 +3,14 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Where `config.exceptions_app` sends a rescued error. `via: :all` because the
+  # request that failed could have been any verb. 422 shares the 404 page: a
+  # rejected request is not a page either. 500 stays on its static file — see the
+  # plan; an error page that depends on the layout can fail the same way the
+  # request did.
+  match "/404" => "errors#not_found", via: :all
+  match "/422" => "errors#not_found", via: :all
+
   # The artwork of the day is the front door.
   root "daily#show"
 

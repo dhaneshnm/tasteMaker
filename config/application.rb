@@ -37,6 +37,13 @@ module TasteMaker
     # per-visitor timezone logic: `DailyPick.current` is only correct if
     # `Date.current` means "today in New York".
     config.time_zone = "America/New_York"
+
+    # Rescued exceptions go back through the router, so an error page is a normal
+    # request rendering the normal layout. Without this the reader lands on
+    # `public/404.html` — the one screen in the product that is not on linen, and
+    # the one the design test cannot see because it is a static file outside the
+    # asset pipeline. See specs/0004-linen-404/.
+    config.exceptions_app = routes
     # config.eager_load_paths << Rails.root.join("extras")
 
     # No libvips/imagemagick on this machine; image dimensions come from MIA

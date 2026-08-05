@@ -1,7 +1,7 @@
 # 0006 — The collection you keep
 Date: 2026-08-04
 Lane: Full (core, target ≤ 2 days)
-Status: Draft
+Status: Shipped 2026-08-05 — built, bin/ci green, QA'd, code-reviewed (15 findings fixed), pushed
 
 ## Who
 **Jordan** — Collector / Wishlist-keeper, persona 2 (`specs/personas.md`). 26, barista and

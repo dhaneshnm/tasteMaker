@@ -1,7 +1,7 @@
 # 0004 — The page that isn't there
 Date: 2026-08-04
 Lane: Express (same-day, reversible)
-Status: Draft — split out of story 0003 at eng review (2026-08-04)
+Status: Shipped 2026-08-05 — split out of story 0003 at eng review (2026-08-04); built, bin/ci green
 
 ## Who
 Anybody who follows a link to a day that no longer exists, types a date by hand, or

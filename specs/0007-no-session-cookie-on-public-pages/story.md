@@ -1,7 +1,7 @@
 # 0007 — The cookie the front door should not be handing out
 Date: 2026-08-04
 Lane: Express (same-day, reversible)
-Status: Draft — split out of story 0006 at eng review (2026-08-04)
+Status: Shipped 2026-08-05 — split out of story 0006 at eng review (2026-08-04); built, bin/ci green, pushed
 
 ## Who
 Every reader, none of whom will ever see this. Also the next person to put a cache or a CDN

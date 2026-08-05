@@ -35,6 +35,35 @@ module ActiveSupport
       teardown { ActionController::Base.allow_forgery_protection = @forgery_protection_was }
     end
 
+    # Render error pages the way a reader gets them.
+    #
+    # Two switches, not one. `show_exceptions` decides whether a raise is rescued
+    # at all; `show_detailed_exceptions` decides whether the rescued request gets
+    # the developer's debug page or the reader's. The test environment sets both
+    # the developer's way, so flipping only the first still asserts against the
+    # debug page — which has no masthead and no linen, and will fail in a way
+    # that looks like the error page is broken.
+    def with_rescued_exceptions
+      config = Rails.application.env_config
+      was = config.values_at("action_dispatch.show_exceptions",
+        "action_dispatch.show_detailed_exceptions")
+      config["action_dispatch.show_exceptions"] = :all
+      config["action_dispatch.show_detailed_exceptions"] = false
+      yield
+    ensure
+      config["action_dispatch.show_exceptions"], config["action_dispatch.show_detailed_exceptions"] = was
+    end
+
+    # The whole-file form, for a test case whose every test needs it.
+    def self.with_rescued_exceptions!
+      setup    { @rescued_was = Rails.application.env_config.values_at(
+                   "action_dispatch.show_exceptions", "action_dispatch.show_detailed_exceptions")
+                 Rails.application.env_config["action_dispatch.show_exceptions"] = :all
+                 Rails.application.env_config["action_dispatch.show_detailed_exceptions"] = false }
+      teardown { Rails.application.env_config["action_dispatch.show_exceptions"],
+                 Rails.application.env_config["action_dispatch.show_detailed_exceptions"] = @rescued_was }
+    end
+
     # The curator's credentials, in one place. Integration tests want them as a
     # header hash (`curator_headers` below); the system test hands the same string
     # to Chrome over CDP. `ActionDispatch::SystemTestCase` descends from
