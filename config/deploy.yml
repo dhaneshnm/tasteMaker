@@ -1,0 +1,90 @@
+# Kamal 2 — one app, one VPS, SQLite on a persistent volume.
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# THREE VALUES YOU MUST SUPPLY before the first deploy. Every one is marked
+# CHANGEME below; nothing else in this file needs editing.
+#
+#   1. servers.web[0]      the VPS's IP or hostname
+#   2. proxy.host          the domain pointing at that IP (Let's Encrypt needs
+#                          it resolving BEFORE the first deploy, or cert
+#                          issuance fails and the app answers on plain HTTP)
+#   3. image / registry    your container-registry namespace and username
+#
+# Then: `kamal setup` once, `kamal deploy` thereafter.
+#
+# TWO THINGS THE FIRST DEPLOY DOES THAT NOTHING WARNS YOU ABOUT. Both were found
+# by running this image locally, not by reading:
+#
+#   1. First boot downloads all 110 museum images before the app answers. It
+#      took ~30s here on a warm connection; the health check may need longer on
+#      the server. Do not conclude the deploy hung.
+#   2. Seeds create paintings but ZERO daily picks, so the front door comes up
+#      on its empty state — "The first artwork arrives soon." Schedule day one
+#      at /admin/daily_picks before sending anyone the link.
+# ─────────────────────────────────────────────────────────────────────────────
+
+service: tastemaker
+
+# CHANGEME — namespace/repo only. `registry.server` below is prepended, so
+# including "ghcr.io/" here produces ghcr.io/ghcr.io/... and the push 404s.
+image: dhaneshnm/tastemaker
+
+servers:
+  web:
+    # CHANGEME — the VPS.
+    - 203.0.113.10
+
+proxy:
+  ssl: true
+  # CHANGEME — must already resolve to the server above.
+  host: tastemaker.example.com
+  # Thruster listens on 80 inside the container (Dockerfile EXPOSE 80). It also
+  # runs its own 64MB HTTP cache, which is why every public page in this app is
+  # deliberately `Cache-Control: public` and carries no Set-Cookie (story 0007).
+  app_port: 80
+
+registry:
+  server: ghcr.io
+  # CHANGEME — registry username.
+  username: dhaneshnm
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+env:
+  secret:
+    - RAILS_MASTER_KEY
+  clear:
+    # One clock for the whole product. `DailyPick.current` is only correct if
+    # `Date.current` means "today in New York" — the day has to roll over at the
+    # same instant for every reader, wherever they are.
+    TZ: America/New_York
+    SOLID_QUEUE_IN_PUMA: false
+
+# SQLite and Active Storage both write to /rails/storage. Kamal replaces the
+# container on every deploy, so without this volume each deploy would ship an
+# empty database and throw away the curator's queue and every reader's
+# collection. This is the one line in the file that loses data if it is wrong.
+volumes:
+  - "tastemaker_storage:/rails/storage"
+
+aliases:
+  console: app exec --interactive --reuse "bin/rails console"
+  shell: app exec --interactive --reuse "bash"
+  logs: app logs -f
+  dbc: app exec --interactive --reuse "bin/rails dbconsole"
+
+# The image is built here and pushed, so the builder needs to match the server's
+# architecture. Most VPS hosts are amd64; this Mac is arm64.
+builder:
+  arch: amd64
+
+asset_path: /rails/public/assets
+
+# Not configured, deliberately:
+#
+# - accessories (Postgres/Redis): SQLite + Solid gems are the stack (CLAUDE.md).
+# - a second server: BET.md's floor is 50 installs. One VPS is the right size,
+#   and SQLite on a local disk cannot be load-balanced anyway.
+# - Solid Queue: no job needs it yet. Publishing is date arithmetic
+#   (`DailyPick.published` is `scheduled_on <= Date.current`), so nothing runs on
+#   a schedule until push exists. CLAUDE.md says add it with the job, not before.

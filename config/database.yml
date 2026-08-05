@@ -28,4 +28,8 @@ test:
 # ensure the database is located in a persisted volume.
 production:
   <<: *default
-  # database: path/to/persistent/storage/production.sqlite3
+  # Inside the container this is /rails/storage, which config/deploy.yml mounts
+  # as a named Docker volume. SQLite needs a persistent disk and Kamal replaces
+  # the container on every deploy — without the volume, every deploy would ship
+  # a fresh empty database and take the curator's queue with it.
+  database: storage/production.sqlite3
