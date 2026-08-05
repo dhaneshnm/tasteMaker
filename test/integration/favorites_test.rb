@@ -134,7 +134,7 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     assert_select "button[aria-pressed=?]", "true"
     assert_select "button", text: "Kept · Remove"
 
-    delete favorite_path(@painting)
+    unkeep(@painting)
 
     assert_select "button[aria-pressed=?]", "false"
     assert_select "button", text: "Keep this"
@@ -150,10 +150,29 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     assert_select "button[aria-pressed=?]", "true"
   end
 
+  # destroy has two callers with two different needs, and answering both the same
+  # way is what broke the orphan row: Turbo Drive refuses a bare 200 for a
+  # page-level form, so the row stayed on screen while the row was gone from the
+  # table. The frame caller still wants the fragment.
+  test "unkeeping answers the frame with a fragment and the page with a redirect" do
+    keep(@painting)
+
+    delete favorite_path(@painting), headers: { "Turbo-Frame" => "keep_#{@painting.id}" }
+
+    assert_response :success
+    assert_select "turbo-frame#keep_#{@painting.id}"
+
+    keep(@painting)
+    delete favorite_path(@painting)
+
+    assert_redirected_to collection_path
+    assert_response :see_other
+  end
+
   test "letting go of something already gone is not an error" do
     get favorite_control_path(@painting)   # establish identity, keep nothing
 
-    delete favorite_path(@painting)
+    unkeep(@painting)
 
     assert_response :success
     assert_select "button[aria-pressed=?]", "false"
@@ -323,6 +342,14 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     def keep(painting)
       post favorite_path(painting)
       assert_response :success
+    end
+
+    # The day page's toggle lives inside the keep frame, so it sends the header
+    # Turbo sends. Tests that omit it are exercising the page-level caller, which
+    # gets a redirect instead — see the two-callers test above.
+    def unkeep(painting)
+      delete favorite_path(painting),
+        headers: { "Turbo-Frame" => "keep_#{painting.id}" }
     end
 
     def set_cookie_header

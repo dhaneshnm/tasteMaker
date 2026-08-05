@@ -652,6 +652,7 @@ asserted at integration level above (eng review, issue 6).
 | Lazy frame announces itself | SR user scrolls past the credit and hears an unprompted string | **yes** (system test) | yes — no live region (D3) | Nothing until they act |
 | Curator preview | Keep button on unpublished work, curator rows pollute usage data | **yes** (integration) | yes — `chrome:` gate (D2) | No control in preview |
 | Curator deletes a pick under a kept work | Row has no day to link to | yes | yes — unlinked row + `Remove` | The work, unlinked, removable |
+| Orphan `Remove` pressed | The row submits from OUTSIDE any frame, so Turbo Drive refuses a bare 200 ("Form responses must redirect to another location") — the row was deleted but stayed on screen | **yes** — system test + a two-callers integration test | yes — `destroy` branches on `turbo_frame_request?` | The row disappears and the count drops |
 | Cookie evicted by iOS storage pressure | Collection becomes unreachable | no — cannot be simulated | **none** | An empty collection. **This is the accepted device-local risk, not a handled case.** |
 | Collector token guessed | Another reader's collection read | no | 24 random base58 chars, signed, httponly | Not reachable |
 | Painting blob unreadable on a collection row | vips/CDN failure | inherited from `artwork_src` | yes — existing narrow logged rescue | CDN image, or a collapsed thumbnail |
@@ -885,6 +886,15 @@ in this branch; a prerequisite for deploying it.
 - 2026-08-04: `_row.html.erb` split again into `_row` + `_row_body`. The linked and unlinked
   shapes share their whole interior, and one `if` around 12 lines of duplicated markup was
   the alternative.
+- 2026-08-05: **the orphan row's `Remove` did nothing visible.** `destroy` answered every
+  caller with a turbo-frame fragment, but that button is the one control in the product
+  submitting from *outside* a frame — a row cannot nest a form inside its own `<a>`. Turbo
+  Drive refuses a bare 200 for a page-level form, so the row was deleted server-side and
+  stayed on screen, the count never moved, and a second tap deleted nothing and errored
+  again. `destroy` now branches on `turbo_frame_request?`: fragment for the frame, `303` to
+  `/collection` for the page. Found by `/code-review` in a real browser; every existing test
+  passed. The plan's own failure-modes table listed this row as "tested" — it was, at
+  integration level, which is exactly the level that cannot see it.
 
 ---
 

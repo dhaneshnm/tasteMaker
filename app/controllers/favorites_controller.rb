@@ -60,7 +60,23 @@ class FavoritesController < ApplicationController
     # delete_all, not destroy_all: no callbacks and no dependents, so loading the
     # row to throw it away is a wasted query.
     Favorite.collected_by(collector_digest).where(painting: @painting).delete_all
-    render_control(kept: false, autofocus: true)
+
+    # Two callers, two right answers.
+    #
+    # The day page's toggle submits from inside the keep frame and wants the
+    # fragment back. The collection's orphan Remove is a page-level form — a row
+    # cannot nest a form inside its own <a>, so that button sits outside any
+    # frame — and Turbo Drive refuses a plain 200 for those ("Form responses must
+    # redirect to another location"). Answering both with a fragment left the row
+    # on screen and the count unchanged while the row was already gone from the
+    # table, and a second tap deleted nothing and errored again.
+    #
+    # It is the only control an orphaned work has, so it gets the redirect.
+    if turbo_frame_request?
+      render_control(kept: false, autofocus: true)
+    else
+      redirect_to collection_path, status: :see_other
+    end
   end
 
   private

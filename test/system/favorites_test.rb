@@ -95,6 +95,30 @@ class FavoritesTest < ApplicationSystemTestCase
       links.first.native.size.width), :>=, 16, "the two ways out ran together"
   end
 
+  # The orphan row's Remove is the ONLY control a kept work has once the curator
+  # has removed its day — the row is unlinked, so there is no page to open and
+  # unkeep it from. It is also the one control in the product that submits from
+  # OUTSIDE a turbo-frame, which is exactly why it needs a browser test: an
+  # integration DELETE passes while the real thing renders nothing.
+  test "letting go of a work whose day is gone updates the page" do
+    keep_todays_artwork
+    daily_picks(:today).destroy!
+
+    visit collection_path
+    assert_selector ".days__link--gone"
+    assert_selector ".masthead__aside", text: /1 work/i
+
+    click_on "Remove"
+
+    assert_no_selector ".days__day"
+    assert_selector ".masthead__aside", text: /0 works/i
+    assert_text "The works you keep will gather here."
+
+    # The stranger's row on the very same painting survives — the delete is
+    # scoped to the reader who pressed the button, not to the work.
+    assert_equal [ favorites(:strangers_sunflowers) ], Favorite.all.to_a
+  end
+
   # The parity guard: the day page still does everything it did before the frame.
   test "the artwork still opens full screen with the control on the page" do
     visit root_path
