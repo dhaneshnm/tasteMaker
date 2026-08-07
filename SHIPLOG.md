@@ -12,10 +12,30 @@ shipped code and zero initiated user contact is builder's gravity — it gets na
 | 2026-08-04 | Story 0006 "favorites" built — **baseline item 4**, the last purely-web baseline item. Design review 6/10 → 9/10 (9 decisions), eng review 8 findings, QA 2 findings / 1 fixed. Code only, **not published, not deployed, zero users, zero installs**: an input metric under R7. | 9b22661, d2e9f7c, ae229ef |
 | 2026-08-05 | Story 0004 "the page that isn't there" built — the 404 renders on linen and keeps its status code. Code only. | eeb9946 |
 | 2026-08-05 | Kamal + Thruster deploy config written and rehearsed against a real production container. **Still not deployed** — needs a VPS. | 244254f |
+| 2026-08-07 | Story 0009 "the typefaces come from us" built — Fraunces and Newsreader self-hosted, two third-party hosts off the critical path. Code only. | 5a6929c |
+| 2026-08-07 | Story 0008 "the shell that gets it onto a phone" built — **baseline item 2's precondition**, a Hotwire Native iOS target that builds and runs on an iPhone 17 simulator against `localhost:3000`. Code only, **not on a device, not on TestFlight, not submitted, zero installs**: an input metric under R7. | 39e68c7, 6861b81 |
 
 **Log gap, named rather than backfilled:** stories 0002 (feed zoom, `1ddc20b`), 0003 (past
 days, `62bd3db`) and 0005 (museum note fallback, `22aec4c`) shipped without a line here. The
 log was not current when this session started.
+
+**Builder's gravity, named a third time (R7 / session gate 5), 2026-08-07.** Apple Developer
+enrollment is done, which unblocks App Store Connect, TestFlight and an APNs key — and the
+shell now exists to put into them. **None of that has happened.** There is still no VPS
+(`config/deploy.yml` carries five `CHANGEME` values), so nothing is deployed and the Release
+build points at a placeholder host. Baseline item 2 — daily push, the habit driver and the
+only reason the shell was urgent — has no spec, no number, and no code; it is story 0010 and
+it is not started.
+
+Every threshold in `BET.md` is still zero: not live, 0 of 4 posts, 0 of 3 keywords, **0 of 5
+user conversations**, 0 of 50 installs. The App Store deadline is Aug 14 and the submission
+target was ~Aug 11, which is four days out. Nobody outside this repo has opened this app.
+
+Two things that are not on any list and gate the bet directly: the App Store Connect listing
+— name, subtitle, keyword field, screenshots, privacy labels — has no spec at all, and it
+*is* the ASO channel `BET.md` bets everything on. And session gate 6 is unmet: no error
+tracking, no analytics, no backup or logged restore test for a SQLite file living on a
+single volume.
 
 **Builder's gravity, named again (R7 / session gate 5), 2026-08-05.** The Proven baseline is
 now 4/5 and the deploy config is rehearsed, and **every one of BET.md's five thresholds is
