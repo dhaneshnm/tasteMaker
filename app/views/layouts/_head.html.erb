@@ -26,9 +26,9 @@
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon.png">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap" rel="stylesheet">
-
+<%# No font host here, and none is coming back — see specs/0009-self-hosted-fonts/.
+    Fraunces and Newsreader are served from this app's own asset pipeline, declared
+    in application.css. `test/integration/self_hosted_fonts_test.rb` fails if a
+    third-party font host reappears in this file. %>
 <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
 <%= javascript_importmap_tags %>
