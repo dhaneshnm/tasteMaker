@@ -160,6 +160,7 @@
   --warn: #a33f28;
   --hairline: rgba(125, 95, 24, 0.3);
   --frame-edge: rgba(42, 36, 28, 0.18);
+  --mount-bg: #100e0b;  /* the one dark surface — see DESIGN.md, accepted exceptions */
   --serif-display: "Fraunces", "Iowan Old Style", Georgia, serif;
   --serif-body: "Newsreader", Georgia, serif;
   --measure: 42.5rem;
@@ -236,7 +237,14 @@ a:hover { color: var(--gold-deep); }
   align-items: baseline;
   column-gap: 1rem;
   row-gap: 0.15rem;
-  padding: 0.9rem clamp(1.15rem, 5vw, 2rem) 0.75rem;
+  /* Story 0008. Under `viewport-fit=cover` the page owns the unsafe strips, so
+     the brand would otherwise sit under the notch and, in landscape, under the
+     rounded corner. The horizontal insets are 0 in portrait. */
+  padding:
+    calc(0.9rem + env(safe-area-inset-top))
+    calc(clamp(1.15rem, 5vw, 2rem) + env(safe-area-inset-right))
+    0.75rem
+    calc(clamp(1.15rem, 5vw, 2rem) + env(safe-area-inset-left));
   border-bottom: 1px solid var(--hairline);
 }
 
@@ -278,7 +286,14 @@ a:hover { color: var(--gold-deep); }
 .page {
   max-width: var(--measure);
   margin: 0 auto;
-  padding: clamp(1rem, 3.5vw, 1.9rem) clamp(1.15rem, 5vw, 1.5rem) 3.5rem;
+  /* The bottom inset clears the home indicator. `.coda` is a footer inside this
+     element on every screen that has one, so it inherits the clearance rather
+     than adding its own — padding on both would double-count it. */
+  padding:
+    clamp(1rem, 3.5vw, 1.9rem)
+    calc(clamp(1.15rem, 5vw, 1.5rem) + env(safe-area-inset-right))
+    calc(3.5rem + env(safe-area-inset-bottom))
+    calc(clamp(1.15rem, 5vw, 1.5rem) + env(safe-area-inset-left));
 }
 
 .page--empty {
@@ -733,7 +748,7 @@ html.zoom-open body { overflow: hidden; }
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #100e0b;
+  background: var(--mount-bg);
   cursor: zoom-out;
   animation: zoom-fade 0.18s ease-out;
 }
@@ -748,8 +763,11 @@ html.zoom-open body { overflow: hidden; }
 
 .zoom__close {
   position: fixed;
-  top: max(0.9rem, env(safe-area-inset-top));
-  right: 0.9rem;
+  /* `calc`, not `max`. Under `viewport-fit=cover` the inset is the height of the
+     unsafe strip, so `max()` lands the button flush against the status bar with
+     no breathing room; the gap has to be added to the inset, not compared with it. */
+  top: calc(0.9rem + env(safe-area-inset-top));
+  right: calc(0.9rem + env(safe-area-inset-right));
   min-width: 44px;
   min-height: 44px;
   padding: 0 1rem;

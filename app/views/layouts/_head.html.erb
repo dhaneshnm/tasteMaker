@@ -12,7 +12,15 @@
     with `data: { turbo_method: :delete }` and Turbo reads it from the meta tag.
     Reader-facing forms do not need it: `form_with` embeds its own hidden token. %>
 <title><%= content_for(:title) || "Tastemaker — One artwork a day" %></title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<%# `viewport-fit=cover` — story 0008. Without it WebKit insets the layout
+    viewport out of the unsafe strips, so `.zoom`'s `position: fixed; inset: 0`
+    stops below the notch and above the home indicator and the surround shows
+    through as linen bands. DESIGN.md's single accepted exception says that at
+    full screen the picture is the room; bands are the wall.
+
+    Every `env(safe-area-inset-*)` in application.css resolved to 0 before this
+    line existed — including the one `.zoom__close` was already written against. %>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="<%= content_for(:description) || "One public-domain artwork a day, from the collection of the Minneapolis Institute of Art, with a short hand-written note on why it matters." %>">
 <meta name="theme-color" content="#f4efe6">
 <meta name="apple-mobile-web-app-capable" content="yes">

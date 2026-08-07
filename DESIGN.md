@@ -37,6 +37,7 @@ Colour, all contrast ratios measured on the linen paper:
 | `--warn` | `#a33f28` | Form errors, off-target hints. Nothing else. |
 | `--hairline` | `rgba(125, 95, 24, 0.3)` | Rules under the masthead and table headers. |
 | `--frame-edge` | `rgba(42, 36, 28, 0.18)` | The 1px edge around an artwork. |
+| `--mount-bg` | `#100e0b` | The full-screen surround, and nothing else. The accepted exception below. |
 
 Everything above AA at the size it is used. No colour outside this table.
 
@@ -138,10 +139,20 @@ curator's desk.
 
 ## Accepted exceptions
 
-**The full-screen view is dark** (`#100e0b`). At full screen the picture is the
-room, and a linen surround bounces light into it. Mount board, not wall.
+**The full-screen view is dark** (`--mount-bg`, `#100e0b`). At full screen the
+picture is the room, and a linen surround bounces light into it. Mount board,
+not wall.
 
 That is the only one.
+
+It used to be a hardcoded hex, which rule 1 does not allow and which story 0008
+could not mirror into the iOS asset catalogue. It is a token now, and the native
+shell reads the same value from `Assets.xcassets/MountBg.colorset`.
+
+The exception is also why `viewport-fit=cover` is set. Without it WebKit keeps
+the layout viewport out of the notch and home-indicator strips, so the surround
+stops short of both and the wall shows through in linen — the exact thing this
+paragraph exists to prevent.
 
 ---
 
