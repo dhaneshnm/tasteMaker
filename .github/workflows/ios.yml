@@ -1,0 +1,58 @@
+name: iOS
+
+# Story 0008's forcing function (R1).
+#
+# `ci.yml` runs entirely on ubuntu, which cannot compile Swift. Without this
+# workflow the iOS shell would be an artifact with no enforcement — and the
+# `.pbxproj` is hand-written, so "does Xcode still accept this file" is a real
+# question that only a build can answer.
+#
+# **Cost, named here rather than discovered on an invoice:** macOS runners bill
+# at 10x minutes on private repos. That is why this is its own workflow with
+# path filters instead of a job in `ci.yml` — it stays off the commits that
+# only touch Rails, which is most of them. `workflow_dispatch` runs it on
+# demand when you want it anyway.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "ios/**"
+      - "script/ios-build"
+      - ".github/workflows/ios.yml"
+  push:
+    branches: [ main ]
+    paths:
+      - "ios/**"
+      - "script/ios-build"
+      - ".github/workflows/ios.yml"
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: xcodebuild -version && swift --version
+
+      # Pinned by the committed Package.resolved. Resolving as its own step
+      # means a dependency failure reads as a dependency failure, rather than
+      # as a compile error 200 lines into a build log.
+      - name: Resolve Swift packages
+        run: xcodebuild -resolvePackageDependencies -project ios/Tastemaker.xcodeproj
+
+      # A generic destination rather than a named device: which simulators a
+      # runner image ships changes without notice, and this job exists to prove
+      # the project compiles, not to prove GitHub installed an iPhone 17.
+      - name: Build the shell
+        run: script/ios-build "generic/platform=iOS Simulator"
+
+      - name: Upload build log
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ios-build-log
+          path: ${{ runner.temp }}/ios-build.log
+          if-no-files-found: ignore

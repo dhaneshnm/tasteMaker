@@ -40,3 +40,9 @@
 *.swp
 .idea/
 .vscode/
+
+# Xcode
+ios/**/xcuserdata/
+ios/**/*.xcuserstate
+ios/build/
+DerivedData/

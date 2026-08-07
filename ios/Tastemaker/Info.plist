@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Tastemaker</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+
+	<!-- Where the shell points. Set per-configuration in Config/*.xcconfig so a
+	     start URL is never hardcoded in Swift. Endpoint.swift reads this key and
+	     traps loudly if it is missing or unparseable. -->
+	<key>TastemakerURL</key>
+	<string>$(TASTEMAKER_URL)</string>
+
+	<!-- Local networking only. This permits http://localhost:3000 during
+	     development without opening arbitrary cleartext to the internet, so it
+	     is safe to ship as-is. -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+
+	<!-- The plain launch-screen dictionary: a background colour and a centred
+	     image. No storyboard, and no fonts needed at launch — the wordmark is
+	     shipped as an asset. The first frame of the product is linen, not the
+	     white default flash, because the calm starts before the app opens. -->
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>Linen</string>
+		<key>UIImageName</key>
+		<string>LaunchWordmark</string>
+		<key>UIImageRespectsSafeAreaInsets</key>
+		<true/>
+	</dict>
+
+	<!-- The error view is the one screen the web cannot draw, because by
+	     definition there is no network when it appears. These are static
+	     instances cut from the same latin subsets the website uses, at the two
+	     sizes the empty state calls for — iOS cannot load woff2, and shipping
+	     the full variable families would be ~1.5MB for two lines of text.
+	     SIL OFL 1.1; the licence text ships beside them in Fonts/. -->
+	<key>UIAppFonts</key>
+	<array>
+		<string>Fraunces-Italic.ttf</string>
+		<string>Newsreader-Regular.ttf</string>
+	</array>
+
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneConfigurationName</key>
+					<string>Default Configuration</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+
+	<!-- Landscape is supported, which is why the stylesheet carries left/right
+	     safe-area insets. Upside-down is not: nothing in this product wants it. -->
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+
+	<!-- The shell forces .light in code (decisions/0006). This is the belt to
+	     that braces: it stops the system from flipping native surfaces to black
+	     before any of our code runs. -->
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
+
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>armv7</string>
+	</array>
+</dict>
+</plist>

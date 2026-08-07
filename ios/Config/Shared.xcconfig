@@ -1,0 +1,36 @@
+// Tastemaker — settings shared by every configuration.
+//
+// Everything that is not environment-specific lives here. The one thing that
+// is — where the shell points — lives in Debug.xcconfig and Release.xcconfig,
+// because a start URL hardcoded in Swift is a start URL that ships to the App
+// Store pointing at a laptop.
+
+PRODUCT_NAME = Tastemaker
+PRODUCT_BUNDLE_IDENTIFIER = com.dhaneshnm.tastemaker
+MARKETING_VERSION = 1.0
+CURRENT_PROJECT_VERSION = 1
+
+// iOS 17 still covers iPhone XS and later — 2018 hardware. Persona 2 (Jordan)
+// is on an old cracked-screen iPhone, so the floor is deliberate, not default.
+// The library floor is iOS 14, so this is our choice rather than a constraint.
+IPHONEOS_DEPLOYMENT_TARGET = 17.0
+TARGETED_DEVICE_FAMILY = 1
+SUPPORTED_PLATFORMS = iphoneos iphonesimulator
+SDKROOT = iphoneos
+
+// Swift 5 language mode, not 6. Hotwire Native 1.3.0 is not annotated for
+// strict concurrency, and adopting Swift 6 mode here would mean fighting
+// actor-isolation diagnostics in a story whose subject is a thin shell. This is
+// a deliberate deferral, not an oversight.
+SWIFT_VERSION = 5.0
+
+INFOPLIST_FILE = Tastemaker/Info.plist
+GENERATE_INFOPLIST_FILE = NO
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
+ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = Gold
+
+CODE_SIGN_STYLE = Automatic
+ENABLE_USER_SCRIPT_SANDBOXING = YES
+SWIFT_EMIT_LOC_STRINGS = YES
+CLANG_ENABLE_MODULES = YES
+ALWAYS_SEARCH_USER_PATHS = NO

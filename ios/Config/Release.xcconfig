@@ -1,0 +1,10 @@
+#include "Shared.xcconfig"
+
+// CHANGEME — the VPS, once one exists. `config/deploy.yml` carries the matching
+// placeholders. The shell will build and run against this value without
+// complaint, so the thing that catches it is App Review opening a dead host.
+TASTEMAKER_URL = https:/$()/CHANGEME.example.com
+
+SWIFT_OPTIMIZATION_LEVEL = -O
+SWIFT_COMPILATION_MODE = wholemodule
+VALIDATE_PRODUCT = YES

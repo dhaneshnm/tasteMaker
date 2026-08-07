@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Builds the Hotwire Native shell for an iPhone simulator and fails loudly.
+#
+# This exists because `.github/workflows/ci.yml` runs on ubuntu-latest and
+# cannot compile Swift. An iOS target with no build check is an artifact
+# without its enforcement (R1) — and the `.pbxproj` in this repo is
+# hand-written, so "does Xcode still accept it" is a real question with a real
+# answer only a build can give.
+#
+# Usage:
+#   script/ios-build                                  # iPhone 17 simulator
+#   script/ios-build "iPhone 17 Pro"                  # a named simulator
+#   script/ios-build "generic/platform=iOS Simulator" # any, for CI
+#
+# CI passes the generic destination: which simulators a runner image ships
+# changes without notice, and the job exists to prove the project compiles.
+
+set -euo pipefail
+
+TARGET="${1:-iPhone 17}"
+PROJECT="ios/Tastemaker.xcodeproj"
+SCHEME="Tastemaker"
+
+# Accept either a device name or a full destination specifier.
+case "$TARGET" in
+  *platform=*) DESTINATION="$TARGET" ;;
+  *)           DESTINATION="platform=iOS Simulator,name=$TARGET" ;;
+esac
+
+cd "$(dirname "$0")/.."
+
+if ! command -v xcodebuild >/dev/null 2>&1; then
+  echo "xcodebuild not found — this script needs Xcode, not just the command line tools." >&2
+  exit 1
+fi
+
+echo "==> Building $SCHEME for $DESTINATION"
+
+LOG="${TMPDIR:-/tmp}/ios-build.log"
+
+# Run unpiped and capture the status directly. Piping xcodebuild into `grep`
+# and reading `$?` is how a broken build passes CI while looking green — the
+# status you get back belongs to grep, not to the compiler.
+#
+# The signing flags keep this runnable on a machine with no provisioning
+# profile, which is the whole point of a simulator build.
+set +e
+xcodebuild build \
+  -project "$PROJECT" \
+  -scheme "$SCHEME" \
+  -configuration Debug \
+  -destination "$DESTINATION" \
+  -skipMacroValidation \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO \
+  > "$LOG" 2>&1
+status=$?
+set -e
+
+if [ "$status" -ne 0 ]; then
+  echo "==> BUILD FAILED" >&2
+  grep -E "error:|warning:|BUILD" "$LOG" | tail -40 >&2 || true
+  echo "==> full log: $LOG" >&2
+  exit "$status"
+fi
+
+grep -E "warning:" "$LOG" | sort -u | head -20 || true
+echo "==> BUILD SUCCEEDED"

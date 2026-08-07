@@ -1,0 +1,24 @@
+{
+  "settings": {},
+  "rules": [
+    {
+      "patterns": ["^/$"],
+      "properties": {
+        "presentation": "clear_all",
+        "pull_to_refresh_enabled": true
+      }
+    },
+    {
+      "patterns": ["^/feed$"],
+      "properties": {
+        "pull_to_refresh_enabled": false
+      }
+    },
+    {
+      "patterns": ["^/admin"],
+      "properties": {
+        "presentation": "none"
+      }
+    }
+  ]
+}

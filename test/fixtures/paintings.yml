@@ -1,7 +1,13 @@
-# A tiny inline PNG stands in for the museum CDN: real pixels for system tests,
-# no network for anyone.
+# An inline 800x1000 PNG stands in for the museum CDN: real geometry for system
+# tests, no network for anyone.
+#
+# It used to be a 1x1 pixel, which laid out at 1x1 because `.plate__img` is
+# `width: auto; height: auto` — the width/height attributes only set an aspect
+# ratio, they do not override the intrinsic size. Every fold-budget assertion in
+# the suite was therefore measuring a layout with no artwork in it. See
+# test/system/dynamic_type_test.rb.
 DEFAULTS: &DEFAULTS
-  image_url_800: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+  image_url_800: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAPoAQMAAAAcBQjyAAAABlBMVEWKel48NCrPHChbAAAA3klEQVR42u3NAQkAQAgEsPP7d9YUPghbgSUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABwU/WH5EUikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUhWDX/IA/dRm5FUAAAAAElFTkSuQmCC"
   image_width: 800
   image_height: 1000
   department: Paintings
