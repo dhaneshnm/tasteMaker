@@ -15,6 +15,8 @@ shipped code and zero initiated user contact is builder's gravity — it gets na
 | 2026-08-07 | Story 0009 "the typefaces come from us" built — Fraunces and Newsreader self-hosted, two third-party hosts off the critical path. Code only. | 5a6929c |
 | 2026-08-07 | Story 0008 "the shell that gets it onto a phone" built — **baseline item 2's precondition**, a Hotwire Native iOS target that builds and runs on an iPhone 17 simulator against `localhost:3000`. Code only, **not on a device, not on TestFlight, not submitted, zero installs**: an input metric under R7. | 39e68c7, 6861b81 |
 
+| 2026-08-10 | Bug fix, not a story: shipping story 0009's CSS moved the asset digest but not the ETag, so any browser holding the previous HTML revalidated into a 304 and kept linking a stylesheet URL that no longer resolved — the page rendered unstyled and did not heal on reload. Found by hitting it locally, not by a test. Code only. | ae742dc |
+
 **Log gap, named rather than backfilled:** stories 0002 (feed zoom, `1ddc20b`), 0003 (past
 days, `62bd3db`) and 0005 (museum note fallback, `22aec4c`) shipped without a line here. The
 log was not current when this session started.
