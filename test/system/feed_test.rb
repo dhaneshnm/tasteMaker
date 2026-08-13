@@ -16,7 +16,7 @@ class FeedTest < ApplicationSystemTestCase
   # Enough works to push the masthead well off the top of the screen.
   setup do
     (PaintingsController::PER_PAGE * 2).times do |i|
-      Painting.create!(mia_id: 920_000 + i, title: "Filler #{i}",
+      Painting.create!(source: "mia", source_id: 920_000 + i, title: "Filler #{i}",
         artist: "A. Painter", image_url_800: "https://example.test/#{i}.jpg")
     end
   end

@@ -23,7 +23,7 @@ class FeedZoomTest < ActionDispatch::IntegrationTest
   test "a work with no picture is not tappable and rests instead" do
     get feed_path
 
-    assert_select "#painting_#{paintings(:imageless).mia_id}" do
+    assert_select "#painting_#{paintings(:imageless).dom_key}" do
       assert_select ".plate__zoom", count: 0
       assert_select ".plate__resting[hidden]", count: 0
       assert_select ".plate__resting", text: /resting/

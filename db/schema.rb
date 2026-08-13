@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_04_205713) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_13_205010) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -71,16 +71,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_04_205713) do
     t.string "dimension"
     t.integer "feed_order"
     t.integer "image_height"
+    t.string "image_license"
     t.string "image_url_800"
     t.string "image_url_full"
     t.integer "image_width"
     t.string "life_date"
     t.string "medium"
-    t.integer "mia_id"
+    t.string "source", null: false
+    t.integer "source_id"
     t.string "title"
     t.datetime "updated_at", null: false
     t.index ["feed_order"], name: "index_paintings_on_feed_order"
-    t.index ["mia_id"], name: "index_paintings_on_mia_id", unique: true
+    t.index ["source", "source_id"], name: "index_paintings_on_source_and_source_id", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

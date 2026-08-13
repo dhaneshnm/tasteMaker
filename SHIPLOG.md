@@ -18,6 +18,8 @@ shipped code and zero initiated user contact is builder's gravity — it gets na
 | 2026-08-10 | Bug fix, not a story: shipping story 0009's CSS moved the asset digest but not the ETag, so any browser holding the previous HTML revalidated into a 304 and kept linking a stylesheet URL that no longer resolved — the page rendered unstyled and did not heal on reload. Found by hitting it locally, not by a test. Code only. | ae742dc |
 | 2026-08-13 | Stories 0011 "rename to Tondo" and 0012 "getting around", in one commit — the tree never had a 0011-only state, so splitting them would have mislabelled one story's work as the other's. 0011: the product is Tondo, a rose-window mark, one masthead partial where six copies used to be. 0012: a compass on every screen and a sticky rail on `/feed`, which was a dead end — its only exit was a wordmark that had scrolled off the top. Design review 6/10 → 9/10 (4 decisions), eng review 12 findings, Codex outside voice 9 findings (4 novel, all confirmed). Code only, **not published, not deployed, zero users, zero installs**: an input metric under R7. | bea621c |
 
+| 2026-08-13 | Story 0013 "a deeper pool" built — the pool goes from **110 works in one museum to 2,000 across four** (Met, Art Institute of Chicago, Cleveland, Minneapolis). Selection is a quota table in code, not a hand-pick: per-artist ceiling 5, no museum over 50%, no region over 25%, 53% outside Europe and North America, 18% dated 1900+, 83% carrying readable museum text, every plate \u2265 1600px. `db/seeds/pool_report.md` is the receipt; `test/lib/pool_quota_test.rb` fails the build if a reseed regresses any bar. 0.94 GB on disk against CX22's 40 GB. Code only, **not published, not deployed, zero users, zero installs**: an input metric under R7. | 5d1ef94 |
+
 **Builder's gravity, named a fifth time (R7 / session gate 5), 2026-08-13.** Two more
 stories built today and **still zero initiated user conversations** — the count `BET.md`
 needs five of, and has none of, with eighteen days to the kill review. The App Store
@@ -68,3 +70,20 @@ initiated user conversations** all week. BET.md needs 5 two-way exchanges by Aug
 0. Baseline items 1, 3 and 4 are done; item 2 (push) still needs an iOS shell that does not
 exist, the App Store deadline is Aug 14, and nothing is deployed. Every line above is an
 input metric. None of them is progress.
+
+**What story 0013 actually cost, and what it did not buy (R7), 2026-08-13.** The pool was
+never what was stopping this bet: 110 works is 3.6 months of dailies and the kill review is
+in **eighteen days**. This moved none of BET.md's five numbers. The scoreboard is unchanged
+at 0 live / 0 posts / 0 keywords / 0 conversations / 0 installs, the App Store live-by date
+is **tomorrow**, and `config/deploy.yml` still carries two `CHANGEME` values.
+
+What it did produce, beyond the count: five defects that only existed because something
+checked. The quota table failed its own first run five works short and wrote nothing. The
+first report that passed every bar was 46% South Asian — the range floor met by draining
+one collection, which answers persona 3 with a different monoculture. 156 works counted as
+"range" turned out to be Dutch and Flemish. 983 Minneapolis image URLs were well-formed and
+every one of them 403'd. And pointing the existing fold-budget test at the new pool's worst
+case put the day's first written line 193px below the fold on a 297-character title.
+
+None of that is progress either. It is the difference between shipping 2,000 paintings and
+shipping 2,000 rows.

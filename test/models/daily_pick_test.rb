@@ -94,7 +94,7 @@ class DailyPickTest < ActiveSupport::TestCase
   end
 
   test "a day with neither a note nor museum text is not a day" do
-    wordless = Painting.create!(mia_id: 930_001, title: "No Words At All",
+    wordless = Painting.create!(source: "mia", source_id: 930_001, title: "No Words At All",
       image_url_800: paintings(:woodcut).image_url_800, image_width: 800, image_height: 1000)
     pick = DailyPick.new(painting: wordless, scheduled_on: 1.week.from_now.to_date)
 

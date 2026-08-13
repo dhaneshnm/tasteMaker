@@ -12,10 +12,16 @@
     <footer class="coda">
       <div class="ornament" aria-hidden="true">✦</div>
       <p class="coda__line">You have walked the whole gallery.</p>
+      <%# Names the museums actually represented in the pool, not a fixed list:
+          story 0013 draws from four collections and the quota table decides how
+          many of each, so a hard-coded sentence would go stale on the next
+          reseed. Ordered by weight, so the largest contributor reads first. %>
       <p class="coda__note">
-        Every work here is in the public domain, from the collection of the
-        <a href="https://collections.artsmia.org" target="_blank" rel="noopener">Minneapolis Institute of Art</a>.
-        Metadata CC0 via <a href="https://github.com/artsmia/collection" target="_blank" rel="noopener">artsmia/collection</a>.
+        Every work here is in the public domain, from the collections of
+        <%= safe_join(Painting.represented_sources.map { |museum|
+              link_to(museum[:name], museum[:url], target: "_blank", rel: "noopener")
+            }, ", ") %>.
+        Metadata CC0.
       </p>
       <a class="caps-link" href="#top" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">Back to the beginning ↑</a>
     </footer>

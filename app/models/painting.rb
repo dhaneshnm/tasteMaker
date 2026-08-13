@@ -1,16 +1,41 @@
 class Painting < ApplicationRecord
   has_one_attached :image
 
-  validates :mia_id, presence: true, uniqueness: true
+  # The four collections the pool is drawn from (story 0013). Names carry their
+  # own article because they are read mid-sentence — "From the Cleveland Museum
+  # of Art" — and two of the four want one while two do not.
+  SOURCES = {
+    "mia" => { name: "the Minneapolis Institute of Art", url: "https://collections.artsmia.org" },
+    "met" => { name: "The Metropolitan Museum of Art",   url: "https://www.metmuseum.org/art/collection" },
+    "aic" => { name: "the Art Institute of Chicago",     url: "https://www.artic.edu/collection" },
+    "cma" => { name: "the Cleveland Museum of Art",      url: "https://www.clevelandart.org/art/collection" }
+  }.freeze
+
+  # Museum object ids collide across museums, so identity is the pair.
+  validates :source, presence: true, inclusion: { in: SOURCES.keys }
+  validates :source_id, presence: true, uniqueness: { scope: :source }
   validates :title, presence: true
 
   scope :feed_ordered, -> { order(:feed_order, :id) }
+
+  # The museums actually in the pool, heaviest first. The gallery's closing line
+  # credits these rather than a hard-coded list, so it stays true after a reseed
+  # changes the mix (story 0013).
+  def self.represented_sources
+    group(:source).order(count_all: :desc).count.keys.filter_map { |key| SOURCES[key] }
+  end
 
   # Serve the locally stored copy when present; fall back to the museum CDN
   # so the feed still works before `db:seed` finishes downloading images.
   def display_image?
     image.attached? || image_url_800.present?
   end
+
+  def source_name = SOURCES.dig(source, :name)
+  def source_url  = SOURCES.dig(source, :url)
+
+  # Stable across reseeds, unique across museums — the feed anchors on it.
+  def dom_key = "#{source}_#{source_id}"
 
   def artist_display
     artist.presence || culture.presence || "Unknown artist"

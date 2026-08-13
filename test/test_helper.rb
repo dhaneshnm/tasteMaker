@@ -84,7 +84,8 @@ module ActiveSupport
     # painting rather than competing for the fixtures.
     def publish_day(date, blurb: "A note long enough to read the way a real one does.")
       painting = Painting.create!(
-        mia_id: (Painting.maximum(:mia_id).to_i + 1),
+        source: "mia",
+        source_id: (Painting.maximum(:source_id).to_i + 1),
         title: "A Day in #{date.strftime("%B")}",
         artist: "Unknown Hand",
         image_url_800: paintings(:woodcut).image_url_800,

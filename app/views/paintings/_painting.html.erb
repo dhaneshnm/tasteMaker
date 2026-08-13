@@ -1,4 +1,4 @@
-<article class="post" data-controller="reveal" id="painting_<%= painting.mia_id %>">
+<article class="post" data-controller="reveal" id="painting_<%= painting.dom_key %>">
   <%= render "shared/plate", painting: painting, eager: painting_counter < 2,
         describedby: nil, resting: "This work is resting." %>
 

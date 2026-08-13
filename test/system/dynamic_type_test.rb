@@ -72,11 +72,17 @@ class DynamicTypeTest < ApplicationSystemTestCase
     [
       [ "museum copy, no hand-written note", paintings(:woodcut), nil ],
       [ "a long title over a two-line artist line", paintings(:sunflowers),
-        # The longest title in the shipping dataset, verbatim — 104 characters.
-        # `db/seeds/mia_paintings.json` holds 18 over 60, so this is the shape of
-        # page the front door really has to survive, not a contrived one.
-        "Pope Benedict XIV Presenting the Encyclical Ex Omnibus to the " \
-        "Comte de Stainville, Later Duc de Choiseul" ]
+        # The longest title in the shipping dataset, verbatim — exactly 100
+        # characters, and 274 of the 2,000 run over 60.
+        #
+        # Story 0013 grew the pool from 110 Minneapolis works to 2,000 across
+        # four museums and found this bar by breaking it: an untrimmed pool put
+        # a 297-character manuscript catalogue entry on the front door and
+        # pushed this very assertion 193px below the fold. `Pool::MAX_TITLE`
+        # exists because of that, and it is set to the length measured here —
+        # at 95 characters the note clears by a full line, at 105 by 2px.
+        "Khurshid reunited with her husband Utarid, from a Tuti-nama " \
+        "(Tales of a Parrot): Thirty-second Night" ]
     ].each do |what, painting, retitle|
       DailyPick.destroy_all
       painting.update!(title: retitle) if retitle

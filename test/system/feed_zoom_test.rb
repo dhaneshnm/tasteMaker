@@ -37,11 +37,11 @@ class FeedZoomTest < ApplicationSystemTestCase
   # actions bind themselves; this is the test that says so.
   test "works that arrive with infinite scroll are tappable too" do
     (PaintingsController::PER_PAGE + 1).times do |i|
-      Painting.create!(mia_id: 910_000 + i, title: "Filler #{i}",
+      Painting.create!(source: "mia", source_id: 910_000 + i, title: "Filler #{i}",
         image_url_800: paintings(:sunflowers).image_url_800,
         image_width: 800, image_height: 1000, feed_order: 100 + i)
     end
-    arrival = Painting.find_by!(mia_id: 910_010)
+    arrival = Painting.find_by!(source_id: 910_010)
 
     visit feed_path
     page.execute_script("window.scrollTo(0, document.body.scrollHeight)")
@@ -70,7 +70,7 @@ class FeedZoomTest < ApplicationSystemTestCase
 
   private
     def work(painting)
-      "#painting_#{painting.mia_id}"
+      "#painting_#{painting.dom_key}"
     end
 
     # Posts below the fold sit at opacity 0 until they are scrolled to, so

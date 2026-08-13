@@ -49,17 +49,33 @@ SKIP_IMAGES=1 bin/rails db:seed  # metadata only; feed falls back to the museum 
 ```
 
 Seeding is idempotent — re-running only fills in whatever is missing.
-Image resizing uses macOS `sips`, so no imagemagick/libvips install is needed
-(on Linux, seed with `FAST=1` or add a resize tool).
+Image resizing prefers libvips (already in the Dockerfile) and falls back to
+macOS `sips`, so no local install is needed on either. With neither available
+the seed refuses to run rather than filling the disk with full-size plates.
 
 ## Data
 
-`db/seeds/mia_paintings.json` holds 110 curated works — chosen from the
-museum's ~1,400 public-domain paintings for having substantial curatorial
-descriptions, good images, and a mix of artists and departments (European,
-Asian, Americas). Metadata is CC0 from
-[artsmia/collection](https://github.com/artsmia/collection); images come from
-the museum's public CDN at seed time.
+`db/seeds/paintings.json` holds the 2,000 works the app ships with, drawn from
+four open-access collections: the Metropolitan Museum of Art, the Art Institute
+of Chicago, the Cleveland Museum of Art and the Minneapolis Institute of Art.
+Images come from each museum's CDN at seed time; all metadata is CC0.
+
+The pool is not hand-picked. `lib/pool/curator.rb` holds a quota table — range
+beyond Europe and North America, a per-artist ceiling, a cap on any one museum
+or region, a floor of works carrying readable museum text, a resolution floor —
+and `db/seeds/pool_report.md` is the receipt showing every bar holding.
+`test/lib/pool_quota_test.rb` fails the build if a reseed regresses any of them.
+
+Rebuild the pool with:
+
+```
+bin/rails pool:mirror   # ~15K painting records from all four museums, cached in tmp/
+bin/rails pool:curate   # applies the quota table, writes the manifest and report
+bin/rails db:seed       # downloads plates for the 2,000 selected (~1 GB), resumable
+```
+
+`pool:curate` proves every plate it selects is actually reachable before writing
+the manifest — museums publish public-domain rights for images that then 403.
 
 ## How the feed works
 

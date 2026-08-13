@@ -125,7 +125,7 @@ class DailyTest < ActionDispatch::IntegrationTest
   # test has to fill one.
   test "the gallery's next page still comes from /feed, not the front door" do
     (PaintingsController::PER_PAGE + 1).times do |i|
-      Painting.create!(mia_id: 910_000 + i, title: "Filler #{i}", image_url_800: "https://example.test/#{i}.jpg")
+      Painting.create!(source: "mia", source_id: 910_000 + i, title: "Filler #{i}", image_url_800: "https://example.test/#{i}.jpg")
     end
 
     get feed_path

@@ -11,10 +11,11 @@ DEFAULTS: &DEFAULTS
   image_width: 800
   image_height: 1000
   department: Paintings
+  source: mia
 
 sunflowers:
   <<: *DEFAULTS
-  mia_id: 900001
+  source_id: 900001
   title: Sunflowers in a Blue Vase
   artist: Vincent van Gogh
   life_date: 1853–1890
@@ -27,7 +28,7 @@ sunflowers:
 
 harbour:
   <<: *DEFAULTS
-  mia_id: 900002
+  source_id: 900002
   title: Harbour at Dawn
   artist: Berthe Morisot
   life_date: 1841–1895
@@ -36,7 +37,7 @@ harbour:
 
 bronze:
   <<: *DEFAULTS
-  mia_id: 900003
+  source_id: 900003
   title: Bronze Ritual Vessel
   culture: Chinese
   dated: 11th century BCE
@@ -44,7 +45,7 @@ bronze:
 
 woodcut:
   <<: *DEFAULTS
-  mia_id: 900004
+  source_id: 900004
   title: Rain at Shono
   artist: Utagawa Hiroshige
   dated: "1833"
@@ -53,7 +54,8 @@ woodcut:
 
 # Deliberately has no image at all: nothing to attach, nothing to hotlink.
 imageless:
-  mia_id: 900005
+  source: mia
+  source_id: 900005
   title: Lost Panel
   artist: Unknown
   department: Paintings

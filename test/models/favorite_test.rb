@@ -44,7 +44,7 @@ class FavoriteTest < ActiveSupport::TestCase
     assert_match(/\A[0-9a-f]{64}\z/, favorites(:strangers_sunflowers).collector_digest)
   end
 
-  # db/seeds.rb only ever upserts by mia_id, so this cannot happen today. Asserted
+  # db/seeds.rb only ever upserts by (source, source_id), so this cannot happen today. Asserted
   # so that a future cleanup task discovers the constraint here rather than in
   # production, and has to decide what happens to the collections holding the work.
   test "a painting somebody kept cannot be deleted out from under them" do
