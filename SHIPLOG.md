@@ -16,6 +16,23 @@ shipped code and zero initiated user contact is builder's gravity — it gets na
 | 2026-08-07 | Story 0008 "the shell that gets it onto a phone" built — **baseline item 2's precondition**, a Hotwire Native iOS target that builds and runs on an iPhone 17 simulator against `localhost:3000`. Code only, **not on a device, not on TestFlight, not submitted, zero installs**: an input metric under R7. | 39e68c7, 6861b81 |
 
 | 2026-08-10 | Bug fix, not a story: shipping story 0009's CSS moved the asset digest but not the ETag, so any browser holding the previous HTML revalidated into a 304 and kept linking a stylesheet URL that no longer resolved — the page rendered unstyled and did not heal on reload. Found by hitting it locally, not by a test. Code only. | ae742dc |
+| 2026-08-13 | Stories 0011 "rename to Tondo" and 0012 "getting around", in one commit — the tree never had a 0011-only state, so splitting them would have mislabelled one story's work as the other's. 0011: the product is Tondo, a rose-window mark, one masthead partial where six copies used to be. 0012: a compass on every screen and a sticky rail on `/feed`, which was a dead end — its only exit was a wordmark that had scrolled off the top. Design review 6/10 → 9/10 (4 decisions), eng review 12 findings, Codex outside voice 9 findings (4 novel, all confirmed). Code only, **not published, not deployed, zero users, zero installs**: an input metric under R7. | bea621c |
+
+**Builder's gravity, named a fifth time (R7 / session gate 5), 2026-08-13.** Two more
+stories built today and **still zero initiated user conversations** — the count `BET.md`
+needs five of, and has none of, with eighteen days to the kill review. The App Store
+submission target was ~Aug 11 and the live-by date is **tomorrow, Aug 14**. There is still
+no VPS, nothing is deployed, and the App Store Connect listing — the ASO channel this whole
+bet rides on — still has no spec.
+
+What today actually produced: navigation polish on an app nobody outside this repo has
+opened. It is worth noting that the day's most valuable find was not the feature — it was
+that `ApplicationSystemTestCase` claimed a 375px viewport and had been running at 500px
+since it was written, so every fold measurement in this product had been looser than the
+phone it named. That is a real defect fixed. It is also still an input metric.
+
+Every threshold in `BET.md` is unchanged and zero: not live, 0 of 4 posts, 0 of 3 keywords,
+0 of 5 user conversations, 0 of 50 installs.
 
 **Log gap, named rather than backfilled:** stories 0002 (feed zoom, `1ddc20b`), 0003 (past
 days, `62bd3db`) and 0005 (museum note fallback, `22aec4c`) shipped without a line here. The
