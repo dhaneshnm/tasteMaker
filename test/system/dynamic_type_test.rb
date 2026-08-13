@@ -3,7 +3,7 @@ require "application_system_test_case"
 # The forcing function for story 0008's Dynamic Type support (T10).
 #
 # The shell scales the page by setting a root font size from
-# `UIApplication.preferredContentSizeCategory` — see `ios/Tastemaker/DynamicType.swift`.
+# `UIApplication.preferredContentSizeCategory` — see `ios/Tondo/DynamicType.swift`.
 # Every `rem` in `application.css` follows, which is the point and also the risk:
 # bigger text pushes the note down against the 55vh cap on `.plate__img`, and
 # "art and text visible together" is the Better-bucket bar the category leader
@@ -59,6 +59,43 @@ class DynamicTypeTest < ApplicationSystemTestCase
       "the note's first line was pushed below the fold at the largest standard text size"
   end
 
+  # The fixture above is the friendliest page this product publishes: a short
+  # hand-written note under a two-line title. Everything else that reaches the
+  # front door sits higher up the screen — museum copy renders through
+  # `.label__body` with its own source line, and a long title steps the type
+  # down but still runs to more lines.
+  #
+  # Story 0012 is why this exists. The compass left 9px of margin in a static
+  # harness and turned out to be 1px over on the real page, and the difference
+  # was the fixture. One page shape is a coincidence; three is a bound.
+  test "the bar holds on the pages that sit highest up the screen" do
+    [
+      [ "museum copy, no hand-written note", paintings(:woodcut), nil ],
+      [ "a long title over a two-line artist line", paintings(:sunflowers),
+        # The longest title in the shipping dataset, verbatim — 104 characters.
+        # `db/seeds/mia_paintings.json` holds 18 over 60, so this is the shape of
+        # page the front door really has to survive, not a contrived one.
+        "Pope Benedict XIV Presenting the Encyclical Ex Omnibus to the " \
+        "Comte de Stainville, Later Duc de Choiseul" ]
+    ].each do |what, painting, retitle|
+      DailyPick.destroy_all
+      painting.update!(title: retitle) if retitle
+      DailyPick.create!(painting: painting, scheduled_on: Date.current,
+        blurb: painting.description.present? ? nil : "A note for the day.")
+
+      visit root_path
+      assert_selector ".plate__img"
+
+      scale_to CAPPED_ACCESSIBILITY_ROOT
+      f = fold
+
+      assert_operator f["plateBottom"], :<, f["viewport"],
+        "the artwork is below the fold at the accessibility cap on #{what}"
+      assert_operator f["noteTop"] + f["lineHeight"], :<=, f["viewport"],
+        "the first written line is below the fold at the accessibility cap on #{what}"
+    end
+  end
+
   # The cap exists so accessibility sizes degrade rather than break. If someone
   # raises `DynamicType.maximumScale`, this is what should stop them.
   #
@@ -80,9 +117,15 @@ class DynamicTypeTest < ApplicationSystemTestCase
       "the note's first line is below the fold at the capped accessibility size; the cap is too high"
   end
 
-  # The plate is capped in `vh`, so it must not grow with the root size at all.
-  # If it ever does, scaling text would start eating the picture from both ends.
-  test "the plate does not grow with the text" do
+  # The plate must never GROW with the root size. If it did, scaling text would
+  # eat the picture from both ends at once and there would be no way out.
+  #
+  # It is allowed to shrink, and story 0012 made it. The cap gained a third term
+  # — `calc(100dvh - 19rem)` — so that the compass row and scaled type can both
+  # be paid for out of the picture rather than out of the note. That is the cap
+  # doing the job its comment always claimed: keeping the opening of the note
+  # above the fold. The assertions above are what bound how far it goes.
+  test "the plate never grows with the text, and yields when the text needs room" do
     visit root_path
     assert_selector ".plate__img"
 
@@ -92,7 +135,13 @@ class DynamicTypeTest < ApplicationSystemTestCase
     scale_to CAPPED_ACCESSIBILITY_ROOT
     after = fold["plateHeight"]
 
-    assert_in_delta before, after, 1.0,
-      "the artwork resized with the text; the 55vh cap is no longer holding it"
+    assert_operator after, :<=, before + 1.0,
+      "the artwork grew with the text; scaling type is eating the picture from both ends"
+
+    # Not unbounded either. The picture giving up a quarter of its height to make
+    # room for words would be the wrong trade in the other direction, and it is
+    # the direction a bigger `19rem` walks in.
+    assert_operator after, :>=, before * 0.75,
+      "the artwork gave up more than a quarter of its height; 19rem is too greedy"
   end
 end

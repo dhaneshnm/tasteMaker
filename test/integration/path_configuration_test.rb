@@ -14,7 +14,7 @@ require "test_helper"
 # unwinding to the root, the stack grows without bound, and swipe-back walks
 # backwards through duplicate front doors.
 class PathConfigurationTest < ActionDispatch::IntegrationTest
-  BUNDLED = Rails.root.join("ios/Tastemaker/path-configuration.json")
+  BUNDLED = Rails.root.join("ios/Tondo/path-configuration.json")
   SERVED  = "/configurations/ios_v1.json".freeze
 
   test "the served configuration is there and is JSON" do

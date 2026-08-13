@@ -1,0 +1,71 @@
+<%# The one bar every screen wears. DESIGN.md has called `.masthead` "one bar for
+    every screen" since the design system was written; until story 0011 the code
+    was six copies of it that happened to agree, and the brand string was typed
+    out in about fifteen places. Renaming the product is what presented the bill.
+
+    Three questions, top to bottom: what this is (the brand), where you are (the
+    label), where else you can go (the compass). One fact rides on the right.
+
+    Two variances this partial carries rather than flattens:
+
+      brand   ├── <a href=root_path>  every screen a reader can leave
+              └── <span>              the empty state — there is no archive to
+                                      go back to yet, so the brand is not a door
+
+      compass ├── rendered            every screen but one
+              └── suppressed          /feed, which carries its own sticky
+                                      `.rail` instead. Two `<nav>`s labelled
+                                      "Sections" on one page is a defect, not a
+                                      redundancy — see paintings/index.
+
+    Locals:
+      label:    required. What this screen is.
+      here:     which of the four surfaces this screen is, or nil when it is
+                none of them (`/days/:date`, the 404). ApplicationHelper#
+                compass_destinations owns the contract and raises on anything
+                that is neither nil nor one of its keys.
+      compass:  default true. False renders no compass at all — /feed only.
+      linked:   default true. False renders the brand as a span.
+      aside:    optional string, wrapped in `.masthead__aside` here.
+      aside_datetime: optional ISO 8601 date. Present, the aside is a <time>
+                with that `datetime`; absent, a <span>. Only the daily page
+                passes it — "13 August 2026" is a date and should say so in
+                markup, "110 works · Mia" is not.
+
+    There was an `aside_html:` local until story 0012. Only the daily page used
+    it, to `capture` a <time> whose date was sometimes a link into the archive.
+    The compass now carries that door with the word `Days` on it, unconditionally,
+    so what is left is a date with no link in it — one more local, and no
+    pre-built markup crossing a partial boundary.
+
+    Deliberately NOT a `render layout:` block. `yield` inside a partial is
+    `_layout_for`, which silently returns the surrounding buffer when the
+    partial was rendered without `layout:` — so a plain `render "shared/masthead"`
+    produced no aside and raised nothing. Explicit locals beat one clever one
+    that fails quietly.
+%>
+<header class="masthead">
+  <% if local_assigns.fetch(:linked, true) %>
+    <a class="masthead__brand" href="<%= root_path %>">Tondo</a>
+  <% else %>
+    <span class="masthead__brand">Tondo</span>
+  <% end %>
+
+  <p class="masthead__label"><%= label %></p>
+
+  <% if local_assigns[:aside].present? %>
+    <% if local_assigns[:aside_datetime].present? %>
+      <time class="masthead__aside" datetime="<%= aside_datetime %>"><%= aside %></time>
+    <% else %>
+      <span class="masthead__aside"><%= aside %></span>
+    <% end %>
+  <% end %>
+
+  <%# `fetch` with no default: a screen that renders a compass has to say where
+      it is, and `here: nil` has to be typed out. Reading it as `local_assigns[:here]`
+      would turn a forgotten local into a silent "nothing is marked", which is
+      the same defect the helper raises about, one level up. %>
+  <% if local_assigns.fetch(:compass, true) %>
+    <%= render "shared/compass", here: local_assigns.fetch(:here) %>
+  <% end %>
+</header>

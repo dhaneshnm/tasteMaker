@@ -10,15 +10,19 @@ class DailyController < ApplicationController
     return render :empty if @pick.nil?
 
     @chrome = :front_door
-    # Counted once, then used twice: for the key and for the decision it covers.
-    # The date is only a link once there is more than one published day, so
-    # without the count in the key a curator backfilling a *past* day leaves
-    # `current` unchanged and every returning visitor keeps a 304 with no way
-    # into the archive that just appeared. The painting is in the key because
-    # the page renders its title, artist and image.
-    @published_count = DailyPick.published.count
 
-    fresh_when(etag: [ @pick, @pick.painting, @published_count ],
+    # The key is the pick and its painting, and nothing else. It used to carry
+    # `DailyPick.published.count` as well, because the masthead date was only a
+    # link once a second day existed — so a curator backfilling a past day
+    # changed this page without changing this pick, and returning visitors would
+    # have kept a 304 with no way into the archive that had just appeared.
+    #
+    # Story 0012 deleted that condition. The compass links to the archive from
+    # every screen, always, so nothing on this page depends on how many days
+    # exist and the count in the key would only be invalidation with no reader
+    # behind it. The painting stays in the key because the page renders its
+    # title, artist and image.
+    fresh_when(etag: [ @pick, @pick.painting ],
       last_modified: @pick.updated_at, public: true)
     response.cache_control[:no_cache] = true
   end

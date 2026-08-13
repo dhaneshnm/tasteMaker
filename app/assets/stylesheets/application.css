@@ -1,5 +1,5 @@
 /*
- * Tastemaker — "the morning room"
+ * Tondo — "the morning room"
  *
  * One room, one light. Warm linen paper, ink type, an old gold dark enough to
  * clear 4.5:1 on that paper. Display: Fraunces · Body: Newsreader.
@@ -233,7 +233,8 @@ a:hover { color: var(--gold-deep); }
   grid-template-columns: 1fr auto;
   grid-template-areas:
     "brand aside"
-    "label aside";
+    "label aside"
+    "compass compass";
   align-items: baseline;
   column-gap: 1rem;
   row-gap: 0.15rem;
@@ -279,6 +280,119 @@ a:hover { color: var(--gold-deep); }
   letter-spacing: 0.18em;
   color: var(--ink-dim);
   white-space: nowrap;
+}
+
+/* ---------- Compass ----------
+ * Where else you can go. Four destinations, always all four, same order on every
+ * screen. The label above says which one you are on; this row says what the
+ * others are, and marks the current one by taking its link away.
+ *
+ * It costs 44px per row, always, because `DESIGN.md` rule 9 applies to every one
+ * of these and `.caps-link` sets size and tracking but never height. That is why
+ * the labels are one word each: measured at 375px, four one-word labels fit on
+ * one row and four two-word labels wrap to two, and the second row comes
+ * straight out of the space above the artwork. The front door clears the
+ * accessibility fold by 9px with this row in place and by 92px without it —
+ * `test/system/dynamic_type_test.rb` is what stops the next thing that wants
+ * space up here. Numbers in `specs/0012-getting-around/plan.md`.
+ *
+ * No separator glyph. The gap at 0.2em tracking already parts the words, and
+ * `·` is spent twice over on `.label__artist-dates` and `Kept · Remove`.
+ *
+ * The gap started at 1.4rem and is now clamped, which is not fussiness — it is
+ * the difference between one row and two. Measured at 375px with Dynamic Type
+ * at its cap: the four labels are 270px wide and the page leaves 329px, so
+ * three 1.4rem gaps (354px total) wrap and three 1rem gaps (330px) still wrap,
+ * by one pixel. A wrapped row costs 44px straight out of the fold budget.
+ *
+ * The clamp is what stops the arms race. A pure `rem` gap grows with the text
+ * at exactly the moment there is least room for it, so the middle term is `vw`:
+ * the space between two words is about how wide the screen is, not how large
+ * the reader set their type. Widen any of the three numbers and
+ * `dynamic_type_test.rb` goes red, which is the rule working. */
+.compass {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: clamp(0.7rem, 3.5vw, 1rem);
+}
+
+.masthead .compass {
+  grid-area: compass;
+}
+
+/* The compass row is 44px of touch target, and a touch target is mostly air.
+ * Below the third-column breakpoint that air is the space under the label and
+ * the space above the plate, so the masthead and the page stop adding their own
+ * on top of it. Measured on the front door at 375x667: this is 22px of the 44
+ * the row costs, and the front door needs all 22.
+ *
+ * Scoped to narrow widths on purpose. Above 46rem the compass moves into the
+ * middle column and stops being a row at all, so both paddings go back to what
+ * every other screen uses. */
+@media (max-width: 45.999rem) {
+  .masthead:has(.compass) { padding-bottom: 0; }
+  .masthead:has(.compass) ~ .page { padding-top: 0.4rem; }
+}
+
+/* The screen you are on. Same type, same tracking, same 44px box as its
+ * neighbours — only the colour steps back and only the <a> is missing. As a bare
+ * <span> it drops out of small caps into body type and reads as a bug. */
+.compass__here { color: var(--ink-dim); }
+
+/* Wide enough for a third column: the compass rides beside the label instead of
+ * under it, and the masthead costs 75px instead of 104px.
+ *
+ * Every area is named, including `aside`. Naming only brand/label/compass leaves
+ * `.masthead__aside` — which sets `grid-area: aside` unconditionally — placed
+ * implicitly, and implicit placement happening to look right at one width is not
+ * a layout. */
+@media (min-width: 46rem) {
+  .masthead:has(.compass) {
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas:
+      "brand   compass aside"
+      "label   compass aside";
+    column-gap: 2rem;
+  }
+
+  .masthead:has(.compass) .compass {
+    margin-top: 0;
+    align-self: center;
+  }
+}
+
+/* ---------- The rail ----------
+ * `/feed` only, and the one narrowing of `DESIGN.md` rule 5.
+ *
+ * The gallery is the product's only unbounded screen: 110 works of infinite
+ * scroll, a masthead that is never sticky, and a coda that renders on the last
+ * page. Two flicks in there was nothing on screen to leave by. So on that one
+ * screen the compass is not in the masthead at all — it is this, sitting under
+ * the bar at the top of the page and staying behind when the bar scrolls away.
+ *
+ * Nothing changes shape. There is no cross-browser way for CSS to know an
+ * element has become stuck, and inventing one costs this app its first
+ * scroll-watching JavaScript to hide a wordmark. The masthead simply leaves and
+ * the rail simply does not.
+ *
+ * `z-index: 1` is enough and is deliberately small: `.zoom` is 20 and must cover
+ * this, and `body::after` — the paper tooth over the whole product — is 3 and
+ * should keep passing over it like it passes over everything else.
+ *
+ * The safe-area terms match `.masthead`'s. Under `viewport-fit=cover` the page
+ * owns the unsafe strips (story 0008), so once this is stuck at `top: 0` it is
+ * the thing under the notch. */
+.compass--rail {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg);
+  border-bottom: 1px solid var(--hairline);
+  padding:
+    calc(0.45rem + env(safe-area-inset-top))
+    calc(clamp(1.15rem, 5vw, 2rem) + env(safe-area-inset-right))
+    0.35rem
+    calc(clamp(1.15rem, 5vw, 2rem) + env(safe-area-inset-left));
 }
 
 /* ---------- Page column ---------- */
@@ -353,6 +467,39 @@ a:hover { color: var(--gold-deep); }
   object-fit: contain;
   background: var(--bg-lift);
   border: 1px solid var(--frame-edge);
+}
+
+/*
+ * The third term, added by story 0012: the cap also yields to the text.
+ *
+ * 55vh was always in service of the sentence above it — "the cap leaves the
+ * opening of the note above the fold." A flat 55vh only does that while
+ * everything else above the fold stays the same size, and two things changed:
+ * the compass took 22 net pixels off the top of the page, and Dynamic Type
+ * scales every `rem` between the plate and the note by up to 1.25 (story 0008).
+ * Measured on the front door at 375x667, the two together put the note's first
+ * line 1px below the fold, and the plate was the only thing in the frame with
+ * any give.
+ *
+ * `17rem` is the room the label needs: title, artist, medium, and one line of
+ * the note, at whatever size the reader has chosen. Because it is `rem` and the
+ * other two terms are `vh`, this only ever wins when the text is scaled up —
+ * at the default root size `100dvh - 19rem` is 363px against a 367px 55vh, so
+ * `min()` picks within 4px of 55vh and the artwork is the size it has always
+ * been. It gives back real height only as the text grows, which is the trade
+ * rule 2 does allow: a smaller picture, never a cropped one.
+ *
+ * 19rem and not 17: the number is set by the worst page this product publishes,
+ * not the friendliest. `db/seeds/mia_paintings.json` holds 18 titles over 60
+ * characters and one of 104, and a title that long over a two-line artist row
+ * is what `dynamic_type_test.rb` measures. 17rem passed the short fixture and
+ * missed that one by 10px.
+ *
+ * Only `.plate__img`. The archive's thumbnails are 112px in a fixed box and
+ * have no relationship to the fold.
+ */
+.plate__img {
+  max-height: min(55vh, 55dvh, calc(100dvh - 19rem));
 }
 
 .plate__resting {
@@ -521,7 +668,7 @@ a:hover { color: var(--gold-deep); }
  * rest of its chrome. Two homes, on purpose; adding a third for a caps-link is
  * the mistake. */
 .coda .caps-link,
-.page--empty .caps-link,
+.compass .caps-link,
 .walk__step,
 .walk__today,
 .keep__toggle,
@@ -545,17 +692,11 @@ a:hover { color: var(--gold-deep); }
 .keep__toggle:hover,
 .days__remove:hover { color: var(--gold-deep); }
 
-/* A coda used to end with one way out. The archive and the collection now offer
- * two, and two small-caps links sharing a line with only a space between them
- * read as one long string.
- *
- * `>` on purpose. Descendant scope also matched the two links inside `.walk`,
- * where it outranked `.walk__step--next { margin-inline-start: auto }` (0,3,0
- * against 0,1,0) and only looked right because `.walk`'s own space-between was
- * doing the work. That made the walk's layout depend on it rendering inside a
- * coda. Direct children are the codas' own ways out; the walk styles its own. */
-.coda > .caps-link + .caps-link,
-.page--empty > .caps-link + .caps-link { margin-inline-start: 1.6rem; }
+/* There was a `.coda > .caps-link + .caps-link` rule here until story 0012,
+ * spacing the two ways out that the archive and the collection used to end with.
+ * The compass carries those doors now and no coda has two adjacent caps-links
+ * left, so the rule went. The gap between compass items is `column-gap` on the
+ * flex row, which is the same job done by the layout that owns it. */
 
 /* ---------- The days behind you ----------
  * A contents list, not a gallery — /feed is the gallery. Rows are separated by a

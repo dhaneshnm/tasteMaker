@@ -38,7 +38,13 @@ class ErrorsTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
     assert_select ".coda__line", text: "That page does not exist."
-    assert_select "a.caps-link", text: "Today →"
+
+    # This page used to offer exactly one way out. A page that does not exist is
+    # not one of the four surfaces, so the compass marks nothing and links
+    # everything.
+    assert_select ".compass a", count: 4
+    assert_select ".compass span[aria-current]", count: 0
+    assert_select ".compass a[href=?]", root_path, text: "Today"
   end
 
   # Story 0007's rule reaches this page too: it renders the reader's layout, so

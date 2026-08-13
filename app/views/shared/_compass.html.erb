@@ -1,0 +1,34 @@
+<%# Where else you can go. Four destinations, always all four, in the same order
+    on every screen — a reader who found `Days` on the front door finds it in
+    the same place in the gallery.
+
+    Locals:
+      here: which of the four this screen IS, or nil when it is none of them.
+            `ApplicationHelper#compass_destinations` owns the contract and
+            raises on anything else.
+      rail: default false. True on /feed, where this is not inside the masthead
+            but is a sticky bar of its own. The class is `.compass`, not
+            `.masthead__compass`, precisely because of that — an element that
+            lives in two places should not be named after one of them.
+
+    The current destination stays in the row rather than being dropped from it.
+    Rendering only "the other three" was the first draft, and it moves every
+    label one slot to the left depending on which screen you are standing on,
+    which is the opposite of learning the set once.
+
+    It keeps `.caps-link`. Same size, same tracking, same 44px box as its
+    neighbours; only the colour changes and only the `<a>` is missing. As a bare
+    `<span>` it drops out of small caps into body type and reads as a bug.
+
+    Nothing here is per-visitor and nothing here is counted, which is what lets
+    this render inside the publicly cached HTML of `/` and `/days` (story 0007).
+%>
+<nav class="compass <%= "compass--rail" if local_assigns[:rail] %>" aria-label="Sections">
+  <% compass_destinations(here).each do |destination| %>
+    <% if destination[:current] %>
+      <span class="caps-link compass__here" aria-current="page"><%= destination[:label] %></span>
+    <% else %>
+      <%= link_to destination[:label], destination[:path], class: "caps-link" %>
+    <% end %>
+  <% end %>
+</nav>

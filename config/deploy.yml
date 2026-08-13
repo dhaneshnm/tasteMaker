@@ -23,11 +23,11 @@
 #      at /admin/daily_picks before sending anyone the link.
 # ─────────────────────────────────────────────────────────────────────────────
 
-service: tastemaker
+service: tondo
 
 # CHANGEME — namespace/repo only. `registry.server` below is prepended, so
 # including "ghcr.io/" here produces ghcr.io/ghcr.io/... and the push 404s.
-image: dhaneshnm/tastemaker
+image: dhaneshnm/tondo
 
 servers:
   web:
@@ -37,7 +37,7 @@ servers:
 proxy:
   ssl: true
   # CHANGEME — must already resolve to the server above.
-  host: tastemaker.example.com
+  host: tondo.example.com
   # Thruster listens on 80 inside the container (Dockerfile EXPOSE 80). It also
   # runs its own 64MB HTTP cache, which is why every public page in this app is
   # deliberately `Cache-Control: public` and carries no Set-Cookie (story 0007).
@@ -65,7 +65,7 @@ env:
 # empty database and throw away the curator's queue and every reader's
 # collection. This is the one line in the file that loses data if it is wrong.
 volumes:
-  - "tastemaker_storage:/rails/storage"
+  - "tondo_storage:/rails/storage"
 
 aliases:
   console: app exec --interactive --reuse "bin/rails console"

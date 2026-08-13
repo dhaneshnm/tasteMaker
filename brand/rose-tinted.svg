@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    Tondo. A rose window: lights that stop short of the centre and cap in an
+    arch, an oculus, and a tracery band. Geometry is DESIGN.md is Brand section
+    transcribed; change it there first, then here, then re-run script/brand-render.
+
+    The iOS 18 tinted appearance. Grayscale, full bleed: the system maps
+      luminance to the tint the reader picked, so the field must stay mid-grey
+      and the window white or the whole tile collapses to one value.
+  -->
+  <rect width="1024" height="1024" fill="#7a7a7a"/>
+  <g fill="#ffffff" transform="translate(512 512)">
+    <path transform="rotate(0)" d="M-44 -170 L-96 -270 A96 96 0 0 1 96 -270 L44 -170 Z"/>
+    <path transform="rotate(45)" d="M-44 -170 L-96 -270 A96 96 0 0 1 96 -270 L44 -170 Z"/>
+    <path transform="rotate(90)" d="M-44 -170 L-96 -270 A96 96 0 0 1 96 -270 L44 -170 Z"/>
+    <path transform="rotate(135)" d="M-44 -170 L-96 -270 A96 96 0 0 1 96 -270 L44 -170 Z"/>
+    <path transform="rotate(180)" d="M-44 -170 L-96 -270 A96 96 0 0 1 96 -270 L44 -170 Z"/>
+    <path transform="rotate(225)" d="M-44 -170 L-96 -270 A96 96 0 0 1 96 -270 L44 -170 Z"/>
+    <path transform="rotate(270)" d="M-44 -170 L-96 -270 A96 96 0 0 1 96 -270 L44 -170 Z"/>
+    <path transform="rotate(315)" d="M-44 -170 L-96 -270 A96 96 0 0 1 96 -270 L44 -170 Z"/>
+  </g>
+  <circle cx="512" cy="512" r="122" fill="#ffffff"/>
+
+</svg>

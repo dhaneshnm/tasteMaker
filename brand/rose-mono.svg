@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    Tondo. A rose window: lights that stop short of the centre and cap in an
+    arch, an oculus, and a tracery band. Geometry is DESIGN.md is Brand section
+    transcribed; change it there first, then here, then re-run script/brand-render.
+
+    One colour, for print and anywhere gold cannot go. Not rendered by
+      script/brand-render; it exists so DESIGN.md is one-colour paragraph is not
+      describing a file nobody made.
+  -->
+  <rect width="1024" height="1024" fill="#2a241c"/>
+  <circle cx="512" cy="512" r="396" fill="none" stroke="#f4efe6" stroke-opacity="0.55" stroke-width="12"/>
+  <g fill="#f4efe6" transform="translate(512 512)">
+    <path transform="rotate(0)" d="M-32 -145 L-76 -284 A76 76 0 0 1 76 -284 L32 -145 Z"/>
+    <path transform="rotate(30)" d="M-32 -145 L-76 -284 A76 76 0 0 1 76 -284 L32 -145 Z"/>
+    <path transform="rotate(60)" d="M-32 -145 L-76 -284 A76 76 0 0 1 76 -284 L32 -145 Z"/>
+    <path transform="rotate(90)" d="M-32 -145 L-76 -284 A76 76 0 0 1 76 -284 L32 -145 Z"/>
+    <path transform="rotate(120)" d="M-32 -145 L-76 -284 A76 76 0 0 1 76 -284 L32 -145 Z"/>
+    <path transform="rotate(150)" d="M-32 -145 L-76 -284 A76 76 0 0 1 76 -284 L32 -145 Z"/>
+    <path transform="rotate(180)" d="M-32 -145 L-76 -284 A76 76 0 0 1 76 -284 L32 -145 Z"/>
+    <path transform="rotate(210)" d="M-32 -145 L-76 -284 A76 76 0 0 1 76 -284 L32 -145 Z"/>
+    <path transform="rotate(240)" d="M-32 -145 L-76 -284 A76 76 0 0 1 76 -284 L32 -145 Z"/>
+    <path transform="rotate(270)" d="M-32 -145 L-76 -284 A76 76 0 0 1 76 -284 L32 -145 Z"/>
+    <path transform="rotate(300)" d="M-32 -145 L-76 -284 A76 76 0 0 1 76 -284 L32 -145 Z"/>
+    <path transform="rotate(330)" d="M-32 -145 L-76 -284 A76 76 0 0 1 76 -284 L32 -145 Z"/>
+  </g>
+  <circle cx="512" cy="512" r="96" fill="#f4efe6"/>
+
+</svg>

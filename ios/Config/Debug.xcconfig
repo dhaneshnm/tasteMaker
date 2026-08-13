@@ -3,7 +3,7 @@
 // `$()` splits the `//` so xcconfig does not read the rest of the line as a
 // comment. This is the documented escape and it is the reason this value cannot
 // simply be written out longhand.
-TASTEMAKER_URL = http:/$()/localhost:3000
+TONDO_URL = http:/$()/localhost:3000
 
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG
 SWIFT_OPTIMIZATION_LEVEL = -Onone

@@ -1,8 +1,20 @@
-<header class="masthead">
-  <a class="masthead__brand" href="<%= root_path %>">Tastemaker</a>
-  <p class="masthead__label">The full gallery</p>
-  <span class="masthead__aside"><%= @total %> works · Mia</span>
-</header>
+<%# `compass: false` — this is the one screen whose compass is not in the
+    masthead. See the rail below. %>
+<%= render "shared/masthead", label: "The full gallery",
+      aside: "#{@total} works · Mia", compass: false %>
+
+<%# The gallery is the only unbounded screen in the product: 110 works of
+    infinite scroll, a masthead that is never sticky (DESIGN.md rule 5), and a
+    coda that only renders on the last page. Two flicks in there was no way out
+    on screen at all, which is the defect story 0012 exists to fix.
+
+    So the compass rides in its own sticky rail rather than in the masthead. At
+    the top of the page it reads as the compass sitting under the bar, exactly
+    like every other screen; once you scroll it is 58px of links and nothing
+    else. No JavaScript: there is no cross-browser way for CSS to know it has
+    become stuck, so nothing here changes shape — the masthead simply scrolls
+    away and the rail does not. %>
+<%= render "shared/compass", here: :gallery, rail: true %>
 
 <%# The overlay lives here, next to the frames the archive streams into, so every
     work that arrives with infinite scroll is inside the controller. %>

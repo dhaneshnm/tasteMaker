@@ -11,7 +11,7 @@
     The admin layout adds the tag back, because the curator's queue deletes a day
     with `data: { turbo_method: :delete }` and Turbo reads it from the meta tag.
     Reader-facing forms do not need it: `form_with` embeds its own hidden token. %>
-<title><%= content_for(:title) || "Tastemaker — One artwork a day" %></title>
+<title><%= content_for(:title) || "Tondo — One artwork a day" %></title>
 <%# `viewport-fit=cover` — story 0008. Without it WebKit insets the layout
     viewport out of the unsafe strips, so `.zoom`'s `position: fixed; inset: 0`
     stops below the notch and above the home indicator and the surround shows
@@ -24,15 +24,21 @@
 <meta name="description" content="<%= content_for(:description) || "One public-domain artwork a day, from the collection of the Minneapolis Institute of Art, with a short hand-written note on why it matters." %>">
 <meta name="theme-color" content="#f4efe6">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="application-name" content="Tastemaker">
+<meta name="application-name" content="Tondo">
 <meta name="mobile-web-app-capable" content="yes">
 <%= csp_meta_tag %>
 
 <%= yield :head %>
 
+<%# `icon.svg` is listed after the PNG on purpose: a browser that understands
+    both takes the vector, which is the only version that stays sharp at the
+    16px the tab strip actually draws. The PNG is the fallback and the PWA's
+    `purpose: any` icon. `apple-touch-icon` is its own 180 rather than the 512 —
+    iOS downloads whatever this points at, and 512 was 4x the bytes for a
+    180-point tile. All three come out of `script/brand-render`. %>
 <link rel="icon" href="/icon.png" type="image/png">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/icon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
 <%# No font host here, and none is coming back — see specs/0009-self-hosted-fonts/.
     Fraunces and Newsreader are served from this app's own asset pipeline, declared

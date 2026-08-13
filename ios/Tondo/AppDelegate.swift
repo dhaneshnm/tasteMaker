@@ -23,7 +23,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         Hotwire.config.defaultViewController = { LinenWebViewController(url: $0) }
         Hotwire.config.makeCustomErrorView = { LinenErrorView(error: $0, handler: $1) }
 
-        Hotwire.config.applicationUserAgentPrefix = "Tastemaker iOS;"
+        Hotwire.config.applicationUserAgentPrefix = "Tondo iOS;"
 
         // The only reason to touch the web view configuration in this story.
         // `Hotwire.config.makeWebView()` calls this and then initialises the

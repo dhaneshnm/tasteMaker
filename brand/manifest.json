@@ -1,0 +1,10 @@
+{
+  "generated_by": "script/brand-render",
+  "sources": {
+    "brand/rose.svg": "00c5f1845ac4ce65c0f0110e7db6b64a7d5912668f2ad148ac437b22ef2f5964",
+    "brand/rose-small.svg": "7ae07e874e16eac2c2e23ccfd09c5015fa1bbd59b1144939f61b89dbd33e6d90",
+    "brand/rose-tinted.svg": "af632cb75efb0af46bda26ace6ed7a734efe1eede622457b4667ba781b8649c4",
+    "brand/rose-mono.svg": "703cbebecf90ec305c35768e789012f759254d69f1d501be54c9d7808204627d",
+    "brand/launch.svg": "d047983f73873492f7164d96fb024d1e469acee5f867996cc1f051b988d0fbca"
+  }
+}

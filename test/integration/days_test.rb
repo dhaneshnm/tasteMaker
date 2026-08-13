@@ -64,11 +64,15 @@ class DaysTest < ActionDispatch::IntegrationTest
     assert_select ".coda__line", text: /One day so far/
   end
 
-  test "more than one day, and the closing line is just the way back" do
+  # The coda used to end with the ways out. Story 0012 moved those into the
+  # compass, so past the first day this footer is an ornament and nothing else —
+  # the way back is in the bar at the top, on this screen and every other one.
+  test "more than one day, and the closing line has nothing left to say" do
     get days_path
 
     assert_select ".coda__line", count: 0
-    assert_select ".coda .caps-link[href=?]", root_path, text: /Today/
+    assert_select ".coda .caps-link", count: 0
+    assert_select ".compass a[href=?]", root_path, text: "Today"
   end
 
   test "months are headings, and they are there from the first row" do
@@ -233,45 +237,61 @@ class DaysTest < ActionDispatch::IntegrationTest
 
   # ---------- the entry point ----------
 
-  test "the front door's date is not a link while there is only one day" do
+  # The date used to be the door — a link, and only once a second day existed.
+  # Story 0012 gave the archive a door with the word `Days` on it, present on
+  # every screen from the first day, so the date went back to being a date.
+  test "the front door's date is a date, not a door" do
+    get root_path
+
+    assert_select "time.masthead__aside a", count: 0
+    assert_select "time.masthead__aside[datetime=?]", Date.current.iso8601
+  end
+
+  test "the archive door is on the front door from the very first day" do
     @yesterday.destroy!
 
     get root_path
 
-    assert_select "time.masthead__aside a", count: 0
+    assert_select ".compass a[href=?]", days_path, text: "Days"
   end
 
-  test "the front door's date opens the archive once there is more than one day" do
-    get root_path
-
-    assert_select "time.masthead__aside a[href=?]", days_path
-  end
-
-  # Backfilling a past day leaves `current` untouched, so an ETag keyed on the
-  # pick alone would keep serving a page with no way into the archive.
-  test "backfilling a past day makes the archive link appear to a returning visitor" do
+  # This used to assert the opposite: the front door's ETag carried
+  # `DailyPick.published.count`, because backfilling a past day left `current`
+  # untouched while changing whether the date was a link, and a returning
+  # visitor would otherwise have kept a 304 with no way into the archive.
+  #
+  # The compass took that condition away. Nothing on this page depends on how
+  # many days exist any more, so the count came out of the key and a backfill is
+  # exactly what it looks like: a change to a page this reader is not looking at.
+  test "backfilling a past day leaves the front door alone, door and all" do
     @yesterday.destroy!
 
     get root_path
     etag = response.headers["ETag"]
-    assert_select "time.masthead__aside a", count: 0
+    assert_select ".compass a[href=?]", days_path
 
     DailyPick.create!(painting: paintings(:woodcut), scheduled_on: 4.days.ago.to_date,
-      blurb: "Backfilled after the fact, which must not leave the front door stale.")
+      blurb: "Backfilled after the fact, which no longer changes the front door.")
 
     get root_path, headers: { "HTTP_IF_NONE_MATCH" => etag }
-    assert_response :success
-    assert_select "time.masthead__aside a[href=?]", days_path
+    assert_response :not_modified
   end
 
   # ---------- the curator's preview ----------
 
-  test "a preview shows the reader's page without a live archive link" do
+  # The preview is the reader's page, compass and all — that is what makes it a
+  # preview. It marks `Today` for the same reason the front door does. What it
+  # does not get is the keep control, because the day is not published and a
+  # curator keeping unpublished works would pollute the only usage signal that
+  # feature has.
+  test "a preview shows the reader's page, compass and all" do
     get preview_admin_daily_pick_path(@tomorrow), headers: curator_headers
 
     assert_response :success
     assert_select ".masthead__label", text: "Artwork of the Day"
     assert_select "time.masthead__aside a", count: 0
+    assert_select ".compass span[aria-current=?]", "page", text: "Today"
+    assert_select ".compass a[href=?]", days_path, text: "Days"
     assert_select ".coda__line", text: "See you tomorrow."
   end
 end

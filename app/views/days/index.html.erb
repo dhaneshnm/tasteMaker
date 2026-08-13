@@ -1,17 +1,13 @@
-<% content_for :title, "Past days — Tastemaker" %>
-<% content_for :description, "Every artwork Tastemaker has published, newest first." %>
+<% content_for :title, "Past days — Tondo" %>
+<% content_for :description, "Every artwork Tondo has published, newest first." %>
 
-<header class="masthead">
-  <a class="masthead__brand" href="<%= root_path %>">Tastemaker</a>
-  <p class="masthead__label">Past days</p>
-  <span class="masthead__aside"><%= pluralize(@picks.size, "day") %></span>
-</header>
+<%= render "shared/masthead", label: "Past days", here: :days,
+      aside: pluralize(@picks.size, "day") %>
 
 <main class="page <%= "page--empty" if @picks.empty? %>">
   <% if @picks.empty? %>
     <div class="ornament" aria-hidden="true">✦</div>
     <p class="coda__line">The days will collect here.</p>
-    <a class="caps-link" href="<%= feed_path %>">Wander the full gallery →</a>
   <% else %>
     <% @months.each do |month, picks| %>
       <h2 class="days__month"><%= month.strftime("%B %Y") %></h2>
@@ -29,12 +25,9 @@
       <% if @picks.size == 1 %>
         <p class="coda__line">One day so far. Tomorrow this becomes an archive.</p>
       <% end %>
-      <%# Countless on purpose: no number means these bytes are the same for every
-          visitor, so the door fits on a publicly cached page with no fragment and
-          no endpoint. It shows at zero too — the archive and the collection are
-          siblings, and an empty collection is how the feature gets discovered. %>
-      <a class="caps-link" href="<%= collection_path %>">Your collection →</a>
-      <a class="caps-link" href="<%= root_path %>">Today →</a>
+      <%# The two ways out that used to live here — `Your collection →` and
+          `Today →` — are in the compass now, on every screen and in the same
+          place. This coda keeps only what it alone can say. %>
     </footer>
   <% end %>
 </main>

@@ -54,6 +54,21 @@ RUN bundle exec bootsnap precompile -j 1 app/ lib/
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
+# One value that changes on every image build, and therefore on every deploy.
+#
+# `/` and `/days` are `public, no-cache` with an ETag keyed on model rows plus
+# the asset digests. Nothing in that key moves when the TEXT of a template
+# changes, so a copy edit ships behind a 304 and returning readers keep the old
+# words indefinitely — each reload revalidates into the same 304. Commit
+# ae742dc was this bug with a stylesheet; renaming the product to Tondo would
+# have been it with the brand.
+#
+# `ApplicationController` folds this file into the ETag, so a deploy busts every
+# conditional GET exactly once. Deliberately not `KAMAL_VERSION`: Kamal does not
+# document injecting it into the container, and an ETag input that is silently
+# blank is worse than no ETag input at all.
+RUN date -u +%Y%m%d%H%M%S > REVISION
+
 
 
 

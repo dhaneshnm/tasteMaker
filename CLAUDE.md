@@ -1,4 +1,4 @@
-# Tastemaker — CLAUDE.md
+# Tondo — CLAUDE.md
 
 Month 1 (Aug 2026) of a 12-month one-app-per-month experiment. iOS daily-art category.
 Fork B: **practice vehicle, not a revenue bet.** Kill review **Aug 31, 2026**, against the

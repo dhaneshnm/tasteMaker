@@ -1,12 +1,17 @@
 require "application_system_test_case"
 
 class DaysSystemTest < ApplicationSystemTestCase
-  # The whole point of the story, made measurable: somebody back from three
+  # The whole point of story 0003, made measurable: somebody back from three
   # shifts reaches a missed day in two taps.
+  #
+  # The first tap used to be the date in the masthead, which was a link only once
+  # a second day existed and never said what it was. Story 0012 made it the
+  # compass's `Days`, which is present from the first day and labelled. Still two
+  # taps — that is the bar, and moving the door must not cost one.
   test "two taps from the front door reach a past day" do
     visit root_path
 
-    find("time.masthead__aside a").click
+    within(".compass") { click_on "Days" }
     assert_selector "h2.days__month"
 
     within "ol.days" do

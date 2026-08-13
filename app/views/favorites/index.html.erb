@@ -1,23 +1,17 @@
-<% content_for :title, "Your collection — Tastemaker" %>
-<% content_for :description, "The works you have kept on Tastemaker." %>
+<% content_for :title, "Your collection — Tondo" %>
+<% content_for :description, "The works you have kept on Tondo." %>
 
-<header class="masthead">
-  <a class="masthead__brand" href="<%= root_path %>">Tastemaker</a>
-  <p class="masthead__label">Your collection</p>
-  <span class="masthead__aside"><%= pluralize(@rows.size, "work") %></span>
-</header>
+<%= render "shared/masthead", label: "Your collection", here: :collection,
+      aside: pluralize(@rows.size, "work") %>
 
 <main class="page <%= "page--empty" if @rows.empty? %>">
   <% if @rows.empty? %>
     <div class="ornament" aria-hidden="true">✦</div>
     <p class="coda__line">The works you keep will gather here.</p>
     <p class="coda__note">Keep this sits under every artwork.</p>
-    <%# Both doors, same as the populated state. A first-time reader arrives here
-        from the archive's countless "Your collection →", and without this the
-        empty page is the one screen in the product with no way back to where
-        they came from. %>
-    <a class="caps-link" href="<%= days_path %>">The days behind you →</a>
-    <a class="caps-link" href="<%= root_path %>">Today →</a>
+    <%# ISSUE-001 was this page offering only `Today →`, stranding a reader who
+        arrived with nothing kept. The compass answers it now, and answers it on
+        every screen rather than one at a time. %>
   <% else %>
     <%# Their order, newest kept first — not ours. No month headings: "the month
         I kept it" is not a fact anybody wants. A row with no pick is a work whose
@@ -38,8 +32,6 @@
           Stating the limit up front is what keeps it from reading as a betrayal
           later — see specs/personas.md, persona 6. %>
       <p class="coda__note">Kept on this device — free, and yours.</p>
-      <a class="caps-link" href="<%= days_path %>">The days behind you →</a>
-      <a class="caps-link" href="<%= root_path %>">Today →</a>
     </footer>
   <% end %>
 </main>

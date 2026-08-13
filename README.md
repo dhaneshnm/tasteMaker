@@ -1,4 +1,4 @@
-# Tastemaker
+# Tondo
 
 One public-domain artwork a day, with a short hand-written note on why it
 matters. Works come from the [Minneapolis Institute of

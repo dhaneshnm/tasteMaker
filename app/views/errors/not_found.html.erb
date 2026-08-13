@@ -1,15 +1,14 @@
 <%# The linen page, reused whole: ornament, one line, one way out. No new
     component and no new CSS — a missing page should look like a quiet room in
     the same building, not like the building fell over. %>
-<% content_for :title, "Not here — Tastemaker" %>
+<% content_for :title, "Not here — Tondo" %>
 
-<header class="masthead">
-  <a class="masthead__brand" href="<%= root_path %>">Tastemaker</a>
-  <p class="masthead__label">Not here</p>
-</header>
+<%# `here: nil` — a page that does not exist is not one of the four surfaces, so
+    all four are real destinations from here. This screen used to offer exactly
+    one way out. %>
+<%= render "shared/masthead", label: "Not here", here: nil %>
 
 <main class="page page--empty">
   <div class="ornament" aria-hidden="true">✦</div>
   <p class="coda__line"><%= @message %></p>
-  <a class="caps-link" href="<%= root_path %>">Today →</a>
 </main>

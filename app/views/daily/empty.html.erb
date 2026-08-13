@@ -1,12 +1,14 @@
-<% content_for :title, "Tastemaker" %>
+<% content_for :title, "Tondo" %>
 
-<header class="masthead">
-  <span class="masthead__brand">Tastemaker</span>
-  <p class="masthead__label">Artwork of the Day</p>
-</header>
+<%# `linked: false` — there is no archive to go back to yet, so the brand is
+    not a door. test/integration/brand_test.rb asserts this stays a span.
+
+    The compass renders anyway. The archive and the collection are both empty at
+    this point and both have written empty states of their own saying so, which
+    is a better answer than three special cases here. %>
+<%= render "shared/masthead", label: "Artwork of the Day", linked: false, here: :today %>
 
 <main class="page page--empty">
   <div class="ornament" aria-hidden="true">✦</div>
   <p class="coda__line">The first artwork arrives soon.</p>
-  <a class="caps-link" href="<%= feed_path %>">Wander the full gallery →</a>
 </main>

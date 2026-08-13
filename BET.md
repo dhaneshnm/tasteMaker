@@ -1,4 +1,4 @@
-# BET.md — Tastemaker (Month 1, Aug 2026)
+# BET.md — Tondo (Month 1, Aug 2026)
 
 **Status: COMPLETE — committed 2026-08-03. Feature commits unblocked (R2).**
 

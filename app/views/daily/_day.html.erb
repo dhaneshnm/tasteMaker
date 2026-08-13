@@ -1,45 +1,42 @@
 <%# One day, on every screen that shows one.
     Locals: pick, chrome: — :front_door (/), :archive (/days/:date), :preview (curator),
-    published_count: and current: — both counted by the controller, never re-queried here.
+    and current: — the pick the front door is showing, counted by the controller.
 
-    The three modes differ in five places and nothing else:
+    The three modes differ in four places and nothing else:
 
-      chrome:        masthead label      date links to     keep control  coda line          coda links
-      ------------   -----------------   ---------------   ------------  ----------------   ----------------------
-      :front_door    Artwork of the Day  /days, if >1 day  yes           See you tomorrow.  the gallery
-      :archive       From the archive    /days             yes           (none)             prev · next · today
-      :preview       Artwork of the Day  nothing           NO            See you tomorrow.  the gallery
+      chrome:        masthead label      compass marks  keep control  coda
+      ------------   -----------------   -------------  ------------  ----------------------
+      :front_door    Artwork of the Day  Today          yes           See you tomorrow. + the gallery
+      :archive       From the archive    nothing        yes           prev · next · today
+      :preview       Artwork of the Day  Today          NO            See you tomorrow. + the gallery
 
-    :preview exists so a curator checking a queued day sees the reader's page, not a page
-    with a live archive link that means nothing in a preview. Same reason it gets no keep
-    control: the day is not published, so no reader can act on it, and a curator keeping
-    unpublished works would be the first thing polluting the only usage signal this
-    feature has. %>
+    An archived day marks nothing, because it is not one of the four surfaces — it is one
+    day *inside* the archive, and marking `Days` there would unlink the only route back to
+    the list. See ApplicationHelper#compass_destinations.
+
+    :preview shows the reader's page, compass and all, because that is what a preview is
+    for. It gets no keep control: the day is not published, so no reader can act on it, and
+    a curator keeping unpublished works would be the first thing polluting the only usage
+    signal that feature has. %>
 <% painting = pick.painting
    src = artwork_src(painting)
    archive = chrome == :archive %>
 
-<% content_for :title, "#{painting.title} — Tastemaker" %>
-<% content_for :description, "#{painting.title} by #{painting.artist_display}, #{archive ? "from the Tastemaker archive" : "today's artwork on Tastemaker"}." %>
+<% content_for :title, "#{painting.title} — Tondo" %>
+<% content_for :description, "#{painting.title} by #{painting.artist_display}, #{archive ? "from the Tondo archive" : "today's artwork on Tondo"}." %>
 <% content_for :head do %>
   <link rel="preload" as="image" href="<%= src %>">
 <% end %>
 
-<header class="masthead">
-  <a class="masthead__brand" href="<%= root_path %>">Tastemaker</a>
-  <p class="masthead__label"><%= archive ? "From the archive" : "Artwork of the Day" %></p>
-
-  <%# The date is the door to the other days — the one element already meaning
-      "which day", so the archive needs no new chrome. It only becomes a link once
-      there is more than the current pick to see. %>
-  <time class="masthead__aside" datetime="<%= pick.scheduled_on.iso8601 %>">
-    <% if archive || (chrome == :front_door && published_count.to_i > 1) %>
-      <%= link_to pick.scheduled_on.to_fs(:daily), days_path, aria: { label: "See past days" } %>
-    <% else %>
-      <%= pick.scheduled_on.to_fs(:daily) %>
-    <% end %>
-  </time>
-</header>
+<%# The date used to be the door to the archive — a link, but only once there was
+    more than one published day, and never labelled as anything but a date. The
+    compass carries that door now, with the word `Days` on it and no condition,
+    so this is a date again and nothing else. %>
+<%= render "shared/masthead",
+      label: archive ? "From the archive" : "Artwork of the Day",
+      here: archive ? nil : :today,
+      aside: pick.scheduled_on.to_fs(:daily),
+      aside_datetime: pick.scheduled_on.iso8601 %>
 
 <main class="page" data-controller="artwork">
   <%= render "shared/plate", painting: painting, eager: true,

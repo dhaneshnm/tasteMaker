@@ -18,10 +18,21 @@ require "rails/test_unit/railtie"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-module TasteMaker
+module Tondo
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.1
+
+    # One value per deploy, folded into the ETag by ApplicationController.
+    #
+    # Without it, a change to the TEXT of a template does not move the ETag on
+    # `/` or `/days` — those keys are model rows plus the importmap and
+    # stylesheet digests — so a returning reader revalidates, gets a 304, and
+    # keeps the old words forever. `REVISION` is written by the Dockerfile at
+    # image build time; "dev" locally, where there are no returning readers and
+    # the value only has to be stable.
+    config.x.revision =
+      Rails.root.join("REVISION").then { |f| f.exist? ? f.read.strip.presence : nil } || "dev"
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.

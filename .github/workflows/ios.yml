@@ -41,7 +41,7 @@ jobs:
       # means a dependency failure reads as a dependency failure, rather than
       # as a compile error 200 lines into a build log.
       - name: Resolve Swift packages
-        run: xcodebuild -resolvePackageDependencies -project ios/Tastemaker.xcodeproj
+        run: xcodebuild -resolvePackageDependencies -project ios/Tondo.xcodeproj
 
       # A generic destination rather than a named device: which simulators a
       # runner image ships changes without notice, and this job exists to prove

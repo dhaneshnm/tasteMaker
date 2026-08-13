@@ -42,7 +42,7 @@ class DailyTest < ActionDispatch::IntegrationTest
   test "the page says what it is and which day it belongs to" do
     get root_path
 
-    assert_select ".masthead__brand", text: "Tastemaker"
+    assert_select ".masthead__brand", text: "Tondo"
     assert_select ".masthead__label", text: "Artwork of the Day"
     assert_select "time.masthead__aside[datetime=?]", Date.current.iso8601
   end

@@ -63,7 +63,7 @@ class FavoritesTest < ApplicationSystemTestCase
     assert_text daily_picks(:today).painting.title
 
     visit days_path
-    click_on "Your collection →"
+    within(".compass") { click_on "Kept" }
 
     assert_selector ".masthead__label", text: "Your collection"
   end
@@ -84,20 +84,34 @@ class FavoritesTest < ApplicationSystemTestCase
   end
 
   # The forcing function for DESIGN.md rule 9, and for the thing dogfooding
-  # caught: a coda used to end with one way out, and two small-caps links sharing
-  # a line with nothing between them read as one long string.
-  test "a coda with two ways out separates them, and both are real targets" do
+  # caught: small-caps links sharing a line with nothing between them read as one
+  # long string.
+  #
+  # This used to measure the archive's coda, which ended with two ways out. Story
+  # 0012 moved every way out into the compass, so the coda has no pair left to
+  # measure and the same defect now lives four items wide at the top of every
+  # screen. The assertion moved with it.
+  #
+  # It also holds the line that decides whether the compass fits on one row at
+  # 375px: four items, one row, is what keeps the fold budget on the front door.
+  test "the compass separates its four doors, and every one is a real target" do
     keep_todays_artwork
     click_on "1 kept →"
 
     # assert_selector waits for the navigation; `all` does not, and reading it
     # straight after a click races the page in.
-    assert_selector ".coda .caps-link", count: 2
-    links = all(".coda .caps-link")
+    assert_selector ".compass .caps-link", count: 4
+    items = all(".compass .caps-link")
 
-    links.each { |link| assert_operator link.native.size.height, :>=, 44 }
-    assert_operator links.last.native.location.x - (links.first.native.location.x +
-      links.first.native.size.width), :>=, 16, "the two ways out ran together"
+    items.each { |item| assert_operator item.native.size.height, :>=, 44 }
+
+    tops = items.map { |item| item.native.location.y }.uniq
+    assert_equal 1, tops.size, "the compass wrapped onto two rows at 375px"
+
+    items.each_cons(2) do |left, right|
+      gap = right.native.location.x - (left.native.location.x + left.native.size.width)
+      assert_operator gap, :>=, 10, "two doors ran together"
+    end
   end
 
   # The orphan row's Remove is the ONLY control a kept work has once the curator

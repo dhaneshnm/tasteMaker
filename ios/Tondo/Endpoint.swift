@@ -2,12 +2,12 @@ import Foundation
 
 /// Where the shell points.
 ///
-/// The value comes from `TASTEMAKER_URL` in `Config/*.xcconfig` by way of
+/// The value comes from `TONDO_URL` in `Config/*.xcconfig` by way of
 /// `Info.plist`, never from a literal in Swift. A hardcoded start URL is a start
 /// URL that ships to the App Store pointing at somebody's laptop.
 enum Endpoint {
     static let url: URL = {
-        guard let raw = Bundle.main.object(forInfoDictionaryKey: "TastemakerURL") as? String,
+        guard let raw = Bundle.main.object(forInfoDictionaryKey: "TondoURL") as? String,
               !raw.isEmpty,
               let url = URL(string: raw),
               url.scheme != nil,
@@ -17,7 +17,7 @@ enum Endpoint {
             // default host is worse than one that will not start: the failure
             // would surface as a blank screen in App Review with no explanation.
             fatalError("""
-            TASTEMAKER_URL is missing or unparseable.
+            TONDO_URL is missing or unparseable.
             Check Config/Debug.xcconfig and Config/Release.xcconfig — note that `//` \
             must be escaped as `/$()/` or xcconfig reads the rest of the line as a comment.
             """)

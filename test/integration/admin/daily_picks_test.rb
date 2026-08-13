@@ -154,7 +154,7 @@ module Admin
 
         assert_select "meta[name=?]", "csrf-token", count: 0,
           message: "the preview rendered the admin layout"
-        assert_select "a.masthead__brand", text: "Tastemaker"
+        assert_select "a.masthead__brand", text: "Tondo"
       end
     end
 

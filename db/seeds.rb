@@ -53,7 +53,7 @@ MAX_PIXELS = 1600 # longest edge after resize; plenty for a retina feed column
 
 def download(url, max_bytes: 60.megabytes)
   URI.parse(url).open(
-    "User-Agent" => "tasteMaker seed (Rails MVP, CC0 images)",
+    "User-Agent" => "Tondo seed (Rails MVP, CC0 images)",
     open_timeout: 15, read_timeout: 180,
     content_length_proc: ->(len) { raise "too large" if len && len > max_bytes }
   )

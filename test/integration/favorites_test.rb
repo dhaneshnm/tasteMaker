@@ -47,7 +47,7 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     get days_path
     empty_handed = response.body
 
-    assert_select "a.caps-link", text: "Your collection →"
+    assert_select ".compass a[href=?]", collection_path, text: "Kept"
 
     keep(@painting)
     get days_path
@@ -264,7 +264,7 @@ class FavoritesTest < ActionDispatch::IntegrationTest
 
     assert_select ".coda__line", text: "The works you keep will gather here."
     assert_select ".coda__note", text: "Keep this sits under every artwork."
-    assert_select "a.caps-link", text: "Today →"
+    assert_select ".compass a[href=?]", root_path, text: "Today"
   end
 
   # Regression: ISSUE-001 — the empty collection offered only "Today →", so a
@@ -273,11 +273,16 @@ class FavoritesTest < ActionDispatch::IntegrationTest
   # reader came from.
   # Found by /qa on 2026-08-04
   # Report: .gstack/qa-reports/qa-report-localhost-2026-08-04-favorites.md
+  #
+  # Story 0012 answered it structurally: the compass carries every door on every
+  # screen, so this cannot come back one page at a time. The assertion moved
+  # onto the compass and stayed.
   test "an empty collection is still a sibling of the archive" do
     get collection_path
 
-    assert_select "a.caps-link[href=?]", days_path, text: "The days behind you →"
-    assert_select "a.caps-link[href=?]", root_path, text: "Today →"
+    assert_select ".compass a[href=?]", days_path, text: "Days"
+    assert_select ".compass a[href=?]", root_path, text: "Today"
+    assert_select ".compass span[aria-current=?]", "page", text: "Kept"
   end
 
   test "a collection that holds something says how it is held, and where else to go" do
@@ -287,8 +292,8 @@ class FavoritesTest < ActionDispatch::IntegrationTest
 
     assert_select ".masthead__aside", text: "1 work"
     assert_select ".coda__note", text: "Kept on this device — free, and yours."
-    assert_select "a.caps-link", text: "The days behind you →"
-    assert_select "a.caps-link", text: "Today →"
+    assert_select ".compass a[href=?]", days_path, text: "Days"
+    assert_select ".compass a[href=?]", root_path, text: "Today"
   end
 
   test "the count link appears only once there is something to count" do

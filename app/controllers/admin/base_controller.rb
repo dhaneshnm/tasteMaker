@@ -17,7 +17,7 @@ module Admin
     private
 
     def authenticate_curator
-      authenticate_or_request_with_http_basic("Tastemaker") do |username, password|
+      authenticate_or_request_with_http_basic("Tondo") do |username, password|
         expected_password = curator_password
         next false if expected_password.blank?
 

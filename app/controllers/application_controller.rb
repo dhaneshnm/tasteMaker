@@ -25,4 +25,23 @@ class ApplicationController < ActionController::Base
   # that does not change the body. The cost of dropping it is that a CSS change
   # also invalidates any non-HTML conditional GET: one extra fetch, once.
   etag { helpers.app_stylesheets_paths.map { |sheet| helpers.stylesheet_path(sheet) } }
+
+  # And so does a change to the templates themselves, which is the general case
+  # the two lines above are each a special case of.
+  #
+  # The importmap etag covers JavaScript. The stylesheet etag covers CSS. Both
+  # were added after a specific bug. Neither covers the third input the page is
+  # built from: the text of the `.erb` files. `/` and `/days` key their ETags on
+  # model rows, so editing a masthead, a `<title>`, or any other string ships a
+  # new page behind an unchanged ETag — every browser holding the old HTML
+  # revalidates into a 304 and keeps the old words, and every reload does it
+  # again. Renaming this product to Tondo (story 0011) would have been exactly
+  # that, on every screen at once.
+  #
+  # `config.x.revision` is written per image build by the Dockerfile, so a
+  # deploy busts every conditional GET once and then they settle back into 304s.
+  # A template digest would be more precise, but dependency tracking through
+  # `render` is implicit and a missed partial fails silently in the same
+  # direction as the bug — this value cannot miss anything.
+  etag { Rails.application.config.x.revision }
 end

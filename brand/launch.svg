@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 40" width="300" height="40">
+  <!--
+    The launch screen. `UILaunchScreen` in Info.plist draws the linen colour and
+    centres this one image, so this file is the entire first frame of the product.
+
+    The mark is deliberately NOT here. Once the icon field went gilt the mark
+    became a filled gold square, and a filled gold square is the loudest thing
+    that would ever land on the calmest surface in the app. See DESIGN.md.
+
+    The wordmark ships as a raster so the launch screen needs no font at all —
+    UIKit draws it before any of our code runs, and before UIAppFonts matters.
+
+    300x40 at 1x, matching the shape of the wordmark it replaces (295x26). The
+    font is this repo's own Fraunces, by relative path, so rendering needs no
+    network. Tracking is 0.24em; `x` carries half of it back because SVG adds
+    letter-spacing after the final glyph too, which would otherwise push the
+    word left of centre.
+  -->
+  <defs>
+    <style>
+      @font-face {
+        font-family: "Fraunces";
+        font-style: normal;
+        font-weight: 300 700;
+        src: url("../app/assets/fonts/fraunces-roman-latin.woff2") format("woff2");
+      }
+    </style>
+  </defs>
+  <rect width="300" height="40" fill="#f4efe6"/>
+  <text x="152.88" y="28.76"
+        text-anchor="middle"
+        fill="#7d5f18"
+        font-family="Fraunces"
+        font-weight="480"
+        font-size="24"
+        letter-spacing="5.76"
+        style="font-variation-settings:'opsz' 144">TONDO</text>
+</svg>

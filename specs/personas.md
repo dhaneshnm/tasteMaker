@@ -96,7 +96,7 @@ a tasteful related-product mention at the end of a blurb ("feels like the app is
 people truly passionate"). When premium gets specced, frame it as patronage + extras, never
 as gating retention features (see persona 6).
 
-## Standing implications for Tastemaker
+## Standing implications for Tondo
 1. Baseline serves persona 1; persona 2 defines the favorites contract (free, permanent).
 2. Persona 3 sets the hand-written-blurb bar and argues for range beyond Euro-canon hits.
    Positive reviews double this: novices AND self-described experts both prize discovering

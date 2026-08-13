@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Tastemaker</string>
+	<string>Tondo</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -24,8 +24,8 @@
 	<!-- Where the shell points. Set per-configuration in Config/*.xcconfig so a
 	     start URL is never hardcoded in Swift. Endpoint.swift reads this key and
 	     traps loudly if it is missing or unparseable. -->
-	<key>TastemakerURL</key>
-	<string>$(TASTEMAKER_URL)</string>
+	<key>TondoURL</key>
+	<string>$(TONDO_URL)</string>
 
 	<!-- Local networking only. This permits http://localhost:3000 during
 	     development without opening arbitrary cleartext to the internet, so it

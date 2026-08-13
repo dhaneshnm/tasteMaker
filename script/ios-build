@@ -18,8 +18,8 @@
 set -euo pipefail
 
 TARGET="${1:-iPhone 17}"
-PROJECT="ios/Tastemaker.xcodeproj"
-SCHEME="Tastemaker"
+PROJECT="ios/Tondo.xcodeproj"
+SCHEME="Tondo"
 
 # Accept either a device name or a full destination specifier.
 case "$TARGET" in

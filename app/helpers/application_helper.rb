@@ -35,6 +35,53 @@ module ApplicationHelper
     pick == current ? root_path : day_path(pick.scheduled_on.iso8601)
   end
 
+  # The four surfaces a reader can be on, in the order the compass shows them:
+  # today first because it is the ritual, the gallery last because it is the
+  # side trip. One word each — `.caps-link` is 0.78rem at 0.2em tracking, and
+  # measured at 375px four one-word labels fit on one row while four two-word
+  # labels wrap to two. Every wrapped row costs 44px above the artwork
+  # (`DESIGN.md` rule 9), so the copy length is a layout constraint, not a
+  # matter of taste. `specs/0012-getting-around/plan.md` has the measurements.
+  #
+  # The third element is the *name* of a route helper, not a path. Route
+  # helpers are request-context methods, so calling them while building a
+  # frozen constant would either fail or freeze one request's idea of a URL
+  # into the class.
+  COMPASS = [
+    [ :today,      "Today",   :root_path ],
+    [ :days,       "Days",    :days_path ],
+    [ :collection, "Kept",    :collection_path ],
+    [ :gallery,    "Gallery", :feed_path ]
+  ].freeze
+
+  COMPASS_KEYS = COMPASS.map(&:first).freeze
+
+  # `here` is a tri-state, and the middle state is the interesting one:
+  #
+  #   nil          four links, nothing marked      /days/:date, /404
+  #   a key        that one is marked and unlinked  /, /days, /collection, /feed
+  #   anything else raises
+  #
+  # `/days/:date` passes nil on purpose. An archived day is a *member* of the
+  # archive, not the archive itself — marking `Days` as current there would
+  # unlink the only route from one old day back to the list, since `days/_walk`
+  # offers previous, next and today and nothing else. The 404 is the same
+  # shape: it is not one of the four surfaces.
+  #
+  # It raises rather than silently rendering four links, because a typo in a
+  # `here:` local would otherwise look exactly like a page that meant to pass
+  # nil, and the reader would lose their "you are here" with nothing failing.
+  def compass_destinations(here)
+    unless here.nil? || COMPASS_KEYS.include?(here)
+      raise ArgumentError,
+        "unknown compass key #{here.inspect} — expected nil or one of #{COMPASS_KEYS.inspect}"
+    end
+
+    COMPASS.map do |key, label, route|
+      { key: key, label: label, path: public_send(route), current: key == here }
+    end
+  end
+
   # Resizing needs libvips or ImageMagick on the box, and this machine has
   # neither — see the analyzer note in `config/application.rb`. Asking for a
   # variant anyway does not raise here: it raises later, inside Active Storage's

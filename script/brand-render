@@ -1,0 +1,197 @@
+#!/usr/bin/env bash
+# Renders every shipped raster from the SVGs in `brand/`, and fails loudly.
+#
+# The mark is drawn once, in `brand/*.svg`, with the geometry DESIGN.md states.
+# Everything else — eight iOS icon sizes, three appearances of some of them, the
+# web icons and the launch wordmark — is generated from those files by this
+# script. Twelve PNGs made by hand are twelve PNGs that drift the first time the
+# mark is nudged, which is why the generator exists at all (R1).
+#
+# Usage:
+#   script/brand-render            # regenerate everything
+#   script/brand-render --check    # exit non-zero if manifest.json is stale
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# TWO THINGS THAT ARE NOT OBVIOUS AND COST AN AFTERNOON EACH.
+#
+#   1. Every raster is downsampled from one 1024 master. Do NOT ask Chrome to
+#      paint the SVG at 40x40 directly. At that size Chrome makes each pixel a
+#      hard gold-or-linen decision and the lights come out as blocks; averaging
+#      down from 1024 keeps the edges. It is also what Apple and browsers do to
+#      the icon anyway, so what ships matches what was proofed. Measured on real
+#      output during the design review, 2026-08-10.
+#
+#   2. This script only runs on macOS. It needs Chrome and `sips`. Linux CI
+#      cannot reproduce these files, and cross-platform renders do not match
+#      byte for byte anyway — macOS and Linux antialias differently and
+#      `launch.svg` contains real type. That is why the forcing function is
+#      `test/integration/brand_assets_test.rb` (structure + source SHAs), not a
+#      re-render and diff in CI.
+# ─────────────────────────────────────────────────────────────────────────────
+
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+BRAND="brand"
+ICONSET="ios/Tondo/Assets.xcassets/AppIcon.appiconset"
+WORDMARK="ios/Tondo/Assets.xcassets/LaunchWordmark.imageset"
+PUBLIC="public"
+MANIFEST="$BRAND/manifest.json"
+
+# Which drawing carries which size. Settled by rendering both at every size and
+# looking at them magnified, not by reasoning — see DESIGN.md.
+#
+# Twelve lights and the tracery band survive down to 80: at 87 and 80 the petals
+# stay separate and the band is still a band. At 60 the band closes up against
+# the petals and the gaps between lights start filling in, so the eight-light
+# drawing takes over — fewer, heavier mullions in a smaller opening, which is
+# what a real rose window does.
+FULL_SIZES="1024 180 120 87 80"
+SMALL_SIZES="60 58 40"
+
+GOLD="7D5F18"   # --gold, for padding the maskable canvas
+
+# ── preflight ────────────────────────────────────────────────────────────────
+if [ ! -x "$CHROME" ]; then
+  echo "brand-render: Chrome not found at $CHROME" >&2
+  echo "  This script renders SVG with headless Chrome. Install Chrome, or" >&2
+  echo "  point CHROME at another Chromium build." >&2
+  exit 1
+fi
+command -v sips >/dev/null 2>&1 || { echo "brand-render: sips not found — macOS only." >&2; exit 1; }
+command -v shasum >/dev/null 2>&1 || { echo "brand-render: shasum not found." >&2; exit 1; }
+
+SOURCES="$BRAND/rose.svg $BRAND/rose-small.svg $BRAND/rose-tinted.svg $BRAND/rose-mono.svg $BRAND/launch.svg"
+for src in $SOURCES; do
+  [ -f "$src" ] || { echo "brand-render: missing source $src" >&2; exit 1; }
+done
+
+# ── --check: is the committed output built from the current sources? ─────────
+write_manifest() {
+  {
+    echo "{"
+    echo "  \"generated_by\": \"script/brand-render\","
+    echo "  \"sources\": {"
+    local first=1
+    for src in $SOURCES; do
+      [ $first -eq 1 ] || echo ","
+      first=0
+      printf '    "%s": "%s"' "$src" "$(shasum -a 256 "$src" | cut -d' ' -f1)"
+    done
+    echo ""
+    echo "  }"
+    echo "}"
+  } > "$1"
+}
+
+if [ "${1:-}" = "--check" ]; then
+  [ -f "$MANIFEST" ] || { echo "brand-render: $MANIFEST missing — run script/brand-render" >&2; exit 1; }
+  tmp=$(mktemp); write_manifest "$tmp"
+  if ! diff -q "$MANIFEST" "$tmp" >/dev/null; then
+    rm -f "$tmp"
+    echo "brand-render: $MANIFEST is stale — a source SVG changed without a re-render." >&2
+    echo "  Run: script/brand-render" >&2
+    exit 1
+  fi
+  rm -f "$tmp"
+  echo "brand-render: manifest matches sources."
+  exit 0
+fi
+
+# ── render one SVG to one PNG at a given size ────────────────────────────────
+# Chrome paints an SVG at whatever its own width/height attributes say, then
+# leaves the rest of the window blank — a 300x40 drawing in a 900x120 window
+# comes out as a small image in the corner of a white page. So the SVG is
+# inlined into a wrapper that stretches it to the viewport, and `--window-size`
+# becomes the output size.
+#
+# The wrapper is written into `brand/` deliberately: `launch.svg` declares an
+# @font-face with a path relative to itself, and that path only resolves if the
+# document loading it lives in the same directory.
+render() {
+  local src="$1" out="$2" w="$3" h="$4"
+  local wrapper="$BRAND/.render.html"
+
+  {
+    echo '<!doctype html><meta charset="utf-8">'
+    echo '<style>html,body{margin:0;padding:0;overflow:hidden}svg{display:block}</style>'
+    # Rewrite the source's own width/height to the target. Explicit attributes,
+    # not `width:100vw` — viewport units put the drawing in the wrong place here,
+    # and a launch wordmark rendered 70px low with its type clipped is the kind
+    # of thing that ships because nobody opened the PNG.
+    W="$w" H="$h" perl -0777 -pe '
+      s{(<svg\b[^>]*?)>}{
+        my $t = $1;
+        $t =~ s/\s(?:width|height)="[^"]*"//g;
+        qq{$t width="$ENV{W}" height="$ENV{H}">}
+      }e' "$src"
+  } > "$wrapper"
+
+  "$CHROME" --headless --disable-gpu --hide-scrollbars \
+    --force-device-scale-factor=1 --default-background-color=00000000 \
+    --virtual-time-budget=2000 --window-size="$w","$h" \
+    --screenshot="$out" "file://$PWD/$wrapper" >/dev/null 2>&1 || true
+
+  rm -f "$wrapper"
+
+  # A zero-byte or missing screenshot is how a silently broken render ships.
+  [ -s "$out" ] || { echo "brand-render: produced nothing for $src -> $out" >&2; exit 1; }
+}
+
+# Downsample a master to a target edge. Never render small directly — see above.
+shrink() {
+  local master="$1" out="$2" size="$3"
+  cp "$master" "$out"
+  sips -Z "$size" "$out" >/dev/null 2>&1
+  [ -s "$out" ] || { echo "brand-render: shrink failed for $out" >&2; exit 1; }
+}
+
+echo "==> rendering masters"
+mkdir -p "$ICONSET" "$WORDMARK" "$PUBLIC" tmp/brand
+render "$BRAND/rose.svg"        tmp/brand/full-1024.png   1024 1024
+render "$BRAND/rose-small.svg"  tmp/brand/small-1024.png  1024 1024
+render "$BRAND/rose-tinted.svg" tmp/brand/tinted-1024.png 1024 1024
+render "$BRAND/launch.svg"      tmp/brand/launch-900.png   900  120
+
+echo "==> iOS icons"
+for size in $FULL_SIZES;  do shrink tmp/brand/full-1024.png  "$ICONSET/icon-$size.png"  "$size"; done
+for size in $SMALL_SIZES; do shrink tmp/brand/small-1024.png "$ICONSET/icon-$size.png"  "$size"; done
+
+# Tinted ships at 1024 ONLY, and that is not an optimisation.
+#
+# `appearances` is not a valid key on a legacy per-size entry. Writing tinted
+# variants alongside the `idiom: iphone` / `scale: 2x` slots builds green and
+# emits "the app icon set AppIcon has 9 unassigned children" — Xcode parses the
+# entries, cannot place them, and drops them. The icon then ships with no tinted
+# appearance at all and nothing fails. Measured 2026-08-10; the warning is the
+# only evidence you get.
+#
+# The appearance slot lives on the universal single-size entry
+# (`idiom: universal`, `platform: ios`, `1024x1024`), which coexists happily
+# with the per-size defaults that carry the two drawings. iOS derives the
+# smaller tinted renditions from this one image.
+cp tmp/brand/tinted-1024.png "$ICONSET/icon-1024-tinted.png"
+
+echo "==> web icons"
+shrink tmp/brand/small-1024.png "$PUBLIC/icon.png"             512
+shrink tmp/brand/small-1024.png "$PUBLIC/apple-touch-icon.png" 180
+cp     "$BRAND/rose-small.svg"  "$PUBLIC/icon.svg"
+
+# Maskable: the mark at 512 centred on a 640 canvas puts the outermost ink at
+# 78% of the half-width, inside the 80% safe circle a maskable icon is cropped
+# to. Padded with the gold, not with transparency, so the crop never exposes an
+# edge — the field is meant to run to the boundary whatever shape the OS picks.
+shrink tmp/brand/small-1024.png "$PUBLIC/icon-maskable.png" 512
+sips -p 640 640 --padColor "$GOLD" "$PUBLIC/icon-maskable.png" >/dev/null 2>&1
+[ -s "$PUBLIC/icon-maskable.png" ] || { echo "brand-render: maskable pad failed" >&2; exit 1; }
+
+echo "==> launch wordmark"
+cp tmp/brand/launch-900.png "$WORDMARK/wordmark@3x.png"
+shrink tmp/brand/launch-900.png "$WORDMARK/wordmark@2x.png" 600
+shrink tmp/brand/launch-900.png "$WORDMARK/wordmark.png"    300
+
+write_manifest "$MANIFEST"
+rm -rf tmp/brand
+
+echo "==> done. $(ls "$ICONSET"/*.png | wc -l | tr -d ' ') icons, 4 web files, 3 wordmarks."
