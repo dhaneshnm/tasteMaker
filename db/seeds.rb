@@ -93,9 +93,17 @@ rescue LoadError
 end
 raise "no image resizer (libvips or sips) — refusing to seed full-size plates" if RESIZER == :none
 
+# Both headers, and the shared constant rather than a second copy of the string.
+# This function used to send its own User-Agent, and that is what cost the first
+# production seed 220 of 2,000 plates — every single failure was the Art
+# Institute. `Pool::Sources` had already learned both lessons (no email address
+# in the string, and AIC's Cloudflare wants its own `AIC-User-Agent` header) and
+# this file had learned neither, because it held a duplicate. Reusing the
+# constant is the fix; keeping a copy in step by hand is what failed.
 def download(url, max_bytes: 60.megabytes)
   URI.parse(url).open(
-    "User-Agent" => "Tondo seed (Rails MVP, CC0 images)",
+    "User-Agent" => Pool::Sources::USER_AGENT,
+    "AIC-User-Agent" => Pool::Sources::USER_AGENT,
     open_timeout: 15, read_timeout: 180,
     content_length_proc: ->(len) { raise "too large" if len && len > max_bytes }
   )
