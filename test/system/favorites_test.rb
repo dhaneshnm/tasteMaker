@@ -14,9 +14,7 @@ require "application_system_test_case"
 # label gone the name is the whole announcement, and a test that can still find
 # the button is a test that a screen reader user can still find it too.
 class FavoritesTest < ApplicationSystemTestCase
-  # Story 0015: the pages this file exercises sit behind the wall. The reader
-  # signs in once per test, through the real fragment.
-  setup { sign_in_as_reader }
+  behind_the_wall!
 
   test "keeping today's artwork changes the glyph and nothing else" do
     visit root_path

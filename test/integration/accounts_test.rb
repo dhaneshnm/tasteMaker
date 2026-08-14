@@ -6,7 +6,7 @@ require "test_helper"
 class AccountsTest < ActionDispatch::IntegrationTest
   test "deleting the account deletes the user and their keeps, and nothing else" do
     user = sign_in
-    post "/collection/#{paintings(:sunflowers).id}"
+    post favorite_path(paintings(:sunflowers))
 
     assert_difference "User.count" => -1, "Favorite.count" => -1 do
       delete "/account"
@@ -34,7 +34,7 @@ class AccountsTest < ActionDispatch::IntegrationTest
 
   test "two worlds never see each other's keeps" do
     register_device
-    post "/collection/#{paintings(:sunflowers).id}"
+    post favorite_path(paintings(:sunflowers))
     device_keep = Favorite.order(:created_at).last
     assert device_keep.collector_digest.present?
 

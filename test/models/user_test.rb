@@ -35,9 +35,8 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 2, User.count
   end
 
-  test "display_identity falls back to the provider when Apple withheld the email" do
-    assert_equal "Apple", User.from_omniauth(auth).display_identity
-    assert_equal "a@example.com",
-      User.from_omniauth(auth(uid: "uid-2", email: "a@example.com")).display_identity
+  test "provider_name speaks the reader's language, not OAuth's" do
+    assert_equal "Google", User.new(provider: "google_oauth2").provider_name
+    assert_equal "Apple", User.new(provider: "apple").provider_name
   end
 end

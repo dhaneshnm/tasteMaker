@@ -1,9 +1,7 @@
 require "application_system_test_case"
 
 class DaysSystemTest < ApplicationSystemTestCase
-  # Story 0015: the pages this file exercises sit behind the wall. The reader
-  # signs in once per test, through the real fragment.
-  setup { sign_in_as_reader }
+  behind_the_wall!
 
   # The whole point of story 0003, made measurable: somebody back from three
   # shifts reaches a missed day in two taps.

@@ -86,8 +86,7 @@ class FavoritesTest < ActionDispatch::IntegrationTest
   # test people reach for first cannot assert this at all.
   test "the device cookie is built to outlive the browser session" do
     fresh = open_session
-    fresh.post "/device/registrations", params: { device_token: "longevity-uuid" },
-      headers: { "X-Tondo-App" => ENV.fetch("TONDO_APP_SECRET") }
+    register_device(token: "longevity-uuid", session: fresh)
     header = Array(fresh.response.headers["Set-Cookie"]).join("\n")
 
     assert_match(/device=/, header)
@@ -231,8 +230,7 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     keep(@painting)
 
     stranger = open_session
-    stranger.post "/device/registrations", params: { device_token: "a-second-device" },
-      headers: { "X-Tondo-App" => ENV.fetch("TONDO_APP_SECRET") }
+    register_device(token: "a-second-device", session: stranger)
     stranger.get favorite_control_path(@painting)
 
     stranger.assert_select "button[aria-pressed=?]", "false"

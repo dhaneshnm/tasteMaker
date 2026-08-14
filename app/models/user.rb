@@ -24,12 +24,6 @@ class User < ApplicationRecord
     user
   end
 
-  # What the collection coda's account line says. Falls back to the provider
-  # alone when Apple withheld the email.
-  def display_identity
-    email.presence || provider_name
-  end
-
   def provider_name
     { "google_oauth2" => "Google", "apple" => "Apple" }.fetch(provider, provider)
   end

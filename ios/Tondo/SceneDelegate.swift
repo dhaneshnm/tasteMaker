@@ -48,10 +48,11 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
-        // The retry path. Idempotent server-side (same UUID → same identity,
-        // cookie re-issued), so re-registering on every foreground costs one
-        // request and heals a failed first launch without special-casing it.
-        guard started else { return }
+        // The retry path — but only while unhealed. Idempotent server-side
+        // (same UUID → same identity), and once this process holds a 204 there
+        // is nothing left to heal until the next cold launch, so a healthy
+        // foreground spends no network round-trip here.
+        guard started, !DeviceIdentity.registered else { return }
         DeviceIdentity.register {}
     }
 

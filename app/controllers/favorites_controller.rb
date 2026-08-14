@@ -124,10 +124,10 @@ class FavoritesController < ApplicationController
     # mint-on-read browser cookie is gone, deleted rather than deprecated,
     # because nothing was deployed and no reader ever held one.
     def reader_favorites
-      current_user ? Favorite.owned_by(current_user) : Favorite.collected_by(current_device_digest)
+      current_user ? Favorite.owned_by(current_user) : Favorite.collected_by(current_device.token_digest)
     end
 
     def reader_identity_attributes
-      current_user ? { user: current_user } : { collector_digest: current_device_digest }
+      current_user ? { user: current_user } : { collector_digest: current_device.token_digest }
     end
 end

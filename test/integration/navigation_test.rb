@@ -16,9 +16,7 @@ require "test_helper"
 # `days/_walk` at the foot of an archived day, so an unscoped assertion would
 # happily prove the wrong element.
 class NavigationTest < ActionDispatch::IntegrationTest
-  # Story 0015 put the reader-facing pages behind the wall; these tests read
-  # them the way the app does — as a registered device.
-  setup { register_device }
+  behind_the_wall!
 
   # The 404 is one of the six screens in the matrix, and reaching it means
   # letting the app render the failure instead of re-raising it (story 0004).

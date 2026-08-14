@@ -7,10 +7,9 @@ class DaysController < ApplicationController
   def index
     picks = DailyPick.published
 
-    # Behind the wall since story 0015: still ETag'd (browsers revalidate),
-    # no longer `public` (Thruster must not hold a gated page's body — a
-    # shared cache entry outlives a sign-out).
-    response.cache_control.replace(no_cache: true, extras: [ "private" ])
+    # Behind the wall since story 0015: still ETag'd, no longer `public` —
+    # see ApplicationController#private_revalidate.
+    private_revalidate
 
     # Aggregates first, then bail: the page revalidates on every visit, and
     # loading every pick, painting, attachment and blob only to discard them on
@@ -42,7 +41,7 @@ class DaysController < ApplicationController
     # `stale?`, not `fresh_when`: this action renders explicitly, and fresh_when
     # already sends the 304 itself, so the render would be a second response.
     # The painting is in the key for the same reason it is on the list.
-    response.cache_control.replace(no_cache: true, extras: [ "private" ])
+    private_revalidate
     render template: "daily/show" if stale?(etag: [ @pick, @pick.painting ],
       last_modified: @pick.updated_at)
   end

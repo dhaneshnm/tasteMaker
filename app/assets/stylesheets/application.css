@@ -1183,16 +1183,28 @@ html.zoom-open body { overflow: hidden; }
   align-items: center;
   gap: 1.4rem;
 }
-.signin--in .caps-link { min-height: 44px; display: inline-flex; align-items: center; }
-.signin__out-form { display: inline-flex; }
-.signin__out {
+/* One reset, three quiet controls: a caps-link that happens to be a <button>
+ * (or must state its own 44px). Grouped so the next quiet button joins a
+ * selector list instead of pasting a fourth copy. */
+.signin--in .caps-link,
+.signin__out,
+.account__delete {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.signin__out-form,
+.account__form { display: inline-flex; }
+.signin__out,
+.account__delete {
   background: none;
   border: none;
   padding: 0;
   color: var(--gold);
   cursor: pointer;
 }
-.signin__out:hover { color: var(--gold-deep); }
+.signin__out:hover,
+.account__delete:hover { color: var(--gold-deep); }
 
 /* The account row at the foot of the collection — the reader's own room is
  * where rare controls live. */
@@ -1200,15 +1212,3 @@ html.zoom-open body { overflow: hidden; }
   margin-top: 2.5rem;
   text-align: center;
 }
-.account__form { display: inline-flex; }
-.account__delete {
-  background: none;
-  border: none;
-  padding: 0;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  color: var(--gold);
-  cursor: pointer;
-}
-.account__delete:hover { color: var(--gold-deep); }

@@ -5,6 +5,13 @@
 class Device < ApplicationRecord
   validates :token_digest, presence: true, uniqueness: true
 
+  # The token→digest rule is this table's invariant, so it lives here — the
+  # wall, registration, and the tests all call this instead of each spelling
+  # the hash themselves. The App Attest upgrade path would change one method.
+  def self.digest(token)
+    Digest::SHA256.hexdigest(token)
+  end
+
   # Once a day, not once a request, and update_column on purpose: no
   # validations, no callbacks, no updated_at churn — SQLite does not take a
   # write per pageview for a timestamp nobody reads more often than daily.

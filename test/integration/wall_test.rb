@@ -6,30 +6,41 @@ require "test_helper"
 # error pages, and the curator's desk stay outside it, each for a stated
 # reason (specs/0015-the-two-keys/plan.md).
 class WallTest < ActionDispatch::IntegrationTest
-  GATED = [
-    -> { "/days" },
-    -> { "/feed" },
-    -> { "/collection" },
-    -> { day_path(daily_picks(:yesterday).scheduled_on.iso8601) },
-    -> { favorite_control_path(paintings(:sunflowers)) }
-  ].freeze
+  # A method, not a constant: two of these need fixtures, which only exist
+  # once a test is running.
+  def gated_paths
+    [ "/days", "/feed", "/collection",
+      day_path(daily_picks(:yesterday).scheduled_on.iso8601),
+      favorite_control_path(paintings(:sunflowers)) ]
+  end
 
   test "cookieless requests bounce to the sign-in anchor and leak nothing" do
-    GATED.each do |path|
-      get instance_exec(&path)
+    gated_paths.each do |path|
+      get path
 
-      assert_redirected_to root_path(anchor: "signin"),
-        "#{instance_exec(&path)} did not bounce"
+      assert_redirected_to root_path(anchor: "signin"), "#{path} did not bounce"
       assert_equal 303, response.status, "the wall's redirect must be 303"
       assert_empty response.body.to_s.scan(/label__title/),
-        "#{instance_exec(&path)} leaked page content in the redirect body"
+        "#{path} leaked page content in the redirect body"
     end
   end
 
-  test "a cookieless keep POST bounces with 303, not 302" do
-    post "/collection/#{paintings(:sunflowers).id}"
+  # Found live at QA: in production the CSRF check answers a cookieless POST
+  # first (422) — a signed-out browser never renders a keep button, so that
+  # POST is curl, not a person. The wall's own 303 is the answer whenever a
+  # POST gets past CSRF. Both halves asserted, so neither env surprises.
+  test "a cookieless keep POST is refused either way and never writes" do
+    with_forgery_protection do
+      assert_no_difference "Favorite.count" do
+        post favorite_path(paintings(:sunflowers))
+      end
+      assert_response :unprocessable_content
+    end
 
-    assert_equal 303, response.status
+    assert_no_difference "Favorite.count" do
+      post favorite_path(paintings(:sunflowers))
+    end
+    assert_equal 303, response.status, "past CSRF, the wall's redirect must be 303"
     assert_redirected_to root_path(anchor: "signin")
   end
 
@@ -59,7 +70,7 @@ class WallTest < ActionDispatch::IntegrationTest
 
   test "a validly signed cookie whose device row is gone fails — revocation works" do
     token = register_device
-    Device.find_by!(token_digest: Digest::SHA256.hexdigest(token)).destroy
+    Device.find_by!(token_digest: Device.digest(token)).destroy
 
     get "/days"
     assert_equal 303, response.status, "deleting the row is the kill switch and it must kill"

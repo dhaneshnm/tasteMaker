@@ -19,9 +19,7 @@ require "test_helper"
 # reading "Tastemaker" indefinitely, because each reload revalidates into the
 # same 304.
 class TemplateEtagTest < ActionDispatch::IntegrationTest
-  # Story 0015 put the reader-facing pages behind the wall; these tests read
-  # them the way the app does — as a registered device.
-  setup { register_device }
+  behind_the_wall!
 
   # Exactly the conditional-GET surface. A page with no ETag cannot have this
   # bug, so the list is the same one `stylesheet_etag_test.rb` uses.

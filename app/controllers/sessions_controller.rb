@@ -19,6 +19,11 @@ class SessionsController < ApplicationController
   # door from the inside.
   skip_before_action :require_reader
 
+  # The class-wide idiom from FavoritesController, for the same reason: a
+  # second per-visitor action added here must not be able to ship a storable
+  # response by forgetting a line.
+  before_action :no_store, only: :control
+
   def create
     auth = request.env["omniauth.auth"]
     user = User.from_omniauth(auth)
@@ -54,11 +59,9 @@ class SessionsController < ApplicationController
   # the session). That is the 0006 pattern: private no-store fragments are
   # where cookies are allowed to happen; the public HTML of `/` stays clean.
   def control
-    no_store
-
     state =
       if current_user then :signed_in
-      elsif current_device || native_shell? then :device
+      elsif native_shell? || current_device then :device
       else :signed_out
       end
 

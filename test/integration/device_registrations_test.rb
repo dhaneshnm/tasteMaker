@@ -6,8 +6,6 @@ require "test_helper"
 # demonstrably real, because the test environment's :null_store makes an
 # un-pinned limiter pass every test while limiting nothing (eng review A1).
 class DeviceRegistrationsTest < ActionDispatch::IntegrationTest
-  setup { DeviceRegistrationsController::RATE_LIMIT_STORE.clear }
-
   test "no secret gets 401 and no cookie" do
     post "/device/registrations", params: { device_token: "uuid-1" }
 
@@ -29,7 +27,7 @@ class DeviceRegistrationsTest < ActionDispatch::IntegrationTest
 
     assert_response :no_content
     assert_equal 1, Device.count
-    assert_equal Digest::SHA256.hexdigest("uuid-1"), Device.first.token_digest,
+    assert_equal Device.digest("uuid-1"), Device.first.token_digest,
       "the table stores the digest, never the token"
     assert cookies[:device].present?
 

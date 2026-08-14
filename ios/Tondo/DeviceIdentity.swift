@@ -29,6 +29,16 @@ enum DeviceIdentity {
     private static let service = Bundle.main.bundleIdentifier ?? "app.tondo"
     private static let account = "device-token"
 
+    /// One session for the enum's lifetime, ephemeral so the ONLY cookie jar
+    /// that matters is the web view's — a per-call session leaks its queue
+    /// until invalidated, for no isolation gain.
+    private static let session = URLSession(configuration: .ephemeral)
+
+    /// Set on the first 204 this process sees. Cold launch always re-registers
+    /// (that is the cross-launch healing), but a healthy foreground should not
+    /// spend a network round-trip re-proving what this process already proved.
+    private(set) static var registered = false
+
     /// Read-or-mint. `AfterFirstUnlock` so a background relaunch on a locked
     /// phone can still read it; device-only (no `kSecAttrSynchronizable`).
     static var token: String {
@@ -59,28 +69,21 @@ enum DeviceIdentity {
                          forHTTPHeaderField: "User-Agent")
         request.httpBody = "device_token=\(token)".data(using: .utf8)
 
-        // An ephemeral session: the ONLY cookie jar that matters is the web
-        // view's. Letting URLSession's shared jar hold a second copy invites
-        // the two to disagree.
-        let configuration = URLSessionConfiguration.ephemeral
-        let session = URLSession(configuration: configuration)
-
+        // One hop to main, then one guard: every path calls `completion`
+        // plainly. A zero-cookie 204 resolves through the same DispatchGroup —
+        // a group with no enters fires `notify` immediately.
         session.dataTask(with: request) { _, response, _ in
-            guard let http = response as? HTTPURLResponse,
-                  http.statusCode == 204,
-                  let url = response?.url,
-                  let headers = http.allHeaderFields as? [String: String] else {
-                DispatchQueue.main.async(execute: completion)
-                return
-            }
-
-            let cookies = HTTPCookie.cookies(withResponseHeaderFields: headers, for: url)
-            guard !cookies.isEmpty else {
-                DispatchQueue.main.async(execute: completion)
-                return
-            }
-
             DispatchQueue.main.async {
+                guard let http = response as? HTTPURLResponse,
+                      http.statusCode == 204,
+                      let url = response?.url,
+                      let headers = http.allHeaderFields as? [String: String] else {
+                    completion()
+                    return
+                }
+
+                registered = true
+                let cookies = HTTPCookie.cookies(withResponseHeaderFields: headers, for: url)
                 let store = WKWebsiteDataStore.default().httpCookieStore
                 let group = DispatchGroup()
                 for cookie in cookies {

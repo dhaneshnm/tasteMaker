@@ -25,14 +25,14 @@ class SessionsTest < ActionDispatch::IntegrationTest
   end
 
   test "the session id rotates across sign-in — fixation" do
+    key = Rails.application.config.session_options.fetch(:key)
+
     # Prime a pre-auth session (the fragment writes one for its CSRF tokens).
     get "/session/control"
-    pre_auth_cookie = cookies[Rails.application.config.session_options[:key] || "_session_id"] ||
-      response.cookies.values.first
+    pre_auth_cookie = cookies[key]
 
     sign_in
-    post_auth_cookie = cookies[Rails.application.config.session_options[:key] || "_session_id"] ||
-      response.cookies.values.first
+    post_auth_cookie = cookies[key]
 
     refute_equal pre_auth_cookie, post_auth_cookie,
       "a session id handed out before auth must not become an authenticated one"
@@ -100,7 +100,8 @@ class SessionsTest < ActionDispatch::IntegrationTest
   test "the fragment renders empty for an UNREGISTERED shell" do
     # First launch, registration failed or in flight: no cookie, shell UA.
     # The app must degrade to art-plus-nothing, never to login UI (Codex).
-    get "/session/control", headers: { "User-Agent" => "Tondo iOS; Mozilla/5.0" }
+    get "/session/control",
+      headers: { "User-Agent" => "#{ApplicationController::NATIVE_UA_TOKEN}; Mozilla/5.0" }
 
     assert_select "turbo-frame#signin", count: 1
     assert_select ".signin", count: 0

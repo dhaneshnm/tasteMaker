@@ -16,9 +16,7 @@ require "delegate"
 # for CSS. `ApplicationController`'s `etag` block is the CSS half; these tests
 # are what stops it being deleted as redundant.
 class StylesheetEtagTest < ActionDispatch::IntegrationTest
-  # Story 0015 put the reader-facing pages behind the wall; these tests read
-  # them the way the app does — as a registered device.
-  setup { register_device }
+  behind_the_wall!
 
   # Pages that revalidate rather than re-render. If a page has no ETag it cannot
   # have this bug, so the list is exactly the conditional-GET surface.

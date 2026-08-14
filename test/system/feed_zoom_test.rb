@@ -1,9 +1,7 @@
 require "application_system_test_case"
 
 class FeedZoomTest < ApplicationSystemTestCase
-  # Story 0015: the pages this file exercises sit behind the wall. The reader
-  # signs in once per test, through the real fragment.
-  setup { sign_in_as_reader }
+  behind_the_wall!
 
   test "tapping a work in the archive opens that work, not the first one" do
     visit feed_path

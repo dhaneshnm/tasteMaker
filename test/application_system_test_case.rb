@@ -43,6 +43,13 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # desktop window does.
   setup { fit_viewport }
 
+  # The whole-file form for system tests, mirroring the integration macro in
+  # test_helper: every test in the file starts signed in through the real
+  # sign-in fragment.
+  def self.behind_the_wall!
+    setup { sign_in_as_reader }
+  end
+
   # The account key, from the browser's side (story 0015). Providers are mocked
   # suite-wide, so tapping the real button on the landing fragment IS the whole
   # flow: POST → mocked consent → callback → session. Tests that need a reader

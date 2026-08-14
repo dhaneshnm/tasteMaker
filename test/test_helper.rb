@@ -132,12 +132,21 @@ class ActionDispatch::IntegrationTest
   # uses them also exercises registration and the OAuth callback.
 
   # Registers a device and leaves its signed cookie in the jar — the state an
-  # iOS reader is in for every request after first launch.
-  def register_device(token: "test-device-uuid")
-    post "/device/registrations", params: { device_token: token },
+  # iOS reader is in for every request after first launch. `session:` lets a
+  # test register a second reader in an `open_session` without re-typing the
+  # endpoint and secret-header idiom.
+  def register_device(token: "test-device-uuid", session: self)
+    session.post "/device/registrations", params: { device_token: token },
       headers: { "X-Tondo-App" => ENV.fetch("TONDO_APP_SECRET") }
-    assert_response :no_content
+    session.assert_response :no_content
     token
+  end
+
+  # The whole-file form, matching `with_rescued_exceptions!`: a test case whose
+  # every test reads gated pages declares it once instead of pasting the same
+  # setup. When identity establishment changes (App Attest), one place moves.
+  def self.behind_the_wall!
+    setup { register_device }
   end
 
   # Signs in through the mocked provider and follows the redirect chain to a

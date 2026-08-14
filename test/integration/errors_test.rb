@@ -6,9 +6,7 @@ require "test_helper"
 # sees when a request fails — and the test environment's default is to re-raise
 # instead of rendering, which is the opposite of what this page exists for.
 class ErrorsTest < ActionDispatch::IntegrationTest
-  # Story 0015 put the reader-facing pages behind the wall; these tests read
-  # them the way the app does — as a registered device.
-  setup { register_device }
+  behind_the_wall!
 
   with_rescued_exceptions!
 

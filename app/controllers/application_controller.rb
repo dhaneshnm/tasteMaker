@@ -71,7 +71,9 @@ class ApplicationController < ActionController::Base
 
     def current_user
       return @current_user if defined?(@current_user)
-      @current_user = User.find_by(id: session[:user_id]) if session[:user_id]
+      # Assigns nil too — a guarded assignment would never latch the
+      # memoization for the common (device) case.
+      @current_user = session[:user_id] && User.find_by(id: session[:user_id])
     end
     helper_method :current_user
 
@@ -80,16 +82,8 @@ class ApplicationController < ActionController::Base
     # hands the row to whoever needs it (eng review, Codex).
     def current_device
       return @current_device if defined?(@current_device)
-      @current_device = begin
-        token = cookies.signed[:device]
-        if token.present?
-          Device.find_by(token_digest: Digest::SHA256.hexdigest(token))&.tap(&:note_seen)
-        end
-      end
-    end
-
-    def current_device_digest
-      current_device&.token_digest
+      token = cookies.signed[:device]
+      @current_device = token.present? ? Device.find_by(token_digest: Device.digest(token))&.tap(&:note_seen) : nil
     end
 
     # Private and uncacheable, always. `Vary: Cookie` is belt to the no-store
@@ -102,11 +96,25 @@ class ApplicationController < ActionController::Base
       response.headers["Vary"] = "Cookie"
     end
 
-    # The shell appends "Tondo iOS/<version>" to WKWebView's user agent. The
-    # sign-in fragment reads this so an UNREGISTERED shell — first launch,
-    # registration failed or still in flight — degrades to art-plus-nothing,
-    # never to Google buttons inside the app (eng review, Codex).
+    # The shell appends "Tondo iOS/<version>" to WKWebView's user agent
+    # (AppDelegate's applicationUserAgentPrefix). The sign-in fragment reads
+    # this so an UNREGISTERED shell — first launch, registration failed or
+    # still in flight — degrades to art-plus-nothing, never to Google buttons
+    # inside the app (eng review, Codex). One constant, referenced by the
+    # tests too, so a rename in the shell fails loudly instead of silently
+    # showing login UI in the app.
+    NATIVE_UA_TOKEN = "Tondo iOS".freeze
+
     def native_shell?
-      request.user_agent.to_s.include?("Tondo iOS")
+      request.user_agent.to_s.include?(NATIVE_UA_TOKEN)
+    end
+
+    # A gated page that still revalidates: private (Thruster must not hold a
+    # gated body — a shared cache entry outlives a sign-out), no-cache (every
+    # request revalidates), expressed via `extras` because Rails' no_cache
+    # header branch honors :public and :extras but ignores :private. Sibling
+    # of `no_store` above, for the pages that keep their ETags.
+    def private_revalidate
+      response.cache_control.replace(no_cache: true, extras: [ "private" ])
     end
 end

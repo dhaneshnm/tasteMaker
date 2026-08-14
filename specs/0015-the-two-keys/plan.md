@@ -449,6 +449,30 @@ the app end up on Google's consent screen" bugs; add it.
 ## Deviations noted during implementation
 _(append here, per build flow step 2)_
 
+- **Apple SameSite mitigation shipped as config-standard, not custom state
+  store.** The scoped `/auth` cookie cannot be exercised anywhere but the
+  deployed domain, so writing it blind would be untestable code. The pinned gem
+  + standard config ship now; the ship-checklist deployed-domain verification
+  decides whether the plan's scoped-cookie work (or the fork fallback) is
+  needed. Time-box clause stands.
+- **The defensive `/auth/*` → Safari path-configuration rule was dropped** —
+  Hotwire Native's path configuration has no send-to-Safari property; adding
+  one means custom route-handler code, which is more than the "one line" the
+  plan priced. The fragment's user-agent guard covers the shell.
+- **`private, no-cache` is expressed as `cache_control.replace(no_cache: true,
+  extras: ["private"])`** — Rails' no_cache header branch honors `:public` and
+  `:extras` but ignores `:private`.
+- **QA finding (live, dev server): a cookieless keep POST answers 422, not the
+  wall's 303** — CSRF runs first in dev/prod (the suite disables it). Not a
+  leak: signed-out browsers never render a keep button, so that POST is curl.
+  `wall_test` now asserts both halves explicitly.
+- **The shell's UA already carried `Tondo iOS;`** (story 0008's
+  `applicationUserAgentPrefix`), so the server-side guard needed no iOS change
+  beyond the registration request's explicit header.
+- **iOS Swift compiled visually only** — no simulator in this session; the
+  device smoke (fresh install → art, reinstall → collection survives) is on
+  the ship checklist next to the Apple-flow verification.
+
 ## GSTACK REVIEW REPORT
 
 | Review | Trigger | Why | Runs | Status | Findings |

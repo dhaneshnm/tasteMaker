@@ -28,7 +28,7 @@ class DeviceRegistrationsController < ApplicationController
 
     token = params.require(:device_token)
     begin
-      Device.find_or_create_by!(token_digest: Digest::SHA256.hexdigest(token))
+      Device.find_or_create_by!(token_digest: Device.digest(token))
     rescue ActiveRecord::RecordNotUnique
       # Two cold launches racing — same idempotent outcome, same idiom
       # favorites#create uses.
