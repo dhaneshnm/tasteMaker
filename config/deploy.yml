@@ -1,23 +1,35 @@
 # Kamal 2 — one app, one VPS, SQLite on a persistent volume.
 #
 # ─────────────────────────────────────────────────────────────────────────────
-# THREE VALUES YOU MUST SUPPLY before the first deploy. Every one is marked
-# CHANGEME below; nothing else in this file needs editing.
-#
-#   1. servers.web[0]      the VPS's IP or hostname
-#   2. proxy.host          the domain pointing at that IP (Let's Encrypt needs
-#                          it resolving BEFORE the first deploy, or cert
-#                          issuance fails and the app answers on plain HTTP)
-#   3. image / registry    your container-registry namespace and username
+# Every value in this file is now real. The box is a GCP e2-medium in
+# us-central1-a — see `decisions/0011-gcp-is-the-box.md`, which supersedes 0009.
 #
 # Then: `kamal setup` once, `kamal deploy` thereafter.
+#
+# BEFORE `kamal setup`, both of these must be true or it fails:
+#
+#   1. dailytondo.com must already RESOLVE to the IP below. Let's Encrypt is
+#      issued on first deploy; if DNS is not live the cert fails and the app
+#      answers on plain HTTP.
+#   2. Both secrets exported. KAMAL_REGISTRY_PASSWORD needs the `write:packages`
+#      scope — a plain `gh auth token` does NOT have it by default:
+#        gh auth refresh -h github.com -s write:packages
+#        export KAMAL_REGISTRY_PASSWORD=$(gh auth token)
+#        export RAILS_MASTER_KEY=$(cat config/master.key)
+#
+# GCP-specific, and the reason the ssh block below stays at Kamal's defaults:
+# the instance was created with `enable-oslogin=FALSE` and a `root:` key in
+# metadata. Ubuntu ships `PermitRootLogin prohibit-password`, so root logs in by
+# key. Rebuilding the box WITHOUT that metadata breaks `ssh.user: root`.
 #
 # TWO THINGS THE FIRST DEPLOY DOES THAT NOTHING WARNS YOU ABOUT. Both were found
 # by running this image locally, not by reading:
 #
-#   1. First boot downloads all 110 museum images before the app answers. It
-#      took ~30s here on a warm connection; the health check may need longer on
-#      the server. Do not conclude the deploy hung.
+#   1. First boot downloads the museum images before the app answers. This note
+#      said "110 images, ~30s" — that was written before story 0013 and is now
+#      wrong by a factor of eighteen. The pool is 2,002 works, 974 MB on disk.
+#      Expect minutes, not seconds, and give the health check room. Do not
+#      conclude the deploy hung.
 #   2. Seeds create paintings but ZERO daily picks, so the front door comes up
 #      on its empty state — "The first artwork arrives soon." Schedule day one
 #      at /admin/daily_picks before sending anyone the link.
@@ -25,19 +37,21 @@
 
 service: tondo
 
-# CHANGEME — namespace/repo only. `registry.server` below is prepended, so
-# including "ghcr.io/" here produces ghcr.io/ghcr.io/... and the push 404s.
+# Namespace/repo only. `registry.server` below is prepended, so including
+# "ghcr.io/" here produces ghcr.io/ghcr.io/... and the push 404s.
 image: dhaneshnm/tondo
 
 servers:
   web:
-    # CHANGEME — the VPS.
-    - 203.0.113.10
+    # GCP e2-medium, project tondo-prod, zone us-central1-a, instance "tondo".
+    # This is a RESERVED static address (`tondo-ip`), not an ephemeral one — an
+    # ephemeral IP changes on stop/start and would break DNS and the cert.
+    - 34.59.147.140
 
 proxy:
   ssl: true
-  # CHANGEME — must already resolve to the server above.
-  host: tondo.example.com
+  # Must already resolve to the server above before `kamal setup`.
+  host: dailytondo.com
   # Thruster listens on 80 inside the container (Dockerfile EXPOSE 80). It also
   # runs its own 64MB HTTP cache, which is why every public page in this app is
   # deliberately `Cache-Control: public` and carries no Set-Cookie (story 0007).
@@ -45,7 +59,8 @@ proxy:
 
 registry:
   server: ghcr.io
-  # CHANGEME — registry username.
+  # GitHub username. The token in KAMAL_REGISTRY_PASSWORD must carry
+  # `write:packages` or the push 403s.
   username: dhaneshnm
   password:
     - KAMAL_REGISTRY_PASSWORD
