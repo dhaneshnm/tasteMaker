@@ -41,6 +41,18 @@ service: tondo
 # "ghcr.io/" here produces ghcr.io/ghcr.io/... and the push 404s.
 image: dhaneshnm/tondo
 
+# Kamal's default is 30 SECONDS, and that is wrong for this app's first boot.
+# `bin/docker-entrypoint` runs `db:prepare` when the server starts, and on a
+# fresh database that runs the seeds — which download 2,002 images from four
+# museum APIs, sequentially, before the app answers. At 30s the health check
+# kills a deploy that is working perfectly and rolls it back.
+#
+# This cost is one-time. On every later deploy the volume already holds the
+# database, so `db:prepare` only migrates and the container answers in seconds.
+# The seeds are idempotent and resume rather than restart, so a timeout here is
+# survivable — retrying picks up where it stopped.
+deploy_timeout: 1800
+
 servers:
   web:
     # GCP e2-medium, project tondo-prod, zone us-central1-a, instance "tondo".
