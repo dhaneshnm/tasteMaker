@@ -66,10 +66,15 @@
         this — that path is an `error` event on an element which does not exist.
         Keep stays: a resting work is still a work you can keep. %>
     <% if painting.display_image? %>
+      <%# "Zoom in on", not "View … full screen" — the plate's own button already
+          uses that exact sentence, and the two are consecutive tab stops. A
+          screen reader user tabbing off the artwork heard the identical name
+          twice in a row before reaching Keep. Both names are accurate; only one
+          of them may be this one. %>
       <button type="button" class="rail__act"
               data-action="artwork#open" data-artwork-target="railZoom"
               data-artwork-title="<%= painting.title %>"
-              aria-label="View <%= painting.title %> full screen">
+              aria-label="Zoom in on <%= painting.title %>">
         <%# The plate's own 1px frame, redrawn at 23px: the glyph that opens the
             artwork is a drawing of the artwork's corners. %>
         <svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"
