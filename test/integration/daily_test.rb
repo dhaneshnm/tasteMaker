@@ -140,6 +140,35 @@ class DailyTest < ActionDispatch::IntegrationTest
     assert_select "article.post", minimum: 1
   end
 
+  # Regression: ISSUE-001 — the rail's zoom button and the plate's zoom button
+  # both read "View {title} full screen", and they are consecutive tab stops, so
+  # a screen reader user tabbing off the artwork heard the identical name twice
+  # before reaching Keep.
+  # Found by /qa on 2026-08-14
+  # Report: .gstack/qa-reports/qa-report-localhost-2026-08-14.md
+  #
+  # Asserted as a general rule rather than against the new string. The specific
+  # wording is not the point — two controls on one screen that announce
+  # themselves identically is, and story 0014 made that easy to reintroduce by
+  # giving the daily page a second control for something the plate already does.
+  test "no two controls on the daily page announce themselves the same way" do
+    yesterday = daily_picks(:yesterday)
+
+    [ root_path, day_path(yesterday.scheduled_on.iso8601) ].each do |route|
+      get route
+      assert_response :success
+
+      names = css_select("a[href], button").filter_map do |el|
+        name = el["aria-label"].presence || el.text.squish.presence
+        name unless name.nil?
+      end
+
+      duplicates = names.tally.select { |_, count| count > 1 }.keys
+      assert_empty duplicates,
+        "#{route} has controls sharing an accessible name: #{duplicates.inspect}"
+    end
+  end
+
   test "the root is no longer the gallery" do
     get root_path
 
