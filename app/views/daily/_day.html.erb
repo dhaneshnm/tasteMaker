@@ -59,7 +59,14 @@
       the 680px measure.
 
       Everything public lives out here in the cached page; only the keep frame is
-      per-visitor. %>
+      per-visitor.
+
+      The wrapper is conditional because both its children are. A curator
+      previewing an unpublished work that has no picture gets neither control,
+      and an empty `.rail` is not free: it still trips `.page:has(.rail)` and
+      charges the artwork a touch target for a row with nothing in it. %>
+  <% keeps = chrome != :preview %>
+  <% if painting.display_image? || keeps %>
   <div class="rail">
     <%# Same guard the plate uses, for the same reason. A work failing
         `display_image?` renders no <img> at all, so `artwork#rest` can never hide
@@ -104,21 +111,26 @@
         announced as one — the frame's real button arrives with the accessible
         name that says what it does.
 
-        Lazy still, and above the fold it now resolves on paint rather than on
-        scroll, so the visitor identifier reaches everyone who opens the app
-        rather than only readers who scrolled. Accepted 2026-08-14; the App Store
-        privacy label owes that sentence.
+        NOT lazy. It was, back when this frame sat below a 55vh plate plus the
+        whole note and a reader who bounced at the picture never paid for it.
+        Under the artwork it is inside the viewport on every route, viewport and
+        text size `dynamic_type_test.rb` asserts, so `loading: "lazy"` could only
+        ever buy an IntersectionObserver that fires immediately — while deferring
+        the request past first layout and lengthening the exact window the
+        placeholder above exists to cover.
 
-        The 44px is reserved on the FRAME, the element that stays: Turbo
-        transplants a response frame's children and discards its attributes. %>
-    <% unless chrome == :preview %>
+        So it resolves on open for every reader rather than only those who
+        scrolled, and the visitor identifier goes with it. Accepted 2026-08-14;
+        the App Store privacy label owes that sentence. %>
+    <% if keeps %>
       <%= turbo_frame_tag "keep_#{painting.id}", src: favorite_control_path(painting),
-            loading: "lazy", class: "rail__slot" do %>
+            class: "rail__slot" do %>
         <span class="rail__act rail__act--waiting" aria-hidden="true"><%=
           render "favorites/keep_glyph", filled: false %></span>
       <% end %>
     <% end %>
   </div>
+  <% end %>
 
   <div class="label">
     <h1 class="label__title <%= "label__title--long" if painting.long_title? %>"><%= painting.title %></h1>

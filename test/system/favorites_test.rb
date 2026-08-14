@@ -44,37 +44,6 @@ class FavoritesTest < ApplicationSystemTestCase
     assert_equal "currentColor", keep_glyph_fill
   end
 
-  # The control is on screen the moment the page is, which is the entire story.
-  # Position is not enough on its own — see the default-content test below.
-  test "the keep control is above the fold without scrolling" do
-    visit root_path
-    assert_selector ".plate__img"
-
-    assert_equal 0, page.evaluate_script("window.scrollY"), "the test scrolled"
-    assert_operator keep_rect["bottom"], :<=, page.evaluate_script("window.innerHeight"),
-      "the keep control was below the fold at open"
-  end
-
-  # Story 0014's second half, and the one the eng review missed until the outside
-  # voice asked for it. The frame is lazy, so proving the control is in the right
-  # PLACE says nothing about whether it is there YET — without default content
-  # the rail paints an empty 44px hole in the spot a reader is now looking at.
-  #
-  # What the cached page carries is the MARK and none of the machinery: a span,
-  # not the button. `button_to` emits a CSRF token, generating one starts a
-  # session, and a session puts a Set-Cookie on a page Thruster caches for
-  # everyone. `test/integration/favorites_test.rb` holds both halves of that in
-  # one place; this asserts it against the page a real browser is served.
-  test "the cached page already carries the keep mark, and none of its machinery" do
-    html = Net::HTTP.get(URI.join(page.server_url, root_path))
-
-    assert_includes html, "rail__act--waiting",
-      "the rail had no keep mark until the private fragment landed"
-    assert_not_includes html, "Keep #{daily_picks(:today).painting.title} in your collection",
-      "the real button shipped in the cached page, which mints a token and a cookie"
-    assert_not_includes html, "kept</a>", "the per-visitor count leaked into the cached page"
-  end
-
   # The whole reason `autofocus` is on the write responses. Turbo replaces the
   # frame on submit, which destroys the focused button; without it focus falls to
   # <body> and a keyboard reader is silently teleported to the top of the page
@@ -90,15 +59,15 @@ class FavoritesTest < ApplicationSystemTestCase
   end
 
   # The other half: the fragment arriving must not grab focus, which is also why
-  # it carries no aria-live. Above the fold this now fires on every open rather
-  # than only for readers who scrolled, so it matters more than it used to.
+  # it carries no aria-live. It now resolves on every open rather than only for
+  # readers who scrolled, so it matters more than it used to.
   test "the frame landing does not steal focus" do
     visit root_path
     assert_selector ".plate__img"
     assert_button keep_label
 
     assert_empty focused_class_names.grep(/rail__act/),
-      "the lazy frame took focus from the reader"
+      "the keep frame took focus from the reader"
   end
 
   # D8, and the reason Zoom is first in the row. Keep and its count share one
@@ -245,15 +214,6 @@ class FavoritesTest < ApplicationSystemTestCase
       visit root_path
       click_on keep_label
       assert_button remove_label
-    end
-
-    def keep_rect
-      page.evaluate_script(<<~JS)
-        (() => {
-          const r = document.querySelector(".rail__slot .rail__act").getBoundingClientRect();
-          return { top: r.top, bottom: r.bottom, left: r.left };
-        })()
-      JS
     end
 
     def zoom_left

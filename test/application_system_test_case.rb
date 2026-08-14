@@ -43,9 +43,21 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # desktop window does.
   setup { fit_viewport }
 
+  # A second phone, for the tests that have to prove a `dvh`-relative rule holds
+  # on more than the smallest screen — a term that fits at 375x667 can still be
+  # wrong at 402x874. The class default stays the small phone; a test opts in for
+  # the length of a block and the ensure puts it back, so nothing leaks into the
+  # next test in the file.
+  def with_viewport(width, height)
+    fit_viewport(width, height)
+    yield
+  ensure
+    fit_viewport
+  end
+
   private
-    def fit_viewport
+    def fit_viewport(width = VIEWPORT_WIDTH, height = VIEWPORT_HEIGHT)
       page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride",
-        width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT, deviceScaleFactor: 1, mobile: true)
+        width: width, height: height, deviceScaleFactor: 1, mobile: true)
     end
 end

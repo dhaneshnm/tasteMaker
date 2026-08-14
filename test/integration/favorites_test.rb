@@ -126,8 +126,8 @@ class FavoritesTest < ActionDispatch::IntegrationTest
   end
 
   # Story 0014's other half. Moving the control under the artwork fixed WHERE it
-  # is; this is what fixes WHETHER IT IS THERE YET. The frame is lazy, so without
-  # default content the rail paints an empty 44px hole in the spot a reader is
+  # is; this is what fixes WHETHER IT IS THERE YET. The frame is fetched, so
+  # without default content the rail paints an empty hole in the spot a reader is
   # now looking at — the same bug, moved from the bottom of the page to the top.
   #
   # The cached page carries the mark and none of the machinery. That split is not
@@ -138,9 +138,9 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     with_forgery_protection do
       get root_path
 
-      assert_select "turbo-frame##{"keep_#{@today.painting_id}"} .rail__act--waiting svg", count: 1,
+      assert_select "turbo-frame#keep_#{@today.painting_id} .rail__act--waiting svg", count: 1,
         message: "the rail had no keep mark until the private fragment landed"
-      assert_select "turbo-frame##{"keep_#{@today.painting_id}"} button", count: 0,
+      assert_select "turbo-frame#keep_#{@today.painting_id} button", count: 0,
         message: "a real button in the cached page mints a CSRF token and a cookie"
       assert_select "a.rail__count", count: 0,
         message: "a per-visitor count leaked into the publicly cached page"
@@ -160,7 +160,7 @@ class FavoritesTest < ActionDispatch::IntegrationTest
 
     assert_select ".plate__resting"
     assert_select ".rail__act[data-artwork-target=?]", "railZoom", count: 0
-    assert_select "turbo-frame##{"keep_#{@today.painting_id}"}", count: 1
+    assert_select "turbo-frame#keep_#{@today.painting_id}", count: 1
   end
 
   # ---------------------------------------------------------------- the toggle

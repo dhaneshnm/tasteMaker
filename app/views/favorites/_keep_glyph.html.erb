@@ -8,9 +8,11 @@
     Fill is the entire state change: no colour shift, no second mark, no words.
     That is why this partial takes `filled:` and nothing else.
 
-    Two callers, which is what earns it a file: the real control in
-    `_keep_button.html.erb`, and the static placeholder in `daily/_day.html.erb`
-    that holds the shape until the private frame lands. %>
+    Two callers, which is what earns it a file, and they sit on either side of
+    the one boundary that matters here: the real control inside the private frame
+    (`_control.html.erb`), and the static placeholder in `daily/_day.html.erb`
+    that holds the shape in the publicly cached page until that frame lands. The
+    glyph is the only part safe to render in both. %>
 <svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"
      fill="<%= filled ? "currentColor" : "none" %>"
      stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">

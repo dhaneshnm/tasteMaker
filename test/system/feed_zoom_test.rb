@@ -105,22 +105,6 @@ class FeedZoomTest < ApplicationSystemTestCase
       "focus did not come back to the rail control that opened the overlay"
   end
 
-  # A work with no usable image renders no `<img>` at all — `_plate.html.erb`
-  # takes that branch server-side and shows the resting note. `rest()` can never
-  # fire for it, because it is an `error` event on an element that was never
-  # there. So the rail's zoom has to be gated in the template, or it ships as a
-  # live control that opens an empty overlay. Keep stays: a resting work is
-  # still a work you can keep.
-  test "a work with no picture at all shows no zoom in the rail, but still keeps" do
-    paintings(:sunflowers).update!(image_url_800: nil)
-
-    visit root_path
-
-    assert_selector ".plate__resting", text: "This work is resting"
-    assert_no_selector ".rail__act[data-artwork-target='railZoom']"
-    assert_selector ".rail__slot .rail__act"
-  end
-
   private
     def work(painting)
       "#painting_#{painting.dom_key}"
