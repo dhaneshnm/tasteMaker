@@ -24,8 +24,24 @@ class SessionsController < ApplicationController
   # response by forgetting a line.
   before_action :no_store, only: :control
 
+  # THE APPLE CALLBACK IS A CROSS-SITE POST — no authenticity token, no Lax
+  # session cookie — so Rails' own CSRF check would 422 every real Apple
+  # sign-in before this action ran a line (code review, both models, ship-
+  # blocker). The scoped skip is safe because the callback phase's actual
+  # guard is OmniAuth's state validation in the middleware, and the request
+  # phase stays covered by omniauth-rails_csrf_protection. `only: :create`,
+  # never the whole controller: destroy and control keep their protection.
+  # The suite exercises this with forgery protection forced on — the suite-
+  # wide off-switch is exactly what hid it.
+  skip_forgery_protection only: :create
+
   def create
+    # An unregistered provider name slips past OmniAuth untouched, so the env
+    # carries no auth hash. The route constraint keeps those out; this guard
+    # is the belt for a misconfigured strategy answering the same way.
     auth = request.env["omniauth.auth"]
+    return redirect_to root_path unless auth
+
     user = User.from_omniauth(auth)
 
     # reset_session BEFORE writing: a session id handed out pre-auth must not

@@ -66,7 +66,24 @@ class ApplicationController < ActionController::Base
   private
     def require_reader
       return if current_user || current_device
-      redirect_to root_path(anchor: "signin"), status: :see_other
+
+      # A frame WRITE cannot follow the bounce usefully: Turbo would fetch
+      # `/`, find no frame matching (say) `keep_42`, and swap in "Content
+      # missing" — a silent hole where the habit mechanic was, for the reader
+      # whose identity died mid-page (signed out elsewhere, device revoked).
+      # Answer those in kind: a matching frame whose one link breaks out to
+      # the sign-in anchor (code review F5). GETs stay a plain 303 — a lazy
+      # frame's failed load keeps its default content, which is how the
+      # signed-out landing page keeps the glyph and not an in-place sign-in
+      # state (declined at design review D3; this guard is what enforces it).
+      if turbo_frame_request? && !request.get?
+        render html: helpers.turbo_frame_tag(request.headers["Turbo-Frame"]) {
+          helpers.link_to "Sign in", root_path(anchor: "signin"),
+            class: "caps-link", data: { turbo_frame: "_top" }
+        }, status: :unauthorized
+      else
+        redirect_to root_path(anchor: "signin"), status: :see_other
+      end
     end
 
     def current_user

@@ -27,6 +27,11 @@ class DeviceRegistrationsController < ApplicationController
     head :unauthorized and return unless valid_app_secret?
 
     token = params.require(:device_token)
+    # A UUID is 36 chars; a nested-hash param or a megabyte of junk is neither
+    # (security review F5: `params.require` happily returns a Parameters hash,
+    # and hexdigest raising TypeError on it is a 500 where a 400 belongs).
+    # No length floor — `params.require` already rejects blank.
+    head :bad_request and return unless token.is_a?(String) && token.length <= 64
     begin
       Device.find_or_create_by!(token_digest: Device.digest(token))
     rescue ActiveRecord::RecordNotUnique

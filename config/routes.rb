@@ -17,7 +17,11 @@ Rails.application.routes.draw do
   # The account key (story 0015). OmniAuth owns POST /auth/:provider; these are
   # the return legs. `via: [:get, :post]` because Apple sends its callback as a
   # cross-site POST — the plan's most-watched edge — while Google returns GET.
-  match "auth/:provider/callback" => "sessions#create", via: %i[get post]
+  # Constrained to the two real providers: an unregistered name passes the
+  # OmniAuth middleware untouched (no auth hash) and used to 500 on demand —
+  # an anonymous error-tracker flood. Now it is a plain 404 (code review F3).
+  match "auth/:provider/callback" => "sessions#create", via: %i[get post],
+    constraints: { provider: /google_oauth2|apple/ }
   get "auth/failure" => "sessions#failure"
   delete "session" => "sessions#destroy", as: :session
 

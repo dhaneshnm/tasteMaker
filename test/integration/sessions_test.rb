@@ -50,6 +50,29 @@ class SessionsTest < ActionDispatch::IntegrationTest
     assert_equal "A Reader", user.name
   end
 
+  # The ship-blocker both review models found: Apple's callback is a
+  # cross-site POST with no authenticity token, and the suite-wide forgery
+  # off-switch hid that Rails would 422 it. Protection forced ON here — this
+  # test fails against a SessionsController without the scoped skip.
+  test "the Apple callback POST survives CSRF protection" do
+    mock_auth(provider: :apple, uid: "apple-uid", email: "a@example.com")
+
+    with_forgery_protection do
+      post "/auth/apple/callback"
+    end
+
+    assert_redirected_to days_path
+    assert User.exists?(provider: "apple", uid: "apple-uid")
+  end
+
+  test "an unknown provider's callback is a 404, not a 500" do
+    with_rescued_exceptions do
+      get "/auth/anything/callback"
+
+      assert_response :not_found
+    end
+  end
+
   test "declined consent goes quietly home" do
     OmniAuth.config.mock_auth[:google_oauth2] = :access_denied
 

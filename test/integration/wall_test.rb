@@ -121,6 +121,25 @@ class WallTest < ActionDispatch::IntegrationTest
     assert_equal nobody, signed_in, "the account identity changed the front door"
   end
 
+  # A frame WRITE that bounced used to become "Content missing" — the habit
+  # mechanic silently swallowed for a reader whose identity died mid-page.
+  # The wall answers those in kind; a frame GET (the lazy load) stays a plain
+  # 303 so the cached page's default glyph survives — the in-place sign-in
+  # state stays declined (design review D3, code review F5).
+  test "a bounced frame write gets a matching frame with a way in, not a hole" do
+    frame = "keep_#{paintings(:sunflowers).id}"
+
+    post favorite_path(paintings(:sunflowers)), headers: { "Turbo-Frame" => frame }
+
+    assert_response :unauthorized
+    assert_select "turbo-frame##{frame}", count: 1
+    assert_select "a[href=?]", root_path(anchor: "signin"), text: "Sign in"
+
+    get favorite_control_path(paintings(:sunflowers)), headers: { "Turbo-Frame" => frame }
+
+    assert_equal 303, response.status, "a lazy-load bounce must stay a redirect"
+  end
+
   test "error pages answer without identity" do
     with_rescued_exceptions do
       get "/definitely-not-a-page"

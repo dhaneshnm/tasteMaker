@@ -70,10 +70,13 @@ class DeviceRegistrationsTest < ActionDispatch::IntegrationTest
     assert_response :too_many_requests
   end
 
-  test "a missing device_token is a 400, not a 500" do
-    post "/device/registrations", params: {},
-      headers: { "X-Tondo-App" => ENV.fetch("TONDO_APP_SECRET") }
+  test "a missing, nested, or absurd device_token is a 400, not a 500" do
+    [ {}, { device_token: { a: "b" } }, { device_token: "x" * 4096 } ].each do |params|
+      post "/device/registrations", params: params,
+        headers: { "X-Tondo-App" => ENV.fetch("TONDO_APP_SECRET") }
 
-    assert_response :bad_request
+      assert_response :bad_request, "#{params.inspect} did not 400"
+    end
+    assert_equal 0, Device.count
   end
 end

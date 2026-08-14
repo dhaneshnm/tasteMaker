@@ -32,7 +32,17 @@ enum DeviceIdentity {
     /// One session for the enum's lifetime, ephemeral so the ONLY cookie jar
     /// that matters is the web view's — a per-call session leaks its queue
     /// until invalidated, for no isolation gain.
-    private static let session = URLSession(configuration: .ephemeral)
+    ///
+    /// The 5-second timeout is load-bearing: cold launch gates ALL UI on this
+    /// round-trip, and the default 60s would leave a reader on a degraded
+    /// network (captive portal, stalled TLS) staring at the launch screen for
+    /// a minute before the proceed-anyway fallback fired (code review F3).
+    /// Airplane mode already fails fast; this bounds everything slower.
+    private static let session: URLSession = {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 5
+        return URLSession(configuration: configuration)
+    }()
 
     /// Set on the first 204 this process sees. Cold launch always re-registers
     /// (that is the cross-launch healing), but a healthy foreground should not
@@ -114,14 +124,28 @@ enum DeviceIdentity {
     }
 
     private static func store(_ token: String) {
-        let attributes: [String: Any] = [
+        // The delete query must be identity-only (class/service/account). The
+        // first version passed the full attributes dict — including the NEW
+        // value — so it never matched an existing item, SecItemAdd failed
+        // with errSecDuplicateItem, both statuses were discarded, and a
+        // transient read failure could fork the device identity: keeps made
+        // under the phantom token orphan forever when the old one returns
+        // (code review F4).
+        let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: account,
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
-            kSecValueData as String: Data(token.utf8)
+            kSecAttrAccount as String: account
         ]
-        SecItemDelete(attributes as CFDictionary)
-        SecItemAdd(attributes as CFDictionary, nil)
+        var attributes = query
+        attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
+        attributes[kSecValueData as String] = Data(token.utf8)
+
+        let status = SecItemAdd(attributes as CFDictionary, nil)
+        if status == errSecDuplicateItem {
+            // An item read() couldn't decode still occupies the slot —
+            // overwrite in place rather than delete-and-hope.
+            SecItemUpdate(query as CFDictionary,
+                          [kSecValueData as String: Data(token.utf8)] as CFDictionary)
+        }
     }
 }
