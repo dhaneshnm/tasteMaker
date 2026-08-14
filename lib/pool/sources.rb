@@ -290,10 +290,14 @@ module Pool
     # shards on a cache key the record carries (`083000\600\40\83645`) and names
     # the file after the rendition, not the object (`mia_5014236.jpg`). Deriving
     # it from the id produced plausible URLs that every one of them 403'd.
+    # The rendition stem is the whole basename, suffixes and all —
+    # `mia_3003333_001.jpg` serves as `mia_3003333_001_full.jpg`. Matching only
+    # the leading `mia_<digits>` dropped the `_001` and produced a 403 for every
+    # work whose rendition carries one.
     def mia_image_url(record, size)
       location = record["Cache_Location"].to_s.tr("\\", "/")
-      rendition = record["Primary_RenditionNumber"].to_s[/\Amia_\d+/]
-      return nil if location.blank? || rendition.nil?
+      rendition = File.basename(record["Primary_RenditionNumber"].to_s, ".jpg").presence
+      return nil if location.blank? || rendition.nil? || !rendition.start_with?("mia_")
 
       "https://img.artsmia.org/web_objects_cache/#{location}/#{rendition}_#{size}.jpg"
     end
@@ -370,7 +374,8 @@ module Pool
         return [ nil, nil ] unless data[0, 2] == "\xFF\xD8".b
 
         i = 2
-        while i < data.bytesize - 9
+        # The frame header is read through i+8, so that is what has to be there.
+        while i + 8 < data.bytesize
           return [ nil, nil ] unless data.getbyte(i) == 0xFF
 
           marker = data.getbyte(i + 1)

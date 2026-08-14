@@ -67,6 +67,14 @@ if ENV["LIMIT"].blank?
   stale.each(&:destroy)
   puts "Pruned #{stale.size} works the pool no longer holds" if stale.any?
   puts "Kept #{spoken_for.size} out-of-pool works that have been published or favorited" if spoken_for.any?
+
+  # A kept work holds the image URL it was seeded with, and museum CDNs retire
+  # those. One of these reached the front door reading "This work is resting"
+  # instead of showing a painting, so it gets said out loud rather than found
+  # by looking at the site.
+  blank = Painting.where(id: spoken_for).left_joins(:image_attachment).where(active_storage_attachments: { id: nil })
+  warn "  ⚠ #{blank.count} published or kept work(s) have no image and are out of the pool: " \
+       "#{blank.map(&:dom_key).join(', ')}" if blank.any?
 end
 
 exit if ENV["SKIP_IMAGES"].present?

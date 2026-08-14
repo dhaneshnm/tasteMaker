@@ -274,3 +274,34 @@ All 2026-08-13.
   from the committed file rather than recomputed on every seed.
 - **`db/seeds.rb` already had a worker pool** (5 threads); the plan said to add one. Raised
   to 6 and left otherwise as it was.
+
+## Post-ship fix (2026-08-13, same day)
+
+**The front door read "This work is resting — read the note."** Reported from the running
+app, not from a test.
+
+Root cause: `Primary_RenditionNumber` carries a suffix — `mia_3003333_001.jpg` — and the
+regex built to read it, `/\Amia_\d+/`, matched only the leading digits and dropped the
+`_001`. `mia_3003333_full.jpg` 403s; `mia_3003333_001_full.jpg` is served. The rendition
+stem is the whole basename, and it is now taken with `File.basename(name, ".jpg")`.
+
+This is the same defect class as the original Minneapolis URL bug and it was hiding inside
+its fix. What it cost:
+
+- **43 works failed to download** in the first full seed and stayed blank.
+- **57 more were wrongly vetoed** as unreachable during curation — dead plates fell from
+  77 to 20 once the stem was right, and the Minneapolis mirror grew 1,547 → 1,670.
+- **One of them was a published day**, so the prune protected it, no image could ever be
+  fetched for it, and it sat on the front door.
+
+Three things changed:
+
+1. `mia_image_url` keeps the full rendition stem. `test/lib/pool_sources_test.rb` pins both
+   forms — with a suffix and without.
+2. `Jpeg.dimensions` had an off-by-one bound (`i < size - 9`) that could skip a frame header
+   at the end of the buffer. Found by the test written for the above.
+3. `db/seeds.rb` now **warns** when a published or kept work is out of the pool and has no
+   image. That is the state that produced this bug report, and nothing said it out loud —
+   it had to be seen on the site.
+
+The pool is now **2,002 rows, 2,002 images attached, 0.94 GB**. Nothing is imageless.

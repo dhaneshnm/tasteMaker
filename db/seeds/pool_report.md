@@ -11,23 +11,23 @@ counted from the committed manifest, `db/seeds/paintings.json`.
 |---|---:|---:|:--|
 | pool size | 2000 | 2000 | ✓ |
 | sources represented | 4 | 4 | ✓ |
-| largest source share | 882 | 1000 | ✓ |
+| largest source share | 880 | 1000 | ✓ |
 | most works by one artist | 5 | 5 | ✓ |
 | largest region share | 500 | 500 | ✓ |
-| outside Europe and North America | 1056 | 900 | ✓ |
-| dated 1900 or later | 365 | 300 | ✓ |
+| outside Europe and North America | 1057 | 900 | ✓ |
+| dated 1900 or later | 364 | 300 | ✓ |
 | highlights (cap) | 200 | 200 | ✓ |
-| carrying museum text | 1666 | 1400 | ✓ |
+| carrying museum text | 1691 | 1400 | ✓ |
 | smallest image edge | 1686 | 1600 | ✓ |
 
 ## By museum
 
 | Museum | Works | Share | Carrying text |
 |---|---:|---:|---:|
-| the Cleveland Museum of Art | 882 | 44.1% | 710 |
-| the Minneapolis Institute of Art | 796 | 39.8% | 745 |
-| the Art Institute of Chicago | 221 | 11.1% | 211 |
-| The Metropolitan Museum of Art | 101 | 5.1% | 0 |
+| the Minneapolis Institute of Art | 880 | 44.0% | 821 |
+| the Cleveland Museum of Art | 798 | 39.9% | 660 |
+| the Art Institute of Chicago | 220 | 11.0% | 210 |
+| The Metropolitan Museum of Art | 102 | 5.1% | 0 |
 
 ## By region
 
@@ -36,10 +36,10 @@ counted from the committed manifest, `db/seeds/paintings.json`.
 | South Asia | 500 | 25.0% |
 | East Asia | 500 | 25.0% |
 | Europe | 500 | 25.0% |
-| United States & Canada | 432 | 21.6% |
+| United States & Canada | 431 | 21.6% |
 | West Asia & the Islamic world | 36 | 1.8% |
+| Latin America | 12 | 0.6% |
 | Unplaced | 12 | 0.6% |
-| Latin America | 11 | 0.6% |
 | Africa | 8 | 0.4% |
 | Oceania | 1 | 0.1% |
 
@@ -47,23 +47,23 @@ counted from the committed manifest, `db/seeds/paintings.json`.
 
 | Era | Works | Share |
 |---|---:|---:|
-| before 1500 | 121 | 6.1% |
-| 1500–1699 | 434 | 21.7% |
-| 1700–1799 | 331 | 16.6% |
-| 1800–1899 | 551 | 27.6% |
-| 1900 and later | 365 | 18.3% |
-| undated | 192 | 9.6% |
+| before 1500 | 105 | 5.3% |
+| 1500–1699 | 421 | 21.1% |
+| 1700–1799 | 333 | 16.7% |
+| 1800–1899 | 562 | 28.1% |
+| 1900 and later | 364 | 18.2% |
+| undated | 211 | 10.6% |
 
 ## Range, stated plainly
 
 **African representation is 8 works (0.4%)**, of which 1 are Egyptian. Persona 3 asked for Benin bronzes; bronzes are not paintings, and the African holdings of all four museums are overwhelmingly sculpture, textile and object. This is finding F2 in the plan — a named gap, not a solved one.
 
-**334 works carry no museum text** (cma 172, met 101, mia 51, aic 10). Under story 0005 those days cannot be published without a hand-written note, which is what the 70% text bar exists to bound.
+**309 works carry no museum text** (cma 138, met 102, mia 59, aic 10). Under story 0005 those days cannot be published without a hand-written note, which is what the 70% text bar exists to bound.
 
 ## Rejected before selection
 
-- **duplicate** — 972
-- **title too long** — 842
-- **no plate** — 77
+- **duplicate** — 981
+- **title too long** — 843
 - **anonymous** — 23
+- **no plate** — 20
 - **too small** — 11
