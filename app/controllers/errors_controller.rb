@@ -4,6 +4,10 @@
 # any other screen — one skin, `DESIGN.md` rule 1. It is the only controller that
 # exists to answer a request that already failed.
 class ErrorsController < ApplicationController
+  # A request that already failed does not also get asked to sign in — and the
+  # exceptions_app can be reached by any verb from any state (story 0015).
+  skip_before_action :require_reader
+
   # Two ways to arrive, and they deserve different sentences.
   #
   # A date that has no artwork raised RecordNotFound out of DaysController; a

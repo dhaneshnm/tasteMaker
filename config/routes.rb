@@ -14,6 +14,25 @@ Rails.application.routes.draw do
   # The artwork of the day is the front door.
   root "daily#show"
 
+  # The account key (story 0015). OmniAuth owns POST /auth/:provider; these are
+  # the return legs. `via: [:get, :post]` because Apple sends its callback as a
+  # cross-site POST — the plan's most-watched edge — while Google returns GET.
+  match "auth/:provider/callback" => "sessions#create", via: %i[get post]
+  get "auth/failure" => "sessions#failure"
+  delete "session" => "sessions#destroy", as: :session
+
+  # The landing page's per-visitor fragment (the favorites#control precedent):
+  # sign-in buttons for a signed-out web visitor, a quiet account line for a
+  # signed-in one, nothing at all for a device.
+  get "session/control" => "sessions#control", as: :session_control
+
+  # The exit door the category's leader never built. Signed-in only.
+  delete "account" => "accounts#destroy", as: :account
+
+  # The device key (story 0015). The shell registers its Keychain UUID here on
+  # launch and receives the signed device cookie every later request rides on.
+  post "device/registrations" => "device_registrations#create"
+
   # The infinite-scroll gallery, moved off the root (decisions/0002).
   get "feed" => "paintings#index", as: :feed
 

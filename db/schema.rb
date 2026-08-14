@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_13_205010) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_14_212702) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -49,13 +49,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_13_205010) do
     t.index ["scheduled_on"], name: "index_daily_picks_on_scheduled_on", unique: true
   end
 
+  create_table "devices", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "last_seen_at"
+    t.string "token_digest", null: false
+    t.datetime "updated_at", null: false
+    t.index ["token_digest"], name: "index_devices_on_token_digest", unique: true
+  end
+
   create_table "favorites", force: :cascade do |t|
-    t.string "collector_digest", null: false
+    t.string "collector_digest"
     t.datetime "created_at", null: false
     t.integer "painting_id", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id"
     t.index ["collector_digest", "painting_id"], name: "index_favorites_on_collector_digest_and_painting_id", unique: true
     t.index ["painting_id"], name: "index_favorites_on_painting_id"
+    t.index ["user_id", "painting_id"], name: "index_favorites_on_user_id_and_painting_id", unique: true, where: "user_id IS NOT NULL"
+    t.index ["user_id"], name: "index_favorites_on_user_id"
   end
 
   create_table "paintings", force: :cascade do |t|
@@ -85,8 +96,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_13_205010) do
     t.index ["source", "source_id"], name: "index_paintings_on_source_and_source_id", unique: true
   end
 
+  create_table "users", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email"
+    t.string "name"
+    t.string "provider", null: false
+    t.string "uid", null: false
+    t.datetime "updated_at", null: false
+    t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "daily_picks", "paintings"
   add_foreign_key "favorites", "paintings"
+  add_foreign_key "favorites", "users"
 end

@@ -6,14 +6,18 @@ class DaysController < ApplicationController
   # pick, so on a gap day "today" and "the page at /" are different things.
   def index
     picks = DailyPick.published
-    response.cache_control[:no_cache] = true
+
+    # Behind the wall since story 0015: still ETag'd (browsers revalidate),
+    # no longer `public` (Thruster must not hold a gated page's body — a
+    # shared cache entry outlives a sign-out).
+    response.cache_control.replace(no_cache: true, extras: [ "private" ])
 
     # Aggregates first, then bail: the page revalidates on every visit, and
     # loading every pick, painting, attachment and blob only to discard them on
     # a 304 is the bulk of the work. The key covers the picks AND the paintings
     # the rows render — title, artist and image live on another table with their
     # own timestamps, so a re-seed that corrects a title must break the key.
-    return unless stale?(etag: [ picks.cache_key_with_version, paintings_touched_at(picks) ], public: true)
+    return unless stale?(etag: [ picks.cache_key_with_version, paintings_touched_at(picks) ])
 
     @picks = picks.with_artwork.order(scheduled_on: :desc).load
     @current = @picks.first
@@ -38,9 +42,9 @@ class DaysController < ApplicationController
     # `stale?`, not `fresh_when`: this action renders explicitly, and fresh_when
     # already sends the 304 itself, so the render would be a second response.
     # The painting is in the key for the same reason it is on the list.
-    response.cache_control[:no_cache] = true
+    response.cache_control.replace(no_cache: true, extras: [ "private" ])
     render template: "daily/show" if stale?(etag: [ @pick, @pick.painting ],
-      last_modified: @pick.updated_at, public: true)
+      last_modified: @pick.updated_at)
   end
 
   private

@@ -26,6 +26,24 @@ class ApplicationController < ActionController::Base
   # also invalidates any non-HTML conditional GET: one extra fetch, once.
   etag { helpers.app_stylesheets_paths.map { |sheet| helpers.stylesheet_path(sheet) } }
 
+  # The wall (story 0015). One guard, two keys:
+  #
+  #   request ──> require_reader ──┬── session[:user_id] → User row?   pass
+  #                                ├── signed device cookie → Device?  pass
+  #                                └── neither → 303 to /#signin
+  #
+  # 303, not 302: the wall bounces POSTs too (a signed-out keep tap), and Turbo
+  # re-issues the method on a 302. The anchor lands the visitor at the sign-in
+  # fragment, which explains what the wall guards (design review D3).
+  #
+  # Skips live on the controllers themselves: the landing page (daily#show),
+  # errors, sessions, device registrations, and admin (whose key is basic auth,
+  # unchanged). Active Storage never passes through here — its controllers do
+  # not inherit this one — and must not: the landing artwork is for everyone.
+  # Blob URLs are signed capability URLs; that is their whole protection, and
+  # it is named in the plan rather than discovered later (eng review A3).
+  before_action :require_reader
+
   # And so does a change to the templates themselves, which is the general case
   # the two lines above are each a special case of.
   #
@@ -44,4 +62,51 @@ class ApplicationController < ActionController::Base
   # `render` is implicit and a missed partial fails silently in the same
   # direction as the bug — this value cannot miss anything.
   etag { Rails.application.config.x.revision }
+
+  private
+    def require_reader
+      return if current_user || current_device
+      redirect_to root_path(anchor: "signin"), status: :see_other
+    end
+
+    def current_user
+      return @current_user if defined?(@current_user)
+      @current_user = User.find_by(id: session[:user_id]) if session[:user_id]
+    end
+    helper_method :current_user
+
+    # Memoizes the row, not just a digest: exists? plus a later last_seen_at
+    # touch would be two queries; find_by is the same one indexed read and
+    # hands the row to whoever needs it (eng review, Codex).
+    def current_device
+      return @current_device if defined?(@current_device)
+      @current_device = begin
+        token = cookies.signed[:device]
+        if token.present?
+          Device.find_by(token_digest: Digest::SHA256.hexdigest(token))&.tap(&:note_seen)
+        end
+      end
+    end
+
+    def current_device_digest
+      current_device&.token_digest
+    end
+
+    # Private and uncacheable, always. `Vary: Cookie` is belt to the no-store
+    # braces: nothing should store these, and nothing should reuse one reader's
+    # copy for another if it does. Shared by every per-visitor endpoint —
+    # favorites and sessions both — so a new one cannot ship storable
+    # per-visitor responses by hand-rolling its own headers.
+    def no_store
+      response.cache_control.replace(private: true, no_store: true)
+      response.headers["Vary"] = "Cookie"
+    end
+
+    # The shell appends "Tondo iOS/<version>" to WKWebView's user agent. The
+    # sign-in fragment reads this so an UNREGISTERED shell — first launch,
+    # registration failed or still in flight — degrades to art-plus-nothing,
+    # never to Google buttons inside the app (eng review, Codex).
+    def native_shell?
+      request.user_agent.to_s.include?("Tondo iOS")
+    end
 end

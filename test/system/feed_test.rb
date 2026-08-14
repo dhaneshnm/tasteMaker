@@ -13,6 +13,10 @@ require "application_system_test_case"
 # has become stuck, so nothing here changes shape — the masthead leaves and the
 # rail does not.
 class FeedTest < ApplicationSystemTestCase
+  # Story 0015: the pages this file exercises sit behind the wall. The reader
+  # signs in once per test, through the real fragment.
+  setup { sign_in_as_reader }
+
   # Enough works to push the masthead well off the top of the screen.
   setup do
     (PaintingsController::PER_PAGE * 2).times do |i|

@@ -1,14 +1,18 @@
 # Keeping a work, letting it go, and the room the kept ones live in.
 #
-# The whole design turns on one constraint: `/` and `/days` are
-# `Cache-Control: public`, and production runs behind Thruster's HTTP cache. So
-# the public HTML has to be byte-identical for every reader, and everything
-# personal lives behind one private fragment:
+# The whole design turns on one constraint: `/` is `Cache-Control: public`,
+# and production runs behind Thruster's HTTP cache. So the public HTML has to
+# be byte-identical for every reader, and everything personal lives behind one
+# private fragment. Identity comes from ApplicationController since story 0015
+# — a signed-in web reader (favorites.user_id) or a registered device
+# (collector_digest); the wall runs first, so a signed-out web visitor never
+# reaches these actions, and their lazy frame request bounces while the
+# default glyph simply stays on screen:
 #
 #   GET /                              GET /collection/42/control
 #     public, no-cache, ETag             private, no-store, Vary: Cookie
 #     identical for everyone             this reader only
-#     never touches the cookie           issues the cookie if absent
+#     never touches the cookie           renders this reader's state
 #          │                                      ▲
 #          └── <turbo-frame src=…> ───────────────┘   POST/DELETE reply into
 #              (static markup, lazy)                  the same frame
@@ -22,7 +26,7 @@ class FavoritesController < ApplicationController
 
   # The reader's own room.
   def index
-    favorites = Favorite.collected_by(collector_digest)
+    favorites = reader_favorites
                         .includes(painting: { image_attachment: :blob })
                         .order(created_at: :desc).to_a
 
@@ -40,15 +44,15 @@ class FavoritesController < ApplicationController
     @rows = favorites.map { |favorite| [ favorite.painting, picks[favorite.painting_id] ] }
   end
 
-  # The per-visitor fragment. In practice this is where the cookie gets issued,
-  # because Turbo always fetches it before a reader can tap anything — but the
-  # writes below mint it too, for a client that posts without loading the frame.
+  # The per-visitor fragment. It used to be where the browser cookie got
+  # minted; since story 0015 identity arrives before this controller does
+  # (session or device cookie), so this only reads.
   def control
     render_control
   end
 
   def create
-    Favorite.create!(collector_digest: collector_digest, painting: @painting)
+    Favorite.create!(reader_identity_attributes.merge(painting: @painting))
     render_control(kept: true, autofocus: true)
   rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid
     # Already kept — two taps that raced, or two tabs. Not an error: the reader
@@ -70,7 +74,7 @@ class FavoritesController < ApplicationController
     # most one row; the cost of the faster version is that the day it grows an
     # `after_destroy` — a counter, a tombstone — both unkeep paths skip it with
     # no test failing.
-    Favorite.collected_by(collector_digest).where(painting: @painting).destroy_all
+    reader_favorites.where(painting: @painting).destroy_all
 
     # Two callers, two right answers.
     #
@@ -91,8 +95,6 @@ class FavoritesController < ApplicationController
   end
 
   private
-    COOKIE = :collector
-
     def set_painting
       @painting = Painting.find(params[:painting_id])
     end
@@ -107,7 +109,7 @@ class FavoritesController < ApplicationController
     # allocating every painting_id the reader has ever kept, on the endpoint the
     # lazy frame hits on every single day-page view.
     def render_control(kept: nil, autofocus: false)
-      collection = Favorite.collected_by(collector_digest)
+      collection = reader_favorites
 
       render partial: "favorites/control", locals: {
         painting: @painting, autofocus: autofocus,
@@ -116,41 +118,16 @@ class FavoritesController < ApplicationController
       }
     end
 
-    # Private and uncacheable, always. `Vary: Cookie` is belt to the no-store
-    # braces: nothing should store these, and nothing should reuse one reader's
-    # copy for another if it does.
-    def no_store
-      response.cache_control.replace(private: true, no_store: true)
-      response.headers["Vary"] = "Cookie"
+    # Which world this reader keeps in (story 0015). A signed-in web reader's
+    # rows carry user_id; a device's rows carry the digest of its registered
+    # Keychain UUID. The wall ran first, so one of the two exists — the old
+    # mint-on-read browser cookie is gone, deleted rather than deprecated,
+    # because nothing was deployed and no reader ever held one.
+    def reader_favorites
+      current_user ? Favorite.owned_by(current_user) : Favorite.collected_by(current_device_digest)
     end
 
-    # The reader's identity is established when the fragment is READ, not when
-    # they first keep something.
-    #
-    # Minting on the first write looked cheaper and had a hole: two tabs, a
-    # brand-new reader, neither holding a cookie, both tapped. Each request mints
-    # a different token, each writes a row, the browser keeps whichever
-    # Set-Cookie lands last, and one row is orphaned under a token nobody holds.
-    # The unique index does not catch it — it is scoped to the digest, and the
-    # digests differ. Both tabs would say "Kept" and one work would never appear.
-    #
-    # Only ever called from this controller. No public page reads or writes this
-    # cookie, because a Set-Cookie on a `public` response is one reader's
-    # identity sitting in a shared cache waiting for the next one.
-    def collector_token
-      cookies.signed[COOKIE].presence || mint_collector_token
-    end
-
-    def mint_collector_token
-      SecureRandom.base58(24).tap do |token|
-        cookies.permanent.signed[COOKIE] = {
-          value: token, httponly: true, same_site: :lax, secure: Rails.env.production?
-        }
-      end
-    end
-
-    # What the table sees. Never the token.
-    def collector_digest
-      @collector_digest ||= Digest::SHA256.hexdigest(collector_token)
+    def reader_identity_attributes
+      current_user ? { user: current_user } : { collector_digest: current_device_digest }
     end
 end

@@ -10,3 +10,8 @@ SWIFT_OPTIMIZATION_LEVEL = -Onone
 GCC_OPTIMIZATION_LEVEL = 0
 ONLY_ACTIVE_ARCH = YES
 ENABLE_TESTABILITY = YES
+
+// The device-registration secret (story 0015). Any value works locally; the
+// server side falls back to ENV["TONDO_APP_SECRET"], so run Rails with the
+// same one.
+TONDO_APP_SECRET = dev-tondo-app-secret

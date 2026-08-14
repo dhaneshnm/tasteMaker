@@ -286,6 +286,19 @@ cropped one.
 `.walk` — previous / next day at the foot of a past day. Two `.caps-link`s, and
 nothing else; the way back to today sits under them.
 
+`.signin` — the landing page's sign-in fragment (story 0015), lazy-loaded into
+the `signin` turbo-frame at the foot of the label column; the frame's id is the
+anchor every wall bounce lands on. One `--ink-faint` line naming what the door
+opens, then two house buttons: `--bg-lift` field, `--hairline` border, the 2px
+form-control radius, 44px minimum height, Newsreader labels ("Continue with
+Google / Apple") led by the provider's official mark at 18px — Google's
+multicolour G, Apple's mark in `--ink`. Recognition lives in the logos, not the
+providers' button chrome. Signed in, the fragment is one quiet line: `Your
+collection → · Sign out`. In the shell, and for any device identity, it renders
+empty — the app never shows login UI. `.account` is its sibling at the foot of
+the collection: the signed-in line and `Delete account`, whose confirm names
+what it destroys.
+
 `.sentinel`, `.zoom`, `.adm` — infinite-scroll spinner, full-screen view,
 curator's desk.
 
@@ -351,7 +364,14 @@ parked over the pictures for the whole scroll. `z-index: 1`, so `.zoom` (20)
 covers it and `body::after`'s paper tooth (3) passes over it like everything
 else.
 
-Those are the only two.
+**Google's G is the only non-token colour in the product** (story 0015,
+design review D4). It appears inside `.signin`'s buttons and nowhere else:
+the mark is the recognisable half of the sign-in door, and desaturating it to
+gold would keep the room at the cost of the door. Confined to that fragment;
+any second appearance of these colours is a violation of rule 1, not a
+precedent.
+
+Those are the only three.
 
 It used to be a hardcoded hex, which rule 1 does not allow and which story 0008
 could not mirror into the iOS asset catalogue. It is a token now, and the native

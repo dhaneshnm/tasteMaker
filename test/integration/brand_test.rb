@@ -10,6 +10,10 @@ require "test_helper"
 # The masthead partial has one variance that is easy to flatten by accident and
 # that nothing else in the suite covers — see the empty-state test below.
 class BrandTest < ActionDispatch::IntegrationTest
+  # Story 0015 put the reader-facing pages behind the wall; these tests read
+  # them the way the app does — as a registered device.
+  setup { register_device }
+
   # The 404 carries a masthead too, and the test environment re-raises instead
   # of rendering it by default. Same reason `errors_test.rb` does this.
   with_rescued_exceptions!

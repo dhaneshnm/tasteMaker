@@ -1,6 +1,11 @@
 class DailyController < ApplicationController
   # The front door. One artwork, one note, one day.
   #
+  # The one reader-facing page outside the wall (story 0015, decision Q1):
+  # today's artwork greets everyone — signed out, signed in, device. Everything
+  # personal on it rides the two private fragments (keep, sign-in).
+  skip_before_action :require_reader
+  #
   # Caching: `public, no-cache` + an ETag means every request revalidates and
   # gets a cheap 304 when nothing changed. A fresh `max-age` would have been
   # wrong here — public caches do not revalidate while fresh, so a typo fix in

@@ -43,6 +43,25 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # desktop window does.
   setup { fit_viewport }
 
+  # The account key, from the browser's side (story 0015). Providers are mocked
+  # suite-wide, so tapping the real button on the landing fragment IS the whole
+  # flow: POST → mocked consent → callback → session. Tests that need a reader
+  # behind the wall call this first — it is the same door a real web reader
+  # walks through, sign-in fragment and all.
+  def sign_in_as_reader
+    mock_auth
+    # The anchor, not the bare root: the fragment is a lazy frame at the foot
+    # of the page, so it loads only when scrolled into view — and #signin is
+    # exactly where the wall sends every bounced visitor anyway. Same door,
+    # same scroll.
+    visit "#{root_path}#signin"
+    click_button "Continue with Google"
+    # Wait for the callback's landing, not for "a masthead" — the landing page
+    # has one too, and a test that proceeds mid-navigation renders its next
+    # page against half-finished state (found as a race the first full run).
+    assert_current_path days_path, wait: 5
+  end
+
   private
     def fit_viewport
       page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride",

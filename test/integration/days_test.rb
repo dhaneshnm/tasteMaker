@@ -1,6 +1,10 @@
 require "test_helper"
 
 class DaysTest < ActionDispatch::IntegrationTest
+  # Story 0015 put the reader-facing pages behind the wall; these tests read
+  # them the way the app does — as a registered device.
+  setup { register_device }
+
   # Fixtures: today (sunflowers), yesterday (harbour), tomorrow (bronze, queued).
   setup do
     @today = daily_picks(:today)

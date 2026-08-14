@@ -8,3 +8,8 @@ TONDO_URL = https:/$()/CHANGEME.example.com
 SWIFT_OPTIMIZATION_LEVEL = -O
 SWIFT_COMPILATION_MODE = wholemodule
 VALIDATE_PRODUCT = YES
+
+// CHANGEME — the production registration secret, matching Rails credentials
+// `tondo.app_secret`. Same caveat as the URL above: builds fine while wrong,
+// caught only when registration answers 401.
+TONDO_APP_SECRET = CHANGEME

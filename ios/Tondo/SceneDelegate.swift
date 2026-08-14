@@ -36,6 +36,27 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window = window
         window.makeKeyAndVisible()
 
-        navigator.start()
+        // The device key rides ahead of the first navigation (story 0015):
+        // register → cookie into the web view's store → route. On failure the
+        // shell routes anyway — the reader gets the public landing page, the
+        // sign-in fragment stays empty for this user agent, and the next
+        // foreground retries. The launch screen covers the round-trip.
+        DeviceIdentity.register { [weak self, navigator] in
+            self?.started = true
+            navigator.start()
+        }
     }
+
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        // The retry path. Idempotent server-side (same UUID → same identity,
+        // cookie re-issued), so re-registering on every foreground costs one
+        // request and heals a failed first launch without special-casing it.
+        guard started else { return }
+        DeviceIdentity.register {}
+    }
+
+    // `sceneDidBecomeActive` also fires right after launch, when `register`
+    // may still be in flight — this keeps the two calls from racing the
+    // cookie store on cold start.
+    private var started = false
 }

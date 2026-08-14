@@ -32,6 +32,16 @@ gem "thruster", require: false
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"
 
+# Story 0015 — OAuth-only sign-in (decisions/0011: OmniAuth over the Rails 8
+# auth generator, because the generator is password-shaped and this product
+# never has a password). omniauth-apple is pinned exactly: Apple's cross-site
+# POST callback makes this the fragile edge (specs/0015 plan, eng review A2),
+# and any bump re-verifies on the deployed domain.
+gem "omniauth"
+gem "omniauth-google-oauth2"
+gem "omniauth-apple", "= 1.3.0"
+gem "omniauth-rails_csrf_protection"
+
 # The Met publishes its open-access collection as one 300 MB CSV and nothing
 # else — no image URLs in the API bulk data (story 0013). Not a default gem
 # since Ruby 3.4.
