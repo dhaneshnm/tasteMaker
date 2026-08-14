@@ -2,7 +2,7 @@
 Date: 2026-08-14
 Lane: Full (core, target ≤ 2 days build; honest estimate 2–3 — this is two surfaces and
 an identity model, combined into one story by explicit owner decision, this session)
-Status: Spec'd
+Status: Built 2026-08-14 — bin/ci green (283 assertions system + 1,236 integration/model), QA'd (1 finding, fixed), simplified (17 findings), code-reviewed (2 agents, 10 findings, ship-blocker fixed). Apple flow verification and iOS device smoke wait on the deployed domain (ship checklist).
 
 ## Who
 **The owner** — this story is directed, not persona-derived. Dhanesh wants the product's

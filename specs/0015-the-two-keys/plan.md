@@ -1,7 +1,10 @@
 # 0015 — Implementation plan
-Status: **Design-reviewed** (`/plan-design-review` 2026-08-14 — triage scope by owner
-choice: the bounce, the buttons, signed-in wayfinding; decisions D3–D5 written into the
-sections below). Awaiting `/plan-eng-review`.
+Status: **Built** 2026-08-14. Design-reviewed (triage, D3–D5), eng-reviewed (19
+findings folded + Codex outside voice), implemented with tests as-you-go,
+QA'd live, simplified (4 agents), code-reviewed (2 agents — including the
+Apple-callback CSRF ship-blocker, fixed with regression coverage). Deviations
+recorded below. Remaining: deployed-domain Apple verification + iOS device
+smoke (ship checklist).
 
 ## Approach
 
