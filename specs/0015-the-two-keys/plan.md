@@ -1,7 +1,7 @@
 # 0015 — Implementation plan
-Status: Drafted 2026-08-14. Awaiting `/plan-design-review` (UI surface is small — one
-sign-in fragment on the landing page, one account-delete control — but it sits on the
-front door, so the review is not skippable) and `/plan-eng-review`.
+Status: **Design-reviewed** (`/plan-design-review` 2026-08-14 — triage scope by owner
+choice: the bounce, the buttons, signed-in wayfinding; decisions D3–D5 written into the
+sections below). Awaiting `/plan-eng-review`.
 
 ## Approach
 
@@ -123,7 +123,7 @@ private
 
 def require_reader
   return if current_user || current_device_digest
-  redirect_to root_path
+  redirect_to root_path(anchor: "signin")
 end
 
 def current_user
@@ -157,6 +157,42 @@ touched at most once a day per device (guarded update, not every request).
 - `destroy`: `reset_session`, redirect to `/`.
 - `control`: the private fragment. `no_store`, renders one of three states
   (signed-out web → two buttons; signed-in → collection link + sign out; device → empty).
+
+### The sign-in fragment's look (design review D4, 2026-08-14)
+
+House buttons, official marks. Two buttons side by side inside the fragment
+(stacked at narrow widths), each: `--bg-lift` field, `--hairline` border, the
+2px radius DESIGN.md already grants form controls, `min-height: 44px` (rule 9),
+label in Newsreader — "Continue with Google" / "Continue with Apple" — with the
+provider's official mark at ~18px leading the label: Google's multicolor G,
+Apple's mark in `--ink`. No bold, no third typeface, no pill.
+
+Recognition lives in the logos, not the providers' button chrome; everything
+else obeys the token table. **DESIGN.md gains two lines in the same commit
+(R1):** a `.signin` component entry, and an accepted exception recording that
+Google's G is the only non-token color in the product, confined to this
+fragment. Both providers' web guidelines permit custom buttons carrying the
+official mark; the exact current guideline pages get checked at implement time
+and noted here if anything material changed.
+
+Above the buttons, one quiet line of `--ink-faint` copy naming what the door
+opens (see the bounce, below). Under them, nothing — no "or", no divider, no
+account-benefits list.
+
+### The bounce (design review D3, 2026-08-14)
+
+`/` is cached and byte-identical, so its compass shows DAYS · KEPT · GALLERY to
+signed-out web visitors, and the rail shows the keep glyph. Every gated tap —
+compass, keep POST, deep link — redirects to **`/#signin`**: the URL fragment
+never reaches the server (cache-safe), and the anchor lands the visitor at the
+sign-in fragment. The fragment's signed-out copy therefore always explains what
+the wall guards, not just how to get through it: sign in opens *past days, the
+gallery, and a collection of your own*. The tap is answered one scroll-jump
+away rather than silently swallowed. The `id="signin"` anchor lives on the
+turbo-frame wrapper in the public HTML — static markup, identical for
+everyone. Accepted cost, stated: a keep tap teleports to the anchor instead of
+answering inside the rail; an in-place "sign in to keep" state was considered
+and declined to keep the fragment's state machine at three states.
 
 Apple specifics, named so they don't surprise at implement time: `omniauth-apple` needs
 team id, key id, Services ID as client id, and the `.p8` private key — all five values
@@ -212,11 +248,21 @@ Queries change from one scheme to two: `Favorite.collected_by(digest)` gains a s
 `Favorite.owned_by(user)`, and `favorites#index` / `#control` pick by identity. The
 unique-tap race handling (RecordNotUnique) stays exactly as is.
 
-## Account deletion
+## Account deletion & signed-in wayfinding (design review D5, 2026-08-14)
+
+The signed-in fragment state on `/` is one quiet line, not a panel: `Your
+collection → · Sign out` — both `.caps-link`, 44px targets, no card, no
+avatar, no email address on the front door. Sign out is a `button_to` (DELETE
+`/session`) styled as the link.
+
+Delete account lives at the foot of `/collection`, in the coda: one
+`--ink-faint` line — "Signed in with Google as dhanesh@…" — followed by
+`Delete account`, a `button_to` with `data-turbo-confirm` that names what it
+destroys: *"Deletes your account and the N works you've kept. There is no
+undo."* Rare controls belong in the reader's own room, not on every screen.
 
 `accounts#destroy`: signed-in only, `destroy` the user (`has_many :favorites,
-dependent: :delete_all`), `reset_session`, redirect to `/`. One button in the collection
-page coda, `data-turbo-confirm` on it — the one place a confirm dialog is honest. No
+dependent: :delete_all`), `reset_session`, redirect to `/`. No
 soft delete, no grace period, no email: there is no mailer and nothing to mail.
 
 ## iOS shell
@@ -282,3 +328,23 @@ the app end up on Google's consent screen" bugs; add it.
 
 ## Deviations noted during implementation
 _(append here, per build flow step 2)_
+
+## GSTACK REVIEW REPORT
+
+| Review | Trigger | Why | Runs | Status | Findings |
+|--------|---------|-----|------|--------|----------|
+| CEO Review | `/plan-ceo-review` | Scope & strategy | 0 | — | — |
+| Codex Review | `/codex review` | Independent 2nd opinion | 0 | — | — |
+| Eng Review | `/plan-eng-review` | Architecture & tests (required) | 0 | — | — |
+| Design Review | `/plan-design-review` | UI/UX gaps | 1 | issues_open (triage scope) | score: 5/10 → 8/10, 3 decisions (D3 bounce → `/#signin`; D4 house buttons + official marks; D5 account controls placement) |
+| DX Review | `/plan-devex-review` | Developer experience gaps | 0 | — | — |
+
+Triage scope, owner-chosen: three named gaps reviewed and resolved; full 7-pass
+sweep and mockups declined for speed. Deferred with rationale: in-place
+"sign in to keep" rail state (declined at D3 — three fragment states, not
+four); responsive/a11y pass beyond the 44px + stacking rules already specced;
+mockups. Design-debt candidates live in the D3/D4 sections above.
+
+**VERDICT:** DESIGN reviewed (triage). Eng review required before implementation.
+
+NO UNRESOLVED DECISIONS
