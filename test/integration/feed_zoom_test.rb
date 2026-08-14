@@ -4,8 +4,11 @@ class FeedZoomTest < ActionDispatch::IntegrationTest
   test "every work in the archive that has a picture is tappable" do
     get feed_path
 
-    assert_select "article.post", count: 5
-    assert_select "button.plate__zoom", count: 4
+    assert_select "article.post", count: Painting.count
+    # "every work that HAS a picture" — derived from the same predicate the
+    # template branches on, so a fixture with or without an image cannot make
+    # this assert a stale number.
+    assert_select "button.plate__zoom", count: Painting.all.count(&:display_image?)
     assert_select "button.plate__zoom[aria-label=?]",
       "View #{paintings(:sunflowers).title} full screen"
   end

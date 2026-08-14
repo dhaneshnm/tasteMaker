@@ -11,7 +11,7 @@ import { Controller } from "@hotwired/stimulus"
 // tap anywhere closes it, and focus returns to the artwork that was tapped. The
 // page behind it does not scroll.
 export default class extends Controller {
-  static targets = ["image", "overlay", "close"]
+  static targets = ["image", "overlay", "close", "railZoom"]
 
   opener = null
 
@@ -32,7 +32,7 @@ export default class extends Controller {
     if (!this.hasOverlayTarget) return
 
     const trigger = event.currentTarget
-    const artwork = trigger.querySelector(".plate__img")
+    const artwork = this.plateFor(trigger)
     if (!artwork?.currentSrc) return
 
     this.opener = trigger
@@ -50,6 +50,17 @@ export default class extends Controller {
     this.releaseModal()
     if (this.opener?.isConnected) this.opener.focus()
     this.opener = null
+  }
+
+  // `.plate__zoom` wraps its own image, so the trigger contains it. The rail's
+  // zoom button (story 0014) sits beside the plate rather than around it, so it
+  // does not — it falls back to this scope's single plate.
+  //
+  // The fallback is safe because the rail only renders on the screens whose job
+  // is one artwork. `/feed` has ten plates inside one controller scope and no
+  // rail at all, so the first branch always wins there and this never guesses.
+  plateFor(trigger) {
+    return trigger.querySelector(".plate__img") ?? this.element.querySelector(".plate__img")
   }
 
   // A field, not a method: the same reference has to come off `document` again.
@@ -78,6 +89,16 @@ export default class extends Controller {
     const trigger = plate.querySelector(".plate__zoom")
     if (trigger) trigger.hidden = true
     plate.querySelector(".plate__resting").hidden = false
+
+    // The rail's zoom button is outside `.plate`, so hiding the plate's trigger
+    // does not reach it — it would survive and open an empty overlay. Guarded,
+    // because `rest()` also runs for feed images and a bare `railZoomTarget`
+    // access throws on a page that has no rail.
+    //
+    // Only on the single-artwork screens, which is the only place a rail exists
+    // and therefore the only place "the plate that failed" and "the plate the
+    // rail points at" are the same plate.
+    if (this.hasRailZoomTarget) this.railZoomTarget.hidden = true
   }
 
   releaseModal() {

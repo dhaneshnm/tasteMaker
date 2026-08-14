@@ -44,6 +44,125 @@ class DynamicTypeTest < ApplicationSystemTestCase
     JS
   end
 
+  # Where the keep control's box lands. Story 0014 moved it out of the wall label
+  # into the rail under the plate, and this is the number that says so.
+  def keep_box
+    page.evaluate_script(<<~JS)
+      (() => {
+        const el = document.querySelector(".rail__slot .rail__act");
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { top: r.top, bottom: r.bottom, viewport: window.innerHeight };
+      })()
+    JS
+  end
+
+  # `ApplicationSystemTestCase` pins every test in the suite to 375x667, the
+  # smallest phone this product supports, through `Emulation.setDeviceMetricsOverride`.
+  # This file is the one that also has to prove the bar on a large modern phone,
+  # because the reserve term is `dvh`-relative and a term that holds on the small
+  # screen can still be wrong on the big one. Re-issuing the same CDP call is how
+  # the class default stays the small phone and only this file opts in.
+  def with_viewport(width, height)
+    page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride",
+      width: width, height: height, deviceScaleFactor: 1, mobile: true)
+    yield
+  ensure
+    fit_viewport
+  end
+
+  # Story 0014's whole success signal, and the forcing function it owes (R1).
+  #
+  # The control used to sit at the foot of the wall label, which put it 40-60pt
+  # below the fold on a fallback day and several hundred below on a hand-written
+  # one — rule 8 shows that note whole, so the page a curator writes is the
+  # TALLER page and the good case was the day nobody wrote. Position next to the
+  # artwork is what makes it independent of note length; this asserts it stayed
+  # that way.
+  #
+  # Both viewports, both routes, every text size. `/days/:date` renders the same
+  # partial but different chrome, and "same partial" is not a test.
+  test "the keep control is on screen at open, on every phone and every text size" do
+    long_note = "A hand-written note at the ceiling. " * 30   # ~180 words, rule 8's cap
+    DailyPick.find_by(scheduled_on: Date.current).update!(blurb: long_note)
+
+    [ [ 375, 667 ], [ 402, 874 ] ].each do |width, height|
+      with_viewport(width, height) do
+        [ root_path, day_path(Date.current) ].each do |route|
+          [ DEFAULT_ROOT, LARGEST_STANDARD_ROOT, CAPPED_ACCESSIBILITY_ROOT ].each do |root|
+            visit route
+            assert_selector ".rail__slot .rail__act"
+
+            scale_to root
+            box = keep_box
+
+            assert_operator box["bottom"], :<=, box["viewport"],
+              "the keep control was below the fold at #{width}x#{height}, " \
+              "root #{root}px, on #{route}"
+          end
+        end
+      end
+    end
+  end
+
+  # The accepted cost, asserted rather than remembered — and asserted on both
+  # phones, because the whole argument for accepting it was that it is paid on
+  # one of them and not the other.
+  #
+  # The fixture plate is 800x1000. The arithmetic, at a 16px root:
+  #
+  #   402x874  content width 361.8 -> natural height 452
+  #            caps: 55vh 481, 100dvh-19rem-44px 526    -> neither binds, 452
+  #   375x667  content width 337.5 -> natural height 422
+  #            caps: 55vh 367, 100dvh-19rem-44px 319    -> the reserve binds, 319
+  #
+  # So on the large phone the picture is width-constrained and the rail is free;
+  # on the small one the reserve term wins and the picture pays 44px of its 363.
+  # If the 402 number ever drops below 452 the reserve grew too greedy to be free
+  # anywhere, which is the direction a bigger rail walks in.
+  test "the rail is free on the large phone and costs the small one 44px" do
+    with_viewport(402, 874) do
+      visit root_path
+      assert_selector ".plate__img"
+      assert_equal 452, fold["plateHeight"].round,
+        "the rail took height from the artwork at 402x874, where nothing should bind"
+    end
+
+    visit root_path
+    assert_selector ".plate__img"
+    assert_equal 319, fold["plateHeight"].round,
+      "the reserve term is no longer what bounds the plate at 375x667"
+  end
+
+  # The other half of the accepted cost: a WIDE painting pays nothing anywhere,
+  # because a landscape plate runs out of width long before any height cap can
+  # reach it. Only works tall enough to be height-capped ever move, which is what
+  # makes the 44px a narrow trade rather than a tax on the whole collection.
+  #
+  # `wide_harbour` carries real 1000x800 pixels rather than DEFAULTS plus edited
+  # width/height attributes. Those attributes only set an aspect ratio and never
+  # override the intrinsic size — the note at the top of `paintings.yml` records
+  # the time that cost this suite every fold assertion it had. A landscape test
+  # against portrait bytes passes while measuring the wrong thing.
+  test "a landscape work is width-constrained, so the rail costs it nothing" do
+    DailyPick.destroy_all
+    DailyPick.create!(painting: paintings(:wide_harbour), scheduled_on: Date.current,
+      blurb: "A note for the day.")
+
+    [ [ 375, 667, 270 ], [ 402, 874, 290 ] ].each do |width, height, expected|
+      with_viewport(width, height) do
+        visit root_path
+        assert_selector ".plate__img"
+
+        assert page.evaluate_script("(() => { const i = document.querySelector('.plate__img'); return i.naturalWidth > i.naturalHeight; })()"),
+          "the landscape fixture is not actually landscape — check its pixels, not its attributes"
+
+        assert_equal expected, fold["plateHeight"].round,
+          "a landscape plate changed height at #{width}x#{height}; it should be width-bound"
+      end
+    end
+  end
+
   # The bar, at the largest size a reader can pick without turning on the
   # accessibility sizes. This is the one that has to hold.
   test "the artwork and the note's first line still share the screen at the largest standard text size" do

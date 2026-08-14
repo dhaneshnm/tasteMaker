@@ -68,6 +68,59 @@ class FeedZoomTest < ApplicationSystemTestCase
     assert_no_selector "#{work(paintings(:sunflowers))} .plate__zoom[hidden]", visible: :all
   end
 
+  # `rest()` reaches for the rail's zoom button too (story 0014), and `/feed`
+  # renders no rail at all. Ten plates, one controller scope, no `railZoom`
+  # target: an unguarded `this.railZoomTarget` throws here and takes every other
+  # zoom on the page down with it. This is the test for that guard, and it is on
+  # the feed on purpose — the guard is invisible on the screens that have a rail.
+  test "a dying picture on the gallery does not break the rest of the page" do
+    visit feed_path
+
+    page.execute_script(<<~JS)
+      document.querySelector("#{work(paintings(:harbour))} .plate__img")
+        .dispatchEvent(new Event("error"))
+    JS
+
+    assert_selector "#{work(paintings(:harbour))} .plate__resting"
+
+    # The proof the handler did not throw partway: a neighbour still zooms.
+    tap_work(paintings(:sunflowers))
+    assert_selector ".zoom", visible: true
+  end
+
+  # The daily page's rail zoom opens the same overlay the plate does, and hands
+  # focus back to whichever control was tapped. Two triggers, one overlay — the
+  # rail's button does not wrap the image, so `plateFor` is what makes it work.
+  test "the rail's zoom opens the artwork and returns focus to itself" do
+    visit root_path
+
+    find(".rail__act[data-artwork-target='railZoom']").click
+    assert_selector ".zoom", visible: true
+    assert_selector ".zoom__img[src]"
+
+    find(".zoom__close").click
+    assert_no_selector ".zoom", visible: true
+    assert_equal "railZoom",
+      page.evaluate_script("document.activeElement.dataset.artworkTarget"),
+      "focus did not come back to the rail control that opened the overlay"
+  end
+
+  # A work with no usable image renders no `<img>` at all — `_plate.html.erb`
+  # takes that branch server-side and shows the resting note. `rest()` can never
+  # fire for it, because it is an `error` event on an element that was never
+  # there. So the rail's zoom has to be gated in the template, or it ships as a
+  # live control that opens an empty overlay. Keep stays: a resting work is
+  # still a work you can keep.
+  test "a work with no picture at all shows no zoom in the rail, but still keeps" do
+    paintings(:sunflowers).update!(image_url_800: nil)
+
+    visit root_path
+
+    assert_selector ".plate__resting", text: "This work is resting"
+    assert_no_selector ".rail__act[data-artwork-target='railZoom']"
+    assert_selector ".rail__slot .rail__act"
+  end
+
   private
     def work(painting)
       "#painting_#{painting.dom_key}"

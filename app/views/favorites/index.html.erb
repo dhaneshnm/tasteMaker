@@ -8,7 +8,12 @@
   <% if @rows.empty? %>
     <div class="ornament" aria-hidden="true">✦</div>
     <p class="coda__line">The works you keep will gather here.</p>
-    <p class="coda__note">Keep this sits under every artwork.</p>
+    <%# This sentence used to read "Keep this sits under every artwork", naming a
+        label that no longer exists — the control is a bookmark glyph now
+        (`decisions/0010`). With the labels gone this is the only place in the
+        product that can tell a first-time reader what that mark does, so it names
+        the shape rather than describing an action. %>
+    <p class="coda__note">The bookmark under each artwork keeps it here.</p>
     <%# ISSUE-001 was this page offering only `Today →`, stranding a reader who
         arrived with nothing kept. The compass answers it now, and answers it on
         every screen rather than one at a time. %>

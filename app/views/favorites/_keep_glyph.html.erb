@@ -1,0 +1,18 @@
+<%# The keep mark. Locals: filled:
+
+    A bookmark, not a heart: a heart means "like", a signal aimed at another
+    person, and there is nobody on the other end of one here — this product has
+    no social graph and the action is called Keep. The arched top is the brand's
+    own arch-capped lancet. See `decisions/0010-actions-become-a-rail.md`.
+
+    Fill is the entire state change: no colour shift, no second mark, no words.
+    That is why this partial takes `filled:` and nothing else.
+
+    Two callers, which is what earns it a file: the real control in
+    `_keep_button.html.erb`, and the static placeholder in `daily/_day.html.erb`
+    that holds the shape until the private frame lands. %>
+<svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"
+     fill="<%= filled ? "currentColor" : "none" %>"
+     stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">
+  <path d="M5.6 20.8V8.4a6.4 6.4 0 0 1 12.8 0v12.4l-6.4-4.9-6.4 4.9z"/>
+</svg>

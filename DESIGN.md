@@ -232,22 +232,56 @@ title is the *target* and gold is the link colour; on the day page the title is
 the *subject* and the artist carries the accent. Without the inversion the only
 gold in the row belongs to the one part that does not navigate.
 
-`.keep` — the last row of the wall label, where a reader keeps a work. A
-`.caps-link`-scale button in `--gold`, and once there is something to count, the
-way into the collection beside it. It sits **inside `.label`**, `2.2rem` below
-the credit — deliberately more air than the credit's own `1.3rem`, because equal
-spacing would group it with the credit block instead of reading as an action.
+`.rail` — the row of actions **directly under the plate**, above the wall label.
+Line icons in `--gold` at a 23px box, `1.4px` stroke, each in its own 44px target
+(rule 9). **Zoom, then Keep, then the count.** Decided 2026-08-14,
+`decisions/0010-actions-become-a-rail.md`.
 
-**Left-grouped, never spread.** `justify-content: flex-start` with a `1.6rem`
-gap. Spread across the measure the two items sit 466px apart at 1280, which stops
-reading as a pair and starts reading as `.walk`, which is a different kind of
-thing one screen further down.
+**Zoom is first for a structural reason, not emphasis.** Keep and its count share
+one Turbo frame, a frame is one contiguous flex item, and the count only exists
+after the fetch — so the frame grows and shoves whatever sits to its right about
+60px, on every open, for exactly the reader who already has a collection. Last
+position means there is nothing to its right to shove.
 
-**No glyph in the kept state.** `Keep this` becomes `Kept · Remove` — words and
-the middle dot `.label__credit` already uses. `✦` was tried and rejected: it is
-the product's only ornament (rule 6), and using it as a state mark put two of
-them within one screen meaning different things. The state is carried by the
-words, the colour, and `aria-pressed`.
+**The frame ships default content.** The un-kept outline glyph is identical for
+every visitor, so it is not personal data and belongs in the cached page; only
+the filled state and the count come from the private fragment. Without it the
+rail paints an empty 44px box where the habit mechanic should be for as long as
+the fetch takes, which is the same bug moved from the bottom of the page to the
+top.
+
+**No labels, and that is why the targets state both axes.** Rule 9 says
+`min-height: 44px` and nothing about width, because every control it names is a
+`.caps-link` and words make those wide for free. These have no words: left as
+written the target would be 23px across. `.rail__act` states `min-width` and
+`min-height`, and so does `.rail__slot` — the lazy frame's placeholder — or Zoom
+slides left every time the keep fragment lands.
+
+**The count keeps its word.** `3 kept`, never `3`. With the labels gone it is the
+only word in the rail, and it is the one thing telling a first-time reader what
+the glyph beside it does.
+
+**It sits next to the artwork because that is what fixes the fold.** Actions used
+to be the last row of the wall label, which put the product's only habit mechanic
+40–60pt below the fold on a fallback day and several hundred below on a
+hand-written one — rule 8 shows that note whole, so the page a curator writes is
+the *taller* one. Position next to the plate does not depend on note length.
+
+**Left-grouped, never spread.** `justify-content: flex-start`. Spread across the
+measure the items sit 466px apart at 1280, which stops reading as a pair and
+starts reading as `.walk`, a different kind of thing one screen further down.
+Instagram spreads; it can, at 402pt, and this cannot, at 680.
+
+**A bookmark, not a heart.** Heart means *like* — a signal aimed at another
+person. This product has no social graph and the action is called Keep, which is
+save-for-later. **The kept state is the filled glyph** — no colour shift, no
+second mark — and the accessible name carries what `Kept · Remove` used to say in
+words. `aria-pressed` is unchanged; it never depended on the label.
+
+**The rail costs `19rem → 22rem` on rule 2's third cap term.** Free at 402×874,
+where 55vh still wins. −48pt of artwork at 375×667 on works tall enough to be
+height-capped. That trade is the one rule 2 allows: a smaller picture, never a
+cropped one.
 
 `.walk` — previous / next day at the foot of a past day. Two `.caps-link`s, and
 nothing else; the way back to today sits under them.
@@ -285,6 +319,12 @@ curator's desk.
 6. **One rule, one ornament.** The hairline under the masthead and the `✦`
    divider are the only decoration. No cards, no shadows, no rounded corners
    beyond the 2px on form controls.
+   **Functional glyphs are not ornament.** `.rail` under the plate carries line
+   icons for Keep and Zoom — `--gold`, 23px box, 1.4px stroke, 44px target. They
+   are controls, not decoration, and they never share a screen with the `✦`,
+   which is what this rule was protecting when it read *"no glyph in the kept
+   state."* Amended 2026-08-14, `decisions/0010-actions-become-a-rail.md`. The
+   exception is for controls only; a decorative second mark is still refused.
 7. **Motion is a fade.** The archive's scroll-in reveal and the zoom fade, both
    off under `prefers-reduced-motion`. Nothing slides, bounces, or springs.
 8. **Text is never clamped on the daily page.** The archive clamps museum

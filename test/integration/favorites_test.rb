@@ -125,19 +125,62 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     assert set_cookie_header.present?, "the fallback mint did not fire"
   end
 
+  # Story 0014's other half. Moving the control under the artwork fixed WHERE it
+  # is; this is what fixes WHETHER IT IS THERE YET. The frame is lazy, so without
+  # default content the rail paints an empty 44px hole in the spot a reader is
+  # now looking at — the same bug, moved from the bottom of the page to the top.
+  #
+  # The cached page carries the mark and none of the machinery. That split is not
+  # tidiness: `button_to` emits a CSRF token, generating one starts a session, and
+  # a session puts a Set-Cookie on a page Thruster caches for everyone — which is
+  # the assertion directly above this one. So the placeholder is a <span>.
+  test "the cached page draws the keep mark without minting a session" do
+    with_forgery_protection do
+      get root_path
+
+      assert_select "turbo-frame##{"keep_#{@today.painting_id}"} .rail__act--waiting svg", count: 1,
+        message: "the rail had no keep mark until the private fragment landed"
+      assert_select "turbo-frame##{"keep_#{@today.painting_id}"} button", count: 0,
+        message: "a real button in the cached page mints a CSRF token and a cookie"
+      assert_select "a.rail__count", count: 0,
+        message: "a per-visitor count leaked into the publicly cached page"
+      assert_nil response.headers["Set-Cookie"]
+    end
+  end
+
+  # A work with no picture renders no <img>, so the JS that hides a dead zoom
+  # control can never fire for it — that path is an error event on an element
+  # which was never there. The guard has to be in the template or the rail ships
+  # a live Zoom that opens an empty overlay. Keeping still works: a resting work
+  # is still a work you can keep.
+  test "a work with no picture offers no zoom in the rail, but still offers keep" do
+    @today.painting.update!(image_url_800: nil)
+
+    get root_path
+
+    assert_select ".plate__resting"
+    assert_select ".rail__act[data-artwork-target=?]", "railZoom", count: 0
+    assert_select "turbo-frame##{"keep_#{@today.painting_id}"}", count: 1
+  end
+
   # ---------------------------------------------------------------- the toggle
 
   test "keeping and letting go" do
     keep(@painting)
     get favorite_control_path(@painting)
 
+    # No visible words since story 0014 — the state is the glyph's fill and the
+    # accessible name, so those are what this asserts. A test looking for text
+    # here would be looking for something the product deliberately does not say.
     assert_select "button[aria-pressed=?]", "true"
-    assert_select "button", text: "Kept · Remove"
+    assert_select "button[aria-label=?]", "Remove #{@painting.title} from your collection"
+    assert_select "button svg[fill=?]", "currentColor"
 
     unkeep(@painting)
 
     assert_select "button[aria-pressed=?]", "false"
-    assert_select "button", text: "Keep this"
+    assert_select "button[aria-label=?]", "Keep #{@painting.title} in your collection"
+    assert_select "button svg[fill=?]", "none"
   end
 
   test "two taps that race keep one work, not two rows and a 500" do
@@ -263,7 +306,7 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     get collection_path
 
     assert_select ".coda__line", text: "The works you keep will gather here."
-    assert_select ".coda__note", text: "Keep this sits under every artwork."
+    assert_select ".coda__note", text: "The bookmark under each artwork keeps it here."
     assert_select ".compass a[href=?]", root_path, text: "Today"
   end
 
@@ -299,11 +342,11 @@ class FavoritesTest < ActionDispatch::IntegrationTest
   test "the count link appears only once there is something to count" do
     get favorite_control_path(@painting)
 
-    assert_select "a.keep__link", count: 0
+    assert_select "a.rail__count", count: 0
 
     post favorite_path(@painting)
 
-    assert_select "a.keep__link", text: "1 kept →"
+    assert_select "a.rail__count", text: "1 kept"
   end
 
   test "collection thumbnails are thumbnails" do

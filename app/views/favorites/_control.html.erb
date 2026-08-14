@@ -1,47 +1,38 @@
-<%# The keep control: the one per-visitor thing on an otherwise public page.
-    Locals: painting, kept, count, autofocus
+<%# The keep control's per-visitor half — the one personal thing on an otherwise
+    public page. Locals: painting, kept, count, autofocus
 
     It carries its own <turbo-frame> rather than only the contents, because a
     frame-targeted response has to hand back a matching frame id or Turbo reports
     missing content.
 
-    `autofocus` is true ONLY on the write responses. Turbo replaces the whole
-    frame on submit, which destroys the focused button and drops focus to <body>;
-    autofocus puts it back, and focus landing on a toggle is also what makes a
-    screen reader announce the new state. On the initial lazy GET it is false —
-    a fragment arriving mid-scroll must not steal focus, which is the same reason
-    there is no aria-live here.
+    The button itself lives in `_keep_button.html.erb`, which `daily/_day` also
+    renders as this frame's default content. So the outline glyph is already on
+    screen when this response arrives; what this adds is the reader's real state
+    and their count. See the partial's own comment for why that split exists.
 
-    No glyph in the kept state. `✦` is the product's only ornament (DESIGN.md
-    rule 6) and using it here put two of them a few centimetres apart meaning
-    different things. The words carry the state instead, with the middle dot
-    `.label__credit` already uses. %>
+    No glyph-versus-words decision is made here any more. It was made in
+    `decisions/0010-actions-become-a-rail.md`: bare glyphs, filled kept state,
+    and the accessible name carrying what `Kept · Remove` used to say aloud. %>
 <%# No `class:` here, deliberately. Turbo replaces a frame by transplanting this
     element's CHILDREN into the one already on the page — the response frame's own
-    attributes are discarded. The `.keep-frame` class that reserves the 44px lives
+    attributes are discarded. The `.rail__slot` class that reserves the 44px lives
     on the frame in `daily/_day.html.erb`, which is the element that stays. Adding
     it here too looks load-bearing and is not. %>
 <%= turbo_frame_tag "keep_#{painting.id}" do %>
-  <div class="keep">
-    <%= button_to favorite_path(painting), method: (kept ? :delete : :post),
-          form: { class: "keep__form" },
-          class: "caps-link keep__toggle",
-          autofocus: autofocus,
-          aria: {
-            pressed: kept,
-            label: kept ? "Remove #{painting.title} from your collection"
-                        : "Keep #{painting.title} in your collection"
-          } do %><%= kept ? "Kept · Remove" : "Keep this" %><% end %>
+  <%= render "favorites/keep_button", painting: painting, kept: kept, autofocus: autofocus %>
 
-    <%# Only once there is something to see. The countless door on /days covers
-        discovery at zero; this one is the count climbing, which is the reward.
+  <%# The only word in the rail, and the reason it is a word. `3` alone would save
+      nothing and throw away the one thing telling a first-time reader what the
+      glyph beside it does — which matters more since the labels went (0010).
 
-        `turbo_frame: "_top"` because a link inside a frame navigates the frame by
-        default — without it, tapping this loads the whole collection page into a
-        44px box and the reader goes nowhere. %>
-    <% if count.positive? %>
-      <%= link_to "#{count} kept →", collection_path, class: "caps-link keep__link",
-            data: { turbo_frame: "_top" } %>
-    <% end %>
-  </div>
+      Only once there is something to see. The compass's `Kept` covers discovery
+      at zero; this one is the count climbing, which is the reward.
+
+      `turbo_frame: "_top"` because a link inside a frame navigates the frame by
+      default — without it, tapping this loads the whole collection page into a
+      44px box and the reader goes nowhere. %>
+  <% if count.positive? %>
+    <%= link_to "#{count} kept", collection_path, class: "rail__count",
+          data: { turbo_frame: "_top" } %>
+  <% end %>
 <% end %>

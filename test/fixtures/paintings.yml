@@ -59,3 +59,33 @@ imageless:
   title: Lost Panel
   artist: Unknown
   department: Paintings
+
+# A LANDSCAPE work, and the pixels are really landscape. Setting `image_width`
+# and `image_height` on a fixture that inherits DEFAULTS would not do it: the
+# comment at the top of this file records why — those attributes only set an
+# aspect ratio and never override the intrinsic size, which is how the suite
+# once measured a layout with no artwork in it at all. A test that needs a
+# landscape work needs landscape bytes.
+#
+# 1000x800, one flat colour, 193 bytes. Story 0014 uses it to prove the action
+# rail costs a wide painting nothing on either phone: a landscape plate is
+# width-constrained long before any height cap can reach it.
+#
+# `feed_order` is set high on purpose. Fixture ids are hashed rather than
+# sequential, so a new painting with a nil `feed_order` can sort to the TOP of
+# `/feed` and push an existing work below the scroll-in reveal — where Selenium
+# stops calling it visible and two gallery tests that never mentioned this
+# fixture start failing. Sorting last keeps a fixture added for the daily page
+# out of the gallery's way.
+wide_harbour:
+  <<: *DEFAULTS
+  feed_order: 9000
+  source_id: 900009
+  title: A Wide Harbour
+  artist: Berthe Morisot
+  life_date: 1841–1895
+  dated: "1875"
+  medium: Oil on canvas
+  image_url_800: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA+gAAAMgAQAAAACYY3WQAAAAA1BMVEWKel4S204DAAAAeUlEQVR42u3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgzwCJzwABXJCwkwAAAABJRU5ErkJggg=="
+  image_width: 1000
+  image_height: 800

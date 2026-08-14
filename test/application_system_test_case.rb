@@ -1,5 +1,16 @@
 require "test_helper"
 
+# Capybara matches a button or link by its id, name, value, title or text — and
+# by its `aria-label` only if this is on. It defaults to off.
+#
+# Story 0014 made that a suite-wide concern rather than a preference: the action
+# rail's controls are bare glyphs with no text at all, so the accessible name is
+# the ONLY handle they have. Off, `assert_button` cannot see them and a test can
+# only reach them by CSS class — which would pass just as happily against a
+# button with no accessible name at all, and that is exactly the regression worth
+# catching. On, a control a test can find is a control a screen reader can find.
+Capybara.enable_aria_label = true
+
 # The daily page is designed for a phone held at breakfast, so that is the
 # window every system test runs in.
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase

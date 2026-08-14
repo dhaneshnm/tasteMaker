@@ -115,7 +115,9 @@ class DailyTest < ActionDispatch::IntegrationTest
     get feed_path
 
     assert_response :success
-    assert_select "article.post", count: 5
+    # Derived, not hardcoded: this counts "every fixture painting", and a story
+    # that adds one for its own reasons should not fail a test about the feed.
+    assert_select "article.post", count: Painting.count
     assert_select "img[src=?]", paintings(:sunflowers).image_url_800
   end
 

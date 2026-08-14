@@ -108,4 +108,33 @@ class FeedTest < ApplicationSystemTestCase
     JS
     assert_equal 1, tops, "the rail wrapped onto two rows"
   end
+
+  # The gallery must not pay for a control it does not render.
+  #
+  # Story 0014's action rail buys its room out of `.plate__img`'s third cap term,
+  # and `/feed` uses that same class for all 110 works. Bumping the term globally
+  # would have shrunk every picture in the gallery on a 375x667 screen to make
+  # space for a rail this screen has never had — so the new term is scoped with
+  # `.page:has(.rail)`, and this is what says the scoping still holds.
+  #
+  # Asserted against the number the gallery has always produced. At 375x667 the
+  # fixture plate would like to be 422px tall and the ORIGINAL third term,
+  # `100dvh - 19rem`, already trims it to 363 — narrowly, below the 367 that 55vh
+  # allows, which is the 4px the stylesheet's own comment mentions.
+  #
+  # 363 is therefore the untouched number, and the daily page's is now 319. The
+  # gap between them is the whole scoping decision: if this ever reads 319 the
+  # rail's reserve leaked out of `.page:has(.rail)` and into the gallery, and
+  # nobody would have gone to the gallery to notice.
+  test "the gallery's plates did not shrink when the daily page grew a rail" do
+    visit feed_path
+    assert_selector ".plate__img"
+    # The gallery has no action rail — story 0014 scoped it to the screens whose
+    # job is one artwork, and this is half of why the cap term above still holds.
+    assert_no_selector ".rail"
+
+    height = page.evaluate_script(
+      "Math.round(document.querySelector('.plate__img').getBoundingClientRect().height)")
+    assert_equal 363, height, "a gallery plate lost height to the daily page's rail"
+  end
 end

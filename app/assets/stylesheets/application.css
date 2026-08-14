@@ -502,6 +502,42 @@ a:hover { color: var(--gold-deep); }
   max-height: min(55vh, 55dvh, calc(100dvh - 19rem));
 }
 
+/*
+ * Story 0014 adds the action rail between the plate and the label, so the room
+ * above the note grows and this term has to grow with it.
+ *
+ * `19rem + 44px`, and the split is the whole point — the plan said `22rem` and
+ * `dynamic_type_test.rb` rejected it. The `19rem` is the label's text budget and
+ * belongs in `rem` because it scales with the reader's text size. The rail does
+ * NOT: its height is the 44px touch target rule 9 fixes in pixels, identical at
+ * every Dynamic Type setting. Charging it in `rem` billed the picture 60px it
+ * never spent, and at the accessibility cap the plate gave up 28% of its height
+ * against the 25% this file bounds it to. A fixed cost is written as a fixed
+ * cost. The rail's own margins stay in `rem` and still scale, which is right —
+ * those are spacing around text.
+ *
+ * Scoped, and the scoping is the point. `.plate__img` is also every work in
+ * `/feed`, which renders no rail — bumping the term globally would shrink the
+ * gallery's images on a 375x667 screen to pay for a control that screen does not
+ * have. `:has()` is the same idiom `.masthead:has(.compass)` already uses, and
+ * a modifier class would mean the page knowing about its own children twice.
+ *
+ * It only ever bites where this term is smaller than 55vh. At 402x874 that is
+ * 526px against 481px, so `min()` still picks 55vh and the rail costs the
+ * artwork nothing there at all. At 375x667 it is 319px against 367px, and the
+ * plate loses 44px of its 363. Accepted 2026-08-14: rule 2 allows a smaller
+ * picture, never a cropped one, and only works tall enough to be height-capped
+ * move at all.
+ */
+.page:has(.rail) .plate__img {
+  max-height: min(55vh, 55dvh, calc(100dvh - 19rem - 44px));
+}
+
+/* The rail is the plate's own footer, not a separate block, so it takes over the
+ * gap rather than adding to it. Scoped the same way: a plate with no rail after
+ * it keeps the margin it has always had. */
+.plate:has(+ .rail) { margin-bottom: 0.5rem; }
+
 .plate__resting {
   margin: 0;
   padding: 2.5rem 1.5rem;
@@ -666,13 +702,21 @@ a:hover { color: var(--gold-deep); }
  * that is not a caps-link — a fixed-position button on the dark overlay with its
  * own border, background and `min-width` — so it states its own bar next to the
  * rest of its chrome. Two homes, on purpose; adding a third for a caps-link is
- * the mistake. */
+ * the mistake.
+ *
+ * `.rail__act` and `.rail__count` join this list rather than restating 44 a
+ * third time. The rail's buttons are not caps-links — they are bare glyphs — but
+ * the HEIGHT is the same fact for every control in the product, and one registry
+ * is what stops a future change to the bar from half-landing. What they need
+ * that nothing else here does is a WIDTH, because this rule has always got width
+ * for free from the words inside a caps-link and a glyph has none. That part,
+ * being genuinely new, is stated on its own below. */
 .coda .caps-link,
 .compass .caps-link,
 .walk__step,
 .walk__today,
-.keep__toggle,
-.keep__link,
+.rail__act,
+.rail__count,
 .days__remove {
   display: inline-flex;
   align-items: center;
@@ -680,7 +724,6 @@ a:hover { color: var(--gold-deep); }
 }
 
 /* A caps-link that is a bare <button>: same type, none of the button chrome. */
-.keep__toggle,
 .days__remove {
   padding: 0;
   font-family: var(--serif-body);
@@ -689,7 +732,6 @@ a:hover { color: var(--gold-deep); }
   border: 0;
   cursor: pointer;
 }
-.keep__toggle:hover,
 .days__remove:hover { color: var(--gold-deep); }
 
 /* There was a `.coda > .caps-link + .caps-link` rule here until story 0012,
@@ -794,39 +836,89 @@ a:hover { color: var(--gold-deep); }
 
 .days__remove-form { margin: 0 0 1.25rem; }
 
-/* ---------- Keeping a work ----------
+/* ---------- The action rail ----------
  *
- * The last row of the wall label, not a second ending. Keeping is an act on the
- * artwork, so the control belongs to the label and the coda stays the one way
- * out. 2.2rem above it, deliberately more than the credit's own 1.3rem: equal
- * spacing would group it with the credit block, and that gap is the whole
- * signal that this is an action rather than another line of metadata.
+ * Under the plate, above the wall label. Story 0014,
+ * `decisions/0010-actions-become-a-rail.md`.
  *
- * Left-grouped, never space-between. Spread across the 680px measure put the
- * toggle and the collection link 466px apart, which stops reading as a pair and
- * starts reading as the `.walk` nav row further down the same page.
+ * This used to be `.keep`, the last row of the wall label. That put the
+ * product's only habit mechanic 40-60pt below the fold on a fallback day and
+ * several hundred below on a hand-written one — rule 8 shows that note whole, so
+ * the page a curator writes is the taller one and the good case was the day
+ * nobody wrote. Position next to the artwork does not move with note length,
+ * which is the entire fix.
  *
- * No glyph in the kept state — see DESIGN.md. Both states are `--gold`, because
- * gold is what "this does something" looks like everywhere else here.
+ * Left-grouped, never space-between. Spread across the 680px measure put the two
+ * items 466px apart, which stops reading as a pair and starts reading as the
+ * `.walk` nav row further down the same page. Instagram spreads; it can, at
+ * 402pt, and this cannot, at 680.
  *
- * The height lives on the FRAME, not on `.keep`: the frame is lazy, so before it
- * loads there is no `.keep` to be tall, and the page grew by 79px when the
- * fragment landed. Reserving it on the placeholder is what stops the shift.
- * `.keep`'s own height then comes free from its 44px children. */
-.keep-frame {
-  display: block;
-  min-height: 44px;
-  margin-top: 2.2rem;
-}
-
-.keep {
+ * Order is Zoom, then the keep frame, and that is structural rather than
+ * emphasis. Keep and its count share one frame, a frame is one contiguous flex
+ * item, and the count only exists after the fetch — so the frame GROWS and shoves
+ * whatever is to its right about 60pt, on every open, for exactly the reader who
+ * already has a collection. Last position means there is nothing to its right.
+ *
+ * The gap is small because the 44px targets are mostly air already; it only
+ * keeps them from touching. */
+.rail {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* never space-between: 466px apart stops reading as a pair */
-  gap: 1.6rem;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
 }
 
-.keep__form { margin: 0; }
+/* The lazy frame's placeholder. `min-width` is not symmetry with `min-height`:
+ * before the fragment lands there is no button to be 44 wide, and the height
+ * half of this already had a bug to its name — the page grew 79px when the
+ * fragment landed. The frame now ships default content (the un-kept glyph, see
+ * `favorites/_keep_button.html.erb`), so in practice this reserves nothing that
+ * is not already drawn; it stays because the frame is still what holds the box
+ * if that default is ever removed. */
+.rail__slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* `button_to` wraps its button in a <form>, so without this the FORM is the flex
+ * item and the button is only as wide as its glyph. Every geometry assertion
+ * would then measure the form, pass at 44px, and ship a 23px target — which is
+ * the same shape of assumption that shipped 15px targets in ISSUE-002. */
+.rail__form { display: contents; }
+
+/* Height comes from the rule-9 list above. Width is stated here because that
+ * rule has always got width for free from the words inside a caps-link, and
+ * these have no words (`decisions/0010`). */
+.rail__act {
+  justify-content: center;
+  min-width: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gold);
+  cursor: pointer;
+}
+.rail__act:hover { color: var(--gold-deep); }
+.rail__act svg { display: block; width: 23px; height: 23px; }
+
+/* The mark holding its own place until the private frame lands. Same box, same
+ * colour, no cursor — it is a drawing, not a control, and the real button
+ * replaces it. Only reachable for the handful of frames the fetch takes, which
+ * is exactly how long the alternative would have shown a hole. */
+.rail__act--waiting { cursor: default; }
+
+/* The only word in the rail. It is metadata about the action beside it, so it
+ * steps back to dim like every other count in this product (rule 4) — but it
+ * keeps the word `kept`, because with the labels gone it is the one thing on the
+ * row telling a first-time reader what the glyph does. */
+.rail__count {
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+}
 
 /* ---------- The walk between days ---------- */
 
