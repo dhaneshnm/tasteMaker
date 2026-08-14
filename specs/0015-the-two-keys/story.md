@@ -68,8 +68,12 @@ and get the archive, the feed, and a collection that is mine.
   reinstall; dies with device wipe — accepted, decision Q2), registers it with the
   server, and receives a signed, permanent device cookie into the WKWebView cookie store.
 - Every screen in the app works with no account: today, days, feed, keep, collection.
-  **No login UI exists anywhere in the app.** Sign-in affordances shown to logged-out web
-  visitors must never render inside the shell.
+  Honest boundary (eng review): this holds once first registration has succeeded; on a
+  first-ever launch with no network, only the landing page renders until the next
+  foreground retry — degraded to art, never to an error or a login screen.
+  **No login UI exists anywhere in the app**, including the unregistered-shell state.
+  Sign-in affordances shown to logged-out web visitors must never render inside the
+  shell.
 - Kept works are keyed against the device identity. Deleting and reinstalling the app
   keeps the collection (Keychain survives). Wiping the device loses it — same honest
   caveat as story 0006, now one notch more durable.
