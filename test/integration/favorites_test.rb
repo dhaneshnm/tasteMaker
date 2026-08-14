@@ -372,6 +372,29 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     get preview_admin_daily_pick_path(daily_picks(:tomorrow)), headers: curator_headers
     assert_select "turbo-frame", count: 0,
       message: "the curator's preview offered a keep control on an unpublished day"
+
+    # …and the rail is still there for the zoom, which the preview does get.
+    assert_select ".rail .rail__act[data-artwork-target=?]", "railZoom", count: 1
+  end
+
+  # The one page shape where the rail has nothing to put in itself: a curator
+  # previewing an unpublished work that also has no picture. Preview takes the
+  # keep control away and `display_image?` takes the zoom, so an unconditional
+  # wrapper would ship an empty `.rail` — which is not free. It still matches
+  # `.page:has(.rail)`, so it charges the artwork a touch target of height, and
+  # it still renders its own bottom margin, for a row with nothing in it.
+  #
+  # Every other test passes with the guard reverted, which is why this one
+  # exists: it is the only assertion that fails without it.
+  test "a preview of a work with no picture renders no rail at all" do
+    daily_picks(:tomorrow).painting.update!(image_url_800: nil)
+
+    get preview_admin_daily_pick_path(daily_picks(:tomorrow)), headers: curator_headers
+
+    assert_response :success
+    assert_select ".plate__resting"
+    assert_select ".rail", count: 0,
+      message: "an empty rail shipped, charging the plate 44px for a row with no controls"
   end
 
   test "both list pages render the same row" do

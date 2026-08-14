@@ -883,7 +883,7 @@ a:hover { color: var(--gold-deep); }
   margin: 0 0 0.75rem;
 }
 
-/* The lazy frame. It carries no reserved box of its own: the frame always ships
+/* The keep frame. It carries no reserved box of its own: the frame always ships
  * default content (the un-kept glyph — see `favorites/_control.html.erb`), and
  * that span is a `.rail__act`, so it is already `--tap` in both directions
  * before the fetch resolves. Reserving the same box here a second time would be

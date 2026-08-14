@@ -251,11 +251,17 @@ the fetch takes, which is the same bug moved from the bottom of the page to the
 top.
 
 **No labels, and that is why the targets state both axes.** Rule 9 says
-`min-height: 44px` and nothing about width, because every control it names is a
+`min-height` and nothing about width, because every control it names is a
 `.caps-link` and words make those wide for free. These have no words: left as
-written the target would be 23px across. `.rail__act` states `min-width` and
-`min-height`, and so does `.rail__slot` — the lazy frame's placeholder — or Zoom
-slides left every time the keep fragment lands.
+written the target would be 23px across. `.rail__act` states `min-width` as well,
+and both read `--tap`.
+
+**`.rail__slot` reserves nothing, deliberately.** It briefly carried its own
+`--tap` box against the frame landing and shoving Zoom sideways. Neither half of
+that is a risk any more: the frame ships default content, so the box is drawn by
+a real `.rail__act` before the fetch resolves, and Zoom sits *before* the frame,
+so a frame that grows has nothing to its right to move. Reserving it a second
+time would be scaffolding for a default that is tested to exist.
 
 **The count keeps its word.** `3 kept`, never `3`. With the labels gone it is the
 only word in the rail, and it is the one thing telling a first-time reader what

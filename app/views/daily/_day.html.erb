@@ -64,7 +64,13 @@
       The wrapper is conditional because both its children are. A curator
       previewing an unpublished work that has no picture gets neither control,
       and an empty `.rail` is not free: it still trips `.page:has(.rail)` and
-      charges the artwork a touch target for a row with nothing in it. %>
+      charges the artwork a touch target for a row with nothing in it.
+
+      Server-side only, and deliberately so. One path still reaches an empty rail
+      — a curator previewing a work that passes `display_image?` and whose plate
+      then 404s from the museum CDN, so `artwork#rest` hides the zoom and there is
+      no keep frame beside it. Curator-only, cosmetic, and it would cost a
+      `:has()`-of-a-`:not()` to close. Left, knowingly. %>
   <% keeps = chrome != :preview %>
   <% if painting.display_image? || keeps %>
   <div class="rail">

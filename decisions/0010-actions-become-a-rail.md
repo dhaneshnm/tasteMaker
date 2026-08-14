@@ -113,6 +113,21 @@ both, and so does the lazy frame's placeholder — `.rail__slot` reserves
 `min-width: 44px` or Zoom slides left every time the keep fragment lands, which
 is the sideways version of the 79px shift already recorded in the stylesheet.
 
+**Amended 2026-08-14, same day, after `/simplify`.** The paragraph above is left
+as written because it is what was decided; this is what happened to it. Two
+things landed between the decision and the code that made `.rail__slot`'s reserve
+dead, and it was removed:
+
+- The frame ships **default content** (the un-kept glyph), so a real `.rail__act`
+  already holds a `--tap` box in both directions before the fetch resolves.
+- **Zoom moved to first in the row**, so the frame that grows has nothing to its
+  right to shove.
+
+Either one alone would have retired the reserve; both shipped. What survives is
+the finding underneath it — rule 9 needed a second axis — and that is now a
+`--tap` token rather than a number written in four places. `.rail__act` still
+states `min-width`; only the placeholder's duplicate box went.
+
 ## Prediction (falsifiable, time-bound)
 
 Through the **Aug 31, 2026** kill review: `Keep this` is on screen at open on

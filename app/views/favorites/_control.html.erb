@@ -20,7 +20,7 @@
     `autofocus` is true ONLY on the write responses. Turbo replaces the whole
     frame on submit, which destroys the focused button and drops focus to <body>;
     autofocus puts it back, and focus landing on a toggle is also what makes a
-    screen reader announce the new state. On the initial lazy GET it is false — a
+    screen reader announce the new state. On the initial GET it is false — a
     fragment arriving unbidden must not steal focus, which is the same reason
     there is no aria-live here. %>
 <%# No `class:` here, deliberately. Turbo replaces a frame by transplanting this
