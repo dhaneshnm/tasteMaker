@@ -20,6 +20,45 @@ shipped code and zero initiated user contact is builder's gravity — it gets na
 
 | 2026-08-13 | Story 0013 "a deeper pool" built — the pool goes from **110 works in one museum to 2,000 across four** (Met, Art Institute of Chicago, Cleveland, Minneapolis). Selection is a quota table in code, not a hand-pick: per-artist ceiling 5, no museum over 50%, no region over 25%, 53% outside Europe and North America, 18% dated 1900+, 83% carrying readable museum text, every plate \u2265 1600px. `db/seeds/pool_report.md` is the receipt; `test/lib/pool_quota_test.rb` fails the build if a reseed regresses any bar. 0.94 GB on disk against CX22's 40 GB. Code only, **not published, not deployed, zero users, zero installs**: an input metric under R7. | c770303 |
 | 2026-08-13 | Fix, reported from the running app: the front door read "This work is resting" where the artwork should have been. `Primary_RenditionNumber` carries a suffix (`mia_3003333_001.jpg`) and the regex reading it dropped it, so 43 works downloaded blank and 57 more were wrongly vetoed as unreachable. One of the blank ones had already been published. Dead plates 77 → 20; Minneapolis mirror 1,547 → 1,670. 2,002 rows, 2,002 images. | 1e79c05 |
+| 2026-08-14 | Story 0014 "the action rail" built — reader actions leave the bottom of the wall label and become a row of line icons under the plate, because `Keep this` (the habit mechanic, one of two named moats) was measured 40–60pt below the fold on the front door with nothing on screen saying so. Amends `DESIGN.md` rule 6 via `decisions/0010`. QA found ISSUE-001, the rail's zoom control sharing the plate's accessible name; fixed with a regression test. **Logged late** — this shipped in five commits and sat unlogged while the session moved on to hosting. | a4ea62b, 2dd8ca3, e3d977c, 9e298be, a34fd48 |
+| 2026-08-14 | **Tondo is live: https://dailytondo.com** — the first receipt in this file that is a URL instead of a commit. One GCP e2-medium in us-central1, Ubuntu 24.04, `kamal setup` exit 0 in 1,171s, valid Let's Encrypt cert, HTTP 301 → HTTPS, `/up` 200. Domain bought and DNS cut over the same day; USPTO Class 9/41 search run and clear before the money was spent. **Nobody has opened it, there is no daily pick scheduled, and the front door reads "The first artwork arrives soon."** | https://dailytondo.com, d292302, b092833, 096c586 |
+
+**The day the URL started existing, and what that is worth (R7), 2026-08-14.** For the
+first time in this log the receipt column holds an address instead of a hash. That is the
+precondition for every threshold in `BET.md` and it is **not progress against any of them**.
+The scoreboard is unchanged: **0 of 4 posts, 0 of 3 keywords, 0 of 5 user conversations, 0 of
+50 installs**, and "app live on the App Store by **Aug 14**" is now **missed rather than at
+risk** — that was today.
+
+Three hosts were named in two days before one existed. `decisions/0009` chose a Hetzner CX22
+in Ashburn; it is not sold there — the CX line is Germany/Finland only — and the €4.49 it
+quoted was already two months stale, Hetzner having raised USA CPX pricing ~3× on
+2026-06-15. Both were checkable the day 0009 was written. `decisions/0011` supersedes it with
+GCP and says plainly that the choice was made on **speed, not price**: the spread between the
+cheapest and dearest option, across the entire remaining life of this bet, is **$7.76**. That
+$7.76 consumed a decision entry, a price correction, a cost estimate and most of a session.
+
+**Two defects that only production could find.** The first: `bin/docker-entrypoint` runs
+`db:prepare`, which seeds on a fresh database, which downloads 2,000 images before the app
+answers — against Kamal's default `deploy_timeout` of **30 seconds**. Caught by reading the
+entrypoint before deploying rather than by watching a rollback; the failure would have looked
+like a broken app instead of an impatient timeout.
+
+The second is the more useful one. The seed stored **1,780 of 2,000** plates. Every one of
+the 220 failures was the Art Institute — 220 AIC works in the pool, 220 failures, zero AIC
+images. `lib/pool/sources.rb` had already paid for both lessons (no email address in the
+User-Agent, and AIC's Cloudflare wants its own `AIC-User-Agent` header) and `db/seeds.rb`
+carried a **duplicate copy of the string** that had learned neither. Fixed by deleting the
+duplicate rather than syncing it. What makes it worth writing down: from a residential IP the
+old headers work fine and from the datacenter they 403, so this bug was **invisible to every
+local test and certain in production**. The first stated diagnosis was contradicted by the
+first test and only held up when run on the box.
+
+**Still owed before a single external reader**, unchanged and now overdue rather than
+upcoming: no backups, no logged restore test, no error tracking, no analytics — session gate
+6, against a SQLite file on one disk. A VM snapshot of a live SQLite file can capture a torn
+WAL and is not a restorable backup. Choosing a third host in two days did not make that work
+smaller.
 
 | 2026-08-14 | Story 0015 "the two keys" built — every reader-facing endpoint now answers only a signed-in web session (Google/Apple OAuth, no passwords) or a registered device (Keychain UUID → signed cookie); everything else bounces to the landing page's sign-in anchor. The landing page stays public and byte-identical across all three identity states. Design review triage 5/10 → 8/10 (3 decisions), eng review 19 findings + Codex outside voice (19 points, 11 folded), 4-agent simplify (17 applied), 2-agent code review that caught a real ship-blocker: Apple's cross-site POST callback would have 422'd on CSRF in production while the suite stayed green. **The Apple flow is still unverified end-to-end — it cannot be exercised off a deployed domain, and there is no deployed domain.** Code only, **not published, not deployed, zero users, zero installs**: an input metric under R7. | 74c4516, 5db1dfb, b5301d1 |
 

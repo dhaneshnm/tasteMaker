@@ -161,8 +161,7 @@ class DailyTest < ActionDispatch::IntegrationTest
       assert_response :success
 
       names = css_select("a[href], button").filter_map do |el|
-        name = el["aria-label"].presence || el.text.squish.presence
-        name unless name.nil?
+        el["aria-label"].presence || el.text.squish.presence
       end
 
       duplicates = names.tally.select { |_, count| count > 1 }.keys

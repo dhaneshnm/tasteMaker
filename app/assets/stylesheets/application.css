@@ -164,6 +164,13 @@
   --serif-display: "Fraunces", "Iowan Old Style", Georgia, serif;
   --serif-body: "Newsreader", Georgia, serif;
   --measure: 42.5rem;
+
+  /* The touch-target bar, DESIGN.md rule 9. A token because story 0014 gave the
+     rail glyphs a width as well as a height and put the same number into
+     `.plate__img`'s reserve — four sites, and a bar that half-lands is exactly
+     the failure ISSUE-002 shipped once. In `px`, deliberately: a finger does not
+     get bigger when a reader raises their text size. */
+  --tap: 44px;
 }
 
 * { box-sizing: border-box; }
@@ -498,29 +505,28 @@ a:hover { color: var(--gold-deep); }
  * Only `.plate__img`. The archive's thumbnails are 112px in a fixed box and
  * have no relationship to the fold.
  */
-.plate__img {
-  max-height: min(55vh, 55dvh, calc(100dvh - 19rem));
-}
-
 /*
- * Story 0014 adds the action rail between the plate and the label, so the room
- * above the note grows and this term has to grow with it.
+ * Story 0014's action rail sits between the plate and the label, so on the
+ * screens that render one the room above the note grows and this term has to
+ * grow with it. That is the ONLY thing that varies, so it is the only thing the
+ * rule below overrides — the three invariant terms and the reasoning above them
+ * stay written once.
  *
- * `19rem + 44px`, and the split is the whole point — the plan said `22rem` and
- * `dynamic_type_test.rb` rejected it. The `19rem` is the label's text budget and
- * belongs in `rem` because it scales with the reader's text size. The rail does
- * NOT: its height is the 44px touch target rule 9 fixes in pixels, identical at
- * every Dynamic Type setting. Charging it in `rem` billed the picture 60px it
- * never spent, and at the accessibility cap the plate gave up 28% of its height
- * against the 25% this file bounds it to. A fixed cost is written as a fixed
- * cost. The rail's own margins stay in `rem` and still scale, which is right —
- * those are spacing around text.
+ * `19rem + one touch target`, and the split is the whole point: the plan said
+ * `22rem` and `dynamic_type_test.rb` rejected it. The `19rem` is the label's
+ * TEXT budget and belongs in `rem` because it scales with the reader's text
+ * size. The rail does not — its height is the touch-target bar rule 9 fixes in
+ * pixels, identical at every Dynamic Type setting. Charging a fixed cost in
+ * `rem` billed the picture 60px it never spent, and at the accessibility cap the
+ * plate gave up 28% of its height against the 25% this file bounds it to. The
+ * rail's own margins stay in `rem` and still scale, which is right — those are
+ * spacing around text.
  *
  * Scoped, and the scoping is the point. `.plate__img` is also every work in
- * `/feed`, which renders no rail — bumping the term globally would shrink the
+ * `/feed`, which renders no rail — charging the term globally would shrink the
  * gallery's images on a 375x667 screen to pay for a control that screen does not
- * have. `:has()` is the same idiom `.masthead:has(.compass)` already uses, and
- * a modifier class would mean the page knowing about its own children twice.
+ * have. `:has()` is the same idiom `.masthead:has(.compass)` already uses, and a
+ * modifier class would mean the page knowing about its own children twice.
  *
  * It only ever bites where this term is smaller than 55vh. At 402x874 that is
  * 526px against 481px, so `min()` still picks 55vh and the rail costs the
@@ -529,9 +535,12 @@ a:hover { color: var(--gold-deep); }
  * picture, never a cropped one, and only works tall enough to be height-capped
  * move at all.
  */
-.page:has(.rail) .plate__img {
-  max-height: min(55vh, 55dvh, calc(100dvh - 19rem - 44px));
+.plate__img {
+  --rail-reserve: 0px;
+  max-height: min(55vh, 55dvh, calc(100dvh - 19rem - var(--rail-reserve)));
 }
+
+.page:has(.rail) .plate__img { --rail-reserve: var(--tap); }
 
 /* The rail is the plate's own footer, not a separate block, so it takes over the
  * gap rather than adding to it. Scoped the same way: a plate with no rail after
@@ -710,7 +719,8 @@ a:hover { color: var(--gold-deep); }
  * is what stops a future change to the bar from half-landing. What they need
  * that nothing else here does is a WIDTH, because this rule has always got width
  * for free from the words inside a caps-link and a glyph has none. That part,
- * being genuinely new, is stated on its own below. */
+ * being genuinely new, is stated on its own below — and it reads `--tap` too, so
+ * the bar is one number rather than one number and three copies of it. */
 .coda .caps-link,
 .compass .caps-link,
 .walk__step,
@@ -720,11 +730,15 @@ a:hover { color: var(--gold-deep); }
 .days__remove {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
+  min-height: var(--tap);
 }
 
-/* A caps-link that is a bare <button>: same type, none of the button chrome. */
-.days__remove {
+/* A bare <button> in gold: same type, none of the button chrome. `.rail__act`
+ * belongs here for the same reason `.keep__toggle` used to — it is a button
+ * wearing no button, and the reset is the same five declarations. Only the
+ * `font-family` differs in effect, and it is inert on a glyph-only control. */
+.days__remove,
+.rail__act {
   padding: 0;
   font-family: var(--serif-body);
   color: var(--gold);
@@ -732,7 +746,8 @@ a:hover { color: var(--gold-deep); }
   border: 0;
   cursor: pointer;
 }
-.days__remove:hover { color: var(--gold-deep); }
+.days__remove:hover,
+.rail__act:not(.rail__act--waiting):hover { color: var(--gold-deep); }
 
 /* There was a `.coda > .caps-link + .caps-link` rule here until story 0012,
  * spacing the two ways out that the archive and the collection used to end with.
@@ -868,19 +883,15 @@ a:hover { color: var(--gold-deep); }
   margin: 0 0 0.75rem;
 }
 
-/* The lazy frame's placeholder. `min-width` is not symmetry with `min-height`:
- * before the fragment lands there is no button to be 44 wide, and the height
- * half of this already had a bug to its name — the page grew 79px when the
- * fragment landed. The frame now ships default content (the un-kept glyph, see
- * `favorites/_keep_button.html.erb`), so in practice this reserves nothing that
- * is not already drawn; it stays because the frame is still what holds the box
- * if that default is ever removed. */
+/* The keep frame. It carries no reserved box of its own: the frame always ships
+ * default content (the un-kept glyph — see `favorites/_control.html.erb`), and
+ * that span is a `.rail__act`, so it is already `--tap` in both directions
+ * before the fetch resolves. Reserving the same box here a second time would be
+ * scaffolding for a default that is tested to exist. */
 .rail__slot {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  min-width: 44px;
-  min-height: 44px;
 }
 
 /* `button_to` wraps its button in a <form>, so without this the FORM is the flex
@@ -889,25 +900,19 @@ a:hover { color: var(--gold-deep); }
  * the same shape of assumption that shipped 15px targets in ISSUE-002. */
 .rail__form { display: contents; }
 
-/* Height comes from the rule-9 list above. Width is stated here because that
- * rule has always got width for free from the words inside a caps-link, and
- * these have no words (`decisions/0010`). */
+/* Height and the bare-button reset both come from the blocks above. Width is
+ * stated here because rule 9 has always got width for free from the words inside
+ * a caps-link, and these have no words (`decisions/0010`). */
 .rail__act {
   justify-content: center;
-  min-width: 44px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--gold);
-  cursor: pointer;
+  min-width: var(--tap);
 }
-.rail__act:hover { color: var(--gold-deep); }
 .rail__act svg { display: block; width: 23px; height: 23px; }
 
 /* The mark holding its own place until the private frame lands. Same box, same
- * colour, no cursor — it is a drawing, not a control, and the real button
- * replaces it. Only reachable for the handful of frames the fetch takes, which
- * is exactly how long the alternative would have shown a hole. */
+ * colour, no cursor and no hover — it is a drawing, not a control, and the real
+ * button replaces it. Only on screen for the handful of frames the fetch takes,
+ * which is exactly how long the alternative would have shown a hole. */
 .rail__act--waiting { cursor: default; }
 
 /* The only word in the rail. It is metadata about the action beside it, so it
@@ -1001,8 +1006,8 @@ html.zoom-open body { overflow: hidden; }
      no breathing room; the gap has to be added to the inset, not compared with it. */
   top: calc(0.9rem + env(safe-area-inset-top));
   right: calc(0.9rem + env(safe-area-inset-right));
-  min-width: 44px;
-  min-height: 44px;
+  min-width: var(--tap);
+  min-height: var(--tap);
   padding: 0 1rem;
   border: 1px solid rgba(236, 229, 216, 0.3);
   border-radius: 2px;

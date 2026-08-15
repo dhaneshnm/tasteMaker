@@ -44,31 +44,12 @@ class DynamicTypeTest < ApplicationSystemTestCase
     JS
   end
 
-  # Where the keep control's box lands. Story 0014 moved it out of the wall label
-  # into the rail under the plate, and this is the number that says so.
-  def keep_box
-    page.evaluate_script(<<~JS)
-      (() => {
-        const el = document.querySelector(".rail__slot .rail__act");
-        if (!el) return null;
-        const r = el.getBoundingClientRect();
-        return { top: r.top, bottom: r.bottom, viewport: window.innerHeight };
-      })()
-    JS
-  end
-
-  # `ApplicationSystemTestCase` pins every test in the suite to 375x667, the
-  # smallest phone this product supports, through `Emulation.setDeviceMetricsOverride`.
-  # This file is the one that also has to prove the bar on a large modern phone,
-  # because the reserve term is `dvh`-relative and a term that holds on the small
-  # screen can still be wrong on the big one. Re-issuing the same CDP call is how
-  # the class default stays the small phone and only this file opts in.
-  def with_viewport(width, height)
-    page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride",
-      width: width, height: height, deviceScaleFactor: 1, mobile: true)
-    yield
-  ensure
-    fit_viewport
+  # Where the bottom of the keep control lands, and the fold it has to clear.
+  # Story 0014 moved it out of the wall label into the rail under the plate, and
+  # this is the number that says so. `with_viewport` comes from the base class.
+  def keep_bottom
+    page.evaluate_script(
+      %{Math.round(document.querySelector(".rail__slot .rail__act").getBoundingClientRect().bottom)})
   end
 
   # Story 0014's whole success signal, and the forcing function it owes (R1).
@@ -94,9 +75,8 @@ class DynamicTypeTest < ApplicationSystemTestCase
             assert_selector ".rail__slot .rail__act"
 
             scale_to root
-            box = keep_box
 
-            assert_operator box["bottom"], :<=, box["viewport"],
+            assert_operator keep_bottom, :<=, height,
               "the keep control was below the fold at #{width}x#{height}, " \
               "root #{root}px, on #{route}"
           end

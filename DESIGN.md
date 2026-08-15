@@ -251,11 +251,17 @@ the fetch takes, which is the same bug moved from the bottom of the page to the
 top.
 
 **No labels, and that is why the targets state both axes.** Rule 9 says
-`min-height: 44px` and nothing about width, because every control it names is a
+`min-height` and nothing about width, because every control it names is a
 `.caps-link` and words make those wide for free. These have no words: left as
-written the target would be 23px across. `.rail__act` states `min-width` and
-`min-height`, and so does `.rail__slot` — the lazy frame's placeholder — or Zoom
-slides left every time the keep fragment lands.
+written the target would be 23px across. `.rail__act` states `min-width` as well,
+and both read `--tap`.
+
+**`.rail__slot` reserves nothing, deliberately.** It briefly carried its own
+`--tap` box against the frame landing and shoving Zoom sideways. Neither half of
+that is a risk any more: the frame ships default content, so the box is drawn by
+a real `.rail__act` before the fetch resolves, and Zoom sits *before* the frame,
+so a frame that grows has nothing to its right to move. Reserving it a second
+time would be scaffolding for a default that is tested to exist.
 
 **The count keeps its word.** `3 kept`, never `3`. With the labels gone it is the
 only word in the rail, and it is the one thing telling a first-time reader what
@@ -278,8 +284,13 @@ save-for-later. **The kept state is the filled glyph** — no colour shift, no
 second mark — and the accessible name carries what `Kept · Remove` used to say in
 words. `aria-pressed` is unchanged; it never depended on the label.
 
-**The rail costs `19rem → 22rem` on rule 2's third cap term.** Free at 402×874,
-where 55vh still wins. −48pt of artwork at 375×667 on works tall enough to be
+**The rail costs one touch target on rule 2's third cap term** — the reserve goes
+`19rem` → `19rem + var(--tap)`, and the split is the point. The `19rem` is the
+label's text budget and scales with Dynamic Type; the rail's height does not,
+because a finger does not get bigger when a reader raises their text size. The
+plan said `22rem` and `dynamic_type_test.rb` rejected it: charging a fixed cost
+in `rem` billed the picture 60px it never spent. Free at 402×874, where 55vh
+still wins. **−44px** of artwork at 375×667, on works tall enough to be
 height-capped. That trade is the one rule 2 allows: a smaller picture, never a
 cropped one.
 
@@ -311,10 +322,12 @@ curator's desk.
 2. **Never crop an artwork.** `contain`, letterboxed against the paper. Cropping
    is an editorial decision and we are not making it on the viewer's behalf.
    Making it *smaller* is allowed and sometimes required: `.plate__img` is capped
-   at `min(55vh, 55dvh, calc(100dvh - 19rem))`, so at large text sizes the
-   picture yields height to keep the first written line above the fold. At the
-   default root size the third term is within 4px of 55vh and nothing moves.
-   A smaller picture, never a cropped one.
+   at `min(55vh, 55dvh, calc(100dvh - 19rem - var(--rail-reserve)))`, so at large
+   text sizes the picture yields height to keep the first written line above the
+   fold. At the default root size the third term is within 4px of 55vh and
+   nothing moves. `--rail-reserve` is `0` everywhere except the screens carrying
+   an action rail, where it is one touch target — one rule, one varying term, so
+   the `19rem` is not written down twice. A smaller picture, never a cropped one.
 3. **Never truncate a title.** Long titles step the type down instead.
 4. **Prose is `--ink`. Metadata is dim.** Dates, medium, credit, counts step
    back; the words a person wrote do not.
@@ -343,10 +356,16 @@ curator's desk.
 8. **Text is never clamped on the daily page.** The archive clamps museum
    catalogue copy to four lines with a `More` toggle, because there the point is
    the pictures. The hand-written note is the whole point and is shown whole.
-9. **Anything you can tap is at least 44px tall.** `.caps-link` sets size and
-   tracking, not height, so every control built on it adds `min-height: 44px`
-   itself — `.walk__step`, `.zoom__close`, `.keep__toggle`, `.days__remove`.
-   ISSUE-002 (commit 866bbc2) shipped 15px targets once by assuming otherwise.
+9. **Anything you can tap is at least `--tap` (44px) in every direction it has.**
+   `.caps-link` sets size and tracking, not height, so every control built on it
+   states the bar itself — `.walk__step`, `.zoom__close`, `.rail__act`,
+   `.rail__count`, `.days__remove`. ISSUE-002 (commit 866bbc2) shipped 15px
+   targets once by assuming otherwise.
+   **Width counts too, and only bare glyphs have to say so.** A caps-link gets
+   width for free from its words; `.rail__act` has none, so it states
+   `min-width` as well. The number is the `--tap` token rather than a literal,
+   because story 0014 put it in four places at once and a bar that half-lands is
+   the same failure ISSUE-002 was.
 
 ---
 

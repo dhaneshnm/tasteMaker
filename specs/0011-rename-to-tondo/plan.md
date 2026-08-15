@@ -432,7 +432,7 @@ _No new tasks from Pass 4 — AI slop risk rated 9/10._
   - Surfaced by: Outside voice — the tinted key shape is asserted, not confirmed; a wrong schema fails silently
   - Files: `ios/Tondo/Assets.xcassets/AppIcon.appiconset/Contents.json`
   - Verify: Apple asset-catalogue docs, then `script/ios-build` green
-- [ ] **T16 (P3, human: ~10min / CC: ~2min)** — decisions/0007 — widen the trademark trigger
+- [x] **T16 (P3, human: ~10min / CC: ~2min)** — decisions/0007 — widen the trademark trigger
   - Surfaced by: Outside voice — USPTO classes 9 and 41 do not cover App Store name availability
   - Files: `decisions/0007-the-name-is-tondo.md`
   - Verify: the trigger names both checks

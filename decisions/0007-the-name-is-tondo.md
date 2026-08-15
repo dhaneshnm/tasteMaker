@@ -64,16 +64,41 @@ would falsify the record of what was actually built and when.
 
 ## Triggers, so these get decided rather than drifted into
 
-- **The trademark search is still outstanding.** USPTO Class 9 (software) and
-  Class 41 (education — the tutor). It runs before the rename commit lands, not
-  after. A live mark in either class kills this entry and the shortlist reopens
-  at Umber or Daymaker, not at Loupe or Gesso.
+- **The USPTO search: RUN AND CLEAR, 2026-08-14.** `tmsearch.uspto.gov`,
+  wordmark `tondo`. Twelve results, six live, six dead. **Zero live marks in
+  Class 9 or Class 41.** The only record touching either class in the entire
+  corpus is `TONDO.IS` (serial 86382180, Curate Entertainment, Inc., Delaware —
+  IC 009/041/042, computer game programmes and downloadable digital media), and
+  it is **DEAD, ABANDONED**. The six live marks sit in unrelated classes: IC 011
+  fire pits (97528535), IC 035/039 supply-chain logistics (98627471), IC 035
+  consumer product information (99366486), IC 029/030 Italian foodstuffs
+  (79288159 and 79030875), IC 003 perfumery (79171488).
 
-  **Two checks, not one** (eng review, 2026-08-10). USPTO classes establish
-  trademark exposure. They say nothing about whether App Store Connect will
-  accept `Tondo: Daily Art` as an app name — Apple enforces its own uniqueness
-  on that field, first-come. Both run before the commit; either one failing
-  reopens this entry.
+  A second search on `dailyart` — run because the App Store name field is the
+  composite `Tondo: Daily Art`, not the bare word — returned three live marks,
+  all owned by Jiangmen Victory Limited (China) in IC 006, 011 and 021:
+  housewares, lighting and cleaning cloths. Nothing in Class 9 or 41 there
+  either.
+
+  Scope, stated so the clearance is not read as wider than it is: this was a
+  wordmark search. It does not cover phonetic near-misses, design marks carrying
+  no word element, or state and common-law rights. That is the check
+  `decisions/0007` specified and it is the check that was run.
+
+  **This gate ran late.** The entry said it runs before the rename commit lands.
+  The rename landed `bea621c` on 2026-08-13 and the search ran on 2026-08-14,
+  the day after. It came back clean, so nothing is owed — but the sequencing was
+  a miss, and the reason it cost nothing is luck rather than process. Recorded
+  rather than quietly backdated.
+
+- **App Store Connect name availability: STILL OUTSTANDING.** **Two checks, not
+  one** (eng review, 2026-08-10). USPTO classes establish trademark exposure.
+  They say nothing about whether App Store Connect will accept
+  `Tondo: Daily Art` as an app name — Apple enforces its own uniqueness on that
+  field, first-come, and it cannot be checked from outside a signed-in App Store
+  Connect session. Half this gate is now paid; the half that Apple controls is
+  not. It is checked when the app record is created, and a rejection there
+  reopens this entry at Umber or Daymaker.
 - **A second rename.** Renaming after launch throws away whatever keyword
   ranking has accumulated, and `BET.md` allows roughly two and a half weeks of
   indexing before the kill review. After the first App Store submission this

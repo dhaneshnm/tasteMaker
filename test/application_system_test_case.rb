@@ -70,8 +70,8 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   end
 
   private
-    def fit_viewport
+    def fit_viewport(width = VIEWPORT_WIDTH, height = VIEWPORT_HEIGHT)
       page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride",
-        width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT, deviceScaleFactor: 1, mobile: true)
+        width: width, height: height, deviceScaleFactor: 1, mobile: true)
     end
 end

@@ -1,9 +1,10 @@
 #include "Shared.xcconfig"
 
-// CHANGEME — the VPS, once one exists. `config/deploy.yml` carries the matching
-// placeholders. The shell will build and run against this value without
-// complaint, so the thing that catches it is App Review opening a dead host.
-TONDO_URL = https:/$()/CHANGEME.example.com
+// The production host. Must stay in step with `proxy.host` in
+// `config/deploy.yml`; the shell builds and runs against this value without
+// complaint, so the thing that catches a wrong one is App Review opening a
+// dead host. The `$()` is what stops xcconfig treating `//` as a comment.
+TONDO_URL = https:/$()/dailytondo.com
 
 SWIFT_OPTIMIZATION_LEVEL = -O
 SWIFT_COMPILATION_MODE = wholemodule

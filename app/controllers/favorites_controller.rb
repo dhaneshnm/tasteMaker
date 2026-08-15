@@ -15,7 +15,7 @@
 #     never touches the cookie           renders this reader's state
 #          │                                      ▲
 #          └── <turbo-frame src=…> ───────────────┘   POST/DELETE reply into
-#              (static markup, lazy)                  the same frame
+#              (static markup + the                   the same frame
 #
 class FavoritesController < ApplicationController
   # Never cached anywhere, by anyone — a class-wide rule rather than a line at the
@@ -107,7 +107,7 @@ class FavoritesController < ApplicationController
     # the collection. An earlier version pulled the whole id set with one `pluck`
     # to save a round trip; that traded two constant probes for transferring and
     # allocating every painting_id the reader has ever kept, on the endpoint the
-    # lazy frame hits on every single day-page view.
+    # keep frame hits on every single day-page view.
     def render_control(kept: nil, autofocus: false)
       collection = reader_favorites
 
