@@ -2,7 +2,7 @@
 
 Date: 2026-08-13
 
-> **SUPERSEDED by `decisions/0011` (GCP is the box), 2026-08-14 — one day later.**
+> **SUPERSEDED by `decisions/0012` (GCP is the box), 2026-08-14 — one day later.**
 >
 > Two factual errors killed it, both findable on the day it was written:
 > **CX22 is not sold in Ashburn** (Hetzner's CX line is Germany/Finland only; the
@@ -11,7 +11,7 @@ Date: 2026-08-13
 > entry. The real Ashburn equivalent, CPX21, is **$37.49/mo**, not ~€5.
 >
 > The sizing analysis below — 4 GB RAM for vips, disk and traffic both
-> non-constraints — was measured against this app and **survives intact**; 0011
+> non-constraints — was measured against this app and **survives intact**; 0012
 > carries it forward unchanged. Only the vendor and the price collapsed.
 >
 > Left standing rather than rewritten: this is the record of what was decided and

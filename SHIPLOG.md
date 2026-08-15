@@ -33,7 +33,7 @@ risk** — that was today.
 Three hosts were named in two days before one existed. `decisions/0009` chose a Hetzner CX22
 in Ashburn; it is not sold there — the CX line is Germany/Finland only — and the €4.49 it
 quoted was already two months stale, Hetzner having raised USA CPX pricing ~3× on
-2026-06-15. Both were checkable the day 0009 was written. `decisions/0011` supersedes it with
+2026-06-15. Both were checkable the day 0009 was written. `decisions/0012` supersedes it with
 GCP and says plainly that the choice was made on **speed, not price**: the spread between the
 cheapest and dearest option, across the entire remaining life of this bet, is **$7.76**. That
 $7.76 consumed a decision entry, a price correction, a cost estimate and most of a session.

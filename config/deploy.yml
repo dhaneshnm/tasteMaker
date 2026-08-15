@@ -2,7 +2,7 @@
 #
 # ─────────────────────────────────────────────────────────────────────────────
 # Every value in this file is now real. The box is a GCP e2-medium in
-# us-central1-a — see `decisions/0011-gcp-is-the-box.md`, which supersedes 0009.
+# us-central1-a — see `decisions/0012-gcp-is-the-box.md`, which supersedes 0009.
 #
 # Then: `kamal setup` once, `kamal deploy` thereafter.
 #
