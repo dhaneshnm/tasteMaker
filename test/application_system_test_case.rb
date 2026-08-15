@@ -43,6 +43,24 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # desktop window does.
   setup { fit_viewport }
 
+  # A second phone, for the tests that have to prove a `dvh`-relative rule holds
+  # on more than the smallest screen — a term that fits at 375x667 can still be
+  # wrong at 402x874. The class default stays the small phone; a test opts in for
+  # the length of a block and the ensure puts it back, so nothing leaks into the
+  # next test in the file.
+  #
+  # Deleted by the story 0015 merge and restored here. The branch was cut before
+  # 9e298be added this, so git resolved the conflict by taking the branch's side
+  # and dropping a method three `dynamic_type_test.rb` tests call. Textually
+  # clean, semantically broken — the kind of merge damage only running the suite
+  # finds.
+  def with_viewport(width, height)
+    fit_viewport(width, height)
+    yield
+  ensure
+    fit_viewport
+  end
+
   # The whole-file form for system tests, mirroring the integration macro in
   # test_helper: every test in the file starts signed in through the real
   # sign-in fragment.
