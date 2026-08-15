@@ -60,6 +60,8 @@ upcoming: no backups, no logged restore test, no error tracking, no analytics �
 WAL and is not a restorable backup. Choosing a third host in two days did not make that work
 smaller.
 
+| 2026-08-14 | Story 0015 "the two keys" built — every reader-facing endpoint now answers only a signed-in web session (Google/Apple OAuth, no passwords) or a registered device (Keychain UUID → signed cookie); everything else bounces to the landing page's sign-in anchor. The landing page stays public and byte-identical across all three identity states. Design review triage 5/10 → 8/10 (3 decisions), eng review 19 findings + Codex outside voice (19 points, 11 folded), 4-agent simplify (17 applied), 2-agent code review that caught a real ship-blocker: Apple's cross-site POST callback would have 422'd on CSRF in production while the suite stayed green. **The Apple flow is still unverified end-to-end — it cannot be exercised off a deployed domain, and there is no deployed domain.** Code only, **not published, not deployed, zero users, zero installs**: an input metric under R7. | 74c4516, 5db1dfb, b5301d1 |
+
 **Builder's gravity, named a fifth time (R7 / session gate 5), 2026-08-13.** Two more
 stories built today and **still zero initiated user conversations** — the count `BET.md`
 needs five of, and has none of, with eighteen days to the kill review. The App Store

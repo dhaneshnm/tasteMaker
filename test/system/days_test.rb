@@ -1,6 +1,8 @@
 require "application_system_test_case"
 
 class DaysSystemTest < ApplicationSystemTestCase
+  behind_the_wall!
+
   # The whole point of story 0003, made measurable: somebody back from three
   # shifts reaches a missed day in two taps.
   #

@@ -1,6 +1,8 @@
 require "test_helper"
 
 class FeedZoomTest < ActionDispatch::IntegrationTest
+  behind_the_wall!
+
   test "every work in the archive that has a picture is tappable" do
     get feed_path
 

@@ -52,4 +52,36 @@ class FavoriteTest < ActiveSupport::TestCase
 
     assert_raises(ActiveRecord::InvalidForeignKey) { paintings(:harbour).delete }
   end
+
+  # The two keys (story 0015): exactly one identity per row, never both,
+  # never neither.
+  test "a row carries exactly one identity" do
+    user = User.create!(provider: "google_oauth2", uid: "u1")
+
+    assert Favorite.new(user: user, painting: paintings(:harbour)).valid?
+    assert Favorite.new(collector_digest: DIGEST, painting: paintings(:harbour)).valid?
+    assert_not Favorite.new(painting: paintings(:harbour)).valid?
+    assert_not Favorite.new(user: user, collector_digest: DIGEST,
+      painting: paintings(:harbour)).valid?
+  end
+
+  test "a user keeps a work once, and the index holds under a race" do
+    user = User.create!(provider: "google_oauth2", uid: "u1")
+    Favorite.create!(user: user, painting: paintings(:harbour))
+
+    duplicate = Favorite.new(user: user, painting: paintings(:harbour))
+
+    assert_not duplicate.valid?
+    assert_raises(ActiveRecord::RecordNotUnique) { duplicate.save(validate: false) }
+  end
+
+  test "owned_by and collected_by are disjoint worlds" do
+    user = User.create!(provider: "google_oauth2", uid: "u1")
+    theirs = Favorite.create!(user: user, painting: paintings(:harbour))
+    mine = Favorite.create!(collector_digest: DIGEST, painting: paintings(:harbour))
+
+    assert_equal [ theirs ], Favorite.owned_by(user).to_a
+    assert_not_includes Favorite.collected_by(DIGEST), theirs
+    assert_not_includes Favorite.owned_by(user), mine
+  end
 end

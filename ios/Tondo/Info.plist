@@ -27,6 +27,13 @@
 	<key>TondoURL</key>
 	<string>$(TONDO_URL)</string>
 
+	<!-- The device-registration secret (story 0015). Set per-configuration in
+	     Config/*.xcconfig like the URL. Extractable from the IPA by anyone who
+	     unpacks it — decisions/0011 accepts that: it stops open/anonymous
+	     access, not reverse engineering. -->
+	<key>TondoAppSecret</key>
+	<string>$(TONDO_APP_SECRET)</string>
+
 	<!-- Local networking only. This permits http://localhost:3000 during
 	     development without opening arbitrary cleartext to the internet, so it
 	     is safe to ship as-is. -->

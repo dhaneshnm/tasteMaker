@@ -14,6 +14,8 @@ require "application_system_test_case"
 # label gone the name is the whole announcement, and a test that can still find
 # the button is a test that a screen reader user can still find it too.
 class FavoritesTest < ApplicationSystemTestCase
+  behind_the_wall!
+
   test "keeping today's artwork changes the glyph and nothing else" do
     visit root_path
     assert_button keep_label

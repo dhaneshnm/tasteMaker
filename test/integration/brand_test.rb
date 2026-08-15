@@ -10,6 +10,8 @@ require "test_helper"
 # The masthead partial has one variance that is easy to flatten by accident and
 # that nothing else in the suite covers — see the empty-state test below.
 class BrandTest < ActionDispatch::IntegrationTest
+  behind_the_wall!
+
   # The 404 carries a masthead too, and the test environment re-raises instead
   # of rendering it by default. Same reason `errors_test.rb` does this.
   with_rescued_exceptions!

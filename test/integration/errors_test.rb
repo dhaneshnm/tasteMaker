@@ -6,6 +6,8 @@ require "test_helper"
 # sees when a request fails — and the test environment's default is to re-raise
 # instead of rendering, which is the opposite of what this page exists for.
 class ErrorsTest < ActionDispatch::IntegrationTest
+  behind_the_wall!
+
   with_rescued_exceptions!
 
   test "a date with no artwork says so, and still answers 404" do

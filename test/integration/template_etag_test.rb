@@ -19,6 +19,8 @@ require "test_helper"
 # reading "Tastemaker" indefinitely, because each reload revalidates into the
 # same 304.
 class TemplateEtagTest < ActionDispatch::IntegrationTest
+  behind_the_wall!
+
   # Exactly the conditional-GET surface. A page with no ETag cannot have this
   # bug, so the list is the same one `stylesheet_etag_test.rb` uses.
   CACHED_PAGES = %w[/ /days].freeze

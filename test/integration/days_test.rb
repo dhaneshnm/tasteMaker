@@ -1,6 +1,8 @@
 require "test_helper"
 
 class DaysTest < ActionDispatch::IntegrationTest
+  behind_the_wall!
+
   # Fixtures: today (sunflowers), yesterday (harbour), tomorrow (bronze, queued).
   setup do
     @today = daily_picks(:today)

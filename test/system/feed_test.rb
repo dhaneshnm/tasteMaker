@@ -13,6 +13,8 @@ require "application_system_test_case"
 # has become stuck, so nothing here changes shape — the masthead leaves and the
 # rail does not.
 class FeedTest < ApplicationSystemTestCase
+  behind_the_wall!
+
   # Enough works to push the masthead well off the top of the screen.
   setup do
     (PaintingsController::PER_PAGE * 2).times do |i|

@@ -43,16 +43,30 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # desktop window does.
   setup { fit_viewport }
 
-  # A second phone, for the tests that have to prove a `dvh`-relative rule holds
-  # on more than the smallest screen — a term that fits at 375x667 can still be
-  # wrong at 402x874. The class default stays the small phone; a test opts in for
-  # the length of a block and the ensure puts it back, so nothing leaks into the
-  # next test in the file.
-  def with_viewport(width, height)
-    fit_viewport(width, height)
-    yield
-  ensure
-    fit_viewport
+  # The whole-file form for system tests, mirroring the integration macro in
+  # test_helper: every test in the file starts signed in through the real
+  # sign-in fragment.
+  def self.behind_the_wall!
+    setup { sign_in_as_reader }
+  end
+
+  # The account key, from the browser's side (story 0015). Providers are mocked
+  # suite-wide, so tapping the real button on the landing fragment IS the whole
+  # flow: POST → mocked consent → callback → session. Tests that need a reader
+  # behind the wall call this first — it is the same door a real web reader
+  # walks through, sign-in fragment and all.
+  def sign_in_as_reader
+    mock_auth
+    # The anchor, not the bare root: the fragment is a lazy frame at the foot
+    # of the page, so it loads only when scrolled into view — and #signin is
+    # exactly where the wall sends every bounced visitor anyway. Same door,
+    # same scroll.
+    visit "#{root_path}#signin"
+    click_button "Continue with Google"
+    # Wait for the callback's landing, not for "a masthead" — the landing page
+    # has one too, and a test that proceeds mid-navigation renders its next
+    # page against half-finished state (found as a race the first full run).
+    assert_current_path days_path, wait: 5
   end
 
   private

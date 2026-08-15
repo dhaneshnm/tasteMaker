@@ -12,6 +12,11 @@ module Admin
     # than fall back to the reader layout that deliberately has none.
     layout "admin"
 
+    # The curator's key is basic auth, not a Google account (story 0015).
+    # Anonymous /admin answers 401 with a challenge, never a redirect to the
+    # sign-in fragment — the skip must come before authenticate_curator runs.
+    skip_before_action :require_reader
+
     before_action :authenticate_curator
 
     private

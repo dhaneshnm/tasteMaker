@@ -16,6 +16,8 @@ require "delegate"
 # for CSS. `ApplicationController`'s `etag` block is the CSS half; these tests
 # are what stops it being deleted as redundant.
 class StylesheetEtagTest < ActionDispatch::IntegrationTest
+  behind_the_wall!
+
   # Pages that revalidate rather than re-render. If a page has no ETag it cannot
   # have this bug, so the list is exactly the conditional-GET surface.
   CACHED_PAGES = %w[/ /days].freeze

@@ -16,6 +16,8 @@ require "test_helper"
 # `days/_walk` at the foot of an archived day, so an unscoped assertion would
 # happily prove the wrong element.
 class NavigationTest < ActionDispatch::IntegrationTest
+  behind_the_wall!
+
   # The 404 is one of the six screens in the matrix, and reaching it means
   # letting the app render the failure instead of re-raising it (story 0004).
   with_rescued_exceptions!
@@ -184,16 +186,21 @@ class NavigationTest < ActionDispatch::IntegrationTest
 
   # ---------- the promise story 0007 made ----------
 
-  # The compass renders inside the publicly cached HTML of `/` and `/days`, so it
-  # has to be the same bytes for every visitor: no counts, no kept state, no
-  # cookie. This is the guard that adding it did not undo story 0007.
-  test "the compass leaves the public pages impersonal" do
-    [ root_path, days_path ].each do |path|
-      get path
+  # The compass renders inside cached HTML, so it has to be the same bytes for
+  # every visitor: no counts, no kept state, no cookie. This is the guard that
+  # adding it did not undo story 0007. Since story 0015 only `/` is public —
+  # `/days` sits behind the wall and went private — but the impersonal rule
+  # holds on both: a page identical for every *authorized* reader is what lets
+  # the ETag stay stable across sign-ins.
+  test "the compass leaves the cached pages impersonal" do
+    get root_path
+    assert_select ".compass"
+    assert_nil response.headers["Set-Cookie"], "/ started setting a cookie"
+    assert_includes response.headers["Cache-Control"], "public", "/ stopped being public"
 
-      assert_select ".compass"
-      assert_nil response.headers["Set-Cookie"], "#{path} started setting a cookie"
-      assert_includes response.headers["Cache-Control"], "public", "#{path} stopped being public"
-    end
+    get days_path
+    assert_select ".compass"
+    assert_nil response.headers["Set-Cookie"], "/days started setting a cookie"
+    assert_includes response.headers["Cache-Control"], "private", "/days must stay behind the wall"
   end
 end

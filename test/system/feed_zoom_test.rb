@@ -1,6 +1,8 @@
 require "application_system_test_case"
 
 class FeedZoomTest < ApplicationSystemTestCase
+  behind_the_wall!
+
   test "tapping a work in the archive opens that work, not the first one" do
     visit feed_path
     tap_work(paintings(:harbour))

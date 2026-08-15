@@ -1128,3 +1128,92 @@ html.zoom-open body { overflow: hidden; }
   .sentinel__ring { animation: none; }
   .zoom { animation: none; }
 }
+
+/* ---------------------------------------------------------------------------
+ * The sign-in fragment and the account row (story 0015, design review D3-D5).
+ *
+ * `.signin` is the landing page's one per-visitor block, at the foot of the
+ * label column, lazy-loaded into the `signin` frame — which is also the anchor
+ * every wall bounce lands on. House buttons, official marks (D4): the field,
+ * border, radius and type all come from the token table; the providers are
+ * recognisable by their logos alone. Google's G is the only non-token colour
+ * in the product — DESIGN.md records the exception.
+ */
+
+.signin {
+  margin-top: clamp(2rem, 6vw, 3rem);
+  text-align: center;
+}
+
+.signin__note {
+  max-width: 34rem;
+  margin: 0 auto 1.4rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--ink-faint);
+}
+
+.signin__doors {
+  display: flex;
+  justify-content: center;
+  gap: 0.9rem;
+  /* Stacked when narrow — two 44px doors side-by-side need more than a phone
+   * gives them once Dynamic Type grows the labels. */
+  flex-wrap: wrap;
+}
+
+/* DESIGN.md rule 9: min-height stated here, not assumed from type classes. */
+.signin__door {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  min-height: 44px;
+  padding: 0 1.1rem;
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  background: var(--bg-lift);
+  color: var(--ink);
+  font-family: var(--serif-body);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.signin__door:hover { border-color: var(--gold-deep); }
+
+.signin__mark { flex: none; }
+
+/* The signed-in state: one quiet line, two caps-links, no panel (D5). */
+.signin--in {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.4rem;
+}
+/* One reset, three quiet controls: a caps-link that happens to be a <button>
+ * (or must state its own 44px). Grouped so the next quiet button joins a
+ * selector list instead of pasting a fourth copy. */
+.signin--in .caps-link,
+.signin__out,
+.account__delete {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.signin__out-form,
+.account__form { display: inline-flex; }
+.signin__out,
+.account__delete {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--gold);
+  cursor: pointer;
+}
+.signin__out:hover,
+.account__delete:hover { color: var(--gold-deep); }
+
+/* The account row at the foot of the collection — the reader's own room is
+ * where rare controls live. */
+.account {
+  margin-top: 2.5rem;
+  text-align: center;
+}

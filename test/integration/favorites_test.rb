@@ -5,6 +5,11 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     @painting = paintings(:harbour)          # yesterday's day
     @today = daily_picks(:today)
     @yesterday = daily_picks(:yesterday)
+
+    # The device key (story 0015): identity now arrives at registration, not
+    # from a mint-on-read cookie. This file runs in the device world — the
+    # account world's differences are covered in accounts_test and sessions_test.
+    register_device
   end
 
   # ---------------------------------------------------------------- the cache
@@ -15,7 +20,7 @@ class FavoritesTest < ActionDispatch::IntegrationTest
   # Every one of these runs with forgery protection ON — see with_forgery_protection.
 
   test "mounting the keep frame puts no cookie back on a public page" do
-    keep(@painting)   # this session now holds a collector cookie
+    keep(@painting)   # this session now holds a device identity (setup)
 
     # Protection goes on only for the reads: a public page that renders a CSRF
     # token is the thing that writes the session, and with protection off it
@@ -68,26 +73,23 @@ class FavoritesTest < ActionDispatch::IntegrationTest
 
   # ------------------------------------------------------------- the identity
 
-  test "reading the control issues the reader's cookie, once" do
+  test "reading the control mints nothing — identity arrived at registration" do
     get favorite_control_path(@painting)
 
     assert_response :success
-    minted = set_cookie_header
-    assert minted.present?, "the control did not issue a cookie"
-    assert_match(/collector=/, minted)
-
-    get favorite_control_path(@painting)
-
-    assert_nil response.headers["Set-Cookie"], "a second read minted a second identity"
+    assert_nil response.headers["Set-Cookie"],
+      "the control minted an identity; story 0015 deleted that path"
   end
 
   # This, and not a pretend browser restart, is what proves a collection survives
   # quitting the app. A new Capybara session gets a clean profile, so the system
   # test people reach for first cannot assert this at all.
-  test "the cookie is built to outlive the browser session" do
-    get favorite_control_path(@painting)
-    header = set_cookie_header
+  test "the device cookie is built to outlive the browser session" do
+    fresh = open_session
+    register_device(token: "longevity-uuid", session: fresh)
+    header = Array(fresh.response.headers["Set-Cookie"]).join("\n")
 
+    assert_match(/device=/, header)
     assert_match(/httponly/i, header, "the cookie is reachable from script")
     assert_match(/samesite=lax/i, header)
     expires = header[/expires=([^;]+)/i, 1]
@@ -98,10 +100,10 @@ class FavoritesTest < ActionDispatch::IntegrationTest
 
   test "a returning reader with the same cookie finds the same collection" do
     keep(@painting)
-    carried = cookies[:collector]
+    carried = cookies[:device]
 
     returning = open_session
-    returning.cookies[:collector] = carried
+    returning.cookies[:device] = carried
     returning.get collection_path
 
     returning.assert_select ".days__title", text: @painting.title
@@ -113,16 +115,16 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     stored = Favorite.order(:created_at).last.collector_digest
 
     assert_match(/\A[0-9a-f]{64}\z/, stored)
-    assert_not_equal cookies[:collector], stored
-    assert_not_includes cookies[:collector].to_s, stored
+    assert_not_equal cookies[:device], stored
+    assert_not_includes cookies[:device].to_s, stored
   end
 
-  test "a keep from a reader with no cookie yet still works" do
-    post favorite_path(@painting)
+  test "a keep from a visitor with no identity bounces to the sign-in anchor" do
+    stranger = open_session
+    stranger.post favorite_path(@painting)
 
-    assert_response :success
-    assert_select "button[aria-pressed=?]", "true"
-    assert set_cookie_header.present?, "the fallback mint did not fire"
+    assert_equal 303, stranger.response.status
+    stranger.assert_redirected_to root_path(anchor: "signin")
   end
 
   # Story 0014's other half. Moving the control under the artwork fixed WHERE it
@@ -228,6 +230,7 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     keep(@painting)
 
     stranger = open_session
+    register_device(token: "a-second-device", session: stranger)
     stranger.get favorite_control_path(@painting)
 
     stranger.assert_select "button[aria-pressed=?]", "false"
@@ -247,10 +250,11 @@ class FavoritesTest < ActionDispatch::IntegrationTest
   # assertion could never fail.
   test "a write without a valid CSRF token is refused" do
     with_forgery_protection do
-      post favorite_path(@painting), params: { authenticity_token: "nonsense" }
+      assert_no_difference "Favorite.count" do
+        post favorite_path(@painting), params: { authenticity_token: "nonsense" }
+      end
 
       assert_response :unprocessable_content
-      assert_equal 0, Favorite.collected_by(Digest::SHA256.hexdigest("x")).count
     end
   end
 

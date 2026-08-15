@@ -18,6 +18,8 @@ require "test_helper"
 # No system test can catch this. `test/system/` runs headless Chrome at 375x667,
 # where the insets are 0 and always will be.
 class SafeAreaTest < ActionDispatch::IntegrationTest
+  behind_the_wall!
+
   with_rescued_exceptions!
 
   PAGES = %w[/ /days /feed /nope].freeze

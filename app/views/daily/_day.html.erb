@@ -180,6 +180,17 @@
         <a class="caps-link" href="<%= feed_path %>">Wander the full gallery →</a>
       <% end %>
     </footer>
+
+    <%# The sign-in fragment (story 0015) — front door only, and never on the
+        curator's preview. Static markup in the cached page, like the keep
+        frame above; the state arrives privately. The frame's own id is the
+        anchor every wall bounce lands on (`/#signin`), so it lives HERE in
+        the public HTML, identical for everyone. Empty by default on purpose:
+        the signed-out buttons appear only when the fragment says so, which is
+        also how the shell never paints them. %>
+    <% if chrome == :front_door %>
+      <%= turbo_frame_tag "signin", src: session_control_path, loading: "lazy" %>
+    <% end %>
   </div>
 
   <%= render "shared/zoom" %>

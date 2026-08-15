@@ -1,6 +1,8 @@
 require "test_helper"
 
 class DailyTest < ActionDispatch::IntegrationTest
+  behind_the_wall!
+
   test "the front door is today's artwork and today's note" do
     get root_path
 

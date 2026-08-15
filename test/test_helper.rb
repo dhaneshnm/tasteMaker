@@ -1,7 +1,14 @@
 ENV["RAILS_ENV"] ||= "test"
 ENV["CURATOR_PASSWORD"] ||= "test-curator-password"
+ENV["TONDO_APP_SECRET"] ||= "test-tondo-app-secret"
 require_relative "../config/environment"
 require "rails/test_help"
+
+# Every provider is mocked for the whole suite (story 0015): a real OAuth
+# round-trip needs Google's or Apple's servers, and the Apple flow cannot be
+# exercised off the deployed domain at all (specs/0015 plan, eng review A2).
+# Individual tests override `mock_auth` for their own personas.
+OmniAuth.config.test_mode = true
 
 module ActiveSupport
   class TestCase
@@ -64,6 +71,16 @@ module ActiveSupport
                  Rails.application.env_config["action_dispatch.show_detailed_exceptions"] = @rescued_was }
     end
 
+    # A mocked OAuth identity (story 0015). `mock_auth` writes it; the sign-in
+    # helpers below drive the same POST → callback path a reader's tap does.
+    def mock_auth(provider: :google_oauth2, uid: "test-uid-1",
+                  email: "reader@example.com", name: "Test Reader")
+      OmniAuth.config.mock_auth[provider] = OmniAuth::AuthHash.new(
+        provider: provider.to_s, uid: uid,
+        info: { email: email, name: name }.compact
+      )
+    end
+
     # The curator's credentials, in one place. Integration tests want them as a
     # header hash (`curator_headers` below); the system test hands the same string
     # to Chrome over CDP. `ActionDispatch::SystemTestCase` descends from
@@ -97,10 +114,48 @@ module ActiveSupport
 end
 
 class ActionDispatch::IntegrationTest
+  # The registration limiter counts by IP and every test is 127.0.0.1 —
+  # without this, one file's registrations 429 another file's tests (the
+  # store is process-wide, and a store that ISN'T would be the silent-no-op
+  # bug eng review A1 exists to prevent).
+  setup { DeviceRegistrationsController::RATE_LIMIT_STORE.clear }
+
   # The curator's desk is behind HTTP basic auth; tests knock politely. The
   # password's default lives on `curator_credentials` alone — repeating it here
   # would put the thing that was just extracted back in two places.
   def curator_headers(**options)
     { "HTTP_AUTHORIZATION" => curator_credentials(**options) }
+  end
+
+  # The two keys, as one-liners (story 0015). Both go through the real front
+  # desks rather than writing cookies or sessions by hand, so every test that
+  # uses them also exercises registration and the OAuth callback.
+
+  # Registers a device and leaves its signed cookie in the jar — the state an
+  # iOS reader is in for every request after first launch. `session:` lets a
+  # test register a second reader in an `open_session` without re-typing the
+  # endpoint and secret-header idiom.
+  def register_device(token: "test-device-uuid", session: self)
+    session.post "/device/registrations", params: { device_token: token },
+      headers: { "X-Tondo-App" => ENV.fetch("TONDO_APP_SECRET") }
+    session.assert_response :no_content
+    token
+  end
+
+  # The whole-file form, matching `with_rescued_exceptions!`: a test case whose
+  # every test reads gated pages declares it once instead of pasting the same
+  # setup. When identity establishment changes (App Attest), one place moves.
+  def self.behind_the_wall!
+    setup { register_device }
+  end
+
+  # Signs in through the mocked provider and follows the redirect chain to a
+  # signed-in session. Returns the User the callback created or found.
+  def sign_in(provider: :google_oauth2, uid: "test-uid-1", **identity)
+    mock_auth(provider: provider, uid: uid, **identity)
+    post "/auth/#{provider}"
+    follow_redirect! # to the provider (mocked: straight to the callback)
+    follow_redirect! if response.redirect? # callback → /days
+    User.find_by!(provider: provider.to_s, uid: uid)
   end
 end

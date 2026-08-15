@@ -32,11 +32,30 @@
     <footer class="coda">
       <div class="ornament" aria-hidden="true">✦</div>
       <p class="coda__line">To let one go, open it and unkeep it.</p>
-      <%# Said once, quietly, before it can be discovered the hard way. Kept works
-          live in a cookie on this device; deleting the app takes them with it.
-          Stating the limit up front is what keeps it from reading as a betrayal
-          later — see specs/personas.md, persona 6. %>
-      <p class="coda__note">Kept on this device — free, and yours.</p>
+      <%# Said once, quietly, before it can be discovered the hard way. A
+          device's keeps live against this device; an account's live with the
+          account. Stating the limit up front is what keeps it from reading as
+          a betrayal later — see specs/personas.md, persona 6. %>
+      <% if current_user %>
+        <p class="coda__note">Kept with your account — free, and yours.</p>
+      <% else %>
+        <p class="coda__note">Kept on this device — free, and yours.</p>
+      <% end %>
+    </footer>
+  <% end %>
+
+  <%# The account row (story 0015, design review D5): rare controls belong in
+      the reader's own room, not on every screen. Renders for the account
+      world only — a device has no account to administer — and outside the
+      empty-state branch, because a reader with nothing kept still owns the
+      exit door. The confirm names what it destroys (the one honest dialog in
+      the product). %>
+  <% if current_user %>
+    <footer class="account">
+      <p class="coda__note">Signed in with <%= current_user.provider_name %><% if current_user.email.present? %> as <%= current_user.email %><% end %>.</p>
+      <%= button_to "Delete account", account_path, method: :delete,
+            class: "caps-link account__delete", form_class: "account__form",
+            data: { turbo_confirm: "Deletes your account and the #{pluralize(@rows.size, "work")} you've kept. There is no undo." } %>
     </footer>
   <% end %>
 </main>
