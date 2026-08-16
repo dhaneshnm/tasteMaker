@@ -27,16 +27,20 @@ App Review rather than by us:
 
 1. **`before_action :require_reader`** — story 0015's wall bounces every reader-facing
    endpoint to `/#signin` with a 303. Apple fetches the privacy policy URL **without an
-   account**, and a legal page behind a login is rejected under 5.1.1. The new controller
-   skips the wall, and a test asserts it, because the skip is one deletion away from
-   silently re-walling a page nobody looks at again.
+   account**, and a legal page behind a login is rejected under 5.1.1.
 2. **`allow_browser versions: :modern`** — a 406 to any user agent Rails can identify as
-   old. Unknown agents pass today, so a crawler probably survives; "probably" is not the bar
-   for the field that gates submission, and `public/406-unsupported-browser.html` is what a
-   reviewer would see instead of a policy. Skipped on this controller too.
+   old, and `public/406-unsupported-browser.html` is what the reader would see instead of a
+   policy.
 
-These pages are public, static, and identical for everyone, so they also skip `no_store`
-and keep ordinary caching.
+**Neither is skipped. The controller inherits outside the chain instead** — see step 2,
+which carries the measurement and the reason. The short version: `allow_browser` installs
+an anonymous lambda, `skip_before_action :allow_browser` raises, and the `raise: false`
+workaround is a silent no-op. Two `skip_before_action` calls were the original plan and one
+of them could not have worked.
+
+These pages are public, static, and identical for everyone, so they keep ordinary caching
+and must be added to `public_cache_headers_test.rb`, which currently asserts the front door
+is the only public page in the app.
 
 ### Category and age rating — decided from our own catalog, not from taste
 
@@ -91,9 +95,48 @@ guidelines treat price terms in keywords as spam.
    Prediction: the three ranked keywords at kill review come from `history`, `museum` and
    the name/subtitle phrase "daily art"; if the ranked terms are instead `tondo` or
    `renaissance`, the phrase-building model above is wrong.
-2. **`PagesController`** — `privacy` and `support`, both skipping `require_reader` and
-   `allow_browser`. Routes `get "privacy"` and `get "support"`. Static views, existing
-   linen layout, masthead per `DESIGN.md`.
+2. **`PagesController < ActionController::Base`** — `privacy` and `support`, inheriting
+   **outside** `ApplicationController`, with `layout "application"` re-declared. Routes
+   `get "privacy"` and `get "support"`.
+
+   **Not `skip_before_action`, and this is the plan's one real correctness fix** (eng
+   review, Issue 1). `allow_browser` does not install a named callback. Rails 8.1's
+   `actionpack/lib/action_controller/metal/allow_browser.rb` does:
+
+   ```ruby
+   before_action -> { allow_browser(versions: versions, block: block) }, **options
+   ```
+
+   An anonymous lambda cannot be skipped by name. Verified in this app:
+
+   ```
+   skip_before_action :allow_browser               → ArgumentError: callback :allow_browser has not been defined
+   skip_before_action :allow_browser, raise: false → no error, silently a no-op
+   ```
+
+   The first form fails at class definition. The second — the fix a developer reaches for
+   when the first raises — yields a controller that *looks* like it skips the browser gate
+   and does not. Inheriting outside the chain removes both the wall and the browser gate
+   structurally, so there is nothing to skip and nothing for a later edit to delete.
+
+   The exposure is narrow but real. Measured against production:
+
+   | User agent | Status |
+   |---|---|
+   | Safari 14 | **406** |
+   | `curl/8.4.0` | 200 |
+   | empty | 200 |
+   | `AppleBot/1.0` | 200 |
+
+   Rails only blocks browsers it can *identify* as old, so Apple's crawler is fine — but a
+   reader on old hardware (persona 2, explicitly) tapping the policy link gets the 406 page
+   instead of a privacy policy. **And the originally planned test could not catch this**: it
+   asserted an empty/non-modern UA returns 200, which it does either way.
+
+   What is lost by inheriting outside the chain: the parent's `etag` blocks. That is
+   correct here — those exist for pages that key their ETag on model rows via `fresh_when`
+   (`/` and `/days`), which is what made `ae742dc` possible. A static page gets an accurate
+   body-digest ETag automatically.
 
    **Render the compass with `here: nil`.** `ApplicationHelper#compass_destinations`
    *raises* `ArgumentError` on a key outside `COMPASS_KEYS` (`application_helper.rb:75`)
@@ -142,8 +185,14 @@ guidelines treat price terms in keywords as spam.
    receive mail before step 10, not before launch.
 5. **Deploy** — `kamal deploy`. Both URLs must answer 200 to an anonymous `curl` before
    anything is typed into App Store Connect. Verify with no cookie jar.
-6. **Schedule today's pick — `Royal Elephant Ramkali with a Mahout`**, painting id 2691,
-   Rajasthan, c. 1761, aspect 1.03. This is one action doing two jobs, and the second is
+6. **Schedule today's pick — `Royal Elephant Ramkali with a Mahout`**, identified by its
+   **natural key `source: "cma", source_id: "163797"`**, Rajasthan, c. 1761, aspect 1.03.
+
+   **Not by primary key.** The design review wrote "painting id 2691", which is this
+   machine's id. `db/seeds.rb` upserts by `(source, source_id)` and production ran its own
+   seed, so row ids are an artifact of insert order and are not portable between the local
+   database and the box. Naming the local id in a plan step executed against production is
+   how you schedule the wrong painting (eng review, outside voice). This is one action doing two jobs, and the second is
    the one that matters. It clears the stale front door — the live masthead currently
    prints `FRI, AUG 14` on Aug 16, because `DailyPick.current` holds the last published
    day over and there is no publish job to advance it. And it fixes the store hero, which
@@ -211,14 +260,51 @@ guidelines treat price terms in keywords as spam.
    53% of the pool outside Europe and North America, held there by a quota table that
    fails the build if a reseed regresses it. The subtitle survives unchanged: museum text
    *does* explain, so `One painting a day, explained` stays honest.
-10. **Privacy labels** — filed to match the policy written in step 3, field by field.
-    Contact Info (email, name) and Identifiers (device token) linked to the user; no
-    tracking; no data used for advertising. This is the session gate 6 item that is in
-    scope, and it is the one gate-6 item that is part of the filing rather than part of the
+10. **`DELETE /device` — the missing exit door** (eng review, Issue 5). `AccountsController`
+    returns early `unless current_user` (`accounts_controller.rb:7`), so **the default iOS
+    state — a registered device that never signed in — has no way to delete anything**. Its
+    `Device` row and its device-keyed favorites persist. A policy promising in-app deletion
+    would be false for the majority of readers, so this ships with the policy rather than
+    after it. Mirrors the account door: destroy the `Device` row and its favorites, reached
+    from the same collection-page confirm dialog, clear the signed cookie, no soft delete.
+
+11. **App Store Connect metadata, the complete field set.** The design review named
+    category, keywords, description, age rating, screenshots and privacy labels. Also
+    required and previously missing (outside voice): **Content Rights** (the pool is CC0
+    museum imagery — declare third-party content and its licence), **Copyright**,
+    **Price and Availability**, **DSA trader status** (an EU requirement; a non-trader
+    declaration still has to be filed), **App Review contact information**, and **version
+    release settings** — set to *manually release* so approval does not publish on its own.
+
+12. **Privacy labels** — filed to match the policy written in step 3, field by field.
+    Contact Info (email, name), Identifiers (device token), and **User Content / Usage
+    Data for the favorites a reader keeps**, which the design review omitted. Apple
+    requires collected data to be declared even when it is used only for app
+    functionality, and a kept work is data about a person's behaviour stored against their
+    identifier. No tracking, no data used for advertising. This is the one session-gate-6
+    item inside this story, because it is part of the filing rather than part of the
     operations.
-11. **Archive and upload** — `xcodebuild archive` + `-exportArchive` with an App Store
+
+13. **Archive and upload** — `xcodebuild archive` + `-exportArchive` with an App Store
     Connect API key, `CURRENT_PROJECT_VERSION` bumped per upload. Upload does not submit.
-12. **Stop.** Submission waits on the gate-6 work that is not in this story.
+
+14. **Stop.** Submission waits on the gate-6 work that is not in this story.
+
+## Sequencing constraints the steps above depend on
+
+Two things must be true before step 7 can be shot at all, and neither is obvious from the
+step list:
+
+- **`script/ios-secrets` must have been run** so `Config/Secrets.xcconfig` exists. Without
+  it `Release.xcconfig` falls back to `TONDO_APP_SECRET = CHANGEME`, registration answers
+  401, `DeviceIdentity.register` swallows it, and the shell degrades to the public landing
+  page. **Frame 4 photographs `/feed`, which is behind the wall** — so a wrong secret does
+  not produce an error, it produces a screenshot of the sign-in bounce. Verify with the
+  204 check, not by looking at the app.
+- **`support@dailytondo.com` must route before the pages DEPLOY**, not merely before the
+  filing — this supersedes the earlier note (outside voice). Once `/privacy` is live
+  telling readers they can request deletion at that address, a dead address makes the
+  *published policy itself* false, independent of anything App Store Connect knows.
 
 ## Shell behaviour for the two new pages
 
@@ -252,7 +338,30 @@ Minitest, written with the code (R1), not after:
   `compass_destinations` contract is exercised. `here: nil` is correct and `here: :privacy`
   raises; a controller-only test would pass either way.
 
-`bin/ci` green before QA, per build flow.
+Added by eng review:
+
+- **Old-browser access, asserted with a UA Rails actually blocks.** The original test used
+  an empty/non-modern UA, which returns 200 whether or not the browser gate applies — it
+  would have passed against the broken `skip_before_action`. Use the Safari 14 string
+  measured at 406 against production, and assert 200.
+- **Extend `test/integration/public_cache_headers_test.rb`.** `PUBLIC_PAGES = %w[/]` today,
+  and the file's header comment states the front door "is now the ONLY public page". This
+  story makes that false by adding two more. Add `/privacy` and `/support` to the constant
+  **and rewrite the stale comment in the same commit** — an out-of-date comment about which
+  pages are public is worse than none, and story 0007's whole subject was a `public`
+  response carrying `Set-Cookie` into a shared Thruster cache.
+- **`DELETE /device`** — a registered device deletes its row and its favorites; a signed-in
+  user hitting it is unaffected; an unregistered visitor is redirected. Plus a test that
+  the collection page offers the control to a device and the account control to a user.
+- **The policy's forcing function** (R1, Issue 3): a test asserting `Gemfile.lock` contains
+  none of `ahoy`, `mixpanel`, `segment`, `google-analytics`, `sentry`, `appsignal`,
+  `honeybadger`, `scout_apm`, `bugsnag` for as long as the policy claims no analytics and
+  no tracking. Session gate 6 requires error tracking, so this fires within weeks — by
+  design. When it goes red the fix is to edit the policy and the privacy labels, and the
+  test failure is what says so.
+
+`bin/ci` green before QA, per build flow. Note `bin/ci` is Rails-only — the iOS side is
+`script/ios-build`, which Issue 2 extends to cover Release.
 
 ## Design review decisions (2026-08-16, `/plan-design-review`)
 
@@ -272,15 +381,44 @@ own reviewers name. Shipping a listing that does not claim it is shipping withou
 (`decisions/0004`), so the claim is unavailable rather than declined. This does not need
 reopening now; it needs a written day before the copy can ever change.
 
+## Eng review decisions (2026-08-16, `/plan-eng-review`)
+
+Scope accepted as-is — five files, one new class, under both complexity thresholds. Five
+findings, all folded. Two of them correct earlier calls in this same document.
+
+| # | Finding | Decision |
+|---|---|---|
+| E1 [P1] | `skip_before_action :allow_browser` raises; `raise: false` is a silent no-op. Verified in this app. | `PagesController < ActionController::Base` — nothing to skip |
+| E2 [P2] | Nothing builds Release; both defects fixed on 2026-08-16 lived there unseen | `script/ios-build` gains a Release pass + Info.plist assertions |
+| E3 [P1] | The policy's "no analytics" claim has no enforcement (R1) | A test on `Gemfile.lock` that goes red when it stops being true |
+| E4 | **Reverses the design review.** 5.1.1(i) requires an in-app policy link | Privacy + Support in the existing `.coda`, not a new footer |
+| E5 | **Reverses an assumption.** Device-only readers cannot delete anything | Build `DELETE /device` alongside the policy |
+
+**Outside voice (Codex, `model_reasoning_effort=high`).** Independently found E1. Also
+supplied E4, E5, the natural-key correction in step 6, the `public_cache_headers_test.rb`
+gap, the incomplete App Store Connect field set, and the `support@` sequencing correction.
+Every claim above was verified against this repo before being folded in; none was taken on
+the outside voice's word.
+
+**Cross-model agreement on the strategic point.** Codex, unprompted, reached the same
+conclusion as this plan's own unresolved-decisions list: uploading a build while daily
+advancement is unsolved is the lower-leverage move, and making the app actually sustain a
+daily cadence through Aug 31 matters more than the upload. Recorded, not acted on — the
+listing work is what the curator chose, and the tension is named rather than buried.
+
 ## NOT in scope — considered and deferred
 
 - **A nudity screen on the pool.** 12+ is the category norm and the honest filing; a filter
   would narrow the pool that story 0013's quota table exists to keep broad. One line: the
   *thumbnail* must not be a nude, which D2 satisfies.
-- **A footer.** The product has none, so `/privacy` and `/support` are reachable by URL and
-  from the App Store listing only. Adding site-wide chrome to serve two legal pages is a
-  navigation change to every screen, and `caps-link-row-costs-44px` says masthead chrome is
-  measured in 44px rows. Its own story if a reader ever needs to find the policy in-app.
+- ~~**A footer.**~~ **Reversed by eng review (Issue 4) — this deferral was wrong.** The
+  design review deferred any in-app route to the policy on the grounds that site-wide chrome
+  costs 44px a row. Guideline **5.1.1(i) requires the privacy policy link in App Store
+  Connect metadata *and* within the app in an easily accessible manner**, so deferring it
+  would have caused precisely the 5.1.1 rejection this plan's success signal is written to
+  avoid. **In scope now:** Privacy and Support as `.caps-link`s in the existing `.coda` on
+  the collection and archive screens, which already carry one. Not a new site-wide footer,
+  and deliberately not on the daily page, whose job `DESIGN.md` rule 5 protects.
 - **An empty-state pass on `/collection`.** It is what every new installer meets on day one
   and it is a product story, not a listing one. Named here so it is not discovered by a
   reviewer.
@@ -360,6 +498,37 @@ Synthesized from this review's findings. Each task derives from a specific findi
     and an unstated default is easy to leave wrong for months
   - Files: `ios/Tondo/path-configuration.json`, `public/configurations/ios_v1.json`
   - Verify: tap a policy link in the shell and confirm it stays in the web view
+- [ ] **T7 (P1, human: ~1.5h / CC: ~25min)** — `DevicesController` — Build `DELETE /device`
+  so device-only readers can delete their row and favorites
+  - Surfaced by: Eng review E5 — `accounts_controller.rb:7` returns early unless
+    `current_user`, so the default iOS state has no deletion path and the policy would lie
+  - Files: `config/routes.rb`, `app/controllers/devices_controller.rb`,
+    `app/views/favorites/index.html.erb`, `test/integration/`
+  - Verify: `bin/ci`; a registered device deletes and its favorites go with it
+- [ ] **T8 (P1, human: ~45min / CC: ~15min)** — `.coda` — Add Privacy and Support links on
+  the collection and archive screens
+  - Surfaced by: Eng review E4 — guideline 5.1.1(i) requires an in-app policy link; the
+    design review's footer deferral would have caused a 5.1.1 rejection
+  - Files: `app/views/favorites/index.html.erb`, `app/views/days/index.html.erb`
+  - Verify: `test/system/favorites_test.rb` asserts `.coda .caps-link count:2` today — that
+    assertion changes, per the `masthead-nav-breaks-system-tests` learning
+- [ ] **T9 (P1, human: ~30min / CC: ~10min)** — tests — Extend
+  `public_cache_headers_test.rb` to the two new public pages and rewrite its stale comment
+  - Surfaced by: Outside voice — `PUBLIC_PAGES = %w[/]`, and the header comment claims the
+    front door is the ONLY public page, which this story makes false
+  - Files: `test/integration/public_cache_headers_test.rb`
+  - Verify: `bin/ci`
+- [ ] **T10 (P1, human: ~30min / CC: ~10min)** — tests — Assert no tracking dependency in
+  `Gemfile.lock` for as long as the policy claims none
+  - Surfaced by: Eng review E3 — R1, an artifact without its enforcement
+  - Files: `test/integration/privacy_claims_test.rb`
+  - Verify: `bin/ci`; adding `sentry-ruby` turns it red
+- [ ] **T11 (P2, human: ~30min / CC: ~10min)** — `script/ios-build` — Add a Release pass
+  with Info.plist assertions
+  - Surfaced by: Eng review E2 — the Debug-only build check let `CHANGEME` and the missing
+    `DEVELOPMENT_TEAM` sit in the tree until 2026-08-16
+  - Files: `script/ios-build`
+  - Verify: `script/ios-build` fails when `Config/Secrets.xcconfig` is removed
 
 ## Approved Mockups
 
@@ -374,18 +543,27 @@ Synthesized from this review's findings. Each task derives from a specific findi
 | Review | Trigger | Why | Runs | Status | Findings |
 |--------|---------|-----|------|--------|----------|
 | CEO Review | `/plan-ceo-review` | Scope & strategy | 0 | — | — |
-| Codex Review | `/codex review` | Independent 2nd opinion | 0 | — | — |
-| Eng Review | `/plan-eng-review` | Architecture & tests (required) | 1 | CLEAR (PLAN) — **stale** | 11 issues, 0 critical gaps (2026-08-14, commit 62c4cbd, **38 commits ago**) |
+| Codex Review | `/codex review` | Independent 2nd opinion | 1 | ISSUES_FOUND | outside voice on this plan, 2026-08-16 |
+| Eng Review | `/plan-eng-review` | Architecture & tests (required) | 1 | CLEAR (PLAN) | 5 issues, 0 critical gaps |
 | Design Review | `/plan-design-review` | UI/UX gaps | 1 | ISSUES_OPEN | score: 4/10 → 8/10, 4 decisions |
 | DX Review | `/plan-devex-review` | Developer experience gaps | 0 | — | — |
 
-**VERDICT:** DESIGN REVIEWED — 4 decisions landed, 2 items open. Eng review is stale by 38
-commits and predates this plan entirely; `/plan-eng-review` is required before implementation.
+**CODEX:** Independently found the `allow_browser` defect. Supplied four further verified
+corrections: guideline 5.1.1(i) requires an in-app policy link, device-only readers have no
+deletion path, `painting id 2691` is a local id rather than a portable natural key, and
+`public_cache_headers_test.rb` still asserts the front door is the only public page.
+
+**CROSS-MODEL:** Two independent reviewers reached the `allow_browser` finding separately,
+which is the strongest signal in this report. They also agreed, unprompted, on the
+strategic point: uploading a build while daily advancement is unsolved is the lower-leverage
+move. That agreement is recorded, not acted on — the curator chose the listing work.
+
+**VERDICT:** ENG CLEARED — 5 findings, all folded, 0 critical gaps. Design review's two
+reversed calls (in-app policy link, device deletion) are now in scope. Ready to implement.
 
 **UNRESOLVED DECISIONS:**
-- `support@dailytondo.com` has no mail routing. Curator-owned, blocking step 11, and the
-  failure mode is an App Review question that reaches nobody.
-- Nothing advances the day. Step 6 clears the stale front door once, by hand; no job, no
-  Solid Queue, and `DailyPick.current` holds the last published day over indefinitely. The
-  listing will claim a daily cadence the product cannot keep on its own. Needs its own
-  story, and it outranks push.
+- `support@dailytondo.com` has no mail routing. Now blocking the page **deploy**, not just
+  the filing: a live policy naming a dead address is itself false.
+- Nothing advances the day. No job, no Solid Queue; `DailyPick.current` holds the last
+  published day over indefinitely. Step 6 clears it once, by hand. Both reviewers flagged
+  this as outranking the listing work, and it still has no story.
