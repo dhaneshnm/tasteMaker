@@ -68,6 +68,37 @@ smaller.
 
 | 2026-08-16 | **Tondo is on a phone.** Story 0008's shell, built Aug 7, had never left the simulator; it now runs on a physical iPhone 13 Pro (iOS 26.5.2) against `https://dailytondo.com`, signed `Apple Development (7UHVJKQDCU)`, installed by `devicectl`. Three blockers had to go first, none of which raised an error: no `DEVELOPMENT_TEAM` anywhere (a simulator build never asks, a device build cannot sign), `TONDO_APP_SECRET = CHANGEME` still in `Release.xcconfig`, and `UIRequiredDeviceCapabilities` declaring `armv7` — a 32-bit capability no iOS 17 device has. The secret one is the one worth keeping: verified against production, the real value answers **204** and `CHANGEME` answers **401**, and `DeviceIdentity.register` swallows the 401 and routes anyway — so shipping the placeholder would have reached App Review as "sign-in is broken", not as a misconfiguration. Secret now generated from credentials by `script/ios-secrets` into a gitignored `Config/Secrets.xcconfig`. **One device, mine, dev-signed. Not TestFlight, not submitted, zero App Store installs**: an input metric under R7. | f025187 |
 
+| 2026-08-16 | **Story 0016 "the listing", part one: the two pages Apple opens are live, and the exit door most readers never had is built.** `https://dailytondo.com/privacy` and `/support` answer **200 anonymously, to Safari 14, and to AppleBot** — the three fetches that decide whether App Store Connect accepts the record. `PagesController` inherits `ActionController::Base` rather than `ApplicationController`, because the planned `skip_before_action :allow_browser` **raises at class definition** (Rails installs it as an anonymous lambda) and the `raise: false` workaround is a **silent no-op**. Measured before writing the fix: Safari 14 → 406, curl → 200, empty UA → 200, AppleBot → 200, so the victim was never Apple's crawler but a reader on old hardware. `DELETE /device` is the other half: `accounts_controller.rb:7` returns early unless `current_user`, so **the default state of every iOS reader — registered device, never signed in — could not delete anything** while the policy promised in-app deletion. Also today's pick, scheduled by natural key (`cma`/`163797`) after production turned out to assign id **860** where this machine says 2691 — the front door had been reading `FRI, AUG 14` for two days. `bin/ci` 308 runs / 1614 assertions / 0 failures, 47 system tests. **Three store frames captured at 1320×2868 from the Release build against production.** Not submitted: no upload, no review, **zero App Store installs** — an input metric under R7. | dd90512, https://dailytondo.com/privacy |
+
+**What the reviews caught that the build would not have, 2026-08-16.** Worth recording
+because the ratio is unusual. `/plan-design-review` scored the plan 4/10 and the reason had
+nothing to do with layout: the app's own admin queue reports **1 of 1 published day running
+museum text (100%)** against `decisions/0004`'s under-20% bet, the archive held one row and
+the collection was empty — so **three of the five planned screenshots could not be shot
+honestly**, and the listing's strongest claim would have been contradicted by its own
+screenshots. The decision was to shoot what exists and write the copy to match, which means
+**the hand-written editorial claim is not in the App Store description**. That is the moat
+`CLAUDE.md` names first, absent from the storefront because it is unwritten rather than
+because it was declined.
+
+The outside voice (Codex) then found four things a first-party review had already missed,
+all verified before folding: guideline **5.1.1(i) requires the privacy link inside the app**,
+not only in metadata — which reversed a "not in scope" call made an hour earlier and would
+have been a rejection; **device-only readers had no deletion path at all**; the plan named a
+**local database id** for the store hero where production assigns its own (confirmed wrong at
+scheduling time, 2691 vs 860); and `public_cache_headers_test.rb` still asserted the front
+door was the only public page. Two independent reviewers found the `allow_browser` defect
+separately.
+
+**What is still owed, and one of them got worse today.** `support@dailytondo.com` **does not
+receive mail**, and it is now printed on two live pages telling readers they can request
+deletion there — that moved from "blocks the filing" to "the published policy overstates a
+channel". And **nothing advances the day**: `app/jobs/` holds only `application_job.rb`,
+Solid Queue is not in the Gemfile, and `DailyPick.current` holds the last published day over
+indefinitely. Today's pick was scheduled by hand; tomorrow the front door goes stale again,
+under a description that says "one painting a day". Both reviewers named this as outranking
+push. It still has no spec.
+
 **Builder's gravity, named a fifth time (R7 / session gate 5), 2026-08-13.** Two more
 stories built today and **still zero initiated user conversations** — the count `BET.md`
 needs five of, and has none of, with eighteen days to the kill review. The App Store

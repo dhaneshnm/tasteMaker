@@ -534,36 +534,127 @@ Synthesized from this review's findings. Each task derives from a specific findi
 
 | Screen | Path | Direction | Notes |
 |---|---|---|---|
-| Front door, store frame 1 | `~/.gstack/projects/tasteMaker/designs/appstore-hero-20260816/raw-02-front-door-clean.png` | Real Release-build capture, 9:41 status bar | Reference for framing only — the artwork in it is the **rejected** incumbent. Reshoot after T1 with painting 2691. |
+All under `~/.gstack/projects/tasteMaker/designs/appstore-hero-20260816/`. Real
+Release-build captures against production at 1320 × 2868, 9:41 status bar.
+
+| Slot | Captioned file | Raw capture | Caption |
+|---|---|---|---|
+| 1 | `store-1.png` | `frame-1-front-door.png` | One painting a day. |
+| 2 | `store-3.png` | `frame-3-zoom.png` | Look as close as you like. |
+| 3 | `store-4.png` | `frame-4-gallery.png` | Two thousand works. No ads, no paywall. |
+
+`raw-02-front-door-clean.png` is kept as the before: the same screen carrying the
+rejected incumbent pick and a two-day-stale date. `frame-2-label.png` is the
+failed scroll attempt, kept so the next person does not repeat it.
+
+## The copy, as filed (T5)
+
+**Promotional text** (170 char limit, editable without a review):
+
+> One painting a day from the world's open museum collections. Free, no ads,
+> nothing locked away.
+
+**Description.** First three lines are all Maya reads; they carry the two claims
+`user-research/0004` §7 says are true here and unoccupied by anyone with traction.
+No hand-written editorial claim anywhere in it (D1).
+
+```
+One painting a day, from the world's great museum collections. Free, with no
+advertising and nothing locked away.
+
+Tondo opens on a single artwork — a Rajput elephant, a Mughal bird study, a
+Japanese screen, a Dutch harbour — with its title, its maker, and the museum's
+own note on what you are looking at. Read it in a minute with your tea, or stay
+and look closer. Then it is done until tomorrow.
+
+WHAT IS IN IT
+• 2,000 works from the Metropolitan Museum of Art, the Art Institute of Chicago,
+  the Cleveland Museum of Art and the Minneapolis Institute of Art
+• More than half from outside Europe and North America — Japan, China, India,
+  Persia and beyond, not the same forty paintings everywhere else shows you
+• Every image public domain, every plate high resolution, zoomable to the
+  brushwork
+• Every day you have seen stays in the archive, and you can keep the ones worth
+  returning to
+
+WHAT IS NOT IN IT
+• No advertising
+• No paywalled archive
+• No account needed — sign in only if you want your collection to follow you to
+  a new phone
+• Nothing between opening the app and the artwork
+
+Made by one person. Write to support@dailytondo.com and that person reads it.
+```
+
+Two phrasings are deliberately narrow. "Every day you have seen stays in the
+archive" describes the mechanism rather than claiming a volume, because the
+archive holds **two days**. And "more than half from outside Europe and North
+America" is the quota table's 53%, which `test/lib/pool_quota_test.rb` fails the
+build over — a checkable number rather than a mood.
 
 ## Deviations (added during build)
+
+- **2026-08-16 — frame 2 was not captured, and the set ships as three.** The plan
+  called for four frames; the "wall label scrolled" one could not be produced
+  reliably. Four approaches failed: an instantaneous `cliclick` drag (no scroll),
+  a slow stepped drag (WKWebView read it as a long-press and selected text), a
+  fast flick (no scroll), and a throwaway build whose start URL carried the
+  `#daily-note` anchor (rendered a blank linen page). `xcrun simctl` has no
+  pointer input, so there is no first-party way to drive it.
+
+  Frames 1, 3 and 4 are captured, captioned and store-ready at 1320 × 2868.
+  Apple's minimum is one. **The loss is small**: frame 1 already shows the title,
+  artist, medium, the opening of the note, `MORE` and the museum attribution
+  above the fold, which is most of what frame 2 was for.
+
+  Two ways to close it later, neither blocking: record the scroll by hand in the
+  Simulator with a human doing the swipe, or add a `?scroll=note` query the daily
+  page honours. The second is code written for a screenshot, which is the failure
+  pattern `CLAUDE.md` names, so the first is the recommendation.
+
+- **2026-08-16 — the store hero is `source: cma / source_id: 163797`, production
+  id 860.** The design review named local id 2691. Confirmed at scheduling time
+  that production assigns different ids, exactly as the outside voice warned. The
+  natural key found it; the local id would have scheduled a different painting.
+
+- **2026-08-16 — captions are composed in HTML, not an image editor.** No image
+  library is available on this machine (no PIL, no ImageMagick, no libvips — the
+  same absence `config/application.rb` records for Active Storage variants), so
+  each frame is a small HTML page rendering the caption in the app's own Fraunces
+  woff2 over `#f4efe6`, screenshotted headless at 1320 × 2868. Sources are kept
+  next to the output as `cap-*.html` so a caption can be reworded without redoing
+  the capture.
 
 ## GSTACK REVIEW REPORT
 
 | Review | Trigger | Why | Runs | Status | Findings |
 |--------|---------|-----|------|--------|----------|
 | CEO Review | `/plan-ceo-review` | Scope & strategy | 0 | — | — |
-| Codex Review | `/codex review` | Independent 2nd opinion | 1 | ISSUES_FOUND | outside voice on this plan, 2026-08-16 |
+| Codex Review | `/codex review` | Independent 2nd opinion | 1 | ISSUES_FOUND | outside voice, 5 verified corrections folded |
 | Eng Review | `/plan-eng-review` | Architecture & tests (required) | 1 | CLEAR (PLAN) | 5 issues, 0 critical gaps |
 | Design Review | `/plan-design-review` | UI/UX gaps | 1 | ISSUES_OPEN | score: 4/10 → 8/10, 4 decisions |
 | DX Review | `/plan-devex-review` | Developer experience gaps | 0 | — | — |
 
-**CODEX:** Independently found the `allow_browser` defect. Supplied four further verified
-corrections: guideline 5.1.1(i) requires an in-app policy link, device-only readers have no
-deletion path, `painting id 2691` is a local id rather than a portable natural key, and
-`public_cache_headers_test.rb` still asserts the front door is the only public page.
+**CODEX:** Independently found the `allow_browser` defect. Also supplied the
+5.1.1(i) in-app policy requirement, the missing device deletion path, the
+local-vs-production painting id, and the `public_cache_headers_test` gap. All
+verified against the repo before folding; the painting id was confirmed wrong at
+scheduling time (local 2691, production 860).
 
-**CROSS-MODEL:** Two independent reviewers reached the `allow_browser` finding separately,
-which is the strongest signal in this report. They also agreed, unprompted, on the
-strategic point: uploading a build while daily advancement is unsolved is the lower-leverage
-move. That agreement is recorded, not acted on — the curator chose the listing work.
+**CROSS-MODEL:** Two reviewers reached the `allow_browser` finding independently,
+and both reached the same strategic conclusion: daily advancement outranks the
+upload. The second is recorded, not acted on.
 
-**VERDICT:** ENG CLEARED — 5 findings, all folded, 0 critical gaps. Design review's two
-reversed calls (in-app policy link, device deletion) are now in scope. Ready to implement.
+**VERDICT:** ENG + DESIGN CLEARED — implemented, deployed, `bin/ci` green
+(308 runs / 1614 assertions / 0 failures, 47 system tests). T1–T11 done except
+the frame-2 capture, which is a recorded deviation rather than an open decision.
 
 **UNRESOLVED DECISIONS:**
-- `support@dailytondo.com` has no mail routing. Now blocking the page **deploy**, not just
-  the filing: a live policy naming a dead address is itself false.
-- Nothing advances the day. No job, no Solid Queue; `DailyPick.current` holds the last
-  published day over indefinitely. Step 6 clears it once, by hand. Both reviewers flagged
-  this as outranking the listing work, and it still has no story.
+- `support@dailytondo.com` has no mail routing, and it is now **live on two
+  published pages** telling readers they can request deletion there. This moved
+  from "blocks the filing" to "the deployed policy is currently overstating a
+  channel", and it is the most urgent item on this list.
+- Nothing advances the day. Step 6 scheduled Aug 16 by hand; on Aug 17 the front
+  door holds it over again. Both reviewers flagged it, it still has no story, and
+  the listing copy now says "one painting a day" in public.

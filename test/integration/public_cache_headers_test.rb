@@ -15,13 +15,22 @@ require "test_helper"
 # fragments (keep, sign-in).
 #
 # Story 0016 added two more, and this comment used to say the front door was the
-# ONLY one. `/privacy` and `/support` are public by requirement rather than by
-# choice: App Store Connect will not accept the record without them and Apple
-# fetches both with no account, so they cannot go behind the wall and cannot be
-# `private`. That puts them under exactly the rule this file exists to hold —
-# and their `PagesController` deliberately inherits `ActionController::Base`
-# rather than `ApplicationController`, so it does NOT get `no_store` and the
-# other shared guards for free. Which is precisely why they are listed here.
+# ONLY one. `/privacy` and `/support` are reachable without an identity by
+# requirement rather than by choice: App Store Connect will not accept the record
+# without them, and Apple fetches both with no account.
+#
+# Precise about which "public" this file means, because the two are easy to
+# conflate. These pages are publicly REACHABLE (no wall) but not publicly
+# CACHEABLE — measured in production they answer `Cache-Control: max-age=0,
+# private, must-revalidate`, Rails' default, which is the conservative side of
+# the risk this file exists to guard. The danger is a `public` response carrying
+# a `Set-Cookie`; these carry neither.
+#
+# They are listed here anyway, and that is the point: their `PagesController`
+# deliberately inherits `ActionController::Base` rather than
+# `ApplicationController`, so it gets NONE of the shared guards for free. A
+# future `expires_in ..., public: true` on a legal page would be one line, would
+# look harmless, and nothing else in the suite would notice.
 class PublicCacheHeadersTest < ActionDispatch::IntegrationTest
   PUBLIC_PAGES = %w[/ /privacy /support].freeze
 
