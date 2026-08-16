@@ -12,6 +12,12 @@
 # (eng review A2): Apple returns the callback as a cross-site POST, the gem is
 # pinned exactly in the Gemfile, and the flow is verified on the deployed
 # domain — a green local suite cannot exercise that failure.
+# Before OmniAuth in the stack, so it can put Apple's state back into the
+# session before the callback phase reads it. See the class for why the session
+# does not survive Apple's cross-site POST on its own.
+require Rails.root.join("lib/middleware/apple_state_cookie")
+Rails.application.config.middleware.use Middleware::AppleStateCookie
+
 Rails.application.config.middleware.use OmniAuth::Builder do
   provider :google_oauth2,
     Rails.application.credentials.dig(:google, :client_id).presence || ENV["GOOGLE_CLIENT_ID"],

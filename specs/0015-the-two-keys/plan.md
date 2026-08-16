@@ -458,6 +458,22 @@ _(append here, per build flow step 2)_
   + standard config ship now; the ship-checklist deployed-domain verification
   decides whether the plan's scoped-cookie work (or the fork fallback) is
   needed. Time-box clause stands.
+- **The deployed-domain verification answered it: the scoped cookie was
+  needed, and it shipped (2026-08-16).** With real credentials in production
+  the Apple button reached Apple, signed in, and died on the way back — the
+  trap above, firing exactly as predicted. The one surprise was the error
+  string: not `csrf_detected` but `undefined method 'bytesize' for nil`,
+  because omniauth-oauth2's `secure_compare` compares `request.params["state"]`
+  against a nil session value with no guard
+  (`omniauth-oauth2-1.9.0/.../oauth2.rb:149`). Confirmed at the source — the
+  request-phase response carries `set-cookie: _tondo_session=…; samesite=lax`.
+  Fixed with `lib/middleware/apple_state_cookie.rb`, the scoped-cookie option
+  this plan chose, carrying **both** `omniauth.state` and `omniauth.nonce`
+  (omniauth-apple reads the nonce back out of the session too). No fork
+  fallback, no time-box breach. The suite could not have caught this:
+  `OmniAuth.config.test_mode` skips the request phase, so the middleware is
+  tested as Rack, and a mutation run confirms the test reproduces the
+  production nil.
 - **The defensive `/auth/*` → Safari path-configuration rule was dropped** —
   Hotwire Native's path configuration has no send-to-Safari property; adding
   one means custom route-handler code, which is more than the "one line" the
