@@ -9,12 +9,21 @@ require "test_helper"
 # — replay them together and visitor B is visitor A.
 #
 # Story 0015 put `/days` and `/feed` behind the wall and made them `private`
-# (wall_test holds that side), so the front door is now the ONLY public page —
-# and it matters more, not less: it is the one page every visitor state shares,
-# byte-identical, with all the personal machinery behind its two private
+# (wall_test holds that side), which left the front door as the only public page
+# — and made it matter more, not less: it is the one page every visitor state
+# shares, byte-identical, with all the personal machinery behind its two private
 # fragments (keep, sign-in).
+#
+# Story 0016 added two more, and this comment used to say the front door was the
+# ONLY one. `/privacy` and `/support` are public by requirement rather than by
+# choice: App Store Connect will not accept the record without them and Apple
+# fetches both with no account, so they cannot go behind the wall and cannot be
+# `private`. That puts them under exactly the rule this file exists to hold —
+# and their `PagesController` deliberately inherits `ActionController::Base`
+# rather than `ApplicationController`, so it does NOT get `no_store` and the
+# other shared guards for free. Which is precisely why they are listed here.
 class PublicCacheHeadersTest < ActionDispatch::IntegrationTest
-  PUBLIC_PAGES = %w[/].freeze
+  PUBLIC_PAGES = %w[/ /privacy /support].freeze
 
   # Forgery protection goes on for the whole file, not per test.
   #

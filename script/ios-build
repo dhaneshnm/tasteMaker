@@ -65,4 +65,97 @@ if [ "$status" -ne 0 ]; then
 fi
 
 grep -E "warning:" "$LOG" | sort -u | head -20 || true
+echo "==> Debug BUILD SUCCEEDED"
+
+# ---------------------------------------------------------------------------
+# The Release pass (story 0016, eng review).
+#
+# Everything above builds Debug. Debug points at localhost and carries a
+# throwaway secret, so a defect that lives only in Release.xcconfig is invisible
+# to it — and on 2026-08-16 two of them were: `DEVELOPMENT_TEAM` was absent from
+# every xcconfig (a simulator build never asks; a device build cannot sign), and
+# `TONDO_APP_SECRET` was still the literal `CHANGEME`. Both sat in the tree while
+# this script reported green.
+#
+# The secret is the one worth the extra thirty seconds. `DeviceIdentity.register`
+# swallows a 401 and routes anyway, so a wrong secret does not surface as an
+# error — it surfaces as an app where sign-in is quietly broken and every gated
+# screen shows the public landing page instead. Verified against production:
+# the real value answers 204, `CHANGEME` answers 401.
+#
+# Simulator destination and signing still disabled, so this runs on any Mac with
+# no provisioning profile. It proves the Release xcconfig chain resolves and the
+# values that reach Info.plist are the production ones. It does NOT prove the app
+# signs, which only a device build or an archive can.
+# ---------------------------------------------------------------------------
+
+echo "==> Building $SCHEME for $DESTINATION (Release)"
+
+RELEASE_DD="${TMPDIR:-/tmp}/tondo-ios-release-dd"
+RELEASE_LOG="${TMPDIR:-/tmp}/ios-build-release.log"
+
+set +e
+xcodebuild build \
+  -project "$PROJECT" \
+  -scheme "$SCHEME" \
+  -configuration Release \
+  -destination "$DESTINATION" \
+  -derivedDataPath "$RELEASE_DD" \
+  -skipMacroValidation \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO \
+  > "$RELEASE_LOG" 2>&1
+status=$?
+set -e
+
+if [ "$status" -ne 0 ]; then
+  echo "==> RELEASE BUILD FAILED" >&2
+  grep -E "error:|warning:|BUILD" "$RELEASE_LOG" | tail -40 >&2 || true
+  echo "==> full log: $RELEASE_LOG" >&2
+  exit "$status"
+fi
+
+# What the built Info.plist actually says. The xcconfig can resolve cleanly and
+# still carry the wrong values, which is the entire failure mode above, so this
+# reads the artifact rather than the source.
+PLIST=$(find "$RELEASE_DD/Build/Products" -name "Info.plist" -path "*$SCHEME.app*" | head -1)
+
+if [ -z "$PLIST" ]; then
+  echo "==> Release build produced no $SCHEME.app/Info.plist to check" >&2
+  exit 1
+fi
+
+plist_value() { /usr/libexec/PlistBuddy -c "Print :$1" "$PLIST" 2>/dev/null || echo ""; }
+
+URL=$(plist_value TondoURL)
+SECRET=$(plist_value TondoAppSecret)
+fail=0
+
+case "$URL" in
+  https://*) ;;
+  *)
+    echo "==> Release TondoURL is '$URL' — must be the https production host." >&2
+    echo "    Check ios/Config/Release.xcconfig; '//' needs the \$() escape." >&2
+    fail=1
+    ;;
+esac
+
+if [ -z "$SECRET" ] || [ "$SECRET" = "CHANGEME" ]; then
+  echo "==> Release TondoAppSecret is '${SECRET:-<empty>}'." >&2
+  echo "    Device registration will answer 401, DeviceIdentity will swallow it," >&2
+  echo "    and the app will look like sign-in is broken. Run: script/ios-secrets" >&2
+  fail=1
+fi
+
+# `if`, not `[ "$fail" -ne 0 ] && exit 1`. Under `set -e` that one-liner's
+# behaviour on the SUCCESS path depends on the shell's AND-OR-list exemption:
+# the test returns non-zero, `exit 1` never runs, and whether the script dies
+# there is a question about your shell rather than about the build. Explicit
+# beats clever, especially in the branch that is supposed to do nothing.
+if [ "$fail" -ne 0 ]; then
+  exit 1
+fi
+
+grep -E "warning:" "$RELEASE_LOG" | sort -u | head -20 || true
+echo "==> Release BUILD SUCCEEDED (TondoURL=$URL, secret ${#SECRET} chars)"
 echo "==> BUILD SUCCEEDED"

@@ -33,9 +33,22 @@ Rails.application.routes.draw do
   # The exit door the category's leader never built. Signed-in only.
   delete "account" => "accounts#destroy", as: :account
 
+  # The same door for the other identity (story 0016). `accounts#destroy`
+  # returns early unless `current_user`, so until this route existed the DEFAULT
+  # state of every iOS reader — a registered device that never signed in — could
+  # not delete anything it had left behind. A privacy policy promising in-app
+  # deletion was false for the majority case, which is how this was found.
+  delete "device" => "devices#destroy", as: :device
+
   # The device key (story 0015). The shell registers its Keychain UUID here on
   # launch and receives the signed device cookie every later request rides on.
   post "device/registrations" => "device_registrations#create"
+
+  # The two pages App Store Connect requires by URL (story 0016). Served by a
+  # controller that does NOT inherit ApplicationController — see PagesController
+  # for why skipping the wall and the browser gate by name was not an option.
+  get "privacy" => "pages#privacy", as: :privacy
+  get "support" => "pages#support", as: :support
 
   # The infinite-scroll gallery, moved off the root (decisions/0002).
   get "feed" => "paintings#index", as: :feed

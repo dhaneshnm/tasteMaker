@@ -1,0 +1,20 @@
+<%# The in-app route to the legal pages (story 0016).
+
+    App Review guideline 5.1.1(i) requires the privacy policy to be reachable
+    from inside the app, not only from the App Store Connect metadata field. The
+    listing link alone is a rejection.
+
+    Why here and not a site-wide footer: the two screens that already end in a
+    `.coda` are the reader's own room and the archive, both of which a person
+    arrives at deliberately and leaves at their own pace. The daily page is not
+    one of them on purpose — DESIGN.md rule 5 keeps nothing between the reader
+    and the artwork, and `caps-link-row-costs-44px` says every row of these costs
+    a full 44px on a screen already measured tight against the fold.
+
+    One partial rather than two copies, because the pair will grow (terms, an
+    about line) and two codas drifting apart is how a legal link goes missing
+    from one screen for six months. %>
+<nav class="legal" aria-label="About this app">
+  <%= link_to "Privacy", privacy_path, class: "caps-link" %>
+  <%= link_to "Support", support_path, class: "caps-link" %>
+</nav>

@@ -57,5 +57,20 @@
             class: "caps-link account__delete", form_class: "account__form",
             data: { turbo_confirm: "Deletes your account and the #{pluralize(@rows.size, "work")} you've kept. There is no undo." } %>
     </footer>
+  <%# The same door for the other identity (story 0016). Until this existed the
+      DEFAULT state of the iOS app — a registered device that never signed in —
+      had no way to delete anything, while the privacy policy promised in-app
+      deletion. The policy was false for most readers, which is how it was
+      found. Outside the empty-state branch for the same reason the account
+      footer is: a reader with nothing kept still owns the exit door. %>
+  <% elsif current_device %>
+    <footer class="account">
+      <p class="coda__note">Kept on this device, with no account.</p>
+      <%= button_to "Delete this device's data", device_path, method: :delete,
+            class: "caps-link account__delete", form_class: "account__form",
+            data: { turbo_confirm: "Deletes this device and the #{pluralize(@rows.size, "work")} kept on it. There is no undo, and no account to restore them from." } %>
+    </footer>
   <% end %>
+
+  <%= render "shared/legal" %>
 </main>

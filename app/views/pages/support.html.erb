@@ -1,0 +1,57 @@
+<% content_for :title, "Support — Tondo" %>
+<% content_for :description, "How to reach a person about Tondo." %>
+
+<%# `here: nil`, same contract as the privacy page. %>
+<%= render "shared/masthead", label: "Support", here: nil %>
+
+<main class="page">
+  <article class="doc">
+    <p class="doc__lead">
+      Tondo is made by one person. Write to
+      <%= mail_to "support@dailytondo.com", class: "doc__link" %> and that person
+      reads it.
+    </p>
+
+    <div class="ornament" aria-hidden="true">✦</div>
+
+    <h2 class="doc__head">What Tondo is</h2>
+
+    <p>One artwork a day, drawn from the open-access collections of the
+    Metropolitan Museum of Art, the Art Institute of Chicago, the Cleveland
+    Museum of Art, and the Minneapolis Institute of Art. Every work is public
+    domain. The app is free, carries no advertising, and paywalls nothing.</p>
+
+    <div class="ornament" aria-hidden="true">✦</div>
+
+    <h2 class="doc__head">Things people ask</h2>
+
+    <p><strong>Do I need an account?</strong> No. The app works without one, and
+    works you keep are stored on your device. Signing in with Google or Apple
+    moves your collection to an account so it survives a new phone.</p>
+
+    <p><strong>How do I delete what you have?</strong> Open your collection.
+    There is a delete control there for your account or for this device,
+    whichever you have. Details are on the
+    <%= link_to "privacy page", privacy_path, class: "doc__link" %>.</p>
+
+    <p><strong>An artwork looks wrong, or the note has an error.</strong> Please
+    write. Say which day it was and what you saw. Museum catalogue records
+    occasionally carry mistakes and we would rather fix ours than keep them.</p>
+
+    <p><strong>Can I suggest a work?</strong> Yes. That is the most useful mail
+    this address gets.</p>
+
+    <div class="ornament" aria-hidden="true">✦</div>
+
+    <h2 class="doc__head">If something is broken</h2>
+
+    <p>Tell us what you tapped, what happened, and what you expected instead. If
+    it is visual, a screenshot settles it faster than a paragraph. There is no
+    ticket system and no automated reply; you will hear back from a person.</p>
+  </article>
+
+  <footer class="coda">
+    <div class="ornament" aria-hidden="true">✦</div>
+    <%= link_to "Privacy", privacy_path, class: "caps-link" %>
+  </footer>
+</main>

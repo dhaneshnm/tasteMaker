@@ -1,0 +1,101 @@
+<% content_for :title, "Privacy — Tondo" %>
+<% content_for :description, "What Tondo stores, what it does not, and how to delete it." %>
+
+<%# `here: nil` — these pages are not compass destinations, and
+    ApplicationHelper#compass_destinations raises on any key that is neither nil
+    nor one of its four. Reached from the App Store listing and from the coda on
+    the collection and archive screens. %>
+<%= render "shared/masthead", label: "Privacy", here: nil %>
+
+<main class="page">
+  <article class="doc">
+    <p class="doc__stamp">Last updated <%= @updated_on.strftime("%-d %B %Y") %></p>
+
+    <p class="doc__lead">
+      Tondo shows you one artwork a day. It is free, it has no advertising, and
+      nothing here is watching you. This page says exactly what that means,
+      written against the database rather than from a template.
+    </p>
+
+    <div class="ornament" aria-hidden="true">✦</div>
+
+    <h2 class="doc__head">What is stored</h2>
+
+    <p><strong>If you sign in</strong> with Google or Apple, we keep the name and
+    email address that provider hands us, plus the provider's own identifier for
+    you. If you use Apple's <em>Hide My Email</em>, what we hold is the relay
+    address Apple generates, not your real one. We never receive your password.</p>
+
+    <p><strong>If you do not sign in</strong> and you are using the iOS app, the
+    app creates a random identifier on your device the first time it opens and
+    keeps it in the iOS Keychain. We store a one-way hash of it, never the
+    identifier itself, along with the date it was last seen. It is not an
+    advertising identifier, it is not Apple's identifier for vendors, and it is
+    not connected to your name, your email, or any other app.</p>
+
+    <p><strong>Works you keep</strong> are stored against whichever of those two
+    identities you have: your account, or your device's hash.</p>
+
+    <p><strong>Server logs</strong> record ordinary web-server information,
+    including IP addresses and the pages requested. This is how the server runs,
+    not a profile of you.</p>
+
+    <div class="ornament" aria-hidden="true">✦</div>
+
+    <h2 class="doc__head">What is not stored</h2>
+
+    <p>No advertising, and no advertising identifiers. No third-party analytics.
+    No tracking of you across other apps or other websites. No location, no
+    contacts, no health data, no payment details. Nothing is sold, and nothing is
+    shared with anyone for their own purposes.</p>
+
+    <p>This is not a promise about our intentions. The test suite fails the build
+    if a tracking or analytics dependency is added to this app while this
+    paragraph still says otherwise, so the paragraph cannot quietly stop being
+    true.</p>
+
+    <div class="ornament" aria-hidden="true">✦</div>
+
+    <h2 class="doc__head">Deleting it</h2>
+
+    <p><strong>With an account:</strong> open your collection and choose
+    <em>Delete account</em>. It removes the account and every work kept with it,
+    immediately. There is no soft delete and no grace period.</p>
+
+    <p><strong>Without an account,</strong> on the iOS app: open your collection
+    and choose <em>Delete this device's data</em>. It removes the stored hash and
+    every work kept on this device, immediately.</p>
+
+    <p>You can also write to <%= mail_to "support@dailytondo.com", class: "doc__link" %>
+    and ask, and we will do it by hand.</p>
+
+    <div class="ornament" aria-hidden="true">✦</div>
+
+    <h2 class="doc__head">The artwork</h2>
+
+    <p>Every image in Tondo comes from a museum's open-access collection and is
+    in the public domain or released under CC0 — the Metropolitan Museum of Art,
+    the Art Institute of Chicago, the Cleveland Museum of Art, and the
+    Minneapolis Institute of Art. Catalogue text shown beneath a work is the
+    museum's own, and is marked as theirs wherever it appears.</p>
+
+    <div class="ornament" aria-hidden="true">✦</div>
+
+    <h2 class="doc__head">Children</h2>
+
+    <p>Tondo is not directed at children and does not knowingly collect anything
+    from them.</p>
+
+    <div class="ornament" aria-hidden="true">✦</div>
+
+    <h2 class="doc__head">Changes, and how to reach us</h2>
+
+    <p>If this policy changes, the date at the top changes with it. Questions go
+    to <%= mail_to "support@dailytondo.com", class: "doc__link" %>.</p>
+  </article>
+
+  <footer class="coda">
+    <div class="ornament" aria-hidden="true">✦</div>
+    <%= link_to "Support", support_path, class: "caps-link" %>
+  </footer>
+</main>

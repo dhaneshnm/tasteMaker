@@ -102,6 +102,11 @@ class ApplicationController < ActionController::Base
       token = cookies.signed[:device]
       @current_device = token.present? ? Device.find_by(token_digest: Device.digest(token))&.tap(&:note_seen) : nil
     end
+    # Exposed to views for the same reason `current_user` is, and only since
+    # story 0016: the collection page has to offer the device its exit door, and
+    # "which identity is this" is the question that decides which door to draw.
+    # Already memoized, so a view calling it costs nothing.
+    helper_method :current_device
 
     # Private and uncacheable, always. `Vary: Cookie` is belt to the no-store
     # braces: nothing should store these, and nothing should reuse one reader's

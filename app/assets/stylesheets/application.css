@@ -755,6 +755,91 @@ a:hover { color: var(--gold-deep); }
  * left, so the rule went. The gap between compass items is `column-gap` on the
  * flex row, which is the same job done by the layout that owns it. */
 
+/* ---------- Long-form document (story 0016) ----------
+ * The privacy policy and the support page. The longest continuous prose in the
+ * product by a wide margin — longer than any editorial note — and the only
+ * screen whose job is reading rather than looking.
+ *
+ * No new tokens, no new type step, no new ornament. Body is the same size and
+ * measure as a wall label because it is the same act of reading; headings reuse
+ * the small-caps treatment `.days__month` already established for "a new section
+ * starts here"; sections are separated by the `✦` that DESIGN.md rule 6 already
+ * permits. A `<h2>` scale of its own would have been a fourth type step for two
+ * pages, and cards or boxes would have broken rule 6 outright.
+ *
+ * `.page` already caps width at `--measure`, so nothing here restates it.
+ */
+
+.doc__stamp {
+  margin: 0 0 1.6rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ink-faint);
+}
+
+/* One size up, italic display: the same voice `.coda__line` uses to open and
+ * close a screen, here opening a document. */
+.doc__lead {
+  margin: 0 0 0.4rem;
+  font-family: var(--serif-display);
+  font-size: 1.2rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.doc__head {
+  margin: 0 0 1.2rem;
+  font-family: var(--serif-body);
+  font-size: 0.72rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ink-dim);
+}
+
+/* Matches `.label__note p` exactly — same size, same leading, same ink. Two
+ * declarations rather than one shared selector because the wall label clamps
+ * and this never does; joining them would put a `-webkit-line-clamp` one
+ * refactor away from a truncated privacy policy. */
+.doc p {
+  margin: 0 0 0.9rem;
+  font-size: 1.06rem;
+  line-height: 1.66;
+  color: var(--ink);
+}
+
+.doc p:last-child { margin-bottom: 0; }
+
+.doc strong { font-weight: 560; }
+
+.doc__link {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.doc__link:hover { color: var(--gold-deep); }
+
+/* The divider between sections carries the space, so headings do not also need
+ * a large top margin — that would double the gap and float the heading between
+ * its section and the one before it. */
+.doc .ornament { margin: 2.2rem 0 1.6rem; }
+
+/* Privacy and Support in the coda of the collection and archive screens
+ * (guideline 5.1.1(i): the policy must be reachable inside the app, not only
+ * from the App Store listing).
+ *
+ * Story 0012 deleted the old `.coda > .caps-link + .caps-link` rule when the
+ * compass took over the two ways out and no coda had two adjacent caps-links
+ * left. This is a row again, so the spacing comes back — as a flex row that
+ * owns its own gap, rather than an adjacent-sibling margin that only works for
+ * exactly two. */
+.legal {
+  display: flex;
+  justify-content: center;
+  column-gap: 2rem;
+}
+
 /* ---------- The days behind you ----------
  * A contents list, not a gallery — /feed is the gallery. Rows are separated by a
  * hairline and whitespace: no card, no fill, no radius, no shadow, on any state.

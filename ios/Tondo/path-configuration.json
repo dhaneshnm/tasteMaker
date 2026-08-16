@@ -15,6 +15,12 @@
       }
     },
     {
+      "patterns": ["^/privacy$", "^/support$"],
+      "properties": {
+        "pull_to_refresh_enabled": false
+      }
+    },
+    {
       "patterns": ["^/admin"],
       "properties": {
         "presentation": "none"
