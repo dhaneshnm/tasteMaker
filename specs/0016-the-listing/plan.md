@@ -110,11 +110,13 @@ guidelines treat price terms in keywords as spam.
      support address.
    - Not directed at children.
 4. **Write the support page** — what the app is, how to reach a human, link to privacy.
-   **Open question, one line, yours:** the contact address. `dhanesh.n.m19@gmail.com` works
-   today and costs nothing; `support@dailytondo.com` reads like a product but needs mail
-   routing that does not exist. Recommendation: **ship the Gmail**, revisit if volume ever
-   justifies the forwarding. Standing up mail infrastructure for an app with zero installs
-   is the named failure pattern.
+   The contact address is **`support@dailytondo.com`** (decided 2026-08-16; the Gmail was
+   the alternative). Mail routing for it does not exist yet and the curator sets it up
+   before submission — recorded as a blocker below rather than as an assumption, because
+   the failure is not cosmetic: **App Review asks its questions through this address**, and
+   an unrouted one turns a question into an unanswered rejection with no visible cause.
+   The same address goes in App Store Connect's App Information contact field, so it must
+   receive mail before step 10, not before launch.
 5. **Deploy** — `kamal deploy`. Both URLs must answer 200 to an anonymous `curl` before
    anything is typed into App Store Connect. Verify with no cookie jar.
 6. **Screenshots** — 6.9" (1320 × 2868, iPhone 17 Pro Max simulator) is the only size Apple
@@ -160,6 +162,11 @@ Minitest, written with the code (R1), not after:
   `lib/` or `ios/`. Baseline item 2 and one of two named moats. Submitting without it means
   the listing describes a daily habit the app cannot start on its own. Its own story; the
   App ID will need the Push Notifications capability added then.
+- **`support@dailytondo.com` does not receive mail yet.** Curator-owned, due before
+  submission (step 10), not before the page ships — the page can carry the address while
+  the routing is pending, the *filing* cannot. Verify by sending mail to it from an
+  unrelated account and reading it, the same way a restore test is a restore, not a
+  snapshot.
 - **Session gate 6 is open** — no backups, no logged restore test, no error tracking, no
   analytics, against a SQLite file on one GCP disk. This story files accurate privacy
   labels and closes nothing else. **The gate blocks Submit for Review, not this plan.**
