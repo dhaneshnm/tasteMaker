@@ -29,6 +29,13 @@ GENERATE_INFOPLIST_FILE = NO
 ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
 ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = Gold
 
+// Apple Developer Team. Same team that issued the Sign in with Apple key in
+// Rails credentials (`apple.team_id`) — the two must match or the Apple
+// sign-in door breaks on device. A Team ID is not a secret; it is public in
+// every provisioning profile. Without it here, a device build cannot sign and
+// Xcode fails with "Signing for Tondo requires a development team."
+DEVELOPMENT_TEAM = 7UHVJKQDCU
+
 CODE_SIGN_STYLE = Automatic
 ENABLE_USER_SCRIPT_SANDBOXING = YES
 SWIFT_EMIT_LOC_STRINGS = YES

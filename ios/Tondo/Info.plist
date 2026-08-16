@@ -21,6 +21,14 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 
+	<!-- Export compliance, answered once here instead of on every TestFlight
+	     upload. The shell's only cryptography is HTTPS through the system's own
+	     stack, which is exempt under the standard exemption, so this is `false`
+	     as a matter of fact. Omitting the key does not mean "no" — it means App
+	     Store Connect blocks each build behind a manual questionnaire. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
 	<!-- Where the shell points. Set per-configuration in Config/*.xcconfig so a
 	     start URL is never hardcoded in Swift. Endpoint.swift reads this key and
 	     traps loudly if it is missing or unparseable. -->
@@ -102,9 +110,12 @@
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
 
+	<!-- `arm64`, not the `armv7` the old Xcode templates emitted. armv7 is
+	     32-bit, no device running iOS 17 has it, and declaring it as *required*
+	     describes a phone that cannot exist. -->
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv7</string>
+		<string>arm64</string>
 	</array>
 </dict>
 </plist>
