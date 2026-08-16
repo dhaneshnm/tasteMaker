@@ -37,6 +37,65 @@ class PaintingTest < ActiveSupport::TestCase
     assert_equal "met_45734", met.dom_key
   end
 
+  # Museum HTML on the wall label (bug, 2026-08-15). The page escapes
+  # `description`, so every tag that reaches the column is read by a visitor.
+  test "museum markup never reaches the column" do
+    painting = Painting.create!(source: "cma", source_id: 6_001, title: "Old Pat",
+      description: %(a portrait called <em>The Beggar&#39;s Dessert</em> that included a bone))
+
+    assert_equal "a portrait called The Beggar's Dessert that included a bone",
+      painting.description
+  end
+
+  test "block tags become a space, so the words on either side stay apart" do
+    assert_equal "One. Two.", Painting.plain_text("<p>One.</p><p>Two.</p>")
+    assert_equal "A line next line third", Painting.plain_text("A line<br>next line<br />third")
+    assert_equal "Waldo sold many copies",
+      Painting.plain_text(%(<span style="color: rgb(0,0,0)">Waldo sold </span><span>many copies</span>))
+  end
+
+  # Minneapolis ships whole Google Docs paste-ups, and one <span style> is
+  # longer than the 120 readable characters bar 6 counts.
+  test "a paste-up leaves only its words" do
+    assert_equal "Titled work", Painting.plain_text(
+      %(<b id="docs-internal-guid-478" style="font-weight: normal;">) +
+      %(<span style="font-style: italic;">Titled</span></b> work))
+  end
+
+  # Entities are the same bug wearing a different coat: ERB escapes the
+  # ampersand, so a stored "&quot;" is read as literal &quot; on the page.
+  test "entities are decoded, including tags the museum escaped itself" do
+    assert_equal %(For "Allegory of Summer," he depicted),
+      Painting.plain_text(%(For &quot;Allegory of Summer,&quot; he depicted))
+    assert_equal "Rock & Roll", Painting.plain_text("Rock &amp; Roll")
+    assert_equal "a slug and grasshopper", Painting.plain_text("a slug&nbsp;and grasshopper")
+    # AIC stores this one already escaped — one strip pass leaves it visible.
+    assert_equal "this screen shows", Painting.plain_text("&lt;BIG&gt;this screen shows")
+  end
+
+  test "flattening is stable, so a reseed over flattened rows changes nothing" do
+    once = Painting.plain_text(%(<p>Rock &amp; Roll: <i>a &lt;study&gt;</i></p><p>Two.</p>))
+
+    assert_equal once, Painting.plain_text(once)
+  end
+
+  test "text with nothing readable in it becomes nothing, not an empty string" do
+    assert_nil Painting.plain_text("<p></p>")
+    assert_nil Painting.plain_text(nil)
+    assert_nil Painting.create!(source: "met", source_id: 6_002, title: "No text",
+      description: "  ").description
+  end
+
+  # Third-party copy, so the sanitizer's job is load-bearing, not cosmetic:
+  # nothing here is ever marked html_safe, and this pins that it need not be.
+  test "script and event handlers do not survive ingest" do
+    painting = Painting.create!(source: "mia", source_id: 6_003, title: "Hostile",
+      description: %(hi <script>alert(1)</script><img src=x onerror=alert(2)> there))
+
+    assert_equal "hi alert(1) there", painting.description
+    assert_no_match(/<|onerror/, painting.description)
+  end
+
   test "the gallery credits the museums actually in the pool, heaviest first" do
     Painting.create!(source: "cma", source_id: 5_001, title: "Cleveland one")
     Painting.create!(source: "cma", source_id: 5_002, title: "Cleveland two")

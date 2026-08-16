@@ -173,8 +173,11 @@ module Pool
         culture: r["place_of_origin"].to_s.strip,
         department: r["department_title"].to_s.strip,
         region: Pool.region_for(country: r["place_of_origin"], culture: nil, department: r["department_title"]),
-        # AIC's description is HTML.
-        description: ActionController::Base.helpers.strip_tags(text.to_s).squish.presence,
+        # HTML, like Cleveland's and Minneapolis's — and until 2026-08-15 this
+        # was the only adapter that flattened it, which is exactly how the other
+        # two shipped literal "<em>" to the page. One shared call now, so bar 6
+        # counts characters a reader can read rather than markup.
+        description: Painting.plain_text(text),
         creditline: r["credit_line"].to_s.strip,
         accession_number: r["main_reference_number"].to_s.strip,
         # IIIF, requested at the size we want rather than downloaded full and
@@ -215,7 +218,7 @@ module Pool
             culture: Array(r["culture"]).join(", "),
             department: r["department"].to_s.strip,
             region: Pool.region_for(country: Array(r["culture"]).join(" "), culture: nil, department: r["department"]),
-            description: r["description"].presence || r["wall_description"].presence,
+            description: Painting.plain_text(r["description"].presence || r["wall_description"].presence),
             creditline: r["creditline"].to_s.strip,
             accession_number: r["accession_number"].to_s.strip,
             image_url_full: print_image["url"],
@@ -270,7 +273,7 @@ module Pool
             department: r["department"].to_s.strip,
             region: Pool.region_for(country: r["country"], culture: r["culture"],
                                     department: r["department"], continent: r["continent"]),
-            description: r["text"].presence,
+            description: Painting.plain_text(r["text"]),
             creditline: r["creditline"].to_s.strip,
             accession_number: r["accession_number"].to_s.strip,
             image_url_full: full,
