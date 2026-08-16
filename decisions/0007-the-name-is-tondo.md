@@ -29,6 +29,17 @@ and a music developer. **Zero art-category overlap.** App Store names are not
 unique — only bundle identifiers are — so those three are noise rather than
 obstacles.
 
+**Correction, 2026-08-16.** The sentence above is wrong on its facts. App Store
+Connect **does** enforce name uniqueness: the name field is reserved on creation
+and a taken string is refused outright. Bundle identifiers are not the only
+unique key. The conclusion survives anyway, and by luck rather than by the
+reasoning that reached it — uniqueness applies to the whole string, and
+`Tondo: Daily Art` does not collide with the bare `Tondo` namesakes this entry
+catalogued. Reserved without incident on 2026-08-16 (story 0016). What would have
+gone differently if the namesakes *had* held the full string: the fallback is to
+keep the search terms and move the punctuation (`Tondo — Daily Art`,
+`Tondo: One Painting a Day`), never to drop "daily art" to win the name.
+
 The costs accepted, stated plainly. **Tondo is also a district of Manila**,
 dense and widely associated with poverty; Filipino readers will read the name
 that way first. It does not collide in art-intent search and it does not change
