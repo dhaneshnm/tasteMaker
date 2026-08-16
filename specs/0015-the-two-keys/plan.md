@@ -3,8 +3,11 @@ Status: **Built** 2026-08-14. Design-reviewed (triage, D3–D5), eng-reviewed (1
 findings folded + Codex outside voice), implemented with tests as-you-go,
 QA'd live, simplified (4 agents), code-reviewed (2 agents — including the
 Apple-callback CSRF ship-blocker, fixed with regression coverage). Deviations
-recorded below. Remaining: deployed-domain Apple verification + iOS device
-smoke (ship checklist).
+recorded below. **Apple verified on the deployed domain 2026-08-16** — it
+failed on the predicted SameSite trap and shipped fixed (`247b613`); both
+doors now work against real accounts. Remaining: iOS device smoke against the
+live host, and the App Store privacy label, which has no listing to attach to
+yet (ship checklist).
 
 ## Approach
 
