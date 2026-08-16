@@ -46,12 +46,19 @@ class DeviceRegistrationsController < ApplicationController
     head :no_content
   end
 
+  # Credentials first, ENV for local and CI — the curator idiom. Public and on
+  # the class for the same reason `Admin::BaseController.expected_password` is:
+  # the suite must present whatever this machine is configured with, not a
+  # string it hard-codes and hopes still wins the `||` (bug, 2026-08-15).
+  def self.expected_app_secret
+    Rails.application.credentials.dig(:tondo, :app_secret).presence ||
+      ENV["TONDO_APP_SECRET"]
+  end
+
   private
-    # Credentials first, ENV for local and CI — the curator idiom. Blank
-    # secret fails closed rather than open.
+    # Blank secret fails closed rather than open.
     def valid_app_secret?
-      expected = Rails.application.credentials.dig(:tondo, :app_secret).presence ||
-        ENV["TONDO_APP_SECRET"]
+      expected = self.class.expected_app_secret
       return false if expected.blank?
 
       ActiveSupport::SecurityUtils.secure_compare(

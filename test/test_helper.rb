@@ -1,4 +1,9 @@
 ENV["RAILS_ENV"] ||= "test"
+# Only the floor for a machine with no credentials — a fresh clone, or CI with
+# no master key. Where credentials DO carry these, they win the `||` in the two
+# controllers, so nothing below may hard-code these strings: ask
+# `Admin::BaseController.expected_password` and
+# `DeviceRegistrationsController.expected_app_secret` instead.
 ENV["CURATOR_PASSWORD"] ||= "test-curator-password"
 ENV["TONDO_APP_SECRET"] ||= "test-tondo-app-secret"
 require_relative "../config/environment"
@@ -86,7 +91,7 @@ module ActiveSupport
     # to Chrome over CDP. `ActionDispatch::SystemTestCase` descends from
     # ActiveSupport::TestCase, not from IntegrationTest, so this is the only
     # ancestor both can reach.
-    def curator_credentials(password: ENV.fetch("CURATOR_PASSWORD"))
+    def curator_credentials(password: Admin::BaseController.expected_password)
       ActionController::HttpAuthentication::Basic.encode_credentials(
         Admin::BaseController::USERNAME, password
       )
@@ -137,7 +142,7 @@ class ActionDispatch::IntegrationTest
   # endpoint and secret-header idiom.
   def register_device(token: "test-device-uuid", session: self)
     session.post "/device/registrations", params: { device_token: token },
-      headers: { "X-Tondo-App" => ENV.fetch("TONDO_APP_SECRET") }
+      headers: { "X-Tondo-App" => DeviceRegistrationsController.expected_app_secret }
     session.assert_response :no_content
     token
   end

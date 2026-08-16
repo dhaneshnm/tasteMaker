@@ -21,9 +21,24 @@ class DeviceRegistrationsTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  # The precedence the whole suite now leans on. Both doors read credentials
+  # first and ENV second, and on 2026-08-14 credentials gained the real values
+  # while the helpers still typed ENV's — 149 tests 401'd, and a clone with no
+  # master.key went on passing. If the order ever flips, this says so in one
+  # line instead of a wall of unrelated red.
+  test "both doors prefer credentials over ENV" do
+    [ [ DeviceRegistrationsController.method(:expected_app_secret), %i[tondo app_secret], "TONDO_APP_SECRET" ],
+      [ Admin::BaseController.method(:expected_password), %i[curator password], "CURATOR_PASSWORD" ] ].each do |expected, path, var|
+      configured = Rails.application.credentials.dig(*path).presence || ENV[var]
+
+      assert_equal configured, expected.call,
+        "#{path.join(".")} and #{var} disagree about which one the door reads"
+    end
+  end
+
   test "the secret mints a device row and a signed permanent cookie" do
     post "/device/registrations", params: { device_token: "uuid-1" },
-      headers: { "X-Tondo-App" => ENV.fetch("TONDO_APP_SECRET") }
+      headers: { "X-Tondo-App" => DeviceRegistrationsController.expected_app_secret }
 
     assert_response :no_content
     assert_equal 1, Device.count
@@ -39,7 +54,7 @@ class DeviceRegistrationsTest < ActionDispatch::IntegrationTest
   test "registration is idempotent — same UUID, one row" do
     2.times do
       post "/device/registrations", params: { device_token: "uuid-1" },
-        headers: { "X-Tondo-App" => ENV.fetch("TONDO_APP_SECRET") }
+        headers: { "X-Tondo-App" => DeviceRegistrationsController.expected_app_secret }
       assert_response :no_content
     end
 
@@ -51,8 +66,10 @@ class DeviceRegistrationsTest < ActionDispatch::IntegrationTest
     # judges user agents; this pins the endpoint open to the shell's
     # (eng review A4).
     post "/device/registrations", params: { device_token: "uuid-1" },
-      headers: { "X-Tondo-App" => ENV.fetch("TONDO_APP_SECRET"),
-                 "User-Agent" => "Tondo iOS/1 CFNetwork/1494.0.7 Darwin/23.4.0" }
+      headers: {
+        "X-Tondo-App" => DeviceRegistrationsController.expected_app_secret,
+        "User-Agent" => "Tondo iOS/1 CFNetwork/1494.0.7 Darwin/23.4.0"
+      }
 
     assert_response :no_content
   end
@@ -60,12 +77,12 @@ class DeviceRegistrationsTest < ActionDispatch::IntegrationTest
   test "the eleventh request in a minute is refused" do
     10.times do |i|
       post "/device/registrations", params: { device_token: "uuid-#{i}" },
-        headers: { "X-Tondo-App" => ENV.fetch("TONDO_APP_SECRET") }
+        headers: { "X-Tondo-App" => DeviceRegistrationsController.expected_app_secret }
       assert_response :no_content
     end
 
     post "/device/registrations", params: { device_token: "uuid-11" },
-      headers: { "X-Tondo-App" => ENV.fetch("TONDO_APP_SECRET") }
+      headers: { "X-Tondo-App" => DeviceRegistrationsController.expected_app_secret }
 
     assert_response :too_many_requests
   end
@@ -73,7 +90,7 @@ class DeviceRegistrationsTest < ActionDispatch::IntegrationTest
   test "a missing, nested, or absurd device_token is a 400, not a 500" do
     [ {}, { device_token: { a: "b" } }, { device_token: "x" * 4096 } ].each do |params|
       post "/device/registrations", params: params,
-        headers: { "X-Tondo-App" => ENV.fetch("TONDO_APP_SECRET") }
+        headers: { "X-Tondo-App" => DeviceRegistrationsController.expected_app_secret }
 
       assert_response :bad_request, "#{params.inspect} did not 400"
     end
