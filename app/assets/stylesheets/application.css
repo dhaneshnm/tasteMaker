@@ -1400,7 +1400,20 @@ html.zoom-open body { overflow: hidden; }
   column-gap: 1.4rem;
 }
 
-.corner__doors { margin-top: 2rem; }
+/* ISSUE-002, found by /qa 2026-08-17. The bottom margin is the fix and it is
+ * not decoration.
+ *
+ * On the device state with nothing kept, `Delete this device's data` is the
+ * most prominent thing on the screen, and `.legal`'s Privacy and Support sat
+ * about 25px under it in the identical caps-link gold. A destructive control
+ * and two informational links, same type, same colour, same size, stacked —
+ * which reads as a menu of three navigation choices rather than one door you
+ * cannot walk back through.
+ *
+ * The gold caps-link treatment for a destructive control is house style and
+ * stays (story 0015 chose it; `.account__delete` has shipped that way since).
+ * What was new here is the adjacency, so distance is what changes. */
+.corner__doors { margin: 2rem 0 3.5rem; }
 
 /* The account row at the foot of the collection — the reader's own room is
  * where rare controls live. */
