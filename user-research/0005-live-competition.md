@@ -158,6 +158,52 @@ Masterpieces Quiz (218), Art Academy (182), Famous Paintings Widget (157). The c
 not kill apps. Builders quit. That is the same failure mode `BET.md`'s kill discipline exists
 to make deliberate rather than accidental.
 
+### 3.6 Coaching audit — 5 of 43 claim to teach looking, none ships it
+
+All 43 App Store descriptions read and graded. Question: does the app claim to teach the
+*user's own looking* — appreciation as a skill — or does it deliver facts about artworks?
+
+**Grade A — explicit "learn how to look" claim (5 apps, 51 ratings combined):**
+
+| App | Ratings | The claim | What the description says ships |
+|---|---|---|---|
+| Curator | 9 | "see paintings with the eye of someone who knows what to look for… noticing the gesture, the light, the composition" | Visual quizzes, mini-games, guided challenges — **recognition** |
+| ArtBite | 9 | "a story that sharpens your eye" — daily story about "color, light, and composition"; "learn to spot each artist's style" | Daily editorial + collect-apples-by-movement mechanic |
+| Connoisseur | 5 | "train you to identify the artist and movement by only looking at the painting"; author's framing: "sight-read paintings in museums" | Slide-ID exam drilling |
+| ArtGuessr | 24 | "Train your eye… identify the artist from a single detail" | Guess-the-artist quiz |
+| Wonder Wander | 4 | "SEE, SAY, and DO activities to deepen your experience"; built by an art educator | **The only prompt-based looking routine found** — but on public murals and sculpture, not paintings |
+
+**Grade B — appreciation by explanation, no looking claim (27 apps):** deliver the "why"
+(context, symbolism, technique) attached to the work. Builds knowledge, does not train the eye.
+Editorial feed (21): DailyArt, Artlist, Artify, Daily art history and modern, For Art's Sake,
+LearnArt, EveryArt, Arrrt, Cultura, Visual Arts, Museumistic, Paintly, Leo Art, Museum Lovers,
+CANVS, Blast, Smartify, SC El Prado, Bloomberg Connects, Asian Art Museum SF, Art Explora
+Academy. Quiz with post-answer explanation (6): Artly, Learn Art, ArtHist, Art Master, Art
+Quiz, Famous Paintings Quiz.
+
+**Grade C — no teaching layer (11):** Afterglow, ArtDay, Artera, NOUV, Dastan, Daily Dose of
+Art, Who's the Painter?, Kimbell, FAEA, The Art of Ed Community, Michael James Smith TV
+(teaches *making*, not appreciating).
+
+**`0004` §7 holds on the live shelf.** No app among the 43 prompts you to look at a specific
+region of a specific painting and tells you what to notice there. All five Grade-A apps claim
+the outcome and ship a recognition drill — "train your eye" is ASO copy for guess-the-artist.
+
+Three consequences:
+
+1. **The claim is contested; the traction is not.** Five apps, 51 ratings between them. The
+   four painting-focused ones are Tondo's direct positioning rivals and none clears 25 ratings.
+2. **The closest real mechanic is misfiled.** Wonder Wander's SEE/SAY/DO is the only actual
+   observation-prompt structure in the category, and `0004`'s tiering never flagged it because
+   it sits in public art. Worth reading before writing any coached-looking spec.
+3. **SC El Prado stays the near-miss `0004` named.** Gigapixel super-zoom plus audioguide on 14
+   Prado works — keyed to details, but linear and narrated. You listen; you never look-then-check.
+
+**This audit reads marketing copy, not software.** Curator could ship keyed prompts inside its
+"guided challenges" and the description would not say so. Installing Curator, ArtBite and
+Connoisseur — three free apps, one afternoon — is the cheapest check available before any
+coached-looking spec, and it retires the largest single limitation in both `0004` and this file.
+
 ---
 
 ## 4. Use at kill review (2026-08-31)
