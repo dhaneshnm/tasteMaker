@@ -10,6 +10,10 @@
             but is a sticky bar of its own. The class is `.compass`, not
             `.masthead__compass`, precisely because of that — an element that
             lives in two places should not be named after one of them.
+      locked: default []. Keys that render unlinked because the reader cannot
+            reach them yet. `/you` ONLY — see `compass_destinations`. Passing it
+            anywhere `Cache-Control: public` is set would put per-visitor markup
+            into a shared cache and break story 0007.
 
     The current destination stays in the row rather than being dropped from it.
     Rendering only "the other three" was the first draft, and it moves every
@@ -24,9 +28,15 @@
     this render inside the publicly cached HTML of `/` and `/days` (story 0007).
 %>
 <nav class="compass <%= "compass--rail" if local_assigns[:rail] %>" aria-label="Sections">
-  <% compass_destinations(here).each do |destination| %>
+  <% compass_destinations(here, locked: local_assigns.fetch(:locked, [])).each do |destination| %>
     <% if destination[:current] %>
       <span class="caps-link compass__here" aria-current="page"><%= destination[:label] %></span>
+    <%# Same treatment, no `aria-current` — the reader is not standing here, they
+        simply cannot get in yet. Announcing it as the current page would be a
+        lie to a screen reader, and the two states are visually identical on
+        purpose: one dimmed, unlinked idiom to learn, not two. %>
+    <% elsif destination[:locked] %>
+      <span class="caps-link compass__here"><%= destination[:label] %></span>
     <% else %>
       <%= link_to destination[:label], destination[:path], class: "caps-link" %>
     <% end %>

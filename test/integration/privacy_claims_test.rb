@@ -71,4 +71,46 @@ class PrivacyClaimsTest < ActionDispatch::IntegrationTest
     # whether to read this again.
     assert_includes @policy, PagesController::POLICY_UPDATED_ON.strftime("%-d %B %Y")
   end
+
+  # THE ONE THIS FILE DID NOT HAVE.
+  #
+  # Story 0017's plan claimed this file already pinned "the deletion path the
+  # policy names is the path that exists", and that it had caught the story 0016
+  # defect. Neither was true: every other test here checks a STRING in the page,
+  # a gem in the lockfile, or a date. None of them touches a route, so the
+  # policy could name a control that does not exist and this file would stay
+  # green — which is exactly what happened in 0016, where the policy promised
+  # in-app deletion the majority reader had no way to perform.
+  #
+  # So: follow the policy's own instructions and assert the controls are there
+  # and the routes answer. Both identities, because the policy makes the promise
+  # to both and the device half is the one that was false.
+  test "the deletion controls the policy names exist where it says they are" do
+    get privacy_path
+    assert_response :success
+    assert_match "Your corner", response.body,
+      "the policy must name the screen the controls are actually on"
+
+    # With an account.
+    sign_in
+    get corner_path
+    assert_select "form[action=?][method=post]", account_path, count: 1,
+      message: "the policy promises Delete account on this screen"
+    assert_difference "User.count", -1 do
+      delete account_path
+    end
+
+    # Without an account, on the iOS app. This is the case 0016 shipped false.
+    reset!
+    token = register_device
+    Favorite.create!(painting: paintings(:sunflowers), collector_digest: Device.digest(token))
+
+    get corner_path
+    assert_select "form[action=?][method=post]", device_path, count: 1,
+      message: "the policy promises Delete this device's data on this screen"
+
+    assert_difference [ "Device.count", "Favorite.count" ], -1 do
+      delete device_path
+    end
+  end
 end

@@ -62,24 +62,27 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   end
 
   # The whole-file form for system tests, mirroring the integration macro in
-  # test_helper: every test in the file starts signed in through the real
-  # sign-in fragment.
+  # test_helper — though the two take different doors on purpose: that one
+  # registers a device, this one signs in as a web reader.
   def self.behind_the_wall!
     setup { sign_in_as_reader }
   end
 
-  # The account key, from the browser's side (story 0015). Providers are mocked
-  # suite-wide, so tapping the real button on the landing fragment IS the whole
+  # The account key, from the browser's side (story 0015, repointed by 0017).
+  # Providers are mocked suite-wide, so tapping the real button IS the whole
   # flow: POST → mocked consent → callback → session. Tests that need a reader
-  # behind the wall call this first — it is the same door a real web reader
-  # walks through, sign-in fragment and all.
+  # behind the wall call this first, and it stays the same door a real web
+  # reader walks through.
+  #
+  # That door moved. It used to be a lazy fragment at the foot of the landing
+  # page, reached by `#{root_path}#signin` so the frame would scroll into view.
+  # Story 0017 deleted the fragment and gave the doors a page of their own, and
+  # `/you` is now where `require_reader` bounces every cookieless visitor — so
+  # this is still "wherever the wall sends them", with no anchor and no lazy
+  # load to wait on.
   def sign_in_as_reader
     mock_auth
-    # The anchor, not the bare root: the fragment is a lazy frame at the foot
-    # of the page, so it loads only when scrolled into view — and #signin is
-    # exactly where the wall sends every bounced visitor anyway. Same door,
-    # same scroll.
-    visit "#{root_path}#signin"
+    visit corner_path
     click_button "Continue with Google"
     # Wait for the callback's landing, not for "a masthead" — the landing page
     # has one too, and a test that proceeds mid-navigation renders its next

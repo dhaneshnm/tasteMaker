@@ -4,7 +4,7 @@ require "test_helper"
 #
 # App Store Connect will not accept the record without a privacy policy URL and
 # a support URL, and Apple fetches both WITHOUT an account. Story 0015's wall
-# bounces every reader-facing endpoint to `/#signin`, so a legal page that ever
+# bounces every reader-facing endpoint to `/you`, so a legal page that ever
 # ends up behind it is a 5.1.1 rejection — and a silent one, because nobody on
 # this side of the wall ever sees the bounce.
 class PagesTest < ActionDispatch::IntegrationTest

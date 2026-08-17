@@ -44,31 +44,30 @@
     </footer>
   <% end %>
 
-  <%# The account row (story 0015, design review D5): rare controls belong in
-      the reader's own room, not on every screen. Renders for the account
-      world only — a device has no account to administer — and outside the
-      empty-state branch, because a reader with nothing kept still owns the
-      exit door. The confirm names what it destroys (the one honest dialog in
-      the product). %>
+  <%# The signpost, not the doors (story 0017).
+
+      Both delete buttons used to live here, and story 0016 put the device one
+      here in a hurry because the filed privacy policy promised in-app deletion
+      the majority reader did not have. They moved to `/you` so that a
+      destructive control has one home, one confirm string and one tested path.
+
+      What stays is a word. The corner's mark rides the bar on every screen, but
+      a ring and a dot are not a label, and the default iOS reader — a
+      registered device that never signed in — would otherwise have swapped a
+      button that says what it does for a glyph that does not. This is the room
+      the policy names, so this is where the path to the exit gets named too.
+
+      Outside the empty-state branch, for the reason the buttons were: a reader
+      with nothing kept still owns their own door. %>
   <% if current_user %>
     <footer class="account">
       <p class="coda__note">Signed in with <%= current_user.provider_name %><% if current_user.email.present? %> as <%= current_user.email %><% end %>.</p>
-      <%= button_to "Delete account", account_path, method: :delete,
-            class: "caps-link account__delete", form_class: "account__form",
-            data: { turbo_confirm: "Deletes your account and the #{pluralize(@rows.size, "work")} you've kept. There is no undo." } %>
+      <%= link_to "Your corner", corner_path, class: "caps-link" %>
     </footer>
-  <%# The same door for the other identity (story 0016). Until this existed the
-      DEFAULT state of the iOS app — a registered device that never signed in —
-      had no way to delete anything, while the privacy policy promised in-app
-      deletion. The policy was false for most readers, which is how it was
-      found. Outside the empty-state branch for the same reason the account
-      footer is: a reader with nothing kept still owns the exit door. %>
   <% elsif current_device %>
     <footer class="account">
       <p class="coda__note">Kept on this device, with no account.</p>
-      <%= button_to "Delete this device's data", device_path, method: :delete,
-            class: "caps-link account__delete", form_class: "account__form",
-            data: { turbo_confirm: "Deletes this device and the #{pluralize(@rows.size, "work")} kept on it. There is no undo, and no account to restore them from." } %>
+      <%= link_to "Your corner", corner_path, class: "caps-link" %>
     </footer>
   <% end %>
 

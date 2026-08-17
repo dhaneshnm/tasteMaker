@@ -19,10 +19,11 @@ class SessionsController < ApplicationController
   # door from the inside.
   skip_before_action :require_reader
 
-  # The class-wide idiom from FavoritesController, for the same reason: a
-  # second per-visitor action added here must not be able to ship a storable
-  # response by forgetting a line.
-  before_action :no_store, only: :control
+  # `#control` and its `no_store` guard were deleted by story 0017. The landing
+  # page's per-visitor fragment is gone with them: the corner mark in the bar
+  # and the coda word are identical markup for every reader, so `/` needs no
+  # private fragment. The sign-in doors moved to `CornersController`, which
+  # carries the class-wide `no_store` this used to.
 
   # THE APPLE CALLBACK IS A CROSS-SITE POST — no authenticity token, no Lax
   # session cookie — so Rails' own CSRF check would 422 every real Apple
@@ -61,26 +62,5 @@ class SessionsController < ApplicationController
   def destroy
     reset_session
     redirect_to root_path, status: :see_other
-  end
-
-  # The landing page's private fragment (design review D3-D5). Three states:
-  #
-  #   signed-out web   → one quiet line + the two provider buttons
-  #   signed-in web    → `Your collection → · Sign out`
-  #   device / shell   → empty frame — the app never sees login UI, including
-  #                      an UNREGISTERED shell (no cookie yet), which is why
-  #                      the user-agent check exists and not just the cookie
-  #
-  # Rendering the buttons writes a session cookie (their CSRF tokens live in
-  # the session). That is the 0006 pattern: private no-store fragments are
-  # where cookies are allowed to happen; the public HTML of `/` stays clean.
-  def control
-    state =
-      if current_user then :signed_in
-      elsif native_shell? || current_device then :device
-      else :signed_out
-      end
-
-    render partial: "sessions/control", locals: { state: state }
   end
 end

@@ -235,13 +235,24 @@ a:hover { color: var(--gold-deep); }
  * right. Never sticky — nothing is allowed to hover over a painting.
  */
 
+/* Story 0017 added a third column for the corner, and `label` spanning the
+ * first TWO is the whole trick. Give `you` its own column while `label` stays
+ * in the `1fr` and that column drops 198.19 -> 134.19px at root 20: "Artwork of
+ * the day" wraps to two lines and the bar goes 117.00 -> 137.00px, which is
+ * +20px against a fold the front door clears by 9. The label had width to give
+ * and the brand did not, so the label gives it and ends up wider than before.
+ *
+ * `aside` sits on row 1 only now instead of spanning both. It keeps
+ * `align-self: center`, which centres it against the brand's line box rather
+ * than against a two-row block — the same optical result, one less thing to
+ * restate. */
 .masthead {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr auto auto;
   grid-template-areas:
-    "brand aside"
-    "label aside"
-    "compass compass";
+    "brand   aside   you"
+    "label   label   you"
+    "compass compass compass";
   align-items: baseline;
   column-gap: 1rem;
   row-gap: 0.15rem;
@@ -288,6 +299,39 @@ a:hover { color: var(--gold-deep); }
   color: var(--ink-dim);
   white-space: nowrap;
 }
+
+/* The corner (story 0017) — the reader's own room, top right, on every screen.
+ *
+ * It spans the brand and label rows and takes its height from them, which is
+ * the entire reason it is here rather than on the compass row: that band
+ * already measures over a touch target at the accessibility cap, so a 44px box
+ * across it adds nothing to a bar the front door has 9px of fold to spare on.
+ *
+ * `min-width` as well as `min-height`, both `--tap`, and stated here rather
+ * than inherited from the 44px list above. That list gets width for free from
+ * the words inside a caps-link; this has no words, the same reason `.rail__act`
+ * states its own width. `DESIGN.md` rule 9 is every direction it has.
+ *
+ * `justify-self: end` so the box hugs the right edge — without it the column is
+ * `auto`-sized and the glyph floats in the middle of its own target. */
+.masthead__you {
+  grid-area: you;
+  align-self: center;
+  justify-self: end;
+  min-width: var(--tap);
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+}
+
+.masthead__you svg { display: block; }
+
+/* On `/you` itself. Same rule the compass states for the screen you are
+ * standing on: the mark stays in the bar, the link comes away, the colour steps
+ * back. One idiom for "you are here", not two. */
+.masthead__you--here { color: var(--ink-dim); }
 
 /* ---------- Compass ----------
  * Where else you can go. Four destinations, always all four, same order on every
@@ -355,10 +399,10 @@ a:hover { color: var(--gold-deep); }
  * a layout. */
 @media (min-width: 46rem) {
   .masthead:has(.compass) {
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1fr auto auto auto;
     grid-template-areas:
-      "brand   compass aside"
-      "label   compass aside";
+      "brand   compass aside you"
+      "label   compass aside you";
     column-gap: 2rem;
   }
 
@@ -723,6 +767,7 @@ a:hover { color: var(--gold-deep); }
  * the bar is one number rather than one number and three copies of it. */
 .coda .caps-link,
 .compass .caps-link,
+.legal .caps-link,
 .walk__step,
 .walk__today,
 .rail__act,
@@ -732,6 +777,13 @@ a:hover { color: var(--gold-deep); }
   align-items: center;
   min-height: var(--tap);
 }
+
+/* `.legal .caps-link` joined that list in story 0017, and it should have been
+ * there since 0016. Privacy and Support are the one nav App Review guideline
+ * 5.1.1(i) requires to exist, and they were shipping at the ~15px a caps-link
+ * gets from its type alone — ISSUE-002's exact failure mode, on the two links
+ * least able to afford it. Found by the design review, not by a person tapping
+ * them, which is the argument for keeping the list in one place. */
 
 /* A bare <button> in gold: same type, none of the button chrome. `.rail__act`
  * belongs here for the same reason `.keep__toggle` used to — it is a button
@@ -1295,6 +1347,48 @@ html.zoom-open body { overflow: hidden; }
 }
 .signin__out:hover,
 .account__delete:hover { color: var(--gold-deep); }
+
+/* ---------------------------------------------------------------------------
+ * The corner (story 0017) — `/you`, the reader's own room.
+ *
+ * Two classes, and both earn it. Everything else on that page is borrowed:
+ * `.ornament`, `.coda__line`, `.coda__note`, `.signin__doors`, `.signin__door`,
+ * `.signin__out`, `.account__delete` and their forms all come from screens the
+ * reader has already seen, which is what keeps a new surface from reading as a
+ * new product.
+ */
+
+/* The sentence the page is built around. Three of the four states are a reader
+ * standing in front of a decision, and this is the decision said plainly and
+ * at the size the product reserves for the lines that matter.
+ *
+ * It is `.coda__line`'s voice — Fraunces italic, `--ink-dim` — set one step up
+ * and in `--ink`, because unlike a closing line this one is asking for an
+ * answer. Not a new idiom; the same idiom leaning in. */
+.corner__consequence {
+  margin: 0 auto 1.4rem;
+  max-width: 26rem;
+  font-family: var(--serif-display);
+  font-style: italic;
+  font-size: 1.18rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+/* The quiet controls under it. `column-gap` rather than a margin between
+ * siblings, for the reason `.legal` records: an adjacent-sibling rule only
+ * works for exactly two, and the account state already has two while the
+ * device state has one. */
+.coda__doors,
+.corner__doors {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 1.4rem;
+}
+
+.corner__doors { margin-top: 2rem; }
 
 /* The account row at the foot of the collection — the reader's own room is
  * where rare controls live. */

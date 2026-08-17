@@ -1,0 +1,23 @@
+<%# The corner's mark (story 0017). No locals.
+
+    The rose window's oculus: the centre circle of the brand mark, drawn as a
+    ring rather than a filled tile. `DESIGN.md`'s brand section bans the MARK
+    inside the app and gives its reason — "a filled gold square is the loudest
+    thing that would ever appear on the calmest surface in the product." This is
+    the opposite of that: linen field, gold line, one stroke weight.
+
+    Same drawing contract as the two functional glyphs already inside the app
+    (`favorites/_keep_glyph`, the zoom frame in `daily/_day`): 24-unit viewBox
+    rendered at 23px, 1.4px stroke, `currentColor`, inside a 44px target. The
+    filled centre is the one deviation and it is load-bearing — a bare ring at
+    23px reads as a zero or a loading spinner, and the filled oculus is what
+    makes it the window rather than a circle.
+
+    `aria-hidden` because the accessible name lives on the element that wraps
+    this — the link's `aria-label` or, on `/you` itself, a visually-hidden span.
+    The same split `_keep_glyph` uses. %>
+<svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"
+     fill="none" stroke="currentColor" stroke-width="1.4">
+  <circle cx="12" cy="12" r="7.4"/>
+  <circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/>
+</svg>

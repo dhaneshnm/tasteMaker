@@ -93,41 +93,13 @@ class SessionsTest < ActionDispatch::IntegrationTest
     assert_equal 303, response.status, "the wall must close behind a sign-out"
   end
 
-  test "the fragment renders sign-in doors for a signed-out web visitor" do
+  # The four fragment tests that lived here moved to `corners_test.rb` with the
+  # fragment itself. `SessionsController#control` and `/session/control` are
+  # gone: story 0017 gave the sign-in doors a page of their own, so there is no
+  # per-visitor fragment on the landing page left to render.
+  test "the deleted fragment endpoint is gone, not merely unlinked" do
     get "/session/control"
 
-    assert_response :success
-    assert_select "turbo-frame#signin .signin__door", count: 2
-    assert_includes response.headers["Cache-Control"], "no-store"
-  end
-
-  test "the fragment renders the quiet line for a signed-in reader" do
-    sign_in
-
-    get "/session/control"
-
-    assert_select ".signin--in", count: 1
-    assert_select ".signin__door", count: 0
-    assert_select "a[href=?]", collection_path
-  end
-
-  test "the fragment renders empty for a device" do
-    register_device
-
-    get "/session/control"
-
-    assert_select "turbo-frame#signin", count: 1
-    assert_select ".signin", count: 0
-  end
-
-  test "the fragment renders empty for an UNREGISTERED shell" do
-    # First launch, registration failed or in flight: no cookie, shell UA.
-    # The app must degrade to art-plus-nothing, never to login UI (Codex).
-    get "/session/control",
-      headers: { "User-Agent" => "#{ApplicationController::NATIVE_UA_TOKEN}; Mozilla/5.0" }
-
-    assert_select "turbo-frame#signin", count: 1
-    assert_select ".signin", count: 0
-    assert_select ".signin__door", count: 0
+    assert_response :not_found
   end
 end

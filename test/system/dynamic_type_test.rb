@@ -16,6 +16,17 @@ require "application_system_test_case"
 # stylesheet. If these numbers and `DynamicType.swift` ever disagree, the
 # constant below is the one that is wrong.
 class DynamicTypeTest < ApplicationSystemTestCase
+  # This file measures `/` AND `/days/:date`, and until story 0017 it only ever
+  # measured `/`. The archive route has been behind the wall since story 0015,
+  # so an unauthenticated `visit day_path(...)` bounced to the landing page —
+  # which satisfies every selector below, because it renders the same partial.
+  # The assertions passed against the wrong page and nothing said so.
+  #
+  # Story 0017 retargeted that bounce to `/you`, which renders no plate and no
+  # rail, and the loop went red on its second route. The bug it exposed is
+  # older than the change that exposed it.
+  behind_the_wall!
+
   # `DynamicType.baseFontSize` * the scale for each category.
   DEFAULT_ROOT = 16.0                 # .large, the system default
   LARGEST_STANDARD_ROOT = 19.2        # .extraExtraExtraLarge — 16 * 1.20
@@ -248,5 +259,38 @@ class DynamicTypeTest < ApplicationSystemTestCase
     # the direction a bigger `19rem` walks in.
     assert_operator after, :>=, before * 0.75,
       "the artwork gave up more than a quarter of its height; 19rem is too greedy"
+  end
+
+  # Story 0017's forcing function for the corner. Two things, both measured
+  # rather than argued:
+  #
+  #   1. the mark is a real touch target at every text size, in BOTH directions
+  #      — rule 9 gets width for free from words and this has none;
+  #   2. adding it did not push the compass onto a second row, which is the
+  #      44px the whole placement argument was avoiding.
+  #
+  # Measured 2026-08-17 at 375px: the masthead is 105.78 / 109.14 / 112.00 at
+  # roots 16 / 19.2 / 20, and the compass stays one row at all three.
+  test "the corner is a real target and costs the compass nothing" do
+    with_viewport(375, 667) do
+      [ DEFAULT_ROOT, LARGEST_STANDARD_ROOT, CAPPED_ACCESSIBILITY_ROOT ].each do |root|
+        visit root_path
+        scale_to root
+
+        box = page.evaluate_script(<<~JS)
+          (() => {
+            const you = document.querySelector('.masthead__you').getBoundingClientRect();
+            const rows = new Set([...document.querySelectorAll('.compass .caps-link')]
+              .map(el => Math.round(el.getBoundingClientRect().top)));
+            return { w: you.width, h: you.height, rows: rows.size };
+          })()
+        JS
+
+        assert_operator box["w"], :>=, 44, "the corner was #{box["w"]}px wide at root #{root}"
+        assert_operator box["h"], :>=, 44, "the corner was #{box["h"]}px tall at root #{root}"
+        assert_equal 1, box["rows"],
+          "the compass wrapped to #{box["rows"]} rows at root #{root} — the corner cost 44px"
+      end
+    end
   end
 end

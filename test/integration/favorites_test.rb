@@ -124,7 +124,7 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     stranger.post favorite_path(@painting)
 
     assert_equal 303, stranger.response.status
-    stranger.assert_redirected_to root_path(anchor: "signin")
+    stranger.assert_redirected_to corner_path
   end
 
   # Story 0014's other half. Moving the control under the artwork fixed WHERE it

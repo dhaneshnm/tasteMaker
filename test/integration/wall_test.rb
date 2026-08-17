@@ -1,24 +1,28 @@
 require "test_helper"
 
-# The wall (story 0015). Every reader-facing endpoint answers only the two
-# keys — a signed-in web session or a registered device — and everything else
-# bounces to the landing page's sign-in anchor. The landing page itself, the
-# error pages, and the curator's desk stay outside it, each for a stated
-# reason (specs/0015-the-two-keys/plan.md).
+# The wall (story 0015, retargeted by 0017). Every reader-facing endpoint
+# answers only the two keys — a signed-in web session or a registered device —
+# and everything else bounces to `/you`, the reader's corner, which holds the
+# sign-in doors and is therefore unwalled itself. The landing page, the error
+# pages, the two legal pages and the curator's desk stay outside it too, each
+# for a stated reason (specs/0015-the-two-keys/plan.md, specs/0017).
 class WallTest < ActionDispatch::IntegrationTest
   # A method, not a constant: two of these need fixtures, which only exist
   # once a test is running.
   def gated_paths
+    # `favorite_control_path` left this list in story 0017. It answers an
+    # unidentified caller with the null keep state — the same outline mark the
+    # publicly cached page already draws — because bouncing that eager frame
+    # wrote "Content missing" over the placeholder. See FavoritesController.
     [ "/days", "/feed", "/collection",
-      day_path(daily_picks(:yesterday).scheduled_on.iso8601),
-      favorite_control_path(paintings(:sunflowers)) ]
+      day_path(daily_picks(:yesterday).scheduled_on.iso8601) ]
   end
 
-  test "cookieless requests bounce to the sign-in anchor and leak nothing" do
+  test "cookieless requests bounce to the corner and leak nothing" do
     gated_paths.each do |path|
       get path
 
-      assert_redirected_to root_path(anchor: "signin"), "#{path} did not bounce"
+      assert_redirected_to corner_path, "#{path} did not bounce"
       assert_equal 303, response.status, "the wall's redirect must be 303"
       assert_empty response.body.to_s.scan(/label__title/),
         "#{path} leaked page content in the redirect body"
@@ -41,7 +45,7 @@ class WallTest < ActionDispatch::IntegrationTest
       post favorite_path(paintings(:sunflowers))
     end
     assert_equal 303, response.status, "past CSRF, the wall's redirect must be 303"
-    assert_redirected_to root_path(anchor: "signin")
+    assert_redirected_to corner_path
   end
 
   test "a registered device passes" do
@@ -85,11 +89,17 @@ class WallTest < ActionDispatch::IntegrationTest
     refute_includes response.headers["Cache-Control"], "public"
   end
 
-  test "the landing page stays open and carries the sign-in anchor" do
+  # Story 0017 deleted the landing page's sign-in fragment. What the front door
+  # carries now is the corner: a mark in the bar and a word in the coda, both
+  # plain links, both identical for every reader — which is what lets them live
+  # on a page Thruster caches publicly.
+  test "the landing page stays open and carries both doors to the corner" do
     get "/"
 
     assert_response :success
-    assert_select "turbo-frame#signin", count: 1
+    assert_select "turbo-frame#signin", count: 0, message: "the sign-in fragment should be gone"
+    assert_select "a.masthead__you[href=?]", corner_path
+    assert_select ".coda__doors .caps-link[href=?]", corner_path, text: "Your corner"
   end
 
   test "anonymous admin gets the basic-auth challenge, not a bounce" do
@@ -122,10 +132,17 @@ class WallTest < ActionDispatch::IntegrationTest
   end
 
   # A frame WRITE that bounced used to become "Content missing" — the habit
-  # mechanic silently swallowed for a reader whose identity died mid-page.
-  # The wall answers those in kind; a frame GET (the lazy load) stays a plain
-  # 303 so the cached page's default glyph survives — the in-place sign-in
-  # state stays declined (design review D3, code review F5).
+  # mechanic silently swallowed for a reader whose identity died mid-page. The
+  # wall answers those in kind (design review D3, code review F5).
+  #
+  # The READ is story 0017's correction. It used to bounce 303, and the comment
+  # here claimed the cached page's default glyph survived that. It did not
+  # survive on merit: the bounce landed on `/`, which happens to carry a
+  # `keep_<id>` frame for today's painting, so Turbo swapped in that page's
+  # identical placeholder. Retarget the bounce to `/you` — which has no such
+  # frame — and Turbo writes "Content missing" over the mark instead. So the
+  # read now answers directly with the null state, which is the same outline
+  # glyph and leaks nothing.
   test "a bounced frame write gets a matching frame with a way in, not a hole" do
     frame = "keep_#{paintings(:sunflowers).id}"
 
@@ -133,11 +150,18 @@ class WallTest < ActionDispatch::IntegrationTest
 
     assert_response :unauthorized
     assert_select "turbo-frame##{frame}", count: 1
-    assert_select "a[href=?]", root_path(anchor: "signin"), text: "Sign in"
+    assert_select "a[href=?]", corner_path, text: "Sign in"
+  end
+
+  test "an unidentified frame read gets the null keep state, not a bounce" do
+    frame = "keep_#{paintings(:sunflowers).id}"
 
     get favorite_control_path(paintings(:sunflowers)), headers: { "Turbo-Frame" => frame }
 
-    assert_equal 303, response.status, "a lazy-load bounce must stay a redirect"
+    assert_response :success
+    assert_select "turbo-frame##{frame} button.rail__act[aria-pressed=false]", count: 1
+    assert_select ".rail__count", count: 0, message: "an anonymous caller has no count to show"
+    assert_includes response.headers["Cache-Control"], "no-store"
   end
 
   test "error pages answer without identity" do

@@ -53,6 +53,48 @@
 
   <p class="masthead__label"><%= label %></p>
 
+  <%# The corner (story 0017). The reader's own room, on every screen that wears
+      this bar — eight of them, seven with a compass.
+
+      NOT ON THE COMPASS ROW, and the reason is arithmetic rather than taste.
+      At 375px with Dynamic Type at its cap the four labels measure 270.23px and
+      the gap clamp floors to its 0.7rem minimum of 14px, so the row is 312.23
+      of the 329.0px the page leaves. A fifth item needs 44 + 14 = 58px against
+      16.77px of spare and wraps, and a wrapped row costs 44px straight out of a
+      fold budget the front door clears by 9px. `test/system/favorites_test.rb`
+      asserts four caps-links, one row, and a 10px adjacency floor — three ways
+      to fail. Here it shares the vertical band the brand and label rows already
+      occupy and adds no height at the cap.
+
+      THE MARK IS THE OCULUS — the centre of the rose window the App Store icon
+      draws. `DESIGN.md` says the mark appears "nowhere inside the app", and the
+      amendment there records why this does not trip it: the objection is the
+      gilt FIELD, a filled gold square on the calmest surface in the product.
+      This is its inverse — a linen field with a gold line, the same ink weight
+      as the keep bookmark that has been inside the app since story 0006.
+
+      PURE VIEW LOGIC ONLY. `pages/privacy` and `pages/support` render this bar,
+      and `PagesController` inherits `ActionController::Base` rather than
+      `ApplicationController` (deliberately — see that file). `current_user`,
+      `current_device` and `native_shell?` are all UNDEFINED there, so a helper
+      call here is a 500 on the two pages App Review fetches anonymously.
+      `current_page?` is ActionView and is safe.
+
+      It also has to stay identical for every reader: this bar renders inside
+      `/`, which is `Cache-Control: public` behind Thruster. A corner that
+      showed a signed-in state would put per-visitor markup into a shared cache.
+      There is no state here and there must never be. %>
+  <% if current_page?(corner_path) %>
+    <span class="masthead__you masthead__you--here" aria-current="page">
+      <%= render "shared/oculus" %>
+      <span class="visually-hidden">Your corner</span>
+    </span>
+  <% else %>
+    <a class="masthead__you" href="<%= corner_path %>" aria-label="Your corner">
+      <%= render "shared/oculus" %>
+    </a>
+  <% end %>
+
   <% if local_assigns[:aside].present? %>
     <% if local_assigns[:aside_datetime].present? %>
       <time class="masthead__aside" datetime="<%= aside_datetime %>"><%= aside %></time>
@@ -66,6 +108,9 @@
       would turn a forgotten local into a silent "nothing is marked", which is
       the same defect the helper raises about, one level up. %>
   <% if local_assigns.fetch(:compass, true) %>
-    <%= render "shared/compass", here: local_assigns.fetch(:here) %>
+    <%# `locked:` defaults to [] and only `/you` ever passes it — see
+        `compass_destinations`. It must never reach a publicly cached page. %>
+    <%= render "shared/compass", here: local_assigns.fetch(:here),
+          locked: local_assigns.fetch(:locked, []) %>
   <% end %>
 </header>

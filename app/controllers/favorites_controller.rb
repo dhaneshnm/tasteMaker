@@ -18,6 +18,27 @@
 #              (static markup + the                   the same frame
 #
 class FavoritesController < ApplicationController
+  # `#control` answers an unidentified caller too (story 0017), and it has to.
+  #
+  # The keep frame on `/` is EAGER — `daily/_day.html.erb` explains why — and
+  # its default content is the resting keep mark that stops the rail from being
+  # a 44px hole while the fetch lands. Turbo replaces a frame's children with
+  # whatever matching frame it finds in the response, so bouncing this GET to a
+  # page that has no `keep_<id>` frame writes "Content missing" over that
+  # placeholder and the mark vanishes from the cached page.
+  #
+  # It used to bounce to `/`, which happens to carry a `keep_<id>` frame for
+  # today's painting, so Turbo found one and swapped in that page's identical
+  # placeholder. That was an accident, not a design, and story 0017's retarget
+  # to `/you` stopped it paying. `dynamic_type_test.rb:75` caught it.
+  #
+  # Answering directly leaks nothing: with no identity there is no `kept` and no
+  # count, so the response is the outline glyph and nothing else — byte-for-byte
+  # what the publicly cached page already carries. The wall exists to stop the
+  # collection being an anonymous public utility, and a constant is not one.
+  # Writes stay walled; this is the read of a null state.
+  skip_before_action :require_reader, only: :control
+
   # Never cached anywhere, by anyone — a class-wide rule rather than a line at the
   # top of each action, so a fifth action cannot ship a storable per-visitor
   # response by forgetting it.
@@ -109,6 +130,16 @@ class FavoritesController < ApplicationController
     # allocating every painting_id the reader has ever kept, on the endpoint the
     # keep frame hits on every single day-page view.
     def render_control(kept: nil, autofocus: false)
+      # No identity, no collection — the null state, which is the same mark the
+      # cached page already drew. Only `#control` can reach this; every write
+      # still runs behind the wall, so `reader_favorites` below always has one
+      # of the two keys.
+      unless identified?
+        return render partial: "favorites/control", locals: {
+          painting: @painting, autofocus: false, kept: false, count: 0
+        }
+      end
+
       collection = reader_favorites
 
       render partial: "favorites/control", locals: {
@@ -118,16 +149,9 @@ class FavoritesController < ApplicationController
       }
     end
 
-    # Which world this reader keeps in (story 0015). A signed-in web reader's
-    # rows carry user_id; a device's rows carry the digest of its registered
-    # Keychain UUID. The wall ran first, so one of the two exists — the old
-    # mint-on-read browser cookie is gone, deleted rather than deprecated,
-    # because nothing was deployed and no reader ever held one.
-    def reader_favorites
-      current_user ? Favorite.owned_by(current_user) : Favorite.collected_by(current_device.token_digest)
-    end
-
-    def reader_identity_attributes
-      current_user ? { user: current_user } : { collector_digest: current_device.token_digest }
-    end
+  # `reader_favorites` and `reader_identity_attributes` moved to
+  # ApplicationController in story 0017, when `/you` became the second caller.
+  # The wall still runs before every action in THIS controller, so one of the
+  # two keys always exists here — the `identified?` guard those methods now
+  # carry is for `CornersController`, which skips the wall.
 end

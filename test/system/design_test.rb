@@ -4,6 +4,17 @@ require "application_system_test_case"
 # and a decision without a check is a wish: this fails the moment a screen grows
 # its own palette or its own idea of what a picture looks like.
 class DesignTest < ApplicationSystemTestCase
+  # Second instance of the same vacuity `dynamic_type_test` had. This file
+  # compares `/` against `/feed`, `/days` and the 404, and three of those have
+  # been behind the wall since story 0015 — so an unauthenticated `visit` landed
+  # on the bounce target, which rendered the same partials and satisfied every
+  # measurement. It was comparing the front door with itself.
+  #
+  # Story 0017 retargets that bounce to `/you`, which has no plate, so `fit`
+  # came back nil and the comparison finally failed. The bug is older than the
+  # change that surfaced it.
+  behind_the_wall!
+
   MEASURED = <<~JS
     (() => {
       const body = getComputedStyle(document.body);

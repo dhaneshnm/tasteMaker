@@ -170,6 +170,23 @@ Consequence, accepted: the mark appears on the home screen and in the App Store
 and **nowhere inside the app**. That is correct. Inside the app the artwork is
 the subject and a logo would be a second one.
 
+**Amended 2026-08-17, story 0017.** What that bans is the *tile* — the gilt
+field, whole or in part, at lockup size. The objection above is specific and it
+is about ink: a filled gold square is the loudest thing that would ever appear
+on the calmest surface in the product. It is not an objection to the window's
+geometry.
+
+So one element of the drawing may be borrowed back, under the conditions the
+functional-glyph rule already sets: **the oculus**, as an outline in `--gold` on
+linen at the 23px / 1.4px / 44px contract, as the corner mark. That is the
+inverse of the banned thing — linen field, gold line — and it carries the same
+ink weight as the keep bookmark that has been inside the app since story 0006.
+
+The ban stands for everything else: no tile, no lockup, no rose, no gilt field,
+at any size, on any screen inside the app. If `--gold` ever lightens, or if the
+corner is ever asked to be filled rather than drawn, this amendment lapses and
+the original sentence governs again.
+
 ### Contrast
 
 Linen lights on the gold field measure **5.3:1** — the same ratio the token table
@@ -182,7 +199,24 @@ records for gold on linen, since it is the same pair inverted. WCAG 1.4.11 asks
 
 `.masthead` — one bar for every screen. Brand top-left, what-this-screen-is
 under it in italic, one fact on the right (the pick's date on the daily page,
-the work count in the archive), and the compass under all three.
+the work count in the archive), the corner mark in the far corner, and the
+compass under all four.
+
+`.masthead__you` — the corner (story 0017). The reader's own room, reached from
+every screen that wears this bar. `--gold`, 23px oculus in a 44px target, the
+same drawing contract as the two glyphs in `.rail`. It spans the brand and label
+rows and takes its height from them, which is why it costs nothing: that band
+already measures over a touch target at the accessibility cap. It is **not** on
+the compass row and cannot be — at 375px that row is 312.23 of the 329.0px the
+page leaves, and a fifth item needs 58px against 16.77px of spare. On `/you`
+itself it loses its link and steps back to `--ink-dim`, the same way the compass
+marks the screen you are standing on.
+
+**Nothing in this bar may vary by reader.** It renders inside `/`, which is
+`Cache-Control: public` behind Thruster. A corner that showed a signed-in state
+would put per-visitor markup into a shared cache. It also renders on
+`/privacy` and `/support`, whose controller inherits `ActionController::Base` —
+so no `current_user`, no `current_device`, no `native_shell?`. View logic only.
 
 `.compass` — where else you can go. Four destinations, **always all four**, in
 one order everywhere: `TODAY · DAYS · KEPT · GALLERY`. The label says which one
@@ -345,12 +379,19 @@ curator's desk.
 6. **One rule, one ornament.** The hairline under the masthead and the `✦`
    divider are the only decoration. No cards, no shadows, no rounded corners
    beyond the 2px on form controls.
-   **Functional glyphs are not ornament.** `.rail` under the plate carries line
-   icons for Keep and Zoom — `--gold`, 23px box, 1.4px stroke, 44px target. They
-   are controls, not decoration, and they never share a screen with the `✦`,
-   which is what this rule was protecting when it read *"no glyph in the kept
-   state."* Amended 2026-08-14, `decisions/0010-actions-become-a-rail.md`. The
-   exception is for controls only; a decorative second mark is still refused.
+   **Functional glyphs are not ornament.** Line icons that are controls —
+   `--gold`, 23px box, 1.4px stroke, 44px target — are allowed wherever the
+   control is: `.rail` under the plate carries Keep and Zoom, and `.masthead__you`
+   carries the corner. They are not decoration, which is what this rule was
+   protecting when it read *"no glyph in the kept state."* Amended 2026-08-14,
+   `decisions/0010-actions-become-a-rail.md`; widened 2026-08-17 by story 0017.
+   The exception is for controls only; a decorative second mark is still refused.
+
+   The 2026-08-14 wording added *"and they never share a screen with the ✦"*.
+   That clause was **already false when it was written** — `daily/_day.html.erb`
+   renders `.rail` and the `✦` on the same page, every day, on `/` and
+   `/days/:date`. Removed rather than enforced: a rule nothing has ever obeyed
+   is a rule that teaches the next reader to distrust this file.
 7. **Motion is a fade.** The archive's scroll-in reveal and the zoom fade, both
    off under `prefers-reduced-motion`. Nothing slides, bounces, or springs.
 8. **Text is never clamped on the daily page.** The archive clamps museum

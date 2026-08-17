@@ -71,15 +71,51 @@ module ApplicationHelper
   # It raises rather than silently rendering four links, because a typo in a
   # `here:` local would otherwise look exactly like a page that meant to pass
   # nil, and the reader would lose their "you are here" with nothing failing.
-  def compass_destinations(here)
+  # `locked:` is story 0017's addition, and it is a THIRD reason a destination
+  # loses its link — distinct from `current`, and deliberately not merged with
+  # it:
+  #
+  #   current   you are standing here          --ink-dim, aria-current="page"
+  #   locked    you cannot get in from here    --ink-dim, no aria-current
+  #
+  # It exists for one page. `/you` is where `require_reader` bounces every
+  # cookieless visitor, and three of the four destinations are behind the wall
+  # that just bounced them — so tapping Days from there lands back on `/you`,
+  # and the row becomes a set of controls that visibly do nothing. Marking them
+  # the way the compass already marks the current page says "gated", not
+  # "broken", using a treatment the reader has seen since their first screen.
+  #
+  # ONLY `/you` MAY PASS THIS. The compass renders inside `/`, which is
+  # `Cache-Control: public` behind Thruster and must be byte-identical for every
+  # reader (story 0007). A compass that varied by identity there would put
+  # per-visitor markup into a shared cache. `/you` is `private, no-store`, which
+  # is what makes it the one safe place for this.
+  def compass_destinations(here, locked: [])
     unless here.nil? || COMPASS_KEYS.include?(here)
       raise ArgumentError,
         "unknown compass key #{here.inspect} — expected nil or one of #{COMPASS_KEYS.inspect}"
     end
 
-    COMPASS.map do |key, label, route|
-      { key: key, label: label, path: public_send(route), current: key == here }
+    unknown = locked - COMPASS_KEYS
+    if unknown.any?
+      raise ArgumentError,
+        "unknown locked compass key(s) #{unknown.inspect} — expected a subset of #{COMPASS_KEYS.inspect}"
     end
+
+    COMPASS.map do |key, label, route|
+      { key: key, label: label, path: public_send(route),
+        current: key == here, locked: locked.include?(key) }
+    end
+  end
+
+  # The three destinations a reader with no identity cannot reach. Derived from
+  # the wall's own rule rather than typed out again: `Today` is the only surface
+  # that skips `require_reader`, so it is the only one that stays a link.
+  #
+  # Returns [] for an identified reader, which is what keeps this from becoming
+  # a second definition of "signed in" scattered through the views.
+  def walled_compass_keys
+    COMPASS_KEYS - [ :today ]
   end
 
   # Resizing needs libvips or ImageMagick on the box, and this machine has

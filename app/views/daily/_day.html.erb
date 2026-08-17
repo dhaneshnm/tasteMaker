@@ -177,20 +177,34 @@
         <%= render "days/walk", pick: pick, current: current %>
       <% else %>
         <p class="coda__line">See you tomorrow.</p>
-        <a class="caps-link" href="<%= feed_path %>">Wander the full gallery →</a>
+        <%# Two doors, one row (story 0017). The corner's mark rides the bar on
+            every screen, but a ring and a dot teach nobody what they open — so
+            the word ships once, here, on the screen every reader opens every
+            day. Design review 2A: the front door is the only surface whose coda
+            has a caps-link row to join. `/days/:date` gets the walk instead,
+            `/days` and `/collection` get `.legal`, and `/feed`'s coda is page
+            200 of 200.
+
+            No arrow on the new one. `application.css`'s font subsets declare
+            `unicode-range: … U+2191, U+2193 …` and step straight over U+2192,
+            so every → in this product already renders in a fallback face — the
+            one beside it included. Adding a third instance of a live defect to
+            match the other two is not consistency. The compass's four words
+            carry no arrows either. %>
+        <div class="coda__doors">
+          <a class="caps-link" href="<%= feed_path %>">Wander the full gallery →</a>
+          <a class="caps-link" href="<%= corner_path %>">Your corner</a>
+        </div>
       <% end %>
     </footer>
 
-    <%# The sign-in fragment (story 0015) — front door only, and never on the
-        curator's preview. Static markup in the cached page, like the keep
-        frame above; the state arrives privately. The frame's own id is the
-        anchor every wall bounce lands on (`/#signin`), so it lives HERE in
-        the public HTML, identical for everyone. Empty by default on purpose:
-        the signed-out buttons appear only when the fragment says so, which is
-        also how the shell never paints them. %>
-    <% if chrome == :front_door %>
-      <%= turbo_frame_tag "signin", src: session_control_path, loading: "lazy" %>
-    <% end %>
+    <%# The sign-in fragment that used to live here is gone (story 0017). It was
+        a lazy `turbo_frame_tag "signin"` pointing at `/session/control`, and its
+        id was the anchor every wall bounce landed on. Both are deleted: the
+        corner mark and the word above are identical markup for every reader, so
+        the landing page needs no per-visitor fragment at all. That removes a
+        round trip from every front-door render and takes the product's most
+        delicate cache hazard off the one page Thruster is allowed to store. %>
   </div>
 
   <%= render "shared/zoom" %>

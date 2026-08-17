@@ -26,15 +26,21 @@ class ApplicationController < ActionController::Base
   # also invalidates any non-HTML conditional GET: one extra fetch, once.
   etag { helpers.app_stylesheets_paths.map { |sheet| helpers.stylesheet_path(sheet) } }
 
-  # The wall (story 0015). One guard, two keys:
+  # The wall (story 0015, retargeted by story 0017). One guard, two keys:
   #
   #   request ──> require_reader ──┬── session[:user_id] → User row?   pass
   #                                ├── signed device cookie → Device?  pass
-  #                                └── neither → 303 to /#signin
+  #                                └── neither → 303 to /you
   #
   # 303, not 302: the wall bounces POSTs too (a signed-out keep tap), and Turbo
-  # re-issues the method on a 302. The anchor lands the visitor at the sign-in
-  # fragment, which explains what the wall guards (design review D3).
+  # re-issues the method on a 302.
+  #
+  # The target used to be `/#signin` — an anchor onto a lazily-loaded fragment
+  # at the foot of the landing page. Story 0017 deleted that fragment and gave
+  # the sign-in doors a room of their own, so the bounce lands on a whole page
+  # that can explain itself instead of on an anchor that had to be scrolled to.
+  # `/you` is unwalled for exactly this reason: it is where a reader with no
+  # identity is sent, so it cannot require one.
   #
   # Skips live on the controllers themselves: the landing page (daily#show),
   # errors, sessions, device registrations, and admin (whose key is basic auth,
@@ -78,11 +84,11 @@ class ApplicationController < ActionController::Base
       # state (declined at design review D3; this guard is what enforces it).
       if turbo_frame_request? && !request.get?
         render html: helpers.turbo_frame_tag(request.headers["Turbo-Frame"]) {
-          helpers.link_to "Sign in", root_path(anchor: "signin"),
+          helpers.link_to "Sign in", corner_path,
             class: "caps-link", data: { turbo_frame: "_top" }
         }, status: :unauthorized
       else
-        redirect_to root_path(anchor: "signin"), status: :see_other
+        redirect_to corner_path, status: :see_other
       end
     end
 
@@ -107,6 +113,37 @@ class ApplicationController < ActionController::Base
     # "which identity is this" is the question that decides which door to draw.
     # Already memoized, so a view calling it costs nothing.
     helper_method :current_device
+
+    # Which world this reader keeps in (story 0015; moved here by story 0017).
+    # A signed-in web reader's rows carry user_id; a device's rows carry the
+    # digest of its registered Keychain UUID.
+    #
+    #   current_user  ──> Favorite.owned_by(user)
+    #   current_device ─> Favorite.collected_by(digest)
+    #   neither ───────> caller must not ask — see the guard below
+    #
+    # These lived in FavoritesController until `/you` needed the same question
+    # answered for its two delete confirms, which both name a work count. Two
+    # copies of "this reader's kept works" is one copy too many: the day they
+    # drift, `/you` shows a number that disagrees with `/collection` on a dialog
+    # for an irreversible delete.
+    #
+    # `identified?` exists because the wall no longer guarantees an identity for
+    # every caller. `CornersController` skips the wall on purpose — it is where
+    # a reader with no identity is sent — so it is the first caller that can
+    # reach here with neither key, and `current_device.token_digest` on nil is
+    # a 500 on the one page a bounced visitor lands on.
+    def identified?
+      current_user.present? || current_device.present?
+    end
+
+    def reader_favorites
+      current_user ? Favorite.owned_by(current_user) : Favorite.collected_by(current_device.token_digest)
+    end
+
+    def reader_identity_attributes
+      current_user ? { user: current_user } : { collector_digest: current_device.token_digest }
+    end
 
     # Private and uncacheable, always. `Vary: Cookie` is belt to the no-store
     # braces: nothing should store these, and nothing should reuse one reader's

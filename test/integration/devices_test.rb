@@ -37,7 +37,7 @@ class DevicesTest < ActionDispatch::IntegrationTest
 
     # Left in place, the cookie names a digest with no Device behind it:
     # `current_device` returns nil, the wall bounces every request to
-    # `/#signin`, and the reader who just deleted their data is locked out of a
+    # `/you`, and the reader who just deleted their data is locked out of a
     # product that is free and asks for nothing. They should land on the public
     # landing page, which is where an identityless visitor belongs.
     assert cookies[:device].blank?, "the device cookie outlived the device row"
@@ -78,14 +78,30 @@ class DevicesTest < ActionDispatch::IntegrationTest
       "a signed-in reader's device row was destroyed by the device door"
   end
 
-  test "the collection page offers each identity its own door" do
+  # The doors moved to `/you` in story 0017 so a destructive control has one
+  # home, one confirm string and one tested path. The collection keeps a
+  # labelled signpost, because the default iOS reader would otherwise have
+  # traded a button that says what it does for a mark that does not.
+  test "the collection page points each identity at its own door" do
     register_device
     get collection_path
+    assert_select ".account .caps-link[href=?]", corner_path, text: "Your corner"
+    assert_select "form[action=?]", device_path, count: 0
+
+    sign_in
+    get collection_path
+    assert_select ".account .caps-link[href=?]", corner_path, text: "Your corner"
+    assert_select "form[action=?]", account_path, count: 0
+  end
+
+  test "the corner offers each identity its own door" do
+    register_device
+    get corner_path
     assert_select "form[action=?]", device_path
     assert_select "form[action=?]", account_path, count: 0
 
     sign_in
-    get collection_path
+    get corner_path
     assert_select "form[action=?]", account_path
     assert_select "form[action=?]", device_path, count: 0
   end

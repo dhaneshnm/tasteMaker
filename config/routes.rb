@@ -25,10 +25,17 @@ Rails.application.routes.draw do
   get "auth/failure" => "sessions#failure"
   delete "session" => "sessions#destroy", as: :session
 
-  # The landing page's per-visitor fragment (the favorites#control precedent):
-  # sign-in buttons for a signed-out web visitor, a quiet account line for a
-  # signed-in one, nothing at all for a device.
-  get "session/control" => "sessions#control", as: :session_control
+  # The reader's own corner (story 0017) — the fifth surface, and the second
+  # unwalled one after `/`. It holds the sign-in doors, so it cannot require an
+  # identity: `require_reader` bounces every cookieless visitor here.
+  #
+  # The landing page's per-visitor fragment that used to live at
+  # `/session/control` is gone with it. The corner glyph in the masthead and the
+  # coda word on `/` are identical markup for every reader, so the landing page
+  # needs no per-visitor fragment at all — which also takes a round trip off
+  # every front-door render and removes the product's most delicate cache
+  # hazard rather than adding to it.
+  get "you" => "corners#show", as: :corner
 
   # The exit door the category's leader never built. Signed-in only.
   delete "account" => "accounts#destroy", as: :account

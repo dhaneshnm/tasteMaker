@@ -160,15 +160,42 @@ class DailyTest < ActionDispatch::IntegrationTest
       get route
       assert_response :success
 
-      names = css_select("a[href], button").filter_map do |el|
-        el["aria-label"].presence || el.text.squish.presence
+      # Links to the SAME destination are exempt, and only links — never
+      # buttons. Story 0017 puts two doors to `/you` on this page: the corner
+      # mark in the bar and the word in the coda, deliberately, because a ring
+      # and a dot teach nobody what they open. A logo and a footer link both
+      # reading "Home" is the web's oldest pattern and confuses no one; two
+      # buttons firing the same action with nothing to tell them apart is what
+      # ISSUE-001 actually was. The rule keeps its teeth for that case and for
+      # links that share a name while going somewhere else.
+      controls = css_select("a[href], button").filter_map do |el|
+        name = el["aria-label"].presence || el.text.squish.presence
+        next unless name
+
+        { name: name, href: (el["href"] if el.name == "a") }
       end
 
-      duplicates = names.tally.select { |_, count| count > 1 }.keys
+      duplicates =
+        controls.group_by { |control| control[:name] }
+                .select { |_name, group| group.size > 1 }
+                .reject { |_name, group| same_destination?(group) }
+                .keys
+
       assert_empty duplicates,
         "#{route} has controls sharing an accessible name: #{duplicates.inspect}"
     end
   end
+
+  private
+    # Every control in the group is a link, and every one of them points at the
+    # same place. That is one destination offered twice, not two mystery
+    # controls — the exemption story 0017's corner mark and coda word rely on.
+    # A single button in the group fails it, because a button has no href to
+    # prove it does the same thing.
+    def same_destination?(group)
+      hrefs = group.map { |control| control[:href] }
+      hrefs.all?(&:present?) && hrefs.uniq.size == 1
+    end
 
   test "the root is no longer the gallery" do
     get root_path
