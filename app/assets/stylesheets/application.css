@@ -383,6 +383,18 @@ a:hover { color: var(--gold-deep); }
 @media (max-width: 45.999rem) {
   .masthead:has(.compass) { padding-bottom: 0; }
   .masthead:has(.compass) ~ .page { padding-top: 0.4rem; }
+
+  /* ISSUE-001, found by /qa 2026-08-17. The rule above outranks `.page--empty`
+   * on specificity — two classes and a `:has()` against one class — so every
+   * empty screen that also carries a compass computed 6.4px of top padding
+   * instead of the `clamp(4rem, 18vh, 8rem)` it declares. Measured: `/you`,
+   * `/collection` with nothing kept, and the 404 all rendered their ornament
+   * hard under the hairline.
+   *
+   * Older than the story that surfaced it: the collapse has been there since
+   * story 0012 gave those screens a compass. It only became visible when `/you`
+   * shipped as a page whose entire layout is `.page--empty`. */
+  .masthead:has(.compass) ~ .page--empty { padding-top: clamp(4rem, 18vh, 8rem); }
 }
 
 /* The screen you are on. Same type, same tracking, same 44px box as its
