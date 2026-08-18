@@ -32,10 +32,15 @@ module Middleware
     CALLBACK_PATH = "/auth/apple/callback"
     COOKIE        = "_tondo_apple_handoff"
 
-    # Both, not just state: omniauth-apple reads the nonce back out of the
-    # session too (`stored_nonce`), and `verify_nonce!` rejects the id token
-    # without it.
-    CARRIED = %w[omniauth.state omniauth.nonce].freeze
+    # Not just state: omniauth-apple reads the nonce back out of the session
+    # too (`stored_nonce`), and `verify_nonce!` rejects the id token without
+    # it. `omniauth.params` carries the native shell's `native=1` flag (story
+    # 0017 Release 2) — without it, `SessionsController#native_auth?` reads a
+    # dropped session as "web", writes the session into the auth sheet's own
+    # jar instead of handing off a token, and the shell never sees the sign-in
+    # (bug, 2026-08-18: Apple's native flow signed the reader into the sheet's
+    # web view only).
+    CARRIED = %w[omniauth.state omniauth.nonce omniauth.params].freeze
 
     # Long enough to read Apple's consent screen, short enough that a stolen
     # handoff is worth little.
