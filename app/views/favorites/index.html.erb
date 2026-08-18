@@ -61,7 +61,7 @@
       with nothing kept still owns their own door. %>
   <% if current_user %>
     <footer class="account">
-      <p class="coda__note">Signed in with <%= current_user.provider_name %><% if current_user.email.present? %> as <%= current_user.email %><% end %>.</p>
+      <p class="coda__note">Signed in with <%= current_user.signed_in_summary %>.</p>
       <%= link_to "Your corner", corner_path, class: "caps-link" %>
     </footer>
   <% elsif current_device %>

@@ -49,13 +49,26 @@ class CornersController < ApplicationController
     # is the nil dereference this guard exists to prevent, on the page a
     # bounced visitor lands on.
     @kept_count = identified? ? reader_favorites.count : 0
+
+    # Which compass doors are shut, asked of the WALL and not of `@state`.
+    #
+    # The first version derived this from `@state == :signed_out`, which is a
+    # second spelling of "signed in" — and the two disagreed inside one commit.
+    # `:shell` is equally unidentified, so `require_reader` bounces Days, Kept
+    # and Gallery straight back here; it was rendering four live links that all
+    # returned to this page, which is precisely the dead-control loop `locked:`
+    # exists to prevent. Measured: 4 links, 0 locked spans.
+    #
+    # `identified?` is the wall's own predicate, so there is now one definition
+    # and any future identity answers it for free.
+    @locked = identified? ? [] : helpers.walled_compass_keys
   end
 
   private
-    # The user agent is checked before the cookie, deliberately. A shell that
+    # The cookie is checked before the user agent, deliberately. A shell that
     # registered successfully matches both, and `:device` is the more specific
     # answer — so the cookie wins when it exists and the UA only decides the
-    # unregistered case. Written as one expression rather than nested ifs
+    # unregistered case. Written as guard clauses rather than nested ifs
     # because the order is the whole contract.
     def corner_state
       return :account if current_user

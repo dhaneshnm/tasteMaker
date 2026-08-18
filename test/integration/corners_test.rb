@@ -72,7 +72,7 @@ class CornersTest < ActionDispatch::IntegrationTest
 
     get corner_path
 
-    assert_select ".corner__consequence", text: "Nothing is kept on this phone yet."
+    assert_select ".coda__line--ask", text: "Nothing is kept on this phone yet."
   end
 
   test "a device that has kept works is told what that means" do
@@ -82,7 +82,7 @@ class CornersTest < ActionDispatch::IntegrationTest
 
     get corner_path
 
-    assert_select ".corner__consequence", /1 work is kept on this phone/
+    assert_select ".coda__line--ask", /1 work is kept on this phone/
     assert_select "form[action=?]", device_path
   end
 
@@ -97,7 +97,27 @@ class CornersTest < ActionDispatch::IntegrationTest
     assert_select ".signin__door", count: 0
     assert_select "form[action=?]", device_path, count: 0
     assert_select "form[action=?]", account_path, count: 0
-    assert_select ".corner__consequence", text: "This phone is still settling in."
+    assert_select ".coda__line--ask", text: "This phone is still settling in."
+  end
+
+  # Regression: the unregistered shell got four live compass links that all
+  # bounced back here. `locked:` was derived from the view's own state enum
+  # (`@state == :signed_out`) rather than from the wall's predicate, so the one
+  # state this story added a whole branch for rendered exactly the dead-control
+  # loop `locked:` exists to prevent. Measured before the fix: 4 links, 0 locked.
+  #
+  # Asserted against `identified?`'s two answers rather than against the four
+  # render states, because that is the rule.
+  # Found by /simplify on 2026-08-17.
+  test "every unidentified reader sees the shut doors, not just the web one" do
+    [ {}, { "User-Agent" => "#{ApplicationController::NATIVE_UA_TOKEN}; Mozilla/5.0" } ].each do |headers|
+      get corner_path, headers: headers
+
+      assert_select ".compass a.caps-link", count: 1,
+        message: "only Today should be a link for an unidentified reader (#{headers.inspect})"
+      assert_select "span.compass__here", count: 3,
+        message: "Days, Kept and Gallery must read as gated, not broken (#{headers.inspect})"
+    end
   end
 
   # The mark rides the bar on every screen that has one, and on the corner

@@ -108,12 +108,16 @@ module ApplicationHelper
     end
   end
 
-  # The three destinations a reader with no identity cannot reach. Derived from
-  # the wall's own rule rather than typed out again: `Today` is the only surface
-  # that skips `require_reader`, so it is the only one that stays a link.
+  # The three destinations a reader with no identity cannot reach. `Today` is
+  # the only surface that skips `require_reader`, so it is the only one that
+  # stays a link.
   #
-  # Returns [] for an identified reader, which is what keeps this from becoming
-  # a second definition of "signed in" scattered through the views.
+  # WHICH keys, never WHETHER. Deciding whether a given reader is locked out is
+  # the wall's question, and `CornersController` asks it with `identified?` —
+  # the one predicate — before calling this. An earlier version's comment
+  # claimed this method returned [] for an identified reader; it never did, and
+  # the caller compared against `@state` instead, which left the unregistered
+  # shell with four live doors that all bounced back to `/you`.
   def walled_compass_keys
     COMPASS_KEYS - [ :today ]
   end

@@ -170,32 +170,21 @@ class DailyTest < ActionDispatch::IntegrationTest
       # links that share a name while going somewhere else.
       controls = css_select("a[href], button").filter_map do |el|
         name = el["aria-label"].presence || el.text.squish.presence
-        next unless name
-
-        { name: name, href: (el["href"] if el.name == "a") }
+        # Pair each name with where it goes, then de-duplicate on the PAIR. Two
+        # links to one destination collapse to a single entry and stop being a
+        # duplicate name; two links to different places, or any two buttons,
+        # survive and still fail. A button has no href to prove it does the same
+        # thing as another, so it gets its own node path and is never its own
+        # twin.
+        [ name, el.name == "a" ? el["href"] : el.path ] if name
       end
 
-      duplicates =
-        controls.group_by { |control| control[:name] }
-                .select { |_name, group| group.size > 1 }
-                .reject { |_name, group| same_destination?(group) }
-                .keys
+      duplicates = controls.uniq.map(&:first).tally.select { |_, count| count > 1 }.keys
 
       assert_empty duplicates,
         "#{route} has controls sharing an accessible name: #{duplicates.inspect}"
     end
   end
-
-  private
-    # Every control in the group is a link, and every one of them points at the
-    # same place. That is one destination offered twice, not two mystery
-    # controls — the exemption story 0017's corner mark and coda word rely on.
-    # A single button in the group fails it, because a button has no href to
-    # prove it does the same thing.
-    def same_destination?(group)
-      hrefs = group.map { |control| control[:href] }
-      hrefs.all?(&:present?) && hrefs.uniq.size == 1
-    end
 
   test "the root is no longer the gallery" do
     get root_path

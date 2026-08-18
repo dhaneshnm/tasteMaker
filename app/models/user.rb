@@ -27,4 +27,16 @@ class User < ApplicationRecord
   def provider_name
     { "google_oauth2" => "Google", "apple" => "Apple" }.fetch(provider, provider)
   end
+
+  # How this reader is named back to themselves — "Google as maya@example.com",
+  # or just "Google" when the provider handed over no address (Apple's Hide My
+  # Email can, and a reader who declined the scope will).
+  #
+  # One method because two screens print it: the corner, where the account is
+  # administered, and the foot of the collection. They were two copies differing
+  # in whitespace, and the day one gains a detail the other silently disagrees
+  # on the page a reader opens in order to delete their account.
+  def signed_in_summary
+    email.present? ? "#{provider_name} as #{email}" : provider_name
+  end
 end

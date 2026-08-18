@@ -319,19 +319,14 @@ a:hover { color: var(--gold-deep); }
   align-self: center;
   justify-self: end;
   min-width: var(--tap);
-  min-height: var(--tap);
-  display: inline-flex;
-  align-items: center;
   justify-content: center;
   color: var(--gold);
 }
 
-.masthead__you svg { display: block; }
-
-/* On `/you` itself. Same rule the compass states for the screen you are
- * standing on: the mark stays in the bar, the link comes away, the colour steps
- * back. One idiom for "you are here", not two. */
-.masthead__you--here { color: var(--ink-dim); }
+/* On `/you` itself the mark stays in the bar, the link comes away and the
+ * colour steps back — the same treatment the compass gives the screen you are
+ * standing on, which is why `.masthead__you--here` sits in that rule rather
+ * than restating the token here. One idiom for "you are here", not two. */
 
 /* ---------- Compass ----------
  * Where else you can go. Four destinations, always all four, same order on every
@@ -382,25 +377,28 @@ a:hover { color: var(--gold-deep); }
  * every other screen uses. */
 @media (max-width: 45.999rem) {
   .masthead:has(.compass) { padding-bottom: 0; }
-  .masthead:has(.compass) ~ .page { padding-top: 0.4rem; }
-
-  /* ISSUE-001, found by /qa 2026-08-17. The rule above outranks `.page--empty`
-   * on specificity — two classes and a `:has()` against one class — so every
-   * empty screen that also carries a compass computed 6.4px of top padding
-   * instead of the `clamp(4rem, 18vh, 8rem)` it declares. Measured: `/you`,
-   * `/collection` with nothing kept, and the 404 all rendered their ornament
-   * hard under the hairline.
+  /* `:not(.page--empty)` is ISSUE-001, found by /qa 2026-08-17, and it is the
+   * exclusion rather than a louder second rule. Without it this selector — two
+   * classes and a `:has()` — outranks `.page--empty`, so every empty screen
+   * carrying a compass computed 6.4px of top padding instead of the
+   * `clamp(4rem, 18vh, 8rem)` it declares. `/you`, `/collection` with nothing
+   * kept and the 404 all rendered their ornament hard under the hairline.
    *
-   * Older than the story that surfaced it: the collapse has been there since
-   * story 0012 gave those screens a compass. It only became visible when `/you`
-   * shipped as a page whose entire layout is `.page--empty`. */
-  .masthead:has(.compass) ~ .page--empty { padding-top: clamp(4rem, 18vh, 8rem); }
+   * Stated here so the value keeps ONE home. Restating the clamp under a
+   * heavier selector would have worked today and gone stale the first time
+   * `.page--empty` changed — which is the shape of the bug being fixed.
+   *
+   * Older than the story that surfaced it: the collapse dates from story 0012
+   * giving those screens a compass, and only became visible when `/you` shipped
+   * as a page whose entire layout is `.page--empty`. */
+  .masthead:has(.compass) ~ .page:not(.page--empty) { padding-top: 0.4rem; }
 }
 
 /* The screen you are on. Same type, same tracking, same 44px box as its
  * neighbours — only the colour steps back and only the <a> is missing. As a bare
  * <span> it drops out of small caps into body type and reads as a bug. */
-.compass__here { color: var(--ink-dim); }
+.compass__here,
+.masthead__you--here { color: var(--ink-dim); }
 
 /* Wide enough for a third column: the compass rides beside the label instead of
  * under it, and the masthead costs 75px instead of 104px.
@@ -780,6 +778,7 @@ a:hover { color: var(--gold-deep); }
 .coda .caps-link,
 .compass .caps-link,
 .legal .caps-link,
+.masthead__you,
 .walk__step,
 .walk__today,
 .rail__act,
@@ -1056,7 +1055,8 @@ a:hover { color: var(--gold-deep); }
   justify-content: center;
   min-width: var(--tap);
 }
-.rail__act svg { display: block; width: 23px; height: 23px; }
+.rail__act svg,
+.masthead__you svg { display: block; width: 23px; height: 23px; }
 
 /* The mark holding its own place until the private frame lands. Same box, same
  * colour, no cursor and no hover — it is a drawing, not a control, and the real
@@ -1279,28 +1279,21 @@ html.zoom-open body { overflow: hidden; }
 }
 
 /* ---------------------------------------------------------------------------
- * The sign-in fragment and the account row (story 0015, design review D3-D5).
+ * The sign-in doors and the account row (story 0015, design review D3-D5;
+ * rehomed by 0017).
  *
- * `.signin` is the landing page's one per-visitor block, at the foot of the
- * label column, lazy-loaded into the `signin` frame — which is also the anchor
- * every wall bounce lands on. House buttons, official marks (D4): the field,
- * border, radius and type all come from the token table; the providers are
- * recognisable by their logos alone. Google's G is the only non-token colour
- * in the product — DESIGN.md records the exception.
+ * These were the landing page's per-visitor fragment, lazy-loaded into a frame
+ * whose id was also the wall's bounce anchor. Story 0017 deleted the fragment
+ * and moved the doors to `/you`, so what survives here is the door itself and
+ * the quiet controls beside it. `.signin`, `.signin__note` and `.signin--in`
+ * went with the markup that carried them — the corner uses `.coda__note` and
+ * `.corner__doors` for the same jobs.
+ *
+ * House buttons, official marks (D4): the field, border, radius and type all
+ * come from the token table; the providers are recognisable by their logos
+ * alone. Google's G is the only non-token colour in the product — DESIGN.md
+ * records the exception.
  */
-
-.signin {
-  margin-top: clamp(2rem, 6vw, 3rem);
-  text-align: center;
-}
-
-.signin__note {
-  max-width: 34rem;
-  margin: 0 auto 1.4rem;
-  font-size: 0.95rem;
-  line-height: 1.7;
-  color: var(--ink-faint);
-}
 
 .signin__doors {
   display: flex;
@@ -1330,17 +1323,9 @@ html.zoom-open body { overflow: hidden; }
 
 .signin__mark { flex: none; }
 
-/* The signed-in state: one quiet line, two caps-links, no panel (D5). */
-.signin--in {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.4rem;
-}
-/* One reset, three quiet controls: a caps-link that happens to be a <button>
+/* One reset, two quiet controls: a caps-link that happens to be a <button>
  * (or must state its own 44px). Grouped so the next quiet button joins a
- * selector list instead of pasting a fourth copy. */
-.signin--in .caps-link,
+ * selector list instead of pasting a third copy. */
 .signin__out,
 .account__delete {
   min-height: 44px;
@@ -1371,18 +1356,19 @@ html.zoom-open body { overflow: hidden; }
  */
 
 /* The sentence the page is built around. Three of the four states are a reader
- * standing in front of a decision, and this is the decision said plainly and
- * at the size the product reserves for the lines that matter.
+ * standing in front of a decision, and this is the decision said plainly.
  *
- * It is `.coda__line`'s voice — Fraunces italic, `--ink-dim` — set one step up
- * and in `--ink`, because unlike a closing line this one is asking for an
- * answer. Not a new idiom; the same idiom leaning in. */
-.corner__consequence {
-  margin: 0 auto 1.4rem;
+ * A MODIFIER, not a second class. It is `.coda__line`'s voice — Fraunces
+ * italic — and the first version restated all five of that rule's declarations
+ * to change three of them, including a font-size of 1.18rem against 1.15rem.
+ * That is 0.5px at the default root: below anything a reader can see, and below
+ * what the measurement discipline in this file would defend anywhere else. The
+ * type step went; what stays is what actually differs — full `--ink` because
+ * this line is asking for an answer rather than closing a page, a measure so it
+ * breaks where a question should, and the leading that needs. */
+.coda__line--ask {
   max-width: 26rem;
-  font-family: var(--serif-display);
-  font-style: italic;
-  font-size: 1.18rem;
+  margin-inline: auto;
   line-height: 1.45;
   color: var(--ink);
 }

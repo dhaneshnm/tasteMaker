@@ -33,8 +33,11 @@ class FavoritesController < ApplicationController
   # to `/you` stopped it paying. `dynamic_type_test.rb:75` caught it.
   #
   # Answering directly leaks nothing: with no identity there is no `kept` and no
-  # count, so the response is the outline glyph and nothing else — byte-for-byte
-  # what the publicly cached page already carries. The wall exists to stop the
+  # count, so every anonymous caller gets the same outline mark and no number.
+  # It is NOT byte-identical to the cached placeholder — this response carries a
+  # real `button_to`, so it mints a CSRF token and a session, which is exactly
+  # why it is `no_store`. That is the same trade `/you` makes and the reason the
+  # signed-out keep tap has a POST to bounce at all. The wall exists to stop the
   # collection being an anonymous public utility, and a constant is not one.
   # Writes stay walled; this is the read of a null state.
   skip_before_action :require_reader, only: :control
@@ -130,17 +133,15 @@ class FavoritesController < ApplicationController
     # allocating every painting_id the reader has ever kept, on the endpoint the
     # keep frame hits on every single day-page view.
     def render_control(kept: nil, autofocus: false)
-      # No identity, no collection — the null state, which is the same mark the
-      # cached page already drew. Only `#control` can reach this; every write
-      # still runs behind the wall, so `reader_favorites` below always has one
-      # of the two keys.
-      unless identified?
-        return render partial: "favorites/control", locals: {
-          painting: @painting, autofocus: false, kept: false, count: 0
-        }
-      end
-
-      collection = reader_favorites
+      # `Favorite.none` is the null state, and it is why this stayed one render
+      # rather than growing a second one with its own locals hash. Neither
+      # `exists?` nor `count` touches the database on a null relation, so the
+      # unidentified caller pays no query and a fifth local added to the partial
+      # cannot land in one branch and miss the other.
+      #
+      # Only `#control` reaches the unidentified path — every write still runs
+      # behind the wall.
+      collection = identified? ? reader_favorites : Favorite.none
 
       render partial: "favorites/control", locals: {
         painting: @painting, autofocus: autofocus,

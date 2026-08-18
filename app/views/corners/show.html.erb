@@ -8,16 +8,20 @@
     The corner is reached by the mark in the bar, not by a fifth word in the
     row; the arithmetic for that is in `_masthead`.
 
-    `locked:` — only on the state that needs it. A signed-out visitor was very
-    likely bounced here by the wall, and three of the four destinations are
-    behind the wall that bounced them. Unlinked, they read as gated. Linked,
-    they read as broken: every tap lands back on this page. This is the one
-    page in the product allowed to vary its compass, because it is the one that
-    is `private, no-store` (`CornersController`). %>
-<%= render "shared/masthead", label: "Your corner", here: nil,
-      locked: (@state == :signed_out ? walled_compass_keys : []) %>
+    `locked:` — computed by the controller from the wall's own predicate, not
+    from `@state`. A reader with no identity was very likely bounced here, and
+    three of the four destinations are behind the wall that bounced them.
+    Unlinked, they read as gated. Linked, they read as broken: every tap lands
+    back on this page. This is the one page in the product allowed to vary its
+    compass, because it is the one that is `private, no-store`. %>
+<%= render "shared/masthead", label: "Your corner", here: nil, locked: @locked %>
 
 <main class="page page--empty">
+  <%# One ornament, not four. Every branch below opened with this same line —
+      the `case` is about what each state SAYS, and the divider is not part of
+      that. %>
+  <div class="ornament" aria-hidden="true">✦</div>
+
   <%# Nothing may sit between `case` and the first `when` — not markup, not a
       comment, not even the whitespace text node a newline creates. ERB compiles
       this to real Ruby and anything in that gap becomes a statement inside a
@@ -29,11 +33,9 @@
         a decision; this one has already made it. Design review chose the
         quiet-line voice here for that reason — "signed in with Google" set at
         display size would be theatre. %>
-    <div class="ornament" aria-hidden="true">✦</div>
     <p class="coda__line">Kept with your account.</p>
     <p class="coda__note">
-      Signed in with <%= current_user.provider_name %><% if current_user.email.present? %>
-        as <%= current_user.email %><% end %>. Your
+      Signed in with <%= current_user.signed_in_summary %>. Your
       <%= pluralize(@kept_count, "kept work") %>
       <%= @kept_count == 1 ? "travels" : "travel" %> with the account, not with
       any one device.
@@ -43,10 +45,10 @@
     <div class="corner__doors">
       <%= button_to "Sign out", session_path, method: :delete,
             class: "caps-link signin__out", form_class: "signin__out-form" %>
-      <%# The one honest dialog in the product, and the string that already
-          ships at favorites/index.html.erb:58 — carried over verbatim rather
-          than rewritten, because a control moving to a new screen should not
-          quietly change what it warns about. %>
+      <%# The one honest dialog in the product. The wording is carried over
+          verbatim from the button this replaced on `/collection`, because a
+          control moving to a new screen should not quietly change what it
+          warns about. %>
       <%= button_to "Delete account", account_path, method: :delete,
             class: "caps-link account__delete", form_class: "account__form",
             data: { turbo_confirm: "Deletes your account and the #{pluralize(@kept_count, "work")} you've kept. There is no undo." } %>
@@ -62,15 +64,14 @@
       door that is not on the screen is how a reader learns not to trust the
       screen. %>
   <% when :device %>
-    <div class="ornament" aria-hidden="true">✦</div>
     <% if @kept_count.zero? %>
-      <p class="corner__consequence">Nothing is kept on this phone yet.</p>
+      <p class="coda__line coda__line--ask">Nothing is kept on this phone yet.</p>
       <p class="coda__note">
         The bookmark under each artwork keeps it here, and what you keep lives
         with this phone.
       </p>
     <% else %>
-      <p class="corner__consequence">
+      <p class="coda__line coda__line--ask">
         <%= pluralize(@kept_count, "work") %>
         <%= @kept_count == 1 ? "is" : "are" %> kept on this phone.
       </p>
@@ -96,8 +97,7 @@
       `SessionsController#control` used to render an empty frame here, which
       was safe because an empty frame makes no claim. A whole page has to. %>
   <% when :shell %>
-    <div class="ornament" aria-hidden="true">✦</div>
-    <p class="corner__consequence">This phone is still settling in.</p>
+    <p class="coda__line coda__line--ask">This phone is still settling in.</p>
     <p class="coda__note">
       Tondo has not finished setting up on this device yet. Today's artwork is
       already here; everything else arrives with the next connection.
@@ -107,8 +107,7 @@
       A web visitor, and usually one the wall has just bounced. The compass
       above marks the three doors they cannot open. This says what opens them. %>
   <% when :signed_out %>
-    <div class="ornament" aria-hidden="true">✦</div>
-    <p class="corner__consequence">Sign in to keep a collection of your own.</p>
+    <p class="coda__line coda__line--ask">Sign in to keep a collection of your own.</p>
     <p class="coda__note">
       Past days, the full gallery, and works you keep — all of it opens with an
       account. No password, no sign-up form. Free, and yours.

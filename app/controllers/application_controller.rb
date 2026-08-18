@@ -71,17 +71,21 @@ class ApplicationController < ActionController::Base
 
   private
     def require_reader
-      return if current_user || current_device
+      return if identified?
 
       # A frame WRITE cannot follow the bounce usefully: Turbo would fetch
       # `/`, find no frame matching (say) `keep_42`, and swap in "Content
       # missing" — a silent hole where the habit mechanic was, for the reader
       # whose identity died mid-page (signed out elsewhere, device revoked).
       # Answer those in kind: a matching frame whose one link breaks out to
-      # the sign-in anchor (code review F5). GETs stay a plain 303 — a lazy
-      # frame's failed load keeps its default content, which is how the
-      # signed-out landing page keeps the glyph and not an in-place sign-in
-      # state (declined at design review D3; this guard is what enforces it).
+      # the corner (code review F5).
+      #
+      # Frame GETs never reach here any more. `favorites#control` skips the wall
+      # and answers the null state itself — the keep frame on `/` is eager, and
+      # bouncing it wrote "Content missing" over the resting mark. The claim
+      # that used to sit here, that a failed frame load keeps its default
+      # content, was only ever true because the bounce happened to land on a
+      # page carrying the same frame.
       if turbo_frame_request? && !request.get?
         render html: helpers.turbo_frame_tag(request.headers["Turbo-Frame"]) {
           helpers.link_to "Sign in", corner_path,
@@ -134,7 +138,7 @@ class ApplicationController < ActionController::Base
     # reach here with neither key, and `current_device.token_digest` on nil is
     # a 500 on the one page a bounced visitor lands on.
     def identified?
-      current_user.present? || current_device.present?
+      current_user || current_device
     end
 
     def reader_favorites
