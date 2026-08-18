@@ -37,6 +37,8 @@ leader's review failures, see `specs/personas.md`). Not extra features:
 (iOS widget appears in evidence but is a new surface, not a quality bar — own spec, post-baseline.)
 
 ## Build flow — every feature follows this, in order
+0. Raw asks from user contact → `IDEAS.md`, not straight into `specs/`. Triage there;
+   promote to step 1 only when a WIP slot opens.
 1. User describes who the user is + their problem → write user story with intake fields
    (problem, evidence, success-signal prediction, lane: Express same-day reversible /
    Full ≤ 3-day core) → `specs/NNNN-slug/story.md`. The spec IS the intake card.
@@ -103,7 +105,7 @@ Size stories to lane: each shippable in ≤ 2 days. WIP = 1 means one story in f
 1. `BET.md` complete and committed? No → no feature work this session.
 2. Inside month boundary? Kill review Aug 31, 2026.
 3. WIP = 1?
-4. Anything in flight without a spec in `specs/`?
+4. Anything in flight without a spec in `specs/`? `IDEAS.md` Inbox stale (> 1 week untriaged)?
 5. `SHIPLOG.md` current? A week with shipped code and zero initiated user contact →
    name it as builder's gravity.
 6. Before first external user: backups + logged restore test, secrets in Rails
@@ -114,7 +116,8 @@ Size stories to lane: each shippable in ≤ 2 days. WIP = 1 means one story in f
 - Terse instruction in → production-ready output back. Ask only when genuinely blocked;
   otherwise make the call and note it.
 - Mid-session direction choices → `decisions/` entry before session end.
-- Session end: update `SHIPLOG.md` if anything shipped or published; surface drift —
+- Session end: update `SHIPLOG.md` if anything shipped or published; raw asks heard
+  this session → `IDEAS.md` Inbox; surface drift —
   reopened settled questions, second analysis threads, spec-less features,
   infrastructure for later.
 
