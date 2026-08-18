@@ -1,0 +1,43 @@
+<%# The two provider doors. Local: native (default false).
+
+    House buttons, official marks (design review D4, story 0015): the field,
+    border, radius and type come from the token table; the providers are
+    recognisable by their logos alone. Google's G is the one non-token colour in
+    the product and DESIGN.md records the exception.
+
+    TWO SHAPES, ONE APPEARANCE, and the difference is not cosmetic.
+
+      web     a FORM posting to /auth/:provider. OmniAuth's request phase is
+              POST-only (`omniauth.rb`), which is what omniauth-rails_csrf_protection
+              guards, so a link would not start the flow at all. `turbo: false`
+              because the response is a redirect into middleware, not a
+              Turbo-navigable document.
+
+      native  a LINK to /auth/start/:provider. The shell's route decision
+              handler matches that path and opens it in an
+              ASWebAuthenticationSession instead of navigating — a form submit
+              is not a `VisitProposal` and would sail straight past it into the
+              web view, which is exactly where Google answers 403.
+
+    The native branch renders ONLY for a shell whose user agent carries a
+    version, because the version and the interception ship in the same binary.
+    `CornersController#show` owns that test; this partial owns the markup. %>
+<div class="signin__doors">
+  <% providers = [
+       [ "google_oauth2", "Continue with Google" ],
+       [ "apple",         "Continue with Apple" ]
+     ] %>
+
+  <% providers.each do |provider, label| %>
+    <% if local_assigns[:native] %>
+      <%= link_to auth_start_path(provider), class: "signin__door", data: { turbo: false } do %>
+        <%= render "sessions/provider_mark", provider: provider %><%= label %>
+      <% end %>
+    <% else %>
+      <%= button_to "/auth/#{provider}", method: :post, class: "signin__door",
+            data: { turbo: false } do %>
+        <%= render "sessions/provider_mark", provider: provider %><%= label %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

@@ -105,4 +105,32 @@ class DevicesTest < ActionDispatch::IntegrationTest
     assert_select "form[action=?]", account_path
     assert_select "form[action=?]", device_path, count: 0
   end
+  # Persona 6's screen (story 0017 Release 2, design review 3A).
+  #
+  # A reader signs in on the phone, their works move to the account, they sign
+  # out, and `/collection` is empty. The first-day copy there is written for
+  # someone who has never kept anything, and to this reader it reads as loss —
+  # half a minute after a dialog promised nothing would be deleted. `claimed_at`
+  # is the only thing that tells the two apart.
+  test "a device that handed its works to an account is told where they went" do
+    token = register_device
+    Favorite.create!(painting: paintings(:sunflowers), collector_digest: Device.digest(token))
+    user = User.create!(provider: "google_oauth2", uid: "claimer")
+    Favorite.claim!(device: Device.last, user: user)
+
+    get collection_path
+
+    assert_select ".coda__note", /with your account/
+    assert_select ".coda__note", { text: /The bookmark under each artwork/, count: 0 },
+      "the first-day copy would read as loss to this reader"
+  end
+
+  test "a device that never claimed still gets the first-day copy" do
+    register_device
+
+    get collection_path
+
+    assert_select ".coda__note", /The bookmark under each artwork/
+    assert_select ".coda__note", { text: /with your account/, count: 0 }
+  end
 end

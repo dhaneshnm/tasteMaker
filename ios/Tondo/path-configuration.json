@@ -2,26 +2,43 @@
   "settings": {},
   "rules": [
     {
-      "patterns": ["^/$"],
+      "patterns": [
+        "^/$"
+      ],
       "properties": {
         "presentation": "clear_all",
         "pull_to_refresh_enabled": true
       }
     },
     {
-      "patterns": ["^/feed$"],
+      "patterns": [
+        "^/you$"
+      ],
       "properties": {
         "pull_to_refresh_enabled": false
       }
     },
     {
-      "patterns": ["^/privacy$", "^/support$"],
+      "patterns": [
+        "^/feed$"
+      ],
       "properties": {
         "pull_to_refresh_enabled": false
       }
     },
     {
-      "patterns": ["^/admin"],
+      "patterns": [
+        "^/privacy$",
+        "^/support$"
+      ],
+      "properties": {
+        "pull_to_refresh_enabled": false
+      }
+    },
+    {
+      "patterns": [
+        "^/admin"
+      ],
       "properties": {
         "presentation": "none"
       }

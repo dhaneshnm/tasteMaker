@@ -24,6 +24,36 @@ class User < ApplicationRecord
     user
   end
 
+  # The handoff token (story 0017 Release 2).
+  #
+  # ASWebAuthenticationSession runs in a Safari-backed container with its OWN
+  # cookie jar, so the session it establishes is invisible to the WKWebView the
+  # reader returns to. Apple gives no way to share them. The way across is a
+  # short-lived token: the callback signs one into the `tondo://` redirect, the
+  # shell hands it to the web view, and `SessionsController#handoff` spends it
+  # for a real session in the jar that matters.
+  #
+  # Rails signs and expires it, so there is no table and nothing to sweep. The
+  # block's value is embedded in the token and compared on lookup, so bumping
+  # `handoff_seq` invalidates every token issued before it — which is what makes
+  # this single-use rather than merely short-lived. That matters: the token
+  # rides a custom URL scheme, and on iOS a scheme can be claimed by more than
+  # one app.
+  #
+  # 60 seconds is the whole budget for "sheet closes, shell navigates". The
+  # duration is part of the signature, so changing it invalidates outstanding
+  # tokens too.
+  generates_token_for :handoff, expires_in: 60.seconds do |user|
+    user.handoff_seq
+  end
+
+  # Spend it. `increment!` writes the counter the token embeds, so the same
+  # token cannot be presented twice — a replay lands on a payload that no longer
+  # matches and `find_by_token_for` returns nil, exactly as an expired one does.
+  def spend_handoff_tokens!
+    increment!(:handoff_seq)
+  end
+
   def provider_name
     { "google_oauth2" => "Google", "apple" => "Apple" }.fetch(provider, provider)
   end

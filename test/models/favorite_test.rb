@@ -84,4 +84,69 @@ class FavoriteTest < ActiveSupport::TestCase
     assert_not_includes Favorite.collected_by(DIGEST), theirs
     assert_not_includes Favorite.owned_by(user), mine
   end
+
+  # The claim (story 0017 Release 2). One way, once, and total.
+  def claim_setup
+    device = Device.create!(token_digest: Device.digest("claim-uuid"))
+    user = User.create!(provider: "google_oauth2", uid: "claimer")
+    [ device, user ]
+  end
+
+  test "a claim moves the device's works to the account and marks the device" do
+    device, user = claim_setup
+    Favorite.create!(collector_digest: device.token_digest, painting: paintings(:harbour))
+    Favorite.create!(collector_digest: device.token_digest, painting: paintings(:sunflowers))
+
+    assert_equal 2, Favorite.claim!(device: device, user: user)
+
+    assert_equal 2, Favorite.owned_by(user).count
+    assert_equal 0, Favorite.collected_by(device.token_digest).count
+    assert_not_nil device.reload.claimed_at
+  end
+
+  # The collision. Moving a row for a painting the account already holds would
+  # raise on the unique index, so those rows are deleted rather than merged —
+  # and the reader still ends up with exactly one copy.
+  test "a work the account already keeps is dropped, not duplicated and not raised" do
+    device, user = claim_setup
+    Favorite.create!(collector_digest: device.token_digest, painting: paintings(:harbour))
+    Favorite.create!(user: user, painting: paintings(:harbour))
+
+    assert_nothing_raised { Favorite.claim!(device: device, user: user) }
+
+    assert_equal 1, Favorite.owned_by(user).count
+    assert_equal 0, Favorite.collected_by(device.token_digest).count
+  end
+
+  # A retried handoff must not raise and must not move anything twice.
+  test "claiming again finds nothing left and says so" do
+    device, user = claim_setup
+    Favorite.create!(collector_digest: device.token_digest, painting: paintings(:harbour))
+
+    assert_equal 1, Favorite.claim!(device: device, user: user)
+    assert_equal 0, Favorite.claim!(device: device, user: user)
+    assert_equal 1, Favorite.owned_by(user).count
+  end
+
+  # A device that hands over nothing has not claimed. The empty-collection copy
+  # keys on this column, and a first-day reader must not be told their works are
+  # with an account they have never had.
+  test "claiming nothing leaves the device unmarked" do
+    device, user = claim_setup
+
+    assert_equal 0, Favorite.claim!(device: device, user: user)
+    assert_nil device.reload.claimed_at
+  end
+
+  test "the device survives its own claim and keeps working" do
+    device, user = claim_setup
+    Favorite.create!(collector_digest: device.token_digest, painting: paintings(:harbour))
+
+    Favorite.claim!(device: device, user: user)
+
+    assert Device.exists?(device.id), "the device row must outlive the claim"
+    assert_nothing_raised do
+      Favorite.create!(collector_digest: device.token_digest, painting: paintings(:sunflowers))
+    end
+  end
 end

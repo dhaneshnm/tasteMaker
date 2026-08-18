@@ -42,6 +42,30 @@
 	<key>TondoAppSecret</key>
 	<string>$(TONDO_APP_SECRET)</string>
 
+	<!-- The callback scheme the auth sheet comes home on (story 0017 Release 2).
+	     `ASWebAuthenticationSession` refuses a callbackURLScheme the app has not
+	     claimed here, so this is not optional bookkeeping — without it the sheet
+	     opens and never returns.
+
+	     Used for exactly one URL: `tondo://auth?handoff=<token>`, the redirect
+	     the OAuth callback issues instead of writing a session it cannot reach.
+	     The token is single-use and expires in 60 seconds, which is what makes
+	     the scheme safe to share: on iOS any app may claim any scheme, so a
+	     hijacker would win a race for a credential that dies on first use. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER).auth</string>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>tondo</string>
+			</array>
+		</dict>
+	</array>
+
 	<!-- Local networking only. This permits http://localhost:3000 during
 	     development without opening arbitrary cleartext to the internet, so it
 	     is safe to ship as-is. -->

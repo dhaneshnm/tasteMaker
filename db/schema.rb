@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_15_153227) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_18_152736) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -50,6 +50,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_15_153227) do
   end
 
   create_table "devices", force: :cascade do |t|
+    t.datetime "claimed_at"
     t.datetime "created_at", null: false
     t.datetime "last_seen_at"
     t.string "token_digest", null: false
@@ -99,6 +100,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_15_153227) do
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email"
+    t.integer "handoff_seq", default: 0, null: false
     t.string "name"
     t.string "provider", null: false
     t.string "uid", null: false

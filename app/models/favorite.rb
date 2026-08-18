@@ -38,4 +38,52 @@ class Favorite < ApplicationRecord
   # Not `scope :for` — `for` is a Ruby keyword and reads like a bug at the call site.
   scope :collected_by, ->(digest) { where(collector_digest: digest) }
   scope :owned_by, ->(user) { where(user: user) }
+
+  # The claim (story 0017 Release 2, decisions/0013). One way, once.
+  #
+  #   device rows                      account rows
+  #   collector_digest = sha256(uuid)  user_id = N
+  #        │                                ▲
+  #        └──── claim! ────────────────────┘
+  #              painting already kept there? the device row is DELETED
+  #              otherwise?                    it is MOVED
+  #
+  # Two statements inside one transaction, not a loop.
+  #
+  # The delete has to come first. `index_favorites_on_user_id_and_painting_id`
+  # is unique, so moving a row for a painting the account already holds raises
+  # instead of merging — and a row-at-a-time loop that raises partway leaves the
+  # collection split across both identities, which on an operation with no undo
+  # is the worst available outcome. Clearing the collisions first makes the
+  # update total.
+  #
+  # Cost is two queries whatever the size of the collection, and the transaction
+  # plus SQLite's single-writer serialization is what makes a retried handoff
+  # idempotent rather than racy: the second call finds nothing left to move.
+  #
+  # SQLITE IS LOAD-BEARING HERE. `index_favorites_on_collector_digest_and_painting_id`
+  # is unique and NOT partial, unlike its `user_id` sibling. Setting the digest
+  # to NULL on many rows at once only works because SQLite treats NULLs as
+  # distinct in a unique index. Postgres does too, but `CLAUDE.md` says Postgres
+  # needs a written reason — this is one of the lines that would have to be
+  # re-read if that ever changes.
+  #
+  # Returns the number of works that actually moved, which is what tells the
+  # caller whether the reader has a collection to be shown.
+  def self.claim!(device:, user:)
+    moved = 0
+
+    transaction do
+      mine = collected_by(device.token_digest)
+      mine.where(painting_id: owned_by(user).select(:painting_id)).delete_all
+      moved = mine.update_all(user_id: user.id, collector_digest: nil)
+    end
+
+    # Only when something moved. A device that claimed nothing has handed
+    # nothing over, and the empty-collection copy keyed on this column would
+    # otherwise tell a first-day reader their works are with an account.
+    device.update_column(:claimed_at, Time.current) if moved.positive?
+
+    moved
+  end
 end

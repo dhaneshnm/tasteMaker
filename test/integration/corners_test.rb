@@ -142,4 +142,61 @@ class CornersTest < ActionDispatch::IntegrationTest
       assert_select "a.masthead__you[href=?]", corner_path
     end
   end
+  # The sign-in doors, and the version gate that decides whether they exist
+  # (story 0017 Release 2).
+  #
+  # Rails deploys in seconds; binaries update on the reader's schedule. The
+  # version and the auth bridge ship in the SAME binary, so a shell that sends
+  # no version is one built before the transport existed — and a door there
+  # navigates the web view to Google, which answers an embedded view with 403.
+  # Presence of the version is the whole test.
+  OLD_SHELL = "#{ApplicationController::NATIVE_UA_TOKEN}; Mozilla/5.0".freeze
+  NEW_SHELL = "#{ApplicationController::NATIVE_UA_TOKEN}/1.1; Mozilla/5.0".freeze
+
+  test "a device on a shell with no version gets no doors" do
+    register_device
+
+    get corner_path, headers: { "User-Agent" => OLD_SHELL }
+
+    assert_select ".signin__door", count: 0,
+      message: "an older binary has no bridge behind the button"
+    assert_select "form[action=?]", device_path
+  end
+
+  test "a device on a versioned shell gets doors, as links the shell can intercept" do
+    register_device
+
+    get corner_path, headers: { "User-Agent" => NEW_SHELL }
+
+    assert_select "a.signin__door[href=?]", auth_start_path("google_oauth2")
+    assert_select "a.signin__door[href=?]", auth_start_path("apple")
+    # Links, not forms: the shell's route decision handler matches a navigation
+    # and cannot match a form submit.
+    assert_select "form.signin__door", count: 0
+  end
+
+  test "the web reader keeps forms, because OmniAuth's request phase is POST-only" do
+    get corner_path
+
+    assert_select "form[action=?][method=post]", "/auth/google_oauth2"
+    assert_select "a.signin__door", count: 0
+  end
+
+  # An unregistered shell has no row to claim into and registration retries on
+  # the next foreground. "Not ready" is truer than a door.
+  test "an unregistered shell gets no doors even on a versioned binary" do
+    get corner_path, headers: { "User-Agent" => NEW_SHELL }
+
+    assert_select ".signin__door", count: 0
+    assert_select ".coda__line--ask", text: "This phone is still settling in."
+  end
+
+  test "a versioned shell holding works is told what signing in costs" do
+    token = register_device
+    Favorite.create!(painting: paintings(:sunflowers), collector_digest: Device.digest(token))
+
+    get corner_path, headers: { "User-Agent" => NEW_SHELL }
+
+    assert_select ".coda__note", /stop belonging to this\s+phone/
+  end
 end

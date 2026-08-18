@@ -23,7 +23,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         Hotwire.config.defaultViewController = { LinenWebViewController(url: $0) }
         Hotwire.config.makeCustomErrorView = { LinenErrorView(error: $0, handler: $1) }
 
-        Hotwire.config.applicationUserAgentPrefix = "Tondo iOS;"
+        // The version is load-bearing, not decoration. The server reads it to
+        // decide whether this binary has the auth bridge behind its sign-in
+        // doors — Rails deploys in seconds and binaries do not, so a shell that
+        // sends no version is assumed to be one built before the transport
+        // existed and is shown no doors at all. See
+        // `ApplicationController#native_shell_version`.
+        Hotwire.config.applicationUserAgentPrefix =
+            "Tondo iOS/\(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") ?? "1");"
 
         // The only reason to touch the web view configuration in this story.
         // `Hotwire.config.makeWebView()` calls this and then initialises the
@@ -37,7 +44,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // Order matters: first match wins. Ours replaces the library's Safari
         // handler in the same slot, between app navigation and the system's
         // fallback for tel:/mailto:.
+        // Order matters: first match wins. The auth handler goes ahead of the
+        // Safari one, whose `matches` is a bare off-host test and would
+        // otherwise claim the provider's URL once the server redirected.
         Hotwire.registerRouteDecisionHandlers([
+            AuthRouteDecisionHandler(),
             AppNavigationRouteDecisionHandler(),
             LinenSafariRouteDecisionHandler(),
             SystemNavigationRouteDecisionHandler()

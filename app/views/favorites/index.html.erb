@@ -13,7 +13,21 @@
         (`decisions/0010`). With the labels gone this is the only place in the
         product that can tell a first-time reader what that mark does, so it names
         the shape rather than describing an action. %>
-    <p class="coda__note">The bookmark under each artwork keeps it here.</p>
+    <% if current_device&.claimed_at %>
+      <%# The state this whole story's copy effort exists for (story 0017
+          Release 2, design review 3A). A reader signed in, their works moved to
+          the account, they signed out, and this page is now empty. The line
+          above is written for someone who has never kept anything, and to this
+          reader it reads as loss — thirty seconds after a dialog told them
+          nothing would be deleted.
+
+          `claimed_at` is the only way to tell the two apart: same empty
+          collection, same device, entirely different sentence owed. %>
+      <p class="coda__note">Your kept works are with your account. Sign in and
+        they come back — nothing was deleted.</p>
+    <% else %>
+      <p class="coda__note">The bookmark under each artwork keeps it here.</p>
+    <% end %>
     <%# ISSUE-001 was this page offering only `Today →`, stranding a reader who
         arrived with nothing kept. The compass answers it now, and answers it on
         every screen rather than one at a time. %>

@@ -22,6 +22,18 @@ Rails.application.routes.draw do
   # an anonymous error-tracker flood. Now it is a plain 404 (code review F3).
   match "auth/:provider/callback" => "sessions#create", via: %i[get post],
     constraints: { provider: /google_oauth2|apple/ }
+  # The auth sheet's entry and exit (story 0017 Release 2). Both GET, because
+  # ASWebAuthenticationSession can only open a URL: `start` turns that into the
+  # POST OmniAuth requires, and `handoff` spends the token that carries the
+  # session back into the web view's cookie jar.
+  #
+  # Constrained to the two real providers for the same reason the callback is —
+  # an unregistered name would otherwise render a form posting into middleware
+  # that ignores it.
+  get "auth/start/:provider" => "sessions#start", as: :auth_start,
+    constraints: { provider: /google_oauth2|apple/ }
+  get "session/handoff" => "sessions#handoff", as: :session_handoff
+
   get "auth/failure" => "sessions#failure"
   delete "session" => "sessions#destroy", as: :session
 

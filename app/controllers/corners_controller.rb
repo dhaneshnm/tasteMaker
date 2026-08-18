@@ -62,6 +62,24 @@ class CornersController < ApplicationController
     # `identified?` is the wall's own predicate, so there is now one definition
     # and any future identity answers it for free.
     @locked = identified? ? [] : helpers.walled_compass_keys
+
+    # Whether the sign-in doors render at all (story 0017 Release 2).
+    #
+    # A web visitor with no identity always gets them. A registered device gets
+    # them only from a shell that carries a VERSION in its user agent, because
+    # the version and the auth bridge ship in the same binary — an older shell
+    # has no `ASWebAuthenticationSession` behind the button, and a tap would
+    # navigate the web view to Google, which answers an embedded view with
+    # `403 disallowed_useragent`.
+    #
+    # This is the whole reason `native_shell_version` exists. Rails deploys in
+    # seconds and binaries do not, so the server has to assume every shell in
+    # the wild is the old one until it says otherwise.
+    #
+    # `:shell` — registered nothing yet — gets no doors either. It has no row to
+    # claim into and registration retries on the next foreground; "not ready"
+    # is a truer thing to show than a door.
+    @doors = @state == :signed_out || (@state == :device && bridge_capable_shell?)
   end
 
   private

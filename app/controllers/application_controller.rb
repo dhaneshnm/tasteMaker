@@ -183,6 +183,29 @@ class ApplicationController < ActionController::Base
       request.user_agent.to_s.include?(NATIVE_UA_TOKEN)
     end
 
+    # Which shell, not just whether. Story 0017 Release 2.
+    #
+    # `AppDelegate.swift` used to set `applicationUserAgentPrefix = "Tondo iOS;"`
+    # with no version, and the comment above claimed otherwise — the version
+    # existed only on `DeviceIdentity`'s registration request, never on the web
+    # view. So there was no way for the server to tell one binary from another.
+    #
+    # That is not cosmetic. Rails deploys in seconds; binaries update on the
+    # reader's schedule. The moment the server turns the sign-in doors on for a
+    # device, every shell already installed renders them — including the ones
+    # with no bridge behind them, where a tap reaches Google and comes back 403.
+    #
+    # The version and the bridge ship in the SAME binary, so presence is the
+    # whole test: no version means a shell built before the transport existed,
+    # and it gets no doors. Nothing to coordinate, no flag to remember to flip.
+    def native_shell_version
+      request.user_agent.to_s[%r{#{Regexp.escape(NATIVE_UA_TOKEN)}/([\d.]+)}, 1]
+    end
+
+    def bridge_capable_shell?
+      native_shell_version.present?
+    end
+
     # A gated page that still revalidates: private (Thruster must not hold a
     # gated body — a shared cache entry outlives a sign-out), no-cache (every
     # request revalidates), expressed via `extras` because Rails' no_cache
