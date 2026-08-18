@@ -39,4 +39,20 @@ class UserTest < ActiveSupport::TestCase
     assert_equal "Google", User.new(provider: "google_oauth2").provider_name
     assert_equal "Apple", User.new(provider: "apple").provider_name
   end
+
+  # Apple's Hide My Email can withhold the address, and a reader who declines
+  # the scope leaves it nil — so the branch that drops "as …" is the one worth
+  # pinning. Two screens print this string: the corner, where the account is
+  # administered, and the foot of the collection.
+  test "the identity line names the provider, and the address only when there is one" do
+    user = User.from_omniauth(auth(provider: "google_oauth2", email: "maya@example.com"))
+    assert_equal "Google as maya@example.com", user.signed_in_summary
+
+    user.update!(email: nil)
+    assert_equal "Google", user.signed_in_summary
+
+    user.update!(email: "   ")
+    assert_equal "Google", user.signed_in_summary,
+      "a blank address is not an address"
+  end
 end

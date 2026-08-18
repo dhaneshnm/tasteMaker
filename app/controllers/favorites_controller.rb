@@ -143,8 +143,12 @@ class FavoritesController < ApplicationController
       # behind the wall.
       collection = identified? ? reader_favorites : Favorite.none
 
+      # An unidentified caller is always the eager frame's initial GET, never a
+      # write, and `_control.html.erb` states the rule: a fragment arriving
+      # unbidden must not steal focus. Pinned here rather than left to the
+      # accident that `#control` happens to pass the default.
       render partial: "favorites/control", locals: {
-        painting: @painting, autofocus: autofocus,
+        painting: @painting, autofocus: autofocus && collection.present?,
         kept: kept.nil? ? collection.exists?(painting: @painting) : kept,
         count: collection.count
       }

@@ -108,9 +108,14 @@
       would turn a forgotten local into a silent "nothing is marked", which is
       the same defect the helper raises about, one level up. %>
   <% if local_assigns.fetch(:compass, true) %>
-    <%# `locked:` defaults to [] and only `/you` ever passes it — see
-        `compass_destinations`. It must never reach a publicly cached page. %>
+    <%# `locked:` is `/you`'s alone — see `compass_destinations`. It must never
+        reach a publicly cached page.
+
+        `Array()` rather than `fetch(:locked, [])`: `fetch`'s default only fires
+        when the key is ABSENT, and `/you` always passes the key. A nil
+        `@locked` would reach the helper and raise on `nil - COMPASS_KEYS`, a
+        500 on the one page a bounced visitor lands on. %>
     <%= render "shared/compass", here: local_assigns.fetch(:here),
-          locked: local_assigns.fetch(:locked, []) %>
+          locked: Array(local_assigns[:locked]) %>
   <% end %>
 </header>

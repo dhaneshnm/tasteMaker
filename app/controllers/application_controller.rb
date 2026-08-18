@@ -73,20 +73,26 @@ class ApplicationController < ActionController::Base
     def require_reader
       return if identified?
 
-      # A frame WRITE cannot follow the bounce usefully: Turbo would fetch
-      # `/`, find no frame matching (say) `keep_42`, and swap in "Content
-      # missing" — a silent hole where the habit mechanic was, for the reader
-      # whose identity died mid-page (signed out elsewhere, device revoked).
-      # Answer those in kind: a matching frame whose one link breaks out to
-      # the corner (code review F5).
+      # ANY frame request, read or write. Turbo replaces a frame's children with
+      # whatever matching frame it finds in the response, so a redirect to a
+      # page that carries no such frame writes "Content missing" into it — a
+      # silent hole where a control was, for the reader whose identity died
+      # mid-page (signed out elsewhere, device revoked). Answer in kind: a
+      # matching frame whose one link breaks out to the corner.
       #
-      # Frame GETs never reach here any more. `favorites#control` skips the wall
-      # and answers the null state itself — the keep frame on `/` is eager, and
-      # bouncing it wrote "Content missing" over the resting mark. The claim
-      # that used to sit here, that a failed frame load keeps its default
-      # content, was only ever true because the bounce happened to land on a
-      # page carrying the same frame.
-      if turbo_frame_request? && !request.get?
+      # This used to be writes only, on the claim that "a lazy frame's failed
+      # load keeps its default content". That was never true on merit — it held
+      # because the bounce landed on `/`, which happens to carry a `keep_<id>`
+      # frame for today's painting, so Turbo swapped in that page's identical
+      # placeholder. Story 0017 retargeted the bounce to `/you` and the accident
+      # stopped paying.
+      #
+      # The keep frame no longer arrives here at all (`favorites#control` skips
+      # the wall and answers its own null state). `/feed`'s pagination sentinel
+      # still does: `paintings/_page.html.erb:5` is a lazy frame GET and
+      # `PaintingsController` is walled, so a device revoked mid-scroll lands
+      # here. It gets a way back rather than the words "Content missing".
+      if turbo_frame_request?
         render html: helpers.turbo_frame_tag(request.headers["Turbo-Frame"]) {
           helpers.link_to "Sign in", corner_path,
             class: "caps-link", data: { turbo_frame: "_top" }
@@ -137,8 +143,13 @@ class ApplicationController < ActionController::Base
     # a reader with no identity is sent — so it is the first caller that can
     # reach here with neither key, and `current_device.token_digest` on nil is
     # a 500 on the one page a bounced visitor lands on.
+    # A boolean, deliberately. This is now the one named answer to "does this
+    # request have an identity", referenced by name from CornersController, the
+    # compass helper and the tests — so it returns a flag rather than whichever
+    # record happened to match. `.present?` costs nothing and keeps the return
+    # type part of the contract instead of a detail of the last `||`.
     def identified?
-      current_user || current_device
+      current_user.present? || current_device.present?
     end
 
     def reader_favorites

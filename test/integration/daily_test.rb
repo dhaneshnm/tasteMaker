@@ -173,10 +173,14 @@ class DailyTest < ActionDispatch::IntegrationTest
         # Pair each name with where it goes, then de-duplicate on the PAIR. Two
         # links to one destination collapse to a single entry and stop being a
         # duplicate name; two links to different places, or any two buttons,
-        # survive and still fail. A button has no href to prove it does the same
-        # thing as another, so it gets its own node path and is never its own
-        # twin.
-        [ name, el.name == "a" ? el["href"] : el.path ] if name
+        # survive and still fail.
+        #
+        # `el.path` — the node's own XPath — is the destination for anything
+        # that cannot prove one: a button, which has no href at all, and a link
+        # whose href is blank, which proves nothing about where it goes. Both
+        # are then unique per element and can never be their own twin.
+        destination = el["href"].presence if el.name == "a"
+        [ name, destination || el.path ] if name
       end
 
       duplicates = controls.uniq.map(&:first).tally.select { |_, count| count > 1 }.keys

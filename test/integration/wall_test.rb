@@ -153,6 +153,20 @@ class WallTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", corner_path, text: "Sign in"
   end
 
+  # The other walled frame GET, and the one the keep-frame fix does not cover.
+  # `paintings/_page.html.erb:5` is a lazy sentinel that fetches the next page of
+  # the gallery, and `PaintingsController` is walled — so a device revoked
+  # mid-scroll issues a frame GET that used to redirect to a page carrying no
+  # matching frame, and Turbo wrote "Content missing" where the scroll should be.
+  # Found by /code-review on 2026-08-17.
+  test "a walled frame read gets a way back, not the words Content missing" do
+    get feed_path(page: 2), headers: { "Turbo-Frame" => "feed-page-2" }
+
+    assert_response :unauthorized
+    assert_select "turbo-frame#feed-page-2", count: 1
+    assert_select "a[href=?]", corner_path, text: "Sign in"
+  end
+
   test "an unidentified frame read gets the null keep state, not a bounce" do
     frame = "keep_#{paintings(:sunflowers).id}"
 

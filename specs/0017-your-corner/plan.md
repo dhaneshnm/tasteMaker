@@ -381,7 +381,7 @@ the whole persona-6 copy effort exists for, and neither was on a screen.
 
 ## What already exists — reuse, do not invent
 
-`.coda` / `.coda__line` / `.coda__note` · `.caps-link` · `.signin` + `.signin__door` +
+`.coda` / `.coda__line` / `.coda__note` · `.caps-link` · `.signin__doors` + `.signin__door` +
 `.signin__mark` · `.account__delete` + `.account__form` · `.ornament` · `.legal` ·
 `.page--empty` · `.masthead` grid + `.masthead__aside` · the `.rail__act` glyph
 contract (23px box, 1.4px stroke, `--gold`, 44px target) · `compass_destinations`
@@ -703,8 +703,11 @@ review and the outside voice missed it. No new test written.
 - The oculus is inline in `_masthead` via `shared/_oculus`, not a
   `_account_glyph` partial; one caller, one name.
 - No new control classes. `.signin__out` and `.account__delete` already carried
-  the exact treatment, so `/you` reuses them; only `.corner__consequence` and
-  `.coda__doors`/`.corner__doors` are new.
+  the exact treatment, so `/you` reuses them. `.corner__consequence` was new for
+  about a day; `/simplify` folded it into `.coda__line--ask`, a modifier on the
+  closing-line voice, because it had restated five of `.coda__line`'s
+  declarations to change three. What is genuinely new is `.coda__doors` /
+  `.corner__doors` and that modifier.
 - `identified?` was added to `ApplicationController` alongside the promoted
   `reader_favorites`, because `CornersController` and now `favorites#control`
   can both reach it with neither key.

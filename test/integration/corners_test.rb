@@ -106,18 +106,17 @@ class CornersTest < ActionDispatch::IntegrationTest
   # state this story added a whole branch for rendered exactly the dead-control
   # loop `locked:` exists to prevent. Measured before the fix: 4 links, 0 locked.
   #
-  # Asserted against `identified?`'s two answers rather than against the four
-  # render states, because that is the rule.
+  # The signed-out web reader is covered above; this is the state that was
+  # broken. `locked:` now comes from `identified?`, so the two answer alike.
   # Found by /simplify on 2026-08-17.
-  test "every unidentified reader sees the shut doors, not just the web one" do
-    [ {}, { "User-Agent" => "#{ApplicationController::NATIVE_UA_TOKEN}; Mozilla/5.0" } ].each do |headers|
-      get corner_path, headers: headers
+  test "the UNREGISTERED shell sees the shut doors too" do
+    get corner_path,
+      headers: { "User-Agent" => "#{ApplicationController::NATIVE_UA_TOKEN}; Mozilla/5.0" }
 
-      assert_select ".compass a.caps-link", count: 1,
-        message: "only Today should be a link for an unidentified reader (#{headers.inspect})"
-      assert_select "span.compass__here", count: 3,
-        message: "Days, Kept and Gallery must read as gated, not broken (#{headers.inspect})"
-    end
+    assert_select ".compass a.caps-link", count: 1,
+      message: "only Today should be a link for a shell with no device row"
+    assert_select "span.compass__here", count: 3,
+      message: "Days, Kept and Gallery must read as gated, not broken"
   end
 
   # The mark rides the bar on every screen that has one, and on the corner

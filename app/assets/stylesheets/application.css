@@ -307,10 +307,11 @@ a:hover { color: var(--gold-deep); }
  * already measures over a touch target at the accessibility cap, so a 44px box
  * across it adds nothing to a bar the front door has 9px of fold to spare on.
  *
- * `min-width` as well as `min-height`, both `--tap`, and stated here rather
- * than inherited from the 44px list above. That list gets width for free from
- * the words inside a caps-link; this has no words, the same reason `.rail__act`
- * states its own width. `DESIGN.md` rule 9 is every direction it has.
+ * Height comes from the 44px registry below, which this class joins. WIDTH does
+ * not: that registry gets width for free from the words inside a caps-link, and
+ * a glyph has none — so `.masthead__you` sits with `.rail__act` in the
+ * wordless-control rule further down, which states `min-width` once for both.
+ * `DESIGN.md` rule 9 is every direction it has.
  *
  * `justify-self: end` so the box hugs the right edge — without it the column is
  * `auto`-sized and the glyph floats in the middle of its own target. */
@@ -318,8 +319,6 @@ a:hover { color: var(--gold-deep); }
   grid-area: you;
   align-self: center;
   justify-self: end;
-  min-width: var(--tap);
-  justify-content: center;
   color: var(--gold);
 }
 
@@ -1048,9 +1047,11 @@ a:hover { color: var(--gold-deep); }
  * the same shape of assumption that shipped 15px targets in ISSUE-002. */
 .rail__form { display: contents; }
 
-/* Height and the bare-button reset both come from the blocks above. Width is
- * stated here because rule 9 has always got width for free from the words inside
- * a caps-link, and these have no words (`decisions/0010`). */
+/* The wordless controls. Height and the bare-button reset come from the blocks
+ * above; width is stated here, because rule 9 has always got width for free
+ * from the words inside a caps-link and these have none (`decisions/0010`).
+ * Once, for both the rail's glyphs and the masthead's corner. */
+.masthead__you,
 .rail__act {
   justify-content: center;
   min-width: var(--tap);
