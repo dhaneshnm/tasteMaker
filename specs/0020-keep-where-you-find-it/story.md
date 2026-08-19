@@ -1,7 +1,9 @@
 # 0020 — Keep where you find it
 Date: 2026-08-19
 Lane: **Express (same-day, reversible).** One shared partial, two controllers, one CSS term.
-Status: Draft — **ready to build. The WIP slot is free.**
+Status: **Shipped — code only, not deployed** (`b9a6727`, `bin/ci` green). See
+`SHIPLOG.md` 2026-08-19 for the full receipt and `plan.md`'s Deviations for what
+changed during build.
 
 Numbered 0020, not 0019: the coverage fill split out of 0018 took 0019 and shipped
 (`specs/0019-the-coverage-fill`, deployed 2026-08-19). This spec was drafted while that
