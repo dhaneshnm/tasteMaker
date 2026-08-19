@@ -51,14 +51,33 @@ module Pool
     # Anonymous works are not one prolific artist: an empty name falls back to
     # the work's own identity, so the per-artist ceiling cannot collapse every
     # unattributed painting in four museums into a single bucket.
+    #
+    # `parameterize`, not `downcase.gsub(/[^a-z0-9]/, "")` — story 0019 (C3),
+    # fixing eng review E1 from story 0018. The old normalization DELETED
+    # accented characters where `parameterize` transliterates them, so "Paul
+    # Cézanne" keyed as `paulcznne` and "Paul Cezanne" as `paulcezanne`: two
+    # buckets, MAX_PER_ARTIST each, and the 9-work artist page story 0018
+    # measured but could not fix in an app-only release. `Painting.
+    # artist_slug_for` has always used `parameterize`, so the page grouped what
+    # the ceiling did not. One normalization now; measured max works per slug
+    # 9 -> 5.
+    #
+    # The `NOT_AN_ARTIST` deny-list deliberately stays OUT of this. It belongs
+    # to linkability, not to the ceiling: if a deny-listed string keyed as nil
+    # it would fall to the `anon:` branch below, every "China" row would become
+    # its own bucket, and the ceiling would stop capping culture-as-artist rows
+    # altogether — the opposite of what the cap is for.
     def artist_key
-      normalised = artist.to_s.downcase.gsub(/[^a-z0-9]/, "")
-      normalised.presence || "anon:#{source}:#{source_id}"
+      @artist_key ||= artist.to_s.parameterize.presence || "anon:#{source}:#{source_id}"
     end
 
     # Two museums holding the same painting is one painting.
+    #
+    # Same transliteration fix, same reason (story 0019 C3; deferred finding 2
+    # in IDEAS.md): under the old normalization an accented and an unaccented
+    # spelling of one title never deduped, so both copies shipped.
     def dedup_key
-      [ title.to_s.downcase.gsub(/[^a-z0-9]/, ""), artist.to_s.downcase.gsub(/[^a-z0-9]/, "") ].join("|")
+      @dedup_key ||= [ title.to_s.parameterize, artist.to_s.parameterize ].join("|")
     end
 
     def to_manifest
@@ -159,6 +178,35 @@ module Pool
     when "oceania" then "oceania"
     else "unknown"
     end
+  end
+
+  # Does this artist string look like a place or a culture rather than a hand?
+  #
+  # `Painting::NOT_AN_ARTIST` is a deny-list of EXACT strings, so it can only
+  # ever know the placeholders somebody already found. This is the shape rule
+  # that finds the next one: it reuses `PLACES` — the same vocabulary and the
+  # same whole-word regex `region_for` uses — so a new source cannot introduce
+  # a place word this does not already know.
+  #
+  # Bounded at four tokens because a title-length attribution ("Northern
+  # Europe (active England)") is a place and a real name is not: past four
+  # tokens the string is a compound attribution, which story 0018 settled is
+  # grouped verbatim rather than reinterpreted.
+  #
+  # A REPORTED signal, not a rule that suppresses anything on its own —
+  # "Ugolino da Siena" and "Mewar Stipple Master" are painters named for
+  # places, and only a human can tell them from "India (Calcutta)".
+  PLACE_WORDS = PLACES.values.flatten.to_set.freeze
+
+  def self.place_shaped?(artist)
+    base = artist.to_s.gsub(/\([^)]*\)/, " ").squish
+    return false if base.blank?
+
+    tokens = base.downcase.scan(/[[:alpha:]]+/)
+    return false if tokens.empty? || tokens.size > 4
+
+    tokens.any? { |token| PLACE_WORDS.include?(token) } ||
+      PLACE_WORDS.any? { |place| place.include?(" ") && base.downcase.match?(/\b#{Regexp.escape(place)}\b/) }
   end
 
   # Museum date fields are prose ("c. 1570–75", "Edo period (1615–1868)"). The

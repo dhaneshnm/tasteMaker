@@ -26,6 +26,9 @@ module Pool
     MIN_TEXT_SHARE   = 0.70  # story 0005's fallback needs something to fall back to
 
     attr_reader :selected, :rejected
+    # Story 0019: what the recognizable-name stage actually managed, per name,
+    # and any museum slug two names' alias sets both claimed.
+    attr_reader :recognizable, :collisions
 
     # `resolver` is called on a candidate the moment it is about to be taken,
     # and may veto it. The Met needs this: its CSV carries no image URL and no
@@ -44,6 +47,8 @@ module Pool
       @regions = Hash.new(0)
       @highlights = 0
       @rejected = Hash.new(0)
+      @recognizable = {}
+      @collisions = []
     end
 
     def curate!
@@ -52,6 +57,7 @@ module Pool
 
       queue = ordered(pool)
 
+      fill_recognizable(queue)
       fill_scarce_regions(queue)
       fill(queue, floor(MIN_POST_1900)) { |c| c.year.to_i >= 1900 }
       fill(queue, highlight_target, &:highlight?)
@@ -143,6 +149,40 @@ module Pool
         @sources[candidate.source] < (@target * MAX_SOURCE_SHARE).to_i &&
         @regions[candidate.region] < (@target * MAX_REGION_SHARE).to_i &&
         (!candidate.highlight? || @highlights < highlight_target)
+    end
+
+    # Story 0019. The names a visitor already knows, taken FIRST — before
+    # anything else claims a slot.
+    #
+    # Order is the whole mechanism. The quota table optimises range, era and
+    # readable text, and is blind to whether anybody has heard of the artist,
+    # so a pool it curates can hold 2,000 paintings and no Vermeer, no Hokusai
+    # and no Hiroshige while all three sit unused in the mirrors — which is
+    # exactly what shipped. Running this stage first spends the caps on
+    # recognizable work; the existing stages then restore every floor over
+    # what is left.
+    #
+    # It cannot break a bar. Every take goes through `room_for?` like every
+    # other stage, so the fill can only come out INCOMPLETE, never invalid —
+    # and `pool:coverage` prints by how much. That is also why no TARGET growth
+    # is needed: this substitutes recognizable Europeans for arbitrary ones
+    # inside Europe's existing 25% budget rather than adding to it.
+    def fill_recognizable(queue)
+      @recognizable = {}
+      @collisions = []
+      return unless Recognizable.available?
+
+      matches, @collisions = Recognizable.match(queue)
+      matches.each do |match|
+        taken = 0
+        match.works.each do |candidate|
+          break if taken >= Recognizable::DEPTH
+
+          taken += 1 if take(candidate)
+        end
+        @recognizable[match.name] = { taken:, available: match.total, pages: match.pages,
+                                      primary_slug: match.primary_slug }
+      end
     end
 
     # Scarce regions first, because a floor met by luck is not met. Africa,

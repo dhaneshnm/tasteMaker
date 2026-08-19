@@ -90,6 +90,10 @@ module Pool
 
         #{range_note}
 
+        #{recognizable_section}
+
+        #{place_as_artist_section}
+
         ## Rejected before selection
 
         #{rejection_rows}
@@ -97,6 +101,84 @@ module Pool
     end
 
     private
+
+    # Story 0019. What the recognizable-name stage managed, and where it fell
+    # short — a name the mirrors can only supply one work for gets one, and
+    # that is supply, not a bug. Printed so the difference stays visible.
+    def recognizable_section
+      filled = @curator.recognizable
+      return "" if filled.blank?
+
+      short = filled.select { |_, r| r[:taken] < Recognizable::DEPTH }
+      missed = filled.select { |_, r| r[:taken].zero? }
+      lines = [ "## Recognizable names (story 0019)", "" ]
+      lines << "#{filled.size} of #{Recognizable.names.size} names on the 0007 list matched a candidate; " \
+               "#{filled.sum { |_, r| r[:taken] }} works taken at a depth target of #{Recognizable::DEPTH}."
+      lines << ""
+      if missed.any?
+        lines << "**#{missed.size} matched but took nothing** — every candidate was refused by a cap " \
+                 "(`room_for?`), which is the fill failing to be complete rather than a bar breaking:"
+        lines << ""
+        missed.keys.first(20).each { |name| lines << "- #{name}" }
+        lines << ""
+      end
+      capped = short.reject { |name, _| missed.key?(name) }
+      if capped.any?
+        lines << "#{capped.size} name(s) below the depth target, supply-limited or capped:"
+        lines << ""
+        capped.first(20).each { |name, r| lines << "- #{name} — #{r[:taken]} of #{r[:available]} available" }
+        lines << ""
+      end
+      if @curator.collisions.present?
+        lines << "**Alias collisions:** " +
+                 @curator.collisions.map { |x| "`#{x[:slug]}` kept #{x[:kept]}, dropped #{x[:dropped]}" }.join("; ")
+        lines << ""
+      end
+      lines.join("\n")
+    end
+
+    # The deny-list's one structural gap, made visible (IDEAS.md deferred
+    # finding 3). `Painting::NOT_AN_ARTIST` is a list of exact strings, so a
+    # place or culture string a future source introduces becomes a live artist
+    # page silently, with no test and no handling.
+    #
+    # TWO rules, because the first draft had only the "single-word slug holding
+    # more than one work" rule and the eng review measured it: **12 of 12 false
+    # positives and 0 of 30 true positives** on the shipped manifest. Museums do
+    # not write culture-as-artist as a bare single word — they qualify it
+    # ("India (Calcutta)", 5 works live) or inflect it ("Spanish", "Ancient
+    # Egyptian"). The rule flagged Govardhan, Chokha, Fayzullah, Purkhu and
+    # Basavana, who are real Mughal and Pahari painters, and missed all 49 works
+    # over 31 strings that are actually places.
+    #
+    # Both stay REPORTED lines, never assertions: two of the 31 — "Mewar Stipple
+    # Master" and "Ugolino da Siena" — are real painters named for a place, so
+    # only a human can finish the call. The pass extends `NOT_AN_ARTIST` before
+    # `db:seed`, which is the loop story 0018's E2 established.
+    def place_as_artist_section
+      slugs = @works.filter_map { |c| Painting.artist_slug_for(c.artist) }
+      single = slugs.tally.select { |slug, _| slug.exclude?("-") }.sort_by { |_, count| -count }
+      placey = @works.map(&:artist).compact.select { |name| Pool.place_shaped?(name) }
+                     .tally.sort_by { |_, count| -count }
+      return "" if single.empty? && placey.empty?
+
+      [
+        "## Artist strings that may not be artists",
+        "",
+        "Read both lists before seeding. A place or culture string here is `Painting::NOT_AN_ARTIST` " \
+        "missing an entry, and it ships as a live `/artists/:slug` page.",
+        "",
+        "**Single-word slugs** (#{single.size}) — mostly real one-word painters; scan for a country:",
+        "",
+        single.map { |slug, count| "- `#{slug}` — #{count}" }.join("\n"),
+        "",
+        "**Strings containing a place or culture word** (#{placey.size} strings, " \
+        "#{placey.sum(&:last)} works) — the rule that actually catches the defect:",
+        "",
+        placey.map { |name, count| "- #{name.inspect} — #{count}" }.join("\n"),
+        ""
+      ].join("\n")
+    end
 
     def share(count) = "#{(100.0 * count / @works.size).round(1)}%"
 

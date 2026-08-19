@@ -25,15 +25,41 @@ namespace :pool do
     end
   end
 
-  desc "Curate the mirror down to the shipped pool (manifest + report)"
-  task curate: :environment do
-    candidates = Pool::Sources.all.keys.flat_map do |name|
+  # Both `curate` and `coverage` read the same four files; keeping one loader
+  # means the coverage report can never be measured against a different mirror
+  # than the curation it is judging.
+  def mirror_candidates
+    Pool::Sources.all.keys.flat_map do |name|
       path = Pool::MIRROR_DIR.join("#{name}.json")
       raise "no mirror for #{name} — run bin/rails pool:mirror first" unless path.exist?
 
       JSON.parse(path.read).map { |row| Pool::Candidate.new(**row.symbolize_keys) }
     end
+  end
+
+  # Every 0007 row carries a hand-decided `rights` value. Without it a name
+  # absent from the mirrors cannot be told from a name in copyright — all four
+  # sources are already public-domain-filtered at fetch, so mirror-absence
+  # discriminates nothing.
+  def abort_on_missing_rights
+    missing = Pool::Recognizable.rows_missing_rights
+    return if missing.empty?
+
+    abort "#{missing.size} recognizable name(s) carry no `rights` (#{Pool::Recognizable::RIGHTS.join('/')}): " \
+          "#{missing.first(8).map { |e| e['name'] }.join(', ')}#{'…' if missing.size > 8}"
+  end
+
+  desc "Curate the mirror down to the shipped pool (manifest + report)"
+  task curate: :environment do
+    candidates = mirror_candidates
     puts "#{candidates.size} candidates from #{Pool::Sources.all.size} museums"
+    if Pool::Recognizable.available?
+      abort_on_missing_rights
+      puts "#{Pool::Recognizable.names.size} recognizable names loaded (story 0019)"
+    else
+      warn "  ⚠ no recognizable-name list at #{Pool::Recognizable::LIST.relative_path_from(Rails.root)} — " \
+           "curating WITHOUT the coverage fill. See specs/0019-the-coverage-fill/plan.md step 1."
+    end
 
     resolved = 0
     curator = Pool::Curator.new(
@@ -81,5 +107,25 @@ namespace :pool do
     puts Pool::REPORT.read
     puts
     puts Pool::Report.artist_slug_section
+  end
+
+  # Story 0019. Run it BEFORE re-curating to get the baseline, and after to get
+  # the receipt — the story's first success signal is the difference between
+  # the two, so both have to be producible on demand from committed files.
+  desc "Report recognizable-name coverage of the committed manifest (story 0019)"
+  task coverage: :environment do
+    unless Pool::Recognizable.available?
+      abort "no recognizable-name list — see specs/0019-the-coverage-fill/plan.md step 1"
+    end
+    abort_on_missing_rights
+
+    raw = mirror_candidates
+    scratch = Pool::Curator.new(raw)
+    usable = scratch.dedup(scratch.reject_unusable(raw))
+
+    coverage = Pool::Coverage.new(
+      manifest: JSON.parse(Pool::MANIFEST.read), usable:, raw:
+    )
+    puts coverage.to_markdown
   end
 end

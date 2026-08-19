@@ -9,6 +9,25 @@ require "test_helper"
 class PoolQuotaTest < ActiveSupport::TestCase
   POOL = JSON.parse(Pool::MANIFEST.read).freeze
 
+  # Built once for the whole file: it reads all four mirrors, which is slow
+  # enough that doing it per test would be felt.
+  #
+  # `tmp/pool` is gitignored, so GitHub CI has no mirrors. The first draft
+  # degraded to an empty candidate list here, which made every name fall out of
+  # `fillable`, which made `reachable_share` return a perfect 1.0 — this
+  # story's central forcing function passing by measuring nothing, in the only
+  # place it ever runs unattended (eng review finding 1). The mirrors are now
+  # either present or the test says so out loud.
+  MIRRORS = Pool::Sources.all.keys.map { |name| Pool::MIRROR_DIR.join("#{name}.json") }.freeze
+
+  POOL_COVERAGE = begin
+    if MIRRORS.all?(&:exist?)
+      raw = MIRRORS.flat_map { |path| JSON.parse(path.read).map { |row| Pool::Candidate.new(**row.symbolize_keys) } }
+      scratch = Pool::Curator.new(raw)
+      Pool::Coverage.new(manifest: POOL, usable: scratch.dedup(scratch.reject_unusable(raw)), raw: raw)
+    end
+  end
+
   def share(count) = count.to_f / POOL.size
 
   test "the manifest is the pool the story asked for" do
@@ -103,5 +122,55 @@ class PoolQuotaTest < ActiveSupport::TestCase
     assert Pool::REPORT.exist?, "pool_report.md is missing — run bin/rails pool:curate"
     assert_includes Pool::REPORT.read, "#{POOL.size} paintings",
       "the report is stale against the manifest"
+  end
+
+  # Story 0019, success signal 3. `MAX_PER_ARTIST` was enforced on `artist_key`
+  # while the artist page grouped on `Painting.artist_slug_for`, and the two
+  # normalizations disagreed: "Paul Cézanne" and "Paul Cezanne" keyed apart and
+  # kept the full ceiling each, so the shipped pool carried NINE works by one
+  # man on one page. Story 0018 could only report that number (eng review X2)
+  # because unifying the keys changes which works survive curation. This story
+  # re-curates, so it becomes an assertion.
+  test "no artist page holds more than the ceiling, counted the way the page counts" do
+    counts = POOL.filter_map { |w| Painting.artist_slug_for(w["artist"]) }
+                 .tally
+    worst, count = counts.max_by { |_, c| c }
+
+    assert_operator count, :<=, Pool::Curator::MAX_PER_ARTIST,
+      "/artists/#{worst} would show #{count} works"
+  end
+
+  # The fill is only real if a later reseed cannot silently drop it. Stated
+  # against the same code `bin/rails pool:coverage` prints, so the number in
+  # the report and the number in the suite cannot drift.
+  test "the pool holds the recognizable names these collections can actually supply" do
+    skip "no mirrors on disk — run bin/rails pool:mirror" if POOL_COVERAGE.nil?
+    skip "no recognizable-name list committed yet" unless Pool::Recognizable.available?
+
+    missing = POOL_COVERAGE.rows.select { |row| row.bucket == :fillable }
+    share = POOL_COVERAGE.reachable_share
+
+    assert_not_nil share, "no recognizable name is reachable at all — the matcher or the list is broken"
+    assert_operator share, :>=, 0.90,
+      "#{missing.size} recognizable name(s) the mirrors hold are absent from the pool: " +
+      missing.first(10).map(&:name).join(", ") +
+      " (a Met-only name is provisional — its plate is only knowable at selection time)"
+  end
+
+  # Story 0018's E2 found culture-as-artist by sampling, `/qa` found museum
+  # placeholders the same way, and both missed the rest: 49 works over 31
+  # strings were shipping as live `/artists/:slug` pages — `/artists/india-calcutta`
+  # with 5 of them. This is the assertion those two rounds lacked. Narrow on
+  # purpose: only a string that IS a place word, so it can be made green by
+  # extending the deny-list and cannot fire on a painter named for a place.
+  test "no artist string that is simply a place name resolves to an artist page" do
+    live = POOL.map { |w| w["artist"] }.compact
+               .select { |name| Pool::PLACE_WORDS.include?(name.downcase.strip) }
+               .select { |name| Painting.artist_slug_for(name).present? }
+               .tally
+
+    assert_empty live,
+      "these are places, not painters, and each one ships as a live artist page — " \
+      "add them to Painting::NOT_AN_ARTIST"
   end
 end

@@ -8,6 +8,7 @@ ENV["CURATOR_PASSWORD"] ||= "test-curator-password"
 ENV["TONDO_APP_SECRET"] ||= "test-tondo-app-secret"
 require_relative "../config/environment"
 require "rails/test_help"
+require "tempfile"
 
 # Every provider is mocked for the whole suite (story 0015): a real OAuth
 # round-trip needs Google's or Apple's servers, and the Apple flow cannot be
@@ -84,6 +85,49 @@ module ActiveSupport
         provider: provider.to_s, uid: uid,
         info: { email: email, name: name }.compact
       )
+    end
+
+    # A recognizable-name list (story 0019), written to a real file with the
+    # real constant pointed at it.
+    #
+    # Not a stubbed accessor: Minitest 6 no longer ships `minitest/mock`, and
+    # swapping the path exercises the genuine read-parse-match path the curation
+    # task uses. Three test files need this — the matcher, the curator's seed
+    # stage, and the coverage report — so it lives here rather than in whichever
+    # one happened to write it first.
+    # The original path is captured BEFORE anything that can raise, and the
+    # restore is guarded on having actually swapped. Written the other way
+    # round first, a raise inside the setup left the constant restored to `nil`
+    # and every later test in that process died in `load_names`.
+    def with_recognizable_names(names, &)
+      file = Tempfile.new([ "recognizable", ".json" ])
+      file.write(::JSON.generate({ "names" => Array(names) }))
+      file.flush
+      with_recognizable_list(Pathname.new(file.path), &)
+    ensure
+      file&.close!
+    end
+
+    # No list at all — the state every test that does not curate runs in, and
+    # the one the curator has to keep working in.
+    def without_recognizable_names(&)
+      with_recognizable_list(Rails.root.join("tmp/no-such-recognizable-list.json"), &)
+    end
+
+    def with_recognizable_list(path)
+      original = Pool::Recognizable::LIST
+      swapped = false
+      swap_recognizable_list(path)
+      swapped = true
+      yield
+    ensure
+      swap_recognizable_list(original) if swapped || original
+    end
+
+    def swap_recognizable_list(path)
+      Pool::Recognizable.send(:remove_const, :LIST)
+      Pool::Recognizable.const_set(:LIST, path)
+      Pool::Recognizable.reload!
     end
 
     # The curator's credentials, in one place. Integration tests want them as a

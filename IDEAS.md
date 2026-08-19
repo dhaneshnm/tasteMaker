@@ -35,32 +35,20 @@ Not introduced by 0018 — `/feed` has shipped this way since 0013, and 0018 inh
 Cost: N private Turbo frames on a walled page, plus a change to the shared post partial
 that lands on both surfaces at once. Depends on 0018 Release 1.
 
+### Canonicalise the artist string so one artist is one page — Better (range)
+
+Source: `specs/0019-the-coverage-fill/plan.md` C4b, 2026-08-19. Deferred there on purpose.
+
+Museums spell one artist several ways and each spelling becomes its own `/artists/:slug`
+page. Measured over the mirrors: Goya's 29 works sit on four pages, Rembrandt's 42 on
+three, Kandinsky's 8 on two ("Vasily" and "Vassily"). Story 0019 makes the *fill*
+concentrate on each name's deepest page, which stops it building thin pages, but it does
+not merge the pages that already exist.
+
+The fix rewrites stored attribution data for every reader, so it needs its own evidence
+and its own story — not a line inside a re-curation. Depends on 0019.
+
 ## Considering — top = next pick
-
-### The coverage fill — recognizable names — Better (range)
-
-Split out of story 0018 by `/plan-eng-review`, 2026-08-18 (E5). **Next pick once 0018
-Release 1 ships.** Full spec survives verbatim under "Release 2" in
-`specs/0018-the-names-you-know/plan.md` — including the Europe-at-exactly-25.0% arithmetic
-and the `Unmeetable` dry-run gate that proves feasibility before anything is written.
-
-Why it was split: Release 1 is a same-day app fix; this is research plus a re-curation
-whose feasibility the plan itself calls "unknowable without a dry run". An unbounded tail
-does not share a WIP slot with a same-day fix 13 days from kill review (R5).
-
-Depends on 0018 Release 1 — it establishes `artist_slug`, `artist_works_count` and the
-shared slug function this work reads.
-
-Carries three findings deferred into it:
-- Fill depth **2–3**, not ≥1 (design review D17). Under the ≥2 link rule, a filled name
-  that lands one work produces an artist page nobody can reach.
-- Fix `dedup_key`'s normalization (`lib/pool.rb:60`) — the same non-transliterating `gsub`
-  as `artist_key`, so accented and unaccented spellings of one title never dedup. Deferred
-  here because it changes which works survive curation.
-- **The deny-list's one critical gap:** a culture string a future source introduces
-  ("Bhutan") becomes an artist page silently — no test, no handling. Fix is a
-  `pool:report` line flagging single-word artist slugs with more than one work, for a
-  human pass before seeding.
 
 ### Theme/period filters — Proven (nav)
 2026-08-15/16 — gallery test. Observed: theme-seeking in session ("portraits",
@@ -75,7 +63,7 @@ product — the differentiator stays voice + coach; filters are ArtDay's surface
 - **Bulk expansion to 10–20K works** — settled fact (CLAUDE.md): aggregation is the
   documented strategic trap — do not reopen; no user signal unparks this. Inference
   only, no user evidence; ArtDay has 300K works. Bounded coverage fill
-  (`specs/0018-the-names-you-know`, Release 2) is the in-scope alternative.
+  (`specs/0019-the-coverage-fill`) is the in-scope alternative.
   (2026-08-14 memo)
 - **Similar works on keep** (metadata similarity vs vector image search) — Better.
   Zero gallery-test evidence. Vector embeddings before a proven need =
@@ -93,4 +81,9 @@ product — the differentiator stays voice + coach; filters are ArtDay's surface
 ## Promoted
 
 - 2026-08-18 — Artist page + recognizable-artist coverage fill →
-  `specs/0018-the-names-you-know` (one spec, two releases)
+  `specs/0018-the-names-you-know` (Release 1 only; Release 2 split out by eng review E5)
+- 2026-08-19 — The coverage fill — recognizable names → `specs/0019-the-coverage-fill`.
+  Promoted when 0018 Release 1 shipped and deployed. All three deferred findings it
+  carried are consumed by that spec: fill depth (D17, plan step 4), `dedup_key`
+  normalization (plan C3), and the deny-list's culture-string gap (plan step 5, which
+  found 49 works over 31 strings already live as place-name artist pages).

@@ -11,31 +11,31 @@ counted from the committed manifest, `db/seeds/paintings.json`.
 |---|---:|---:|:--|
 | pool size | 2000 | 2000 | ✓ |
 | sources represented | 4 | 4 | ✓ |
-| largest source share | 880 | 1000 | ✓ |
+| largest source share | 853 | 1000 | ✓ |
 | most works by one artist | 5 | 5 | ✓ |
 | largest region share | 500 | 500 | ✓ |
 | outside Europe and North America | 1057 | 900 | ✓ |
-| dated 1900 or later | 364 | 300 | ✓ |
+| dated 1900 or later | 362 | 300 | ✓ |
 | highlights (cap) | 200 | 200 | ✓ |
-| carrying museum text | 1691 | 1400 | ✓ |
+| carrying museum text | 1615 | 1400 | ✓ |
 | smallest image edge | 1686 | 1600 | ✓ |
 
 ## By museum
 
 | Museum | Works | Share | Carrying text |
 |---|---:|---:|---:|
-| the Minneapolis Institute of Art | 880 | 44.0% | 821 |
-| the Cleveland Museum of Art | 798 | 39.9% | 660 |
-| the Art Institute of Chicago | 220 | 11.0% | 210 |
-| The Metropolitan Museum of Art | 102 | 5.1% | 0 |
+| the Cleveland Museum of Art | 853 | 42.7% | 714 |
+| the Minneapolis Institute of Art | 744 | 37.2% | 680 |
+| the Art Institute of Chicago | 236 | 11.8% | 221 |
+| The Metropolitan Museum of Art | 167 | 8.4% | 0 |
 
 ## By region
 
 | Region | Works | Share |
 |---|---:|---:|
-| South Asia | 500 | 25.0% |
-| East Asia | 500 | 25.0% |
 | Europe | 500 | 25.0% |
+| East Asia | 500 | 25.0% |
+| South Asia | 500 | 25.0% |
 | United States & Canada | 431 | 21.6% |
 | West Asia & the Islamic world | 36 | 1.8% |
 | Latin America | 12 | 0.6% |
@@ -47,23 +47,140 @@ counted from the committed manifest, `db/seeds/paintings.json`.
 
 | Era | Works | Share |
 |---|---:|---:|
-| before 1500 | 105 | 5.3% |
-| 1500–1699 | 421 | 21.1% |
-| 1700–1799 | 333 | 16.7% |
-| 1800–1899 | 562 | 28.1% |
-| 1900 and later | 364 | 18.2% |
-| undated | 211 | 10.6% |
+| before 1500 | 102 | 5.1% |
+| 1500–1699 | 423 | 21.2% |
+| 1700–1799 | 327 | 16.4% |
+| 1800–1899 | 574 | 28.7% |
+| 1900 and later | 362 | 18.1% |
+| undated | 208 | 10.4% |
 
 ## Range, stated plainly
 
 **African representation is 8 works (0.4%)**, of which 1 are Egyptian. Persona 3 asked for Benin bronzes; bronzes are not paintings, and the African holdings of all four museums are overwhelmingly sculpture, textile and object. This is finding F2 in the plan — a named gap, not a solved one.
 
-**309 works carry no museum text** (cma 138, met 102, mia 59, aic 10). Under story 0005 those days cannot be published without a hand-written note, which is what the 70% text bar exists to bound.
+**385 works carry no museum text** (met 167, mia 64, aic 15, cma 139). Under story 0005 those days cannot be published without a hand-written note, which is what the 70% text bar exists to bound.
+
+## Recognizable names (story 0019)
+
+105 of 200 names on the 0007 list matched a candidate; 269 works taken at a depth target of 3.
+
+27 name(s) below the depth target, supply-limited or capped:
+
+- Leonardo da Vinci — 1 of 1 available
+- Gustav Klimt — 2 of 2 available
+- Hieronymus Bosch — 2 of 2 available
+- Edvard Munch — 1 of 1 available
+- Egon Schiele — 1 of 1 available
+- Artemisia Gentileschi — 1 of 1 available
+- Gustave Doré — 1 of 2 available
+- Donatello — 1 of 1 available
+- Jan van Eyck — 1 of 1 available
+- Paul Klee — 2 of 2 available
+- Caspar David Friedrich — 1 of 1 available
+- John Everett Millais — 2 of 2 available
+- Giotto — 1 of 1 available
+- William Hogarth — 1 of 1 available
+- John James Audubon — 1 of 1 available
+- Grant Wood — 1 of 1 available
+- Ivan Aivazovsky — 1 of 1 available
+- Giorgio Vasari — 1 of 1 available
+- Edward Lear — 1 of 1 available
+- Lawrence Alma-Tadema — 2 of 2 available
+
+
+## Artist strings that may not be artists
+
+Read both lists before seeding. A place or culture string here is `Painting::NOT_AN_ARTIST` missing an entry, and it ships as a live `/artists/:slug` page.
+
+**Single-word slugs** (43) — mostly real one-word painters; scan for a country:
+
+- `govardhan` — 4
+- `taketsugu` — 3
+- `fayzullah` — 3
+- `chokha` — 3
+- `basavana` — 2
+- `ganku` — 2
+- `kiyokata` — 2
+- `sanju` — 2
+- `hashim` — 2
+- `fujimaro` — 2
+- `purkhu` — 2
+- `ghasi` — 2
+- `gantai` — 2
+- `jokei` — 1
+- `geiai` — 1
+- `eigyo` — 1
+- `caravaggio` — 1
+- `mianyi` — 1
+- `teotihuacan` — 1
+- `yong` — 1
+- `yeoseol` — 1
+- `genga` — 1
+- `sanwalah` — 1
+- `juran` — 1
+- `kuncan` — 1
+- `anonymous` — 1
+- `raphael` — 1
+- `donatello` — 1
+- `chancay` — 1
+- `sadiqi` — 1
+- `bhora` — 1
+- `bichitr` — 1
+- `nainsukh` — 1
+- `shafi` — 1
+- `bishandas` — 1
+- `balchand` — 1
+- `miskin` — 1
+- `kushala` — 1
+- `mushfiq` — 1
+- `ruknuddin` — 1
+- `gujarati` — 1
+- `manohar` — 1
+- `mingzhong` — 1
+
+**Strings containing a place or culture word** (35 strings, 78 works) — the rule that actually catches the defect:
+
+- "Tibet" — 5
+- "Probably Mexico" — 5
+- "Persia (Iran)" — 5
+- "China" — 5
+- "Japan" — 5
+- "Islamic" — 5
+- "India" — 5
+- "India (Calcutta)" — 5
+- "Korea" — 4
+- "India (Rajasthan)" — 3
+- "United States" — 2
+- "Mewar school" — 2
+- "Nepal" — 2
+- "India (Madhya Pradesh)" — 2
+- "Egypt" — 2
+- "Ancient Egyptian" — 2
+- "Austria (Tyrol)" — 1
+- "Spanish" — 1
+- "Ethiopia" — 1
+- "Mexico (Mexico City)" — 1
+- "Egypt; or Mesopotamia (Iraq)" — 1
+- "Possibly Persia (Iran); or Turkey" — 1
+- "Mewar Stipple Master" — 1
+- "India (Bikaner)" — 1
+- "India (Kangra)" — 1
+- "India (Marwar)" — 1
+- "India (Jaipur, Rajasthan)" — 1
+- "India (Mewar)" — 1
+- "India (Gujarat)" — 1
+- "Workshop: Mewar (Udaipur) workshop" — 1
+- "India (Thanjavur, Tamil Nadu)" — 1
+- "India (Deccan)" — 1
+- "India (Kishangarh)" — 1
+- "India (Chambra)" — 1
+- "Painter: Mughal school" — 1
+
 
 ## Rejected before selection
 
-- **duplicate** — 981
+- **duplicate** — 982
 - **title too long** — 843
 - **anonymous** — 23
-- **no plate** — 20
+- **no plate** — 22
 - **too small** — 11

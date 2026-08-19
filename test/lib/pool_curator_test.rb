@@ -153,4 +153,112 @@ class PoolCuratorTest < ActiveSupport::TestCase
     brief = Pool::Candidate.new(description: "Oil on canvas, 24 x 36 in. Gift of a donor.")
     assert_not brief.text?, "a provenance fragment is not something to read"
   end
+
+  # --- the recognizable-name seed stage (story 0019) ---------------------
+  #
+  # The quota table optimises range, era and readable text and is blind to
+  # whether anybody has heard of the artist, which is how a 2,000-work pool
+  # shipped with no Vermeer and no Hokusai while both sat unused in the
+  # mirrors. This stage runs first; these pin that it does, and that running
+  # first cannot break a bar.
+
+  NAMES = [ { "rank" => 1, "name" => "Johannes Vermeer" },
+            { "rank" => 2, "name" => "Katsushika Hokusai" } ].freeze
+
+  # Mute and small — the back of the queue, where `ordered` puts works nothing
+  # else would reach at this target.
+  def unloved(artist, id, region: "europe")
+    candidate(source: "cma", id: id, artist: artist, region: region,
+              text: false, edge: Pool::MIN_EDGE, title: "Late #{id}")
+  end
+
+  test "recognizable names are taken before any other stage sees the queue" do
+    pool = wide_pool + [ unloved("Johannes Vermeer", 9001),
+                         unloved("Katsushika Hokusai", 9002, region: "east_asia") ]
+
+    with_recognizable_names(NAMES) do
+      curator = curate(pool)
+
+      assert_equal [ "Johannes Vermeer", "Katsushika Hokusai" ], curator.selected.first(2).map(&:artist),
+        "the seed stage did not run first"
+      curator.bars.each { |name, (have, want, ok)| assert ok, "#{name}: have #{have}, want #{want}" }
+    end
+  end
+
+  test "the fill is a substitution, not an expansion — every bar still holds" do
+    pool = wide_pool + 12.times.map { |i| unloved("Johannes Vermeer", 9100 + i) }
+
+    with_recognizable_names(NAMES) do
+      curator = curate(pool)
+
+      assert_equal 200, curator.selected.size
+      curator.bars.each { |name, (have, want, ok)| assert ok, "#{name}: have #{have}, want #{want}" }
+    end
+  end
+
+  test "depth is capped even when the queue holds far more by that artist" do
+    works = 10.times.map { |i| unloved("Johannes Vermeer", 9200 + i) }
+
+    with_recognizable_names(NAMES) do
+      curator = Pool::Curator.new(works, target: 200)
+      curator.fill_recognizable(works)
+
+      assert_equal Pool::Recognizable::DEPTH, curator.selected.size
+      assert_equal({ taken: 3, available: 10, pages: 1, primary_slug: "johannes-vermeer" },
+        curator.recognizable["Johannes Vermeer"])
+    end
+  end
+
+  # The stage calls `take`, so every cap applies to it exactly as to every
+  # other stage: the fill can come out INCOMPLETE, never invalid.
+  test "room_for? still binds inside the seed stage" do
+    works = 10.times.map { |i| unloved("Johannes Vermeer", 9300 + i) }
+
+    with_recognizable_names(NAMES) do
+      # Target 8 puts the region cap at 2 (MAX_REGION_SHARE 0.25), below the
+      # depth target of 3, so a recognizable work is refused by a quota bar
+      # rather than by supply — the case that proves the fill cannot break one.
+      curator = Pool::Curator.new(works, target: 8)
+      curator.fill_recognizable(works)
+
+      assert_equal 2, curator.selected.size, "the region cap refused the third"
+      assert_equal 2, curator.recognizable["Johannes Vermeer"][:taken],
+        "an incomplete fill, not a broken bar"
+    end
+  end
+
+  test "a name the mirror cannot supply is skipped without raising" do
+    works = [ unloved("Katsushika Hokusai", 9400, region: "east_asia") ]
+
+    with_recognizable_names(NAMES) do
+      curator = Pool::Curator.new(works, target: 200)
+      curator.fill_recognizable(works)
+
+      assert_equal 1, curator.selected.size
+      assert_not curator.recognizable.key?("Johannes Vermeer"), "no candidate, no row"
+      assert_equal 1, curator.recognizable["Katsushika Hokusai"][:taken]
+    end
+  end
+
+  test "a work whose artist has no reachable page is never seeded" do
+    # `artist_slug_for` returns nil for a NOT_AN_ARTIST string, so no artist
+    # page exists — filling it could not answer "I looked and found nothing".
+    with_recognizable_names([ { "rank" => 1, "name" => "China" } ]) do
+      works = [ unloved("China", 9500) ]
+      curator = Pool::Curator.new(works, target: 200)
+      curator.fill_recognizable(works)
+
+      assert_empty curator.selected
+    end
+  end
+
+  test "with no list the curator behaves exactly as it did before the story" do
+    without_recognizable_names do
+      curator = curate(wide_pool)
+
+      assert_equal 200, curator.selected.size
+      assert_empty curator.recognizable
+      curator.bars.each { |name, (have, want, ok)| assert ok, "#{name}: have #{have}, want #{want}" }
+    end
+  end
 end

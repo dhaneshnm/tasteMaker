@@ -30,9 +30,42 @@ class Painting < ApplicationRecord
   # pluck(:artist).select { |a| a =~ /unidentified|unknown|anonymous|various|
   # not identified|maker unknown/i }` returns exactly these five, 9 works
   # total, none previously in this list.
+  # Third recurrence of one defect, and the first time it was measured rather
+  # than sampled (story 0019, eng review finding 3). E2 found culture strings by
+  # asking "is `artist` a literal country name"; `/qa` found museum placeholders
+  # the same way; both were spot checks. Sweeping the manifest and all four
+  # mirrors with `Pool.place_shaped?` — the same `PLACES` vocabulary
+  # `Pool.region_for` uses — returns **102 distinct strings over 580 rows**, of
+  # which 49 works over 31 strings were already live `/artists/:slug` pages in
+  # production: `/artists/india-calcutta` with 5 works, `/artists/probably-mexico`
+  # with 5, `/artists/persia-iran` with 5.
+  #
+  # Still an EXACT-string list, not a shape rule. E2 settled that and the sweep
+  # confirms it: "Mewar Stipple Master" and "Ugolino da Siena" are painters named
+  # for places, and any rule that suppressed the strings below would suppress
+  # them too. `pool:report` now prints both the single-word slugs and every
+  # place-shaped string so the next one surfaces for a human pass before seeding
+  # instead of after — which is the forcing function the first two rounds lacked.
   NOT_AN_ARTIST = [
+    # Museum placeholders: "we don't know" in the artist column.
+    "Unidentified", "Unknown", "Artist unknown", "Unidentified artist", "Various artists",
+    # A country or culture standing in for a hand.
     "China", "Japan", "Islamic", "Tibet", "India", "Korea", "Nepal", "Egypt",
-    "Unidentified", "Unknown", "Artist unknown", "Unidentified artist", "Various artists"
+    "Italy", "Ethiopia", "Sweden", "United States", "Mughal",
+    "Italian", "French", "German", "Spanish", "Dutch", "Flemish", "British", "English", "Austrian",
+    "Ancient Egyptian", "Probably Mexico", "Mewar school", "Painter: Mughal school",
+    "Northern Europe (active England)", "Egypt; or Mesopotamia (Iraq)",
+    "Workshop: Mewar (Udaipur) workshop", "Possibly Persia (Iran); or Turkey",
+    # The Met's form for an anonymous work of a known school.
+    "French Painter", "Russian Painter", "British Painter", "German Painter", "Spanish Painter",
+    "North Italian Painter", "Northern French Painter", "Italian (Florentine) Painter",
+    "Spanish (Catalan) Painter", "British School", "French School",
+    # Region-with-subregion, the Cleveland and Minneapolis form.
+    "Persia (Iran)", "Mexico (Mexico City)", "Italy (Pompeii)", "Austria (Tyrol)",
+    "India (Calcutta)", "India (Rajasthan)", "India (Madhya Pradesh)", "India (Kishangarh)",
+    "India (Jaipur, Rajasthan)", "India (Bikaner)", "India (Kangra)", "India (Marwar)",
+    "India (Deccan)", "India (Mewar)", "India (Gujarat)", "India (Thanjavur, Tamil Nadu)",
+    "India (Chambra)"
   ].freeze
 
   # Museum copy arrives as HTML from half the collections — Cleveland ships
