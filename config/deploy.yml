@@ -85,7 +85,11 @@ env:
     # `Date.current` means "today in New York" — the day has to roll over at the
     # same instant for every reader, wherever they are.
     TZ: America/New_York
-    SOLID_QUEUE_IN_PUMA: false
+    # Story 0021: the daily queue-fill job runs inside this Puma process.
+    # config/puma.rb compares this against the literal string "true" — never
+    # remove the quotes below to "simplify" this into a YAML boolean, or the
+    # comparison silently goes false and the job never runs.
+    SOLID_QUEUE_IN_PUMA: "true"
 
 # SQLite and Active Storage both write to /rails/storage. Kamal replaces the
 # container on every deploy, so without this volume each deploy would ship an
@@ -112,6 +116,3 @@ asset_path: /rails/public/assets
 # - accessories (Postgres/Redis): SQLite + Solid gems are the stack (CLAUDE.md).
 # - a second server: BET.md's floor is 50 installs. One VPS is the right size,
 #   and SQLite on a local disk cannot be load-balanced anyway.
-# - Solid Queue: no job needs it yet. Publishing is date arithmetic
-#   (`DailyPick.published` is `scheduled_on <= Date.current`), so nothing runs on
-#   a schedule until push exists. CLAUDE.md says add it with the job, not before.

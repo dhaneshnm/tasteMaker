@@ -34,6 +34,14 @@ port ENV.fetch("PORT", 3000)
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
 
+# Story 0021: the daily queue-fill job runs inside this Puma process rather
+# than a second container — one VPS, one process to keep alive. The env var
+# is a string from Kamal, so this must compare against "true" and never rely
+# on truthiness: ENV["SOLID_QUEUE_IN_PUMA"] is the string "false" when unset
+# to false in config/deploy.yml, and a bare `if ENV[...]` would enable the
+# plugin anyway.
+plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"] == "true"
+
 # Specify the PID file. Defaults to tmp/pids/server.pid in development.
 # In other environments, only set the PID file if requested.
 pidfile ENV["PIDFILE"] if ENV["PIDFILE"]

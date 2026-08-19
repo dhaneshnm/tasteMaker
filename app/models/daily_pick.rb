@@ -29,6 +29,13 @@ class DailyPick < ApplicationRecord
   validate :painting_must_have_an_image
   validate :day_must_have_something_to_read
 
+  # A swapped painting or a moved date is a human re-pick — the spacing
+  # guarantees `auto_tier` vouches for no longer hold at the new painting or
+  # the new date, so the row stops claiming the machine placed it. A blurb
+  # edit is not a re-pick: it changes who *speaks* (`hand_written?`), not who
+  # *picked* (story 0021 eng review, finding 4 + outside voice O4).
+  before_update { self.auto_tier = nil if painting_id_changed? || scheduled_on_changed? }
+
   scope :published, -> { where(scheduled_on: ..Date.current) }
   scope :with_artwork, -> { includes(painting: { image_attachment: :blob }) }
 
@@ -66,18 +73,166 @@ class DailyPick < ApplicationRecord
     date
   end
 
+  # How full the buffer is, from today forward — shared by the admin
+  # queue-depth hint and `/queue-health` (story 0021) so "how many days
+  # ahead" means the same number in both places the curator and an outside
+  # monitor read it.
+  def self.days_scheduled_ahead
+    where(scheduled_on: Date.current..).count
+  end
+
+  def self.scheduled_through
+    where(scheduled_on: Date.current..).maximum(:scheduled_on)
+  end
+
+  # Every painting that already has a day, or will once `pick` (if given)
+  # saves. `pick&.id` excludes the pick's own existing row so editing it never
+  # makes its own painting disappear from its own dropdown. One home for this
+  # rule — `selectable_paintings` and `auto_fill!`'s candidate scope both
+  # read it, so the day the one-day-per-painting constraint relaxes, it
+  # relaxes in one place (story 0021 eng review, finding 5).
+  def self.spoken_for(pick = nil)
+    where.not(id: pick&.id).select(:painting_id)
+  end
+
   # The paintings a curator can still choose. This mirrors the "one day per
   # painting" rule above, plus whichever painting `pick` already holds so a
-  # record never vanishes from its own edit form. Kept here so the rule has
-  # one home when the pool grows and the constraint relaxes.
+  # record never vanishes from its own edit form.
   def self.selectable_paintings(pick = nil)
-    spoken_for = where.not(id: pick&.id).select(:painting_id)
-
     Painting.with_attached_image
             .select(:id, :title, :artist, :culture, :dated, :image_url_800, :description)
-            .where.not(id: spoken_for)
+            .where.not(id: spoken_for(pick))
             .order(:title)
   end
+
+  # The scheduled day immediately before/after `date` — any pick, hand or
+  # machine, published or still in the buffer. Distinct from
+  # `previous_published`/`next_published` above, which only ever walk
+  # published days for the reader-facing archive; these two are the
+  # curator's own upcoming schedule, used by `auto_fill!` to keep the
+  # culture rule reading the buffer as it fills, not just the public past.
+  def self.nearest_scheduled_before(date)
+    where(scheduled_on: ...date).order(scheduled_on: :desc).first
+  end
+
+  def self.nearest_scheduled_after(date)
+    where(scheduled_on: (date + 1)..).order(:scheduled_on).first
+  end
+
+  # Machine-picked days are stamped with the tier that filled them — the
+  # audit instrument for the spacing prediction (story 0021 decisions/0015).
+  # A day always fills: each tier gives up one guarantee the tier before it
+  # held, in order, and never invents a rule beyond "any eligible painting".
+  #
+  #   tier 1: artist ±30d  + culture adjacency     ← the intended policy
+  #   tier 2: artist ±30d                          ← culture rule dropped
+  #   tier 3: artist ±7d                           ← window shrunk
+  #   tier 4: any eligible painting                ← pool nearly spent
+  #   (empty at tier 4: pool exhausted → error logged, fill stops; `current`'s
+  #    last-published-day fallback is the graceful floor underneath this)
+  #
+  # `auto_tier` living on the row rather than in a log line is deliberate:
+  # Kamal replaces the container on every deploy, so a log-only audit would
+  # not survive to the kill review that reads it.
+  RELAXATION_TIERS = {
+    1 => { artist_window: 30, culture_rule: true },
+    2 => { artist_window: 30, culture_rule: false },
+    3 => { artist_window: 7,  culture_rule: false },
+    4 => { artist_window: nil, culture_rule: false }
+  }.freeze
+
+  # Tops the queue up to `horizon` days ahead of today, never touching a day
+  # that already has a pick, hand or machine. Idempotent: called again the
+  # same day, `first_open_date` already sits at or past the horizon and the
+  # loop does nothing.
+  def self.auto_fill!(horizon: 7)
+    while first_open_date < Date.current + horizon
+      break unless fill_one!(first_open_date)
+    end
+  end
+
+  # Fills a single date, relaxing tier by tier until something validates.
+  # Candidates are tried through the model's own validations — the same
+  # authority a hand pick answers to — so an unusable candidate is skipped,
+  # never force-inserted.
+  #
+  # `RecordNotUnique` is treated as "already handled", not an error: Solid
+  # Queue's recurring executor is enqueue-once, not run-once, so two
+  # overlapping runs racing to fill the same date is an expected shape, not
+  # a bug to raise on.
+  def self.fill_one!(date)
+    RELAXATION_TIERS.each do |tier, rules|
+      candidates_for(date, rules).each do |painting|
+        pick = new(painting: painting, scheduled_on: date, auto_tier: tier)
+        begin
+          pick.save!
+          Rails.logger.info("DailyPick.auto_fill!: #{date} filled at tier #{tier}") if tier > 1
+          return true
+        rescue ActiveRecord::RecordNotUnique
+          return true
+        rescue ActiveRecord::RecordInvalid
+          next
+        end
+      end
+    end
+
+    Rails.logger.error("DailyPick.auto_fill!: pool exhausted for #{date}")
+    false
+  end
+  private_class_method :fill_one!
+
+  # Every painting `date` could take at this tier, random order. Spoken-for,
+  # museum-text-less, and previously-excluded-by-validation paintings never
+  # reach `fill_one!`'s save attempt — the cheap SQL filters here exist to
+  # narrow the field, not to replace the model's own validations as the
+  # authority on what a publishable day is.
+  #
+  # Artist key: `artist_slug`, falling back to the raw `artist` string when
+  # the slug is nil. A slug is nil for every deny-listed placeholder
+  # ("China", "Unidentified artist", …, see `Painting::NOT_AN_ARTIST`) — keying
+  # on slug alone would silently exempt every placeholder-attributed work
+  # from the artist window and let that whole cohort clump (story 0021 eng
+  # review, outside voice O3). Only a painting with no artist at all, in
+  # either form, is exempt from the rule.
+  #
+  # Both NOT-IN clauses below add an explicit `OR ... IS NULL`: Rails'
+  # `where.not(column: list)` compiles to a bare `NOT IN`, and SQL's NULL
+  # semantics make a bare `NOT IN` silently drop every NULL row from the
+  # result — which here would wrongly exclude every blank-artist or
+  # blank-culture candidate instead of exempting it.
+  ARTIST_KEY_SQL = "COALESCE(NULLIF(paintings.artist_slug, ''), NULLIF(paintings.artist, ''))"
+
+  def self.candidates_for(date, rules)
+    scope = Painting.where.not(id: spoken_for).where.not(description: [ nil, "" ])
+
+    if rules[:artist_window]
+      window = rules[:artist_window]
+      used_keys = joins(:painting)
+        .where(scheduled_on: (date - window)..(date + window))
+        .pluck(Arel.sql(ARTIST_KEY_SQL))
+        .compact
+
+      if used_keys.present?
+        scope = scope.where(
+          "#{ARTIST_KEY_SQL} NOT IN (?) OR #{ARTIST_KEY_SQL} IS NULL", used_keys
+        )
+      end
+    end
+
+    if rules[:culture_rule]
+      neighbour_cultures = [ nearest_scheduled_before(date), nearest_scheduled_after(date) ]
+        .compact.filter_map { |pick| pick.painting.culture.presence }
+
+      if neighbour_cultures.present?
+        scope = scope.where(
+          "paintings.culture NOT IN (?) OR paintings.culture IS NULL", neighbour_cultures
+        )
+      end
+    end
+
+    scope.order(Arel.sql("RANDOM()"))
+  end
+  private_class_method :candidates_for
 
   def blurb_word_count
     blurb.to_s.split.size

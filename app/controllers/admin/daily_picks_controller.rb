@@ -6,6 +6,8 @@ module Admin
     def index
       # The queue lists titles, not pictures, so the images stay unloaded.
       @picks = DailyPick.includes(:painting).order(scheduled_on: :desc).to_a
+      @days_scheduled_ahead = DailyPick.days_scheduled_ahead
+      @scheduled_through = DailyPick.scheduled_through
     end
 
     def new
@@ -38,8 +40,15 @@ module Admin
     end
 
     def destroy
+      # Deleting a future machine pick is a re-roll, not a veto (story 0021,
+      # outside voice O7) — the date refills at the next 05:00, possibly with
+      # the same painting, since there is no rejected-memory. Swap the
+      # painting in place to actually overrule the machine; say so here,
+      # once, at the moment the curator could otherwise be surprised by it.
+      reroll = !@pick.published? && @pick.auto_tier.present?
       @pick.destroy!
-      redirect_to admin_daily_picks_path, notice: "Removed from the queue."
+      notice = reroll ? "Removed — the machine refills this day tomorrow morning. Swap the painting instead to overrule it." : "Removed from the queue."
+      redirect_to admin_daily_picks_path, notice: notice
     end
 
     # Renders the real public page for this pick so the curator sees the exact

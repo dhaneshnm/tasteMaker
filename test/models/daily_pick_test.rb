@@ -154,4 +154,162 @@ class DailyPickTest < ActiveSupport::TestCase
 
     assert_equal 3, pick.blurb_word_count
   end
+
+  test "selectable_paintings still excludes exactly the paintings that already have a day" do
+    taken_ids = DailyPick.pluck(:painting_id)
+    expected_ids = Painting.where.not(id: taken_ids).pluck(:id).sort
+
+    assert_equal expected_ids, DailyPick.selectable_paintings.map(&:id).sort
+  end
+
+  # Story 0021 — DailyPick.auto_fill!. Each test isolates the eligible pool
+  # to a couple of dedicated `auto_*` fixtures (test/fixtures/paintings.yml)
+  # so the ladder's outcome is exact rather than a coin flip against every
+  # other painting in the suite.
+  test "auto_fill! tops the queue to the horizon and does nothing on a second run the same day" do
+    isolate_pool_to(paintings(:auto_filler_1), paintings(:auto_filler_2))
+
+    DailyPick.auto_fill!(horizon: 2)
+
+    assert_equal [ Date.current, Date.current + 1 ], DailyPick.order(:scheduled_on).pluck(:scheduled_on)
+    assert DailyPick.all.all? { |pick| pick.auto_tier == 1 }
+
+    assert_no_difference -> { DailyPick.count } do
+      DailyPick.auto_fill!(horizon: 2)
+    end
+  end
+
+  test "auto_fill! never touches an existing hand pick and fills the other open day around it" do
+    isolate_pool_to(paintings(:auto_filler_1), paintings(:auto_filler_2))
+    hand = DailyPick.create!(painting: paintings(:auto_filler_1), scheduled_on: Date.current + 1,
+      blurb: "A hand-written note.")
+
+    DailyPick.auto_fill!(horizon: 2)
+
+    assert_equal hand, DailyPick.find_by(scheduled_on: Date.current + 1)
+    assert_nil hand.reload.auto_tier
+
+    today_pick = DailyPick.find_by(scheduled_on: Date.current)
+    assert_equal paintings(:auto_filler_2), today_pick.painting
+    assert_equal 1, today_pick.auto_tier
+  end
+
+  test "auto_fill! skips a candidate with no image and does not force-insert it" do
+    isolate_pool_to(paintings(:auto_no_image), paintings(:auto_filler_1))
+
+    DailyPick.auto_fill!(horizon: 1)
+
+    assert_equal paintings(:auto_filler_1), DailyPick.find_by(scheduled_on: Date.current).painting
+  end
+
+  test "auto_fill! relaxes the ladder for a repeated artist within the window and stamps the tier" do
+    isolate_pool_to(paintings(:auto_repeat_artist_1), paintings(:auto_repeat_artist_2))
+
+    DailyPick.auto_fill!(horizon: 2)
+
+    picks = DailyPick.order(:scheduled_on).to_a
+    assert_equal 1, picks.first.auto_tier
+    assert_equal 4, picks.second.auto_tier
+    assert_equal Set[paintings(:auto_repeat_artist_1), paintings(:auto_repeat_artist_2)],
+      picks.map(&:painting).to_set
+  end
+
+  test "auto_fill! relaxes past the culture rule when only one culture is left, and stamps tier 2" do
+    isolate_pool_to(paintings(:auto_shared_culture_1), paintings(:auto_shared_culture_2))
+
+    DailyPick.auto_fill!(horizon: 2)
+
+    picks = DailyPick.order(:scheduled_on).to_a
+    assert_equal 1, picks.first.auto_tier
+    assert_equal 2, picks.second.auto_tier
+  end
+
+  test "auto_fill! spaces deny-listed placeholder artists by their raw name, not a nil slug" do
+    isolate_pool_to(paintings(:auto_placeholder_artist_1), paintings(:auto_placeholder_artist_2))
+    assert_nil paintings(:auto_placeholder_artist_1).artist_slug
+    assert_nil paintings(:auto_placeholder_artist_2).artist_slug
+
+    DailyPick.auto_fill!(horizon: 2)
+
+    picks = DailyPick.order(:scheduled_on).to_a
+    assert_equal 1, picks.first.auto_tier,
+      "two placeholder-attributed works should still count as a repeated artist"
+    assert_equal 4, picks.second.auto_tier
+  end
+
+  test "auto_fill! never excludes or is excluded by a work with no attribution at all" do
+    isolate_pool_to(paintings(:auto_blank_artist_1), paintings(:auto_blank_artist_2))
+
+    DailyPick.auto_fill!(horizon: 2)
+
+    assert DailyPick.all.all? { |pick| pick.auto_tier == 1 },
+      "blank-attribution works should never force the ladder to relax"
+  end
+
+  test "auto_fill! stops and logs when the eligible pool is exhausted, without raising" do
+    isolate_pool_to(paintings(:auto_filler_1))
+
+    assert_nothing_raised { DailyPick.auto_fill!(horizon: 3) }
+
+    assert_equal 1, DailyPick.count
+    assert_equal Date.current, DailyPick.first.scheduled_on
+  end
+
+  test "a machine pick's tier clears when the curator swaps its painting" do
+    isolate_pool_to(paintings(:auto_filler_1), paintings(:auto_filler_2))
+    DailyPick.auto_fill!(horizon: 1)
+    pick = DailyPick.find_by(scheduled_on: Date.current)
+    assert_equal 1, pick.auto_tier
+
+    # Random candidate order means the fill could have landed on either
+    # fixture — swap to whichever one it did NOT land on, or the update is a
+    # no-op and `painting_id_changed?` never fires.
+    other = [ paintings(:auto_filler_1), paintings(:auto_filler_2) ] - [ pick.painting ]
+    pick.update!(painting: other.first)
+
+    assert_nil pick.reload.auto_tier
+  end
+
+  test "a machine pick's tier clears when the curator moves its date" do
+    isolate_pool_to(paintings(:auto_filler_1))
+    DailyPick.auto_fill!(horizon: 1)
+    pick = DailyPick.find_by(scheduled_on: Date.current)
+
+    pick.update!(scheduled_on: Date.current + 5)
+
+    assert_nil pick.reload.auto_tier
+  end
+
+  test "a machine pick's tier survives a blurb edit" do
+    isolate_pool_to(paintings(:auto_filler_1))
+    DailyPick.auto_fill!(horizon: 1)
+    pick = DailyPick.find_by(scheduled_on: Date.current)
+
+    pick.update!(blurb: "The curator's own note, added after the fact.")
+
+    assert_equal 1, pick.reload.auto_tier
+  end
+
+  test "days_scheduled_ahead and scheduled_through report the buffer's depth" do
+    isolate_pool_to(paintings(:auto_filler_1), paintings(:auto_filler_2))
+
+    assert_equal 0, DailyPick.days_scheduled_ahead
+    assert_nil DailyPick.scheduled_through
+
+    DailyPick.auto_fill!(horizon: 2)
+
+    assert_equal 2, DailyPick.days_scheduled_ahead
+    assert_equal Date.current + 1, DailyPick.scheduled_through
+  end
+
+  private
+
+  # Clears the board down to exactly the paintings a test wants to reason
+  # about, so the ladder's outcome is exact rather than a coin flip against
+  # every other eligible painting fixtures load for the whole suite.
+  def isolate_pool_to(*keepers)
+    DailyPick.delete_all
+    Favorite.delete_all
+    Painting.where.not(id: keepers.map(&:id)).delete_all
+  end
 end
