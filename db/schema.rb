@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_18_231500) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_19_145423) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -83,6 +83,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_18_231500) do
     t.text "description"
     t.string "dimension"
     t.integer "feed_order"
+    t.string "genre"
     t.integer "image_height"
     t.string "image_license"
     t.string "image_url_800"
@@ -90,12 +91,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_18_231500) do
     t.integer "image_width"
     t.string "life_date"
     t.string "medium"
+    t.string "period"
     t.string "source", null: false
     t.integer "source_id"
     t.string "title"
     t.datetime "updated_at", null: false
     t.index ["artist_slug"], name: "index_paintings_on_artist_slug"
     t.index ["feed_order"], name: "index_paintings_on_feed_order"
+    t.index ["genre"], name: "index_paintings_on_genre"
+    t.index ["period"], name: "index_paintings_on_period"
     t.index ["source", "source_id"], name: "index_paintings_on_source_and_source_id", unique: true
   end
 

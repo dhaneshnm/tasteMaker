@@ -16,11 +16,33 @@
     away and the rail does not. %>
 <%= render "shared/compass", here: :gallery, rail: true %>
 
+<%# Filter facets (story 0022 Release 1) — one row per lit facet, directly
+    under the compass rail, before the first post. The genre row renders
+    nothing in Release 1: no genre data exists until Release 2 fills the
+    manifest, so `@genre_values` is always empty and the page is
+    byte-identical to before this story except the period row. %>
+<%= render "facet_row", facet_label: "period", param_name: :period,
+      values: @period_values, active: @period,
+      preserve: @filter_params.except(:period) if @period_values.present? %>
+<%= render "facet_row", facet_label: "genre", param_name: :genre,
+      values: @genre_values, active: @genre,
+      preserve: @filter_params.except(:genre) if @genre_values.present? %>
+
 <%# The overlay lives here, next to the frames the archive streams into, so every
     work that arrives with infinite scroll is inside the controller. %>
-<main class="page" data-controller="artwork">
-  <%= render "page", paintings: @paintings, page: @page, next_page: @next_page,
-        kept_ids: @kept_ids %>
+<main class="page<%= " page--empty" if @total.zero? %>" data-controller="artwork">
+  <% if @total.zero? %>
+    <%# Combined filters can AND to zero even when every offered value has
+        works of its own (design review pass 2) — genre=portrait has works,
+        period=16th-century has works, their intersection may not. An empty
+        state is a feature: warmth, a way out, context. %>
+    <div class="ornament" aria-hidden="true">✦</div>
+    <p class="coda__line">Nothing here wears both.</p>
+    <%= link_to "See the full gallery", feed_path, class: "caps-link" %>
+  <% else %>
+    <%= render "page", paintings: @paintings, page: @page, next_page: @next_page,
+          kept_ids: @kept_ids, filtered: @filtered, filter_params: @filter_params %>
+  <% end %>
 
   <%= render "shared/zoom" %>
 </main>

@@ -48,7 +48,14 @@ paintings.each do |attrs|
     image_url_full: attrs["image_url_full"],
     image_url_800: attrs["image_url_800"],
     image_license: attrs["image_license"],
-    feed_order: attrs["feed_order"]
+    feed_order: attrs["feed_order"],
+    # Story 0022 Release 1. `period` is derived from `dated`, which the
+    # manifest already carries — recomputed on every seed, reseed-safe by
+    # construction, no backfill task to forget. `genre` has no source until
+    # Release 2 adds it to the manifest; nil until then is the honest state,
+    # not a placeholder to fill in later.
+    period: Pool::PeriodBucket.from_dated(attrs["dated"]),
+    genre: attrs["genre"]
   )
   painting.save!
 end

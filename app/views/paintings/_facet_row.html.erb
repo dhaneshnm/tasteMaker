@@ -1,0 +1,25 @@
+<%# One filter row (story 0022 Release 1) — period or genre. The caller
+    only renders this partial when `values` is non-empty (the non-empty
+    rule), so this file never has to decide whether to render nothing.
+
+    Same `.caps-link` grammar the compass already teaches: the active value
+    is the unlinked, dimmed one. `aria-current="true"`, not `"page"` — the
+    compass marks a location, this marks a filter (design review pass 6).
+    Chronological order for period, alphabetical for genre until Release 2
+    decides its own (design review pass 1). No row label: the values
+    self-identify. %>
+<nav class="facets" aria-label="Filter by <%= facet_label %>">
+  <% if active.nil? %>
+    <span class="caps-link facets__here" aria-current="true">All</span>
+  <% else %>
+    <%= link_to "All", feed_path(**preserve), class: "caps-link" %>
+  <% end %>
+  <% values.each do |value| %>
+    <% if value == active %>
+      <span class="caps-link facets__here" aria-current="true"><%= value %></span>
+    <% else %>
+      <%= link_to value, feed_path(**preserve, param_name => Painting.facet_slug(value)),
+            class: "caps-link" %>
+    <% end %>
+  <% end %>
+</nav>

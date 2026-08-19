@@ -186,6 +186,47 @@ class PaintingTest < ActiveSupport::TestCase
     assert_equal 1, Painting.accent_count("Cézanne")
   end
 
+  # Story 0022 Release 1, eng review A1. String order puts "10th century"
+  # before "9th century" — the reason `displayed_facet_values` sorts by the
+  # ordinal embedded in the label rather than the label itself.
+  test "displayed_facet_values orders period numerically, not lexically" do
+    5.times { |i| Painting.create!(source: "met", source_id: 7_100 + i, title: "9th #{i}", period: "9th century") }
+    5.times { |i| Painting.create!(source: "met", source_id: 7_200 + i, title: "10th #{i}", period: "10th century") }
+
+    assert_equal [ "9th century", "10th century" ], Painting.displayed_facet_values(:period)
+  end
+
+  test "displayed_facet_values orders genre alphabetically" do
+    5.times { |i| Painting.create!(source: "met", source_id: 7_300 + i, title: "L #{i}", genre: "Landscape") }
+    5.times { |i| Painting.create!(source: "met", source_id: 7_400 + i, title: "P #{i}", genre: "Portrait") }
+
+    assert_equal [ "Landscape", "Portrait" ], Painting.displayed_facet_values(:genre)
+  end
+
+  # The provisional floor (plan D3): a value under MIN_FACET_WORKS renders
+  # no control, but stays a real, resolvable value — facet_counts sees it,
+  # only displayed_facet_values hides it.
+  test "a value under the floor is counted but not displayed" do
+    4.times { |i| Painting.create!(source: "met", source_id: 7_500 + i, title: "Rare #{i}", period: "1st century") }
+
+    assert_equal 4, Painting.facet_counts(:period)["1st century"]
+    assert_not_includes Painting.displayed_facet_values(:period), "1st century"
+  end
+
+  test "facet_slug and resolve_facet_slug are one reduction function, round-tripped" do
+    5.times { |i| Painting.create!(source: "met", source_id: 7_600 + i, title: "19c #{i}", period: "19th century") }
+
+    slug = Painting.facet_slug("19th century")
+    assert_equal "19th-century", slug
+    assert_equal "19th century", Painting.resolve_facet_slug(:period, slug)
+  end
+
+  test "an unknown or blank slug resolves to nil, never a raise" do
+    assert_nil Painting.resolve_facet_slug(:period, "not-a-real-century")
+    assert_nil Painting.resolve_facet_slug(:period, nil)
+    assert_nil Painting.resolve_facet_slug(:period, "")
+  end
+
   test "the gallery credits the museums actually in the pool, heaviest first" do
     Painting.create!(source: "cma", source_id: 5_001, title: "Cleveland one")
     Painting.create!(source: "cma", source_id: 5_002, title: "Cleveland two")

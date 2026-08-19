@@ -455,6 +455,35 @@ a:hover { color: var(--gold-deep); }
     calc(clamp(1.15rem, 5vw, 2rem) + env(safe-area-inset-left));
 }
 
+/* ---------- Filter facets (story 0022 Release 1) ----------
+ * One row per lit facet, `/feed` only, directly under `.compass--rail`.
+ * Same idiom as `.compass`: `.caps-link` items, the active one unlinked and
+ * dimmed. Never sticky — rule 5's sticky budget on this screen is spent on
+ * the compass rail, and this row doesn't earn a second exception.
+ *
+ * `overflow-x: auto` instead of wrapping: a wrapped row costs 44px of fold
+ * budget per line, exactly what the compass's own gap-clamp discussion
+ * above polices. The scroll affordance is the next value clipping at the
+ * viewport edge — no fade mask, no indicator, no scrollbar styling
+ * (DESIGN.md rule 6: no decoration that isn't a control). */
+.facets {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  column-gap: clamp(0.7rem, 3.5vw, 1rem);
+  padding:
+    0.35rem
+    calc(clamp(1.15rem, 5vw, 2rem) + env(safe-area-inset-right))
+    0.35rem
+    calc(clamp(1.15rem, 5vw, 2rem) + env(safe-area-inset-left));
+}
+
+.facets + .facets { padding-top: 0; }
+
+/* The value a reader has selected — same treatment `.compass__here` gives
+ * the screen you are standing on. */
+.facets__here { color: var(--ink-dim); }
+
 /* ---------- Page column ---------- */
 
 .page {
@@ -823,6 +852,7 @@ a.label__artist-name {
  * the bar is one number rather than one number and three copies of it. */
 .coda .caps-link,
 .compass .caps-link,
+.facets .caps-link,
 .legal .caps-link,
 .masthead__you,
 .walk__step,

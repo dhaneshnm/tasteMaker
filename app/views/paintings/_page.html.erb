@@ -2,7 +2,11 @@
   <%= render partial: "painting", collection: paintings, locals: { kept_ids: kept_ids } %>
 
   <% if next_page %>
-    <%= turbo_frame_tag "feed-page-#{next_page}", src: feed_path(page: next_page), loading: :lazy do %>
+    <%# Story 0022: the filter params ride every lazy page fetch, or a
+        scroll past page 1 of a filtered gallery would quietly drop the
+        filter. %>
+    <%= turbo_frame_tag "feed-page-#{next_page}",
+          src: feed_path(**filter_params, page: next_page), loading: :lazy do %>
       <div class="sentinel" aria-label="Loading more paintings">
         <span class="sentinel__ring" aria-hidden="true"></span>
         <span class="sentinel__label">Fetching more masterpieces</span>
@@ -11,7 +15,11 @@
   <% else %>
     <footer class="coda">
       <div class="ornament" aria-hidden="true">✦</div>
-      <p class="coda__line">You have walked the whole gallery.</p>
+      <%# "Walked the whole gallery" is false under a filter — the reader
+          walked a subset (design review pass 2). %>
+      <p class="coda__line">
+        <%= filtered ? "Every match, end to end." : "You have walked the whole gallery." %>
+      </p>
       <%# Names the museums actually represented in the pool, not a fixed list:
           story 0013 draws from four collections and the quota table decides how
           many of each, so a hard-coded sentence would go stale on the next

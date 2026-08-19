@@ -78,6 +78,33 @@ class FeedTest < ApplicationSystemTestCase
     assert_operator brand_bottom, :<, 0, "the masthead came along for the ride"
   end
 
+  # Story 0022 Release 1. Same idiom the "Today" test above already proves for
+  # the compass rail: tap a link, land on the narrowed URL, and the tapped
+  # value marks itself the way the compass marks the screen you are on.
+  test "tapping a period filter narrows the gallery and marks itself active" do
+    Painting::MIN_FACET_WORKS.times do |i|
+      Painting.create!(source: "mia", source_id: 922_000 + i, title: "Twelfth #{i}",
+        artist: "A. Painter", image_url_800: paintings(:woodcut).image_url_800,
+        period: "12th century")
+    end
+
+    visit feed_path
+    within(".facets") { click_on "12th century" }
+
+    # `text-transform: uppercase` renders "12TH CENTURY" — a case-sensitive
+    # text filter would be asserting the stylesheet (the same trap
+    # handoff_test.rb documents for the compass), so this matches
+    # case-insensitively.
+    assert_current_path feed_path(period: "12th-century")
+    within(".facets") do
+      assert_selector "span.facets__here[aria-current='true']", text: /12th century/i
+      assert_no_selector "a", text: /12th century/i
+
+      click_on "All"
+    end
+    assert_current_path feed_path
+  end
+
   # `.zoom` is z-index 20 and the rail is 1. Reading a work full screen from the
   # gallery must not leave a navigation bar sitting on top of the picture.
   test "the full-screen view covers the rail" do
