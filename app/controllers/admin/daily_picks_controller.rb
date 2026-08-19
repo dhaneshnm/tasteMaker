@@ -6,8 +6,11 @@ module Admin
     def index
       # The queue lists titles, not pictures, so the images stay unloaded.
       @picks = DailyPick.includes(:painting).order(scheduled_on: :desc).to_a
-      @days_scheduled_ahead = DailyPick.days_scheduled_ahead
-      @scheduled_through = DailyPick.scheduled_through
+      # Derived from @picks rather than two more queries — the full table is
+      # already in hand (simplify pass).
+      future = @picks.select { |pick| pick.scheduled_on >= Date.current }
+      @days_scheduled_ahead = future.size
+      @scheduled_through = future.map(&:scheduled_on).max
     end
 
     def new
@@ -45,7 +48,7 @@ module Admin
       # the same painting, since there is no rejected-memory. Swap the
       # painting in place to actually overrule the machine; say so here,
       # once, at the moment the curator could otherwise be surprised by it.
-      reroll = !@pick.published? && @pick.auto_tier.present?
+      reroll = @pick.reroll_on_delete?
       @pick.destroy!
       notice = reroll ? "Removed — the machine refills this day tomorrow morning. Swap the painting instead to overrule it." : "Removed from the queue."
       redirect_to admin_daily_picks_path, notice: notice

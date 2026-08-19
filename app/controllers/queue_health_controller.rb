@@ -14,8 +14,6 @@
 #                        monitor is not a modern browser and has no reader
 #                        identity to check).
 class QueueHealthController < ActionController::Base
-  MIN_DAYS_AHEAD = 2
-
   def show
     response.cache_control.replace(no_store: true)
 
@@ -23,7 +21,7 @@ class QueueHealthController < ActionController::Base
     days_ahead = DailyPick.days_scheduled_ahead
     scheduled_through = DailyPick.scheduled_through
 
-    if today_scheduled && days_ahead >= MIN_DAYS_AHEAD
+    if today_scheduled && days_ahead >= DailyPick::LOW_BUFFER_DAYS
       render plain: "ok — scheduled through #{scheduled_through} (#{days_ahead} days ahead)"
     else
       render plain: "queue low — today #{today_scheduled ? "scheduled" : "NOT scheduled"}, " \

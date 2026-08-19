@@ -37,7 +37,14 @@ class DailyPick < ApplicationRecord
   before_update { self.auto_tier = nil if painting_id_changed? || scheduled_on_changed? }
 
   scope :published, -> { where(scheduled_on: ..Date.current) }
+  scope :from_today, -> { where(scheduled_on: Date.current..) }
   scope :with_artwork, -> { includes(painting: { image_attachment: :blob }) }
+
+  # Below this many days of buffer, both the curator's own queue-depth hint
+  # and `/queue-health`'s external monitor call it low — one number, so the
+  # two readings of "how many days ahead" can never drift apart (story 0021
+  # simplify pass).
+  LOW_BUFFER_DAYS = 2
 
   # The artwork of the day: the most recent pick that has actually arrived.
   # Falls back to the last published day when today was never scheduled.
@@ -67,7 +74,7 @@ class DailyPick < ApplicationRecord
   # The first day from today forward that has no artwork yet — never a
   # historical gap, never a date that is already taken.
   def self.first_open_date
-    taken = where(scheduled_on: Date.current..).pluck(:scheduled_on)
+    taken = from_today.pluck(:scheduled_on)
     date = Date.current
     date += 1 while taken.include?(date)
     date
@@ -78,11 +85,11 @@ class DailyPick < ApplicationRecord
   # ahead" means the same number in both places the curator and an outside
   # monitor read it.
   def self.days_scheduled_ahead
-    where(scheduled_on: Date.current..).count
+    from_today.count
   end
 
   def self.scheduled_through
-    where(scheduled_on: Date.current..).maximum(:scheduled_on)
+    from_today.maximum(:scheduled_on)
   end
 
   # Every painting that already has a day, or will once `pick` (if given)
@@ -195,12 +202,19 @@ class DailyPick < ApplicationRecord
   # review, outside voice O3). Only a painting with no artist at all, in
   # either form, is exempt from the rule.
   #
-  # Both NOT-IN clauses below add an explicit `OR ... IS NULL`: Rails'
+  # Both exclusions below need an explicit `OR <expr> IS NULL`: Rails'
   # `where.not(column: list)` compiles to a bare `NOT IN`, and SQL's NULL
   # semantics make a bare `NOT IN` silently drop every NULL row from the
   # result — which here would wrongly exclude every blank-artist or
-  # blank-culture candidate instead of exempting it.
+  # blank-culture candidate instead of exempting it. One helper, so the two
+  # rules can't drift on that fix.
   ARTIST_KEY_SQL = "COALESCE(NULLIF(paintings.artist_slug, ''), NULLIF(paintings.artist, ''))"
+
+  def self.exclude_unless_null(scope, column_sql, values)
+    return scope if values.blank?
+    scope.where("#{column_sql} NOT IN (?) OR #{column_sql} IS NULL", values)
+  end
+  private_class_method :exclude_unless_null
 
   def self.candidates_for(date, rules)
     scope = Painting.where.not(id: spoken_for).where.not(description: [ nil, "" ])
@@ -211,23 +225,13 @@ class DailyPick < ApplicationRecord
         .where(scheduled_on: (date - window)..(date + window))
         .pluck(Arel.sql(ARTIST_KEY_SQL))
         .compact
-
-      if used_keys.present?
-        scope = scope.where(
-          "#{ARTIST_KEY_SQL} NOT IN (?) OR #{ARTIST_KEY_SQL} IS NULL", used_keys
-        )
-      end
+      scope = exclude_unless_null(scope, ARTIST_KEY_SQL, used_keys)
     end
 
     if rules[:culture_rule]
       neighbour_cultures = [ nearest_scheduled_before(date), nearest_scheduled_after(date) ]
         .compact.filter_map { |pick| pick.painting.culture.presence }
-
-      if neighbour_cultures.present?
-        scope = scope.where(
-          "paintings.culture NOT IN (?) OR paintings.culture IS NULL", neighbour_cultures
-        )
-      end
+      scope = exclude_unless_null(scope, "paintings.culture", neighbour_cultures)
     end
 
     scope.order(Arel.sql("RANDOM()"))
@@ -252,6 +256,13 @@ class DailyPick < ApplicationRecord
 
   def hand_written?
     blurb.present?
+  end
+
+  # Deleting this pick is a re-roll, not a veto: the date is still in the
+  # future and the machine placed it, so `auto_fill!` refills it at the next
+  # run rather than leaving a gap (story 0021, outside voice O7).
+  def reroll_on_delete?
+    !published? && auto_tier.present?
   end
 
   private
