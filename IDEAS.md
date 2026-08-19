@@ -21,20 +21,6 @@ feed BET.md's conversation threshold — track in `user-research/`, never as que
 
 ## Inbox
 
-### A Keep rail on every multi-work surface — Better (habit)
-
-Source: `/plan-design-review` on `specs/0018-the-names-you-know/plan.md`, 2026-08-18 (D7).
-
-`/feed` and the new `/artists/:slug` both render works with no `.rail`, so Zoom and Keep
-are unreachable from them. Discovery → keep is the shortest habit loop in the product,
-and the habit mechanic is one of only two moats `CLAUDE.md` names. Tomás landing on 3–5
-newly discovered works by one artist is peak keep intent, and today he has to leave the
-page to act on it.
-
-Not introduced by 0018 — `/feed` has shipped this way since 0013, and 0018 inherits it.
-Cost: N private Turbo frames on a walled page, plus a change to the shared post partial
-that lands on both surfaces at once. Depends on 0018 Release 1.
-
 ### Canonicalise the artist string so one artist is one page — Better (range)
 
 Source: `specs/0019-the-coverage-fill/plan.md` C4b, 2026-08-19. Deferred there on purpose.
@@ -87,3 +73,9 @@ product — the differentiator stays voice + coach; filters are ArtDay's surface
   carried are consumed by that spec: fill depth (D17, plan step 4), `dedup_key`
   normalization (plan C3), and the deny-list's culture-string gap (plan step 5, which
   found 49 works over 31 strings already live as place-name artist pages).
+- 2026-08-19 — A Keep rail on every multi-work surface → `specs/0020-keep-where-you-find-it`.
+  **Corrected on promotion:** the Inbox line claimed Zoom *and* Keep were unreachable on
+  `/feed` and `/artists/:slug`. Zoom is reachable — `shared/_plate.html.erb:7` makes the
+  picture itself the zoom trigger, and both surfaces already render `shared/_zoom`. The gap
+  is Keep only, and 0020 is scoped to Keep only. Built same day (`b9a6727`), `bin/ci` green.
+  Code only — not deployed.

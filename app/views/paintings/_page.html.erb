@@ -1,5 +1,5 @@
 <%= turbo_frame_tag "feed-page-#{page}", target: "_top" do %>
-  <%= render partial: "painting", collection: paintings %>
+  <%= render partial: "painting", collection: paintings, locals: { kept_ids: kept_ids } %>
 
   <% if next_page %>
     <%= turbo_frame_tag "feed-page-#{next_page}", src: feed_path(page: next_page), loading: :lazy do %>

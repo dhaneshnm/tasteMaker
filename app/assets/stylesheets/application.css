@@ -575,25 +575,29 @@ a:hover { color: var(--gold-deep); }
  * rail's own margins stay in `rem` and still scale, which is right — those are
  * spacing around text.
  *
- * Scoped, and the scoping is the point. `.plate__img` is also every work in
- * `/feed`, which renders no rail — charging the term globally would shrink the
- * gallery's images on a 375x667 screen to pay for a control that screen does not
- * have. `:has()` is the same idiom `.masthead:has(.compass)` already uses, and a
- * modifier class would mean the page knowing about its own children twice.
+ * Scoped to the `.plate` itself, not to the `.page`. Story 0020 widened this
+ * from one screen to three: `/`, `/days/:date`, and now `/feed` and
+ * `/artists/:slug`, whose posts each carry their own rail. A page-level
+ * selector would have charged EVERY plate on a page the moment ONE of them
+ * had a rail — wrong on `/feed`, where the reserve has to follow each post's
+ * own rail rather than blanket the whole scroll. `.plate:has(+ .rail)` reads
+ * per-plate instead: the sibling combinator inside `:has()` is the same idiom
+ * `.masthead:has(.compass)` already uses, scoped one level narrower.
  *
  * It only ever bites where this term is smaller than 55vh. At 402x874 that is
  * 526px against 481px, so `min()` still picks 55vh and the rail costs the
  * artwork nothing there at all. At 375x667 it is 319px against 367px, and the
- * plate loses 44px of its 363. Accepted 2026-08-14: rule 2 allows a smaller
- * picture, never a cropped one, and only works tall enough to be height-capped
- * move at all.
+ * plate loses 44px of its 363. Accepted 2026-08-14 for `/` and `/days/:date`,
+ * and again 2026-08-19 (`/plan-design-review`) for `/feed` and
+ * `/artists/:slug`: rule 2 allows a smaller picture, never a cropped one, and
+ * only works tall enough to be height-capped move at all.
  */
 .plate__img {
   --rail-reserve: 0px;
   max-height: min(55vh, 55dvh, calc(100dvh - 19rem - var(--rail-reserve)));
 }
 
-.page:has(.rail) .plate__img { --rail-reserve: var(--tap); }
+.plate:has(+ .rail) .plate__img { --rail-reserve: var(--tap); }
 
 /* The rail is the plate's own footer, not a separate block, so it takes over the
  * gap rather than adding to it. Scoped the same way: a plate with no rail after

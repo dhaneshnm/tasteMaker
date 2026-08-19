@@ -19,7 +19,8 @@
 <%# The overlay lives here, next to the frames the archive streams into, so every
     work that arrives with infinite scroll is inside the controller. %>
 <main class="page" data-controller="artwork">
-  <%= render "page", paintings: @paintings, page: @page, next_page: @next_page %>
+  <%= render "page", paintings: @paintings, page: @page, next_page: @next_page,
+        kept_ids: @kept_ids %>
 
   <%= render "shared/zoom" %>
 </main>

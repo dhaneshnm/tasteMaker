@@ -2,6 +2,35 @@
   <%= render "shared/plate", painting: painting, eager: painting_counter < 2,
         describedby: nil, resting: "This work is resting." %>
 
+  <%# The action rail (story 0020) — Keep alone. Locals: kept_ids (required,
+      not defaulted — see below).
+
+      No Zoom: unlike `daily/_day.html.erb`'s rail, the plate above is already
+      the zoom trigger here (`shared/_plate.html.erb:7`, and both `/feed` and
+      `/artists/:slug` already mount `shared/_zoom`), so a second control for
+      the same action would be a duplicate tab stop.
+
+      No count: mark-only on multi-work surfaces (`decisions/0010`, narrowed
+      2026-08-19) — see `favorites/_control.html.erb` for why.
+
+      Rendered INLINE, not as a fetching frame with `src`: `/feed` and
+      `/artists/:slug` are walled and private
+      (`test/integration/public_cache_headers_test.rb`), so the constraint
+      that forces `/`'s eager-frame-plus-placeholder split — a public,
+      shared-cached page cannot carry a live `button_to` — does not apply
+      here. The mark is correct in the first paint; there is no fetch and so
+      no loading state to design for.
+
+      Unconditional, unlike `_day`'s. This partial has no preview mode, and
+      the plate above never hides its own zoom trigger without also hiding
+      the rail — the two states that make `_day`'s wrapper conditional don't
+      exist here, so there is no state in which this rail would be empty. A
+      resting work (no image) is still a work you can keep. %>
+  <div class="rail">
+    <%= render "favorites/control", painting: painting,
+          kept: kept_ids.include?(painting.id), autofocus: false, compact: true %>
+  </div>
+
   <div class="label">
     <h2 class="label__title <%= "label__title--long" if painting.long_title? %>"><%= painting.title %></h2>
     <%# `show_artist:` default true. The artist page passes false — the name

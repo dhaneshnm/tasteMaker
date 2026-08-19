@@ -140,15 +140,40 @@ class ArtistsTest < ActionDispatch::IntegrationTest
       "(1 work: #{one_work_queries.size}, 2 works: #{two_work_queries.size})"
   end
 
-  # E-A3. Aggregates-first means a 304 never touches Active Storage.
-  test "revalidating a 304 runs no Active Storage query" do
+  # E-A3 held while `stale?` ran first with a hand-rolled `[count, latest]`
+  # aggregate — deleted by story 0020 (`/plan-eng-review` A1) precisely
+  # because that aggregate knew nothing about the reader's favorites, so a
+  # kept-then-revisited page could 304 with a stale mark. `Rack::ETag`'s
+  # automatic body digest replaces it and is per-reader-correct, but the
+  # digest can only be computed by rendering the body — so a would-be-304 now
+  # DOES run the same queries a 200 would, including Active Storage's. That
+  # is the accepted cost, named in `ArtistsController#show` and here: this
+  # test used to assert the OLD invariant and would now fail, correctly,
+  # every time. The test that replaces it is the one directly below, and it
+  # asserts the thing that actually matters — a kept mark never comes back
+  # stale, not that revalidation is free.
+
+  # REGRESSION, mandatory (`/plan-eng-review`, test 8) — the direct forcing
+  # function for deleting `stale?`. Without the automatic body-digest ETag
+  # doing its job, this is exactly the bug the manual one would now cause:
+  # keep a work, leave, come back, and the prior ETag still matches because
+  # nothing about the aggregate it was built from changed — the mark renders
+  # outline again though the database says kept.
+  test "a kept mark never comes back stale on revalidation" do
     get artist_path("berthe-morisot")
     etag = response.headers["ETag"]
 
-    queries = sql_queries { get artist_path("berthe-morisot"), headers: { "HTTP_IF_NONE_MATCH" => etag } }
+    keep(paintings(:harbour))
 
-    assert_response :not_modified
-    storage_queries = queries.select { |sql| sql.match?(/active_storage/i) }
-    assert_empty storage_queries, "a 304 ran an Active Storage query: #{storage_queries}"
+    get artist_path("berthe-morisot"), headers: { "HTTP_IF_NONE_MATCH" => etag }
+
+    assert_response :success, "the kept mark should invalidate the prior ETag, not 304 over it"
+    assert_select "turbo-frame#keep_#{paintings(:harbour).id} button[aria-pressed=?]", "true"
   end
+
+  private
+    def keep(painting)
+      post favorite_path(painting)
+      assert_response :success
+    end
 end

@@ -353,6 +353,25 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     assert_select "a.rail__count", text: "1 kept"
   end
 
+  # Story 0020, test 6. The walled surfaces carry `compact: "1"` on their
+  # form so the same write endpoint knows to render mark-only — a caller
+  # that forgot the hidden field would leak the count onto `/feed`, one copy
+  # per work down the scroll (D1).
+  test "a compact write renders no count link; the same write from / still does" do
+    post favorite_path(@painting), params: { compact: "1" }
+
+    assert_response :success
+    assert_select "a.rail__count", count: 0,
+      message: "a compact write rendered the count link, the noise D1 refused on /feed"
+
+    unkeep(@painting)
+    post favorite_path(paintings(:woodcut))
+
+    assert_response :success
+    assert_select "a.rail__count", text: "1 kept",
+      message: "a non-compact write lost its count link"
+  end
+
   test "collection thumbnails are thumbnails" do
     keep(@painting)
 

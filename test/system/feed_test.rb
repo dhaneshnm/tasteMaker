@@ -111,32 +111,154 @@ class FeedTest < ApplicationSystemTestCase
     assert_equal 1, tops, "the rail wrapped onto two rows"
   end
 
-  # The gallery must not pay for a control it does not render.
+  # Story 0014 scoped the rail's reserve to `.page:has(.rail)` when exactly one
+  # screen shape carried a rail. Story 0020 gave the gallery one too — a keep
+  # control on every post — and with it a plate-level selector,
+  # `.plate:has(+ .rail)`, so the reserve follows each post's own rail rather
+  # than blanketing a page that scrolls past 110 of them. This is what says
+  # BOTH halves of that landed: the rail exists, and the plate that carries
+  # one pays the same reserve `/` does, not the old untouched 363.
   #
-  # Story 0014's action rail buys its room out of `.plate__img`'s third cap term,
-  # and `/feed` uses that same class for all 110 works. Bumping the term globally
-  # would have shrunk every picture in the gallery on a 375x667 screen to make
-  # space for a rail this screen has never had — so the new term is scoped with
-  # `.page:has(.rail)`, and this is what says the scoping still holds.
+  # Measured against the FIRST plate on the page, the same way this test
+  # always has (`document.querySelector`, singular) — not averaged across
+  # every `.plate__img`. The fillers this file seeds carry unreachable
+  # `https://example.test/*.jpg` URLs on purpose (no network in a system
+  # test); a broken image reports no intrinsic size at all and collapses to
+  # a couple of border pixels regardless of any CSS reserve, which would
+  # make an all-images assertion measure "did the image load", not "does the
+  # reserve apply". The fixtures at the front of `feed_ordered` carry the
+  # real 800×1000 bytes `dynamic_type_test.rb` also measures, and that is
+  # what this needs.
   #
-  # Asserted against the number the gallery has always produced. At 375x667 the
-  # fixture plate would like to be 422px tall and the ORIGINAL third term,
-  # `100dvh - 19rem`, already trims it to 363 — narrowly, below the 367 that 55vh
-  # allows, which is the 4px the stylesheet's own comment mentions.
-  #
-  # 363 is therefore the untouched number, and the daily page's is now 319. The
-  # gap between them is the whole scoping decision: if this ever reads 319 the
-  # rail's reserve leaked out of `.page:has(.rail)` and into the gallery, and
-  # nobody would have gone to the gallery to notice.
-  test "the gallery's plates did not shrink when the daily page grew a rail" do
+  # 363 was the number this test asserted before the gallery had a rail at
+  # all; 319 is `/`'s number for the same fixture image, measured in
+  # `dynamic_type_test.rb`. If this ever reads 363 again, the CSS scoping
+  # regressed — the gallery has a `.rail` in the DOM but the reserve stopped
+  # reaching the plate above it.
+  test "the first plate in the gallery pays the same rail reserve the daily page does" do
     visit feed_path
     assert_selector ".plate__img"
-    # The gallery has no action rail — story 0014 scoped it to the screens whose
-    # job is one artwork, and this is half of why the cap term above still holds.
-    assert_no_selector ".rail"
+    assert_selector ".rail", minimum: 1
 
     height = page.evaluate_script(
       "Math.round(document.querySelector('.plate__img').getBoundingClientRect().height)")
-    assert_equal 363, height, "a gallery plate lost height to the daily page's rail"
+    assert_equal 319, height, "the gallery's first plate did not pay the rail reserve"
+  end
+
+  # -------------------------------------------------------- the keep control
+  #
+  # Story 0020. `/`'s keep control is a fetched frame; `/feed`'s is rendered
+  # inline, and the nested-frame risk that design settles by reading Turbo's
+  # source rather than testing it (`specs/0020.../plan.md`) is that a keep
+  # tap could be swallowed by the outer `feed-page-1` frame's `target: "_top"`
+  # and become a full-page navigation. These are the regression guard.
+  #
+  # `reveal` exists because of `reveal_controller.js`: every `.post` opens at
+  # `opacity: 0` and only reaches `opacity: 1` once its own `IntersectionObserver`
+  # sees it enter the viewport (`application.css` `.post.reveal-init`), and this
+  # driver treats `opacity: 0` as not-visible — the same reason `scrolled_to`
+  # exists above for the compass. Fillers 5+ down the page start below the
+  # fold at 375×667 and need this before Capybara's visibility-gated finders
+  # can see them at all.
+  def reveal(aria_label)
+    page.execute_script(<<~JS)
+      document.querySelector('[aria-label="#{aria_label}"]')
+        ?.closest(".post")?.scrollIntoView({ block: "center" })
+    JS
+  end
+
+  test "keeping a work in the gallery fills its mark without touching the rest of the page" do
+    visit feed_path
+    reveal "Keep Filler 0 in your collection"
+    before_path = page.current_path
+
+    click_on "Keep Filler 0 in your collection"
+
+    assert_button "Remove Filler 0 from your collection"
+    assert_equal before_path, page.current_path, "keeping navigated the page"
+    # A work elsewhere on the page, untouched — proof the outer frame did not
+    # reload and discard everything but the tapped post.
+    reveal "Keep Filler 1 in your collection"
+    assert_button "Keep Filler 1 in your collection"
+  end
+
+  test "unkeeping a work in the gallery empties its mark without touching the rest of the page" do
+    visit feed_path
+    reveal "Keep Filler 0 in your collection"
+    click_on "Keep Filler 0 in your collection"
+    assert_button "Remove Filler 0 from your collection"
+
+    click_on "Remove Filler 0 from your collection"
+
+    assert_button "Keep Filler 0 in your collection"
+    reveal "Keep Filler 1 in your collection"
+    assert_button "Keep Filler 1 in your collection"
+  end
+
+  # D1 (`/plan-design-review`): mark-only on `/feed` and `/artists/:slug` —
+  # no `"N kept"` link, on purpose, even once something is kept.
+  test "the gallery never renders the count link, even once something is kept" do
+    visit feed_path
+    reveal "Keep Filler 0 in your collection"
+
+    click_on "Keep Filler 0 in your collection"
+
+    assert_button "Remove Filler 0 from your collection"
+    assert_no_selector ".rail__count"
+  end
+
+  # Rule 9, both axes — the same bar `favorites_test.rb` holds for `/`,
+  # measured on the surface that renders this control inline instead of
+  # fetched.
+  test "the gallery's keep control is a real target on both axes" do
+    visit feed_path
+
+    control = find(".rail .rail__act", match: :first)
+    assert_operator control.native.size.height, :>=, 44, "the gallery's keep control was under 44px tall"
+    assert_operator control.native.size.width, :>=, 44, "the gallery's keep control was under 44px wide"
+  end
+
+  # T5 (`/plan-eng-review`). The error state `application_controller.rb`
+  # already builds for a bounced frame write — asserted here on the surface
+  # that carries TEN of these frames on one page, where "replaces the tapped
+  # mark only" is the property that actually matters. The identity dies the
+  # way a device revocation or an account deletion would: the row behind the
+  # session is gone, but the cookie and the page the reader is looking at are
+  # not.
+  test "identity dying mid-scroll replaces only the tapped mark" do
+    visit feed_path
+    reveal "Keep Filler 1 in your collection"
+    assert_button "Keep Filler 1 in your collection"
+
+    User.find_by!(provider: "google_oauth2", uid: "test-uid-1").destroy!
+
+    reveal "Keep Filler 0 in your collection"
+    click_on "Keep Filler 0 in your collection"
+
+    assert_link "Sign in"
+    # A mark the reader never touched must be unchanged when their identity
+    # died — Capybara's matchers take an options hash, not a message string,
+    # so the "why" lives in this comment rather than in the assertion.
+    assert_button "Keep Filler 1 in your collection"
+  end
+
+  # T6 (`/plan-eng-review`). Asserted as DOM order, not literal `:tab` key
+  # presses: none of these three elements sets `tabindex`, so default tab
+  # order is exactly the order they appear in markup, and DOM order is the
+  # deterministic, cross-driver way to check it.
+  test "each post's tab order is plate zoom, then keep, then the artist link" do
+    visit feed_path
+
+    in_order = page.evaluate_script(<<~JS)
+      [...document.querySelectorAll(".post")].slice(0, 2).every(post => {
+        const els = ["plate__zoom", "rail__act", "label__artist-name"]
+          .map(cls => post.querySelector(`.${cls}`))
+          .filter(Boolean);
+        return els.every((el, i) => i === 0 ||
+          !!(els[i - 1].compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING));
+      })
+    JS
+
+    assert in_order, "a post's zoom, keep, and artist link were not in that source order"
   end
 end

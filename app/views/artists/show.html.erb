@@ -24,9 +24,10 @@
 
   <%# Reuses the feed's post markup wholesale — `show_artist: false` is the
       only difference, so the name is not repeated once as this h1 and once
-      per work (design review D2). %>
+      per work (design review D2). Story 0020 adds `kept_ids:`, required on
+      every caller of this partial now that it renders a keep control. %>
   <%= render partial: "paintings/painting", collection: @paintings,
-        locals: { show_artist: false } %>
+        locals: { show_artist: false, kept_ids: @kept_ids } %>
 
   <%# Ornament only, no count sentence. The drafted copy claimed "the most
       Tondo keeps by anyone" — false for measured pages of 6, 7 and 9 works

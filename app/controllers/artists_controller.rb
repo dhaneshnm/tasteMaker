@@ -15,24 +15,36 @@ class ArtistsController < ApplicationController
     # see ApplicationController#private_revalidate. Same contract as `/days`.
     private_revalidate
 
-    # One query, not two: `exists?` then `cache_key_with_version` measured at
-    # two separate SQL round trips (found by /code-review — the comment here
-    # used to claim parity with `DaysController#index`'s single aggregate,
-    # which was wrong). `pick` with both aggregates in one SELECT covers
-    # existence and freshness together.
-    count, latest = matches.pick(Arel.sql("COUNT(*), MAX(updated_at)"))
-    raise NotFound if count.zero?
-
-    # Aggregates first, then bail — the rule DaysController#index states for
-    # the same reason: a 304 must not pay for loading attachments and blobs
-    # it is about to discard (eng review E-A2/E-A3).
-    return unless stale?(etag: [ count, latest ])
-
+    # NO manual `stale?` any more (story 0020, `/plan-eng-review` A1 — this
+    # deletes what an earlier draft of that story added, a `[count, latest]`
+    # aggregate that this comment used to describe).
+    #
+    # The old aggregate knew nothing about the reader's favorites, so once
+    # this page's body started carrying kept marks (below), a reader who kept
+    # a work and revisited got a 304 back holding the stale outline mark —
+    # silently, the exact class of bug `stale_when_importmap_changes`'s
+    # comment in ApplicationController is about.
+    #
+    # `Rack::ETag` (`rack/etag.rb`) already digests the response BODY on every
+    # 200, and skips only when an ETag or Last-Modified header is already
+    # set — so deleting the manual one restores an automatic ETag that is
+    # inherently per-reader-correct: change a kept mark, change the body,
+    # change the digest. `Rack::ConditionalGet` still turns a matching digest
+    # into a 304 on a repeat, unchanged visit.
+    #
+    # What is genuinely given up: the old code bailed before
+    # `with_attached_image` loaded attachments and blobs, so a 304 cost
+    # nothing server-side (E-A2/E-A3, two 0018 reviews). That skip is gone —
+    # the body must now be rendered to be digested, on every request, even
+    # one that ends in 304. Accepted on a page bounded at 9 works; recorded
+    # in `test/integration/artists_test.rb` rather than left to be
+    # rediscovered.
     @paintings = matches.with_attached_image.feed_ordered.to_a
-    # Computed from the rows already loaded above, not a second query —
-    # `matches` and `@paintings` are the identical row set.
+    raise NotFound if @paintings.empty?
+
     @heading = Painting.canonical_artist_name(@paintings.map(&:artist))
     @life_date = uniform_life_date(@paintings)
+    @kept_ids = kept_ids_for(@paintings)
   end
 
   private

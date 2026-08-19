@@ -156,6 +156,21 @@ class ApplicationController < ActionController::Base
       current_user ? Favorite.owned_by(current_user) : Favorite.collected_by(current_device.token_digest)
     end
 
+    # Which of a page's works this reader has already kept (story 0020). One
+    # method rather than two copies in `PaintingsController` and
+    # `ArtistsController` — the same argument this file already made for
+    # `reader_favorites` above when `/you` became its second caller: two
+    # copies of "this reader's kept works" is one copy too many.
+    #
+    # `(collector_digest, painting_id)` / `(user_id, painting_id)` are both
+    # unique indexes with the identity column leading (`db/schema.rb`), so
+    # this is one covering index range scan — measured with EXPLAIN QUERY
+    # PLAN against the shipped schema, not assumed — bounded by the size of
+    # `paintings`, never by the size of the reader's collection.
+    def kept_ids_for(paintings)
+      reader_favorites.where(painting: paintings).pluck(:painting_id).to_set
+    end
+
     def reader_identity_attributes
       current_user ? { user: current_user } : { collector_digest: current_device.token_digest }
     end
