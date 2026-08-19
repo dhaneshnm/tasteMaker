@@ -59,6 +59,18 @@ module Tondo
     # the one the design test cannot see because it is a static file outside the
     # asset pipeline. See specs/0004-linen-404/.
     config.exceptions_app = routes
+
+    # `ArtistsController::NotFound` (story 0018) subclasses
+    # `ActiveRecord::RecordNotFound` so a reader gets a 404, not a 500 — but
+    # `ActionDispatch::ExceptionWrapper.rescue_responses` keys on the exact
+    # class NAME, not ancestry, so the subclass needs its own entry or it
+    # falls through to `:internal_server_error`. `ErrorsController::MESSAGES`
+    # is the reason the subclass exists at all: it keys on the exact class
+    # too, so this and that map are the same fact stated twice, on purpose —
+    # one decides the status, the other decides the sentence.
+    config.action_dispatch.rescue_responses.merge!(
+      "ArtistsController::NotFound" => :not_found
+    )
     # config.eager_load_paths << Rails.root.join("extras")
 
     # No libvips/imagemagick on this machine; image dimensions come from MIA

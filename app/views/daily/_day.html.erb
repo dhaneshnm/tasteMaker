@@ -141,12 +141,11 @@
   <div class="label">
     <h1 class="label__title <%= "label__title--long" if painting.long_title? %>"><%= painting.title %></h1>
 
-    <p class="label__artist">
-      <span class="label__artist-name"><%= painting.artist_display %></span>
-      <% if painting.life_date.present? %>
-        <span class="label__artist-dates"><%= painting.life_date %></span>
-      <% end %>
-    </p>
+    <%# `/` is public while the artist page is walled — linking here would
+        bounce every anonymous first-time reader (story 0018, eng review X3).
+        `:archive` (`/days/:date`) and `:preview` (curator) both link;
+        `:front_door` (`/`) renders the name dim and unlinked. %>
+    <%= render "shared/artist_line", painting: painting, link: chrome != :front_door %>
 
     <% if painting.meta_line.present? %>
       <p class="label__meta"><%= painting.meta_line %></p>

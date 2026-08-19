@@ -96,6 +96,58 @@ class PaintingTest < ActiveSupport::TestCase
     assert_no_match(/<|onerror/, painting.description)
   end
 
+  # Story 0018, eng review T3. Every fixture's committed `artist_slug` (set
+  # explicitly in the YAML — fixtures bypass `before_save`) must equal what
+  # the model's own function computes, or the backfill migration and this
+  # file's hand-verified values have silently drifted apart.
+  test "every fixture's committed artist_slug matches the model's own function" do
+    Painting.find_each do |painting|
+      expected = Painting.artist_slug_for(painting.artist)
+      message = "#{painting.artist.inspect} (#{painting.title}) has a stale artist_slug fixture value"
+
+      if expected.nil?
+        assert_nil painting.artist_slug, message
+      else
+        assert_equal expected, painting.artist_slug, message
+      end
+    end
+  end
+
+  test "a blank artist resolves to no slug at all" do
+    assert_nil Painting.artist_slug_for(nil)
+    assert_nil Painting.artist_slug_for("")
+    assert_nil Painting.artist_slug_for("   ")
+  end
+
+  # E2. Deny-listed by exact string — the pool measurement behind this list.
+  test "a culture string in the artist column resolves to no slug" do
+    Painting::NOT_AN_ARTIST.each do |culture|
+      assert_nil Painting.artist_slug_for(culture), "#{culture.inspect} should not resolve to a slug"
+    end
+
+    # And a real, sparse Mughal/Pahari painter is not swept up by a
+    # single-word heuristic the deny-list deliberately does not use.
+    assert_equal "govardhan", Painting.artist_slug_for("Govardhan")
+  end
+
+  # An OCR-shaped artifact that parameterizes to nothing — the case that
+  # would otherwise build `artist_path` with an empty segment.
+  test "a name that transliterates to nothing resolves to no slug" do
+    assert_nil Painting.artist_slug_for("???")
+    assert_nil Painting.artist_slug_for("—")
+  end
+
+  test "unicode names parameterize correctly, including this pool's actual Hiroshige fixture" do
+    assert_equal "utagawa-hiroshige", Painting.artist_slug_for(paintings(:woodcut).artist)
+    assert_equal "paul-cezanne", Painting.artist_slug_for("Paul Cézanne")
+  end
+
+  # E4. Neither count nor "most frequent" would settle the fixture pair —
+  # both appear once — so only the accent rule decides.
+  test "the canonical artist name prefers the variant with more accented characters" do
+    assert_equal "Paul Cézanne", Painting.canonical_artist_name("paul-cezanne")
+  end
+
   test "the gallery credits the museums actually in the pool, heaviest first" do
     Painting.create!(source: "cma", source_id: 5_001, title: "Cleveland one")
     Painting.create!(source: "cma", source_id: 5_002, title: "Cleveland two")

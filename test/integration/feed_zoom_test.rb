@@ -42,4 +42,41 @@ class FeedZoomTest < ActionDispatch::IntegrationTest
     get feed_path
     assert_equal daily, css_select(".zoom").first.to_html
   end
+
+  # Story 0018. `/feed` is walled, so an artist with a usable slug links
+  # regardless of how many works it has — the ">= 2 works" rule was drafted
+  # and then reversed once a one-work page was settled as a real page, not a
+  # dead end (eng review E3, reversed by outside voice X5/X6).
+  test "an artist with a usable slug links, even with only one work in the pool" do
+    get feed_path
+
+    assert_select "#painting_#{paintings(:sunflowers).dom_key}" do
+      assert_select "a.label__artist-name[href=?]",
+        artist_path(paintings(:sunflowers).artist_slug), text: paintings(:sunflowers).artist
+    end
+  end
+
+  # Design review D11. A culture string denied artist status by the model
+  # never renders as a link, on the one screen where every other name does.
+  test "a deny-listed culture string never renders as a link" do
+    get feed_path
+
+    assert_select "#painting_#{paintings(:culture_as_artist).dom_key}" do
+      assert_select "a.label__artist-name", count: 0
+      assert_select ".label__artist-name--dim", text: "China"
+    end
+  end
+
+  # Design review D15. The link sits inside a wall label under a titled work
+  # — WCAG 2.4.4's context — so it carries no `aria-label` of its own. An
+  # override would break voice control (which says what it sees) and double
+  # every announcement across 110 works in the gallery.
+  test "the artist link's accessible name is the plain artist string" do
+    get feed_path
+
+    css_select("a.label__artist-name").each do |link|
+      assert_nil link["aria-label"],
+        "#{link['href']} should rely on its visible text for an accessible name"
+    end
+  end
 end

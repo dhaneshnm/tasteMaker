@@ -1,0 +1,30 @@
+<%# The artist under a work — one place, so /feed, /, /days/:date and the
+    artist page cannot render three slightly different shapes of the same
+    five lines. Split out for the reason `days/_row_body.html.erb` was: "so
+    the linked and unlinked shapes cannot drift apart" (eng review E-Q1).
+
+    Locals:
+      painting: the work
+      link:     default true. False renders the name dim and unlinked even
+                when the work has a linkable `artist_slug` — the one caller
+                that passes false is `/`, which is public while the artist
+                page is walled: a link there would bounce every anonymous
+                first-time reader into a sign-in screen the moment they
+                tapped the thing they came to look at (eng review X3, X11).
+
+    Whether the name links is `link && painting.artist_slug.present?` — two
+    independent reasons collapse into one rendered shape. A blank, culture or
+    deny-listed artist has no slug at all (`Painting.artist_slug_for`); a work
+    on `/` has a slug but the caller withheld the link anyway. Both read the
+    same way: dim, no `<a>` (design review D11). %>
+<p class="label__artist">
+  <% if local_assigns.fetch(:link, true) && painting.artist_slug.present? %>
+    <%= link_to painting.artist_display, artist_path(painting.artist_slug),
+          class: "label__artist-name" %>
+  <% else %>
+    <span class="label__artist-name label__artist-name--dim"><%= painting.artist_display %></span>
+  <% end %>
+  <% if painting.life_date.present? %>
+    <span class="label__artist-dates"><%= painting.life_date %></span>
+  <% end %>
+</p>

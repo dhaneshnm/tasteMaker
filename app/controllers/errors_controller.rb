@@ -15,7 +15,8 @@ class ErrorsController < ApplicationController
   # only one of them is about a day. Reading the original exception tells them
   # apart without parsing the path to guess what the reader meant.
   MESSAGES = {
-    ActiveRecord::RecordNotFound => "There was no artwork on that day."
+    ActiveRecord::RecordNotFound => "There was no artwork on that day.",
+    ArtistsController::NotFound  => "No artist by that name here."
   }.freeze
 
   DEFAULT_MESSAGE = "That page does not exist."

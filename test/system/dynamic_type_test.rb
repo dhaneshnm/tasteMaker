@@ -293,4 +293,40 @@ class DynamicTypeTest < ApplicationSystemTestCase
       end
     end
   end
+
+  # Story 0018, eng review D10/X10. `.label__artist-name` is 22.85px against
+  # the 44px bar — the same ISSUE-002 mistake rule 9 exists to prevent, now on
+  # an inline link. Padding on an INLINE element (not `inline-block`) was
+  # chosen specifically because it does not add to the line box, so this
+  # measures both halves of that claim: the target reaches 44px in height, and
+  # the note's fold position is unchanged from before the link existed.
+  test "the artist link meets the tap target without moving the fold" do
+    yesterday = daily_picks(:yesterday)
+
+    with_viewport(375, 667) do
+      visit day_path(yesterday.scheduled_on.iso8601)
+      scale_to DEFAULT_ROOT
+
+      box = page.evaluate_script(<<~JS)
+        (() => {
+          const link = document.querySelector('a.label__artist-name');
+          const rect = link.getBoundingClientRect();
+          return { height: rect.height, width: rect.width };
+        })()
+      JS
+
+      assert_operator box["height"], :>=, 44,
+        "the artist link was #{box["height"]}px tall — inline padding did not reach --tap"
+      # Width is not asserted at the --tap floor: rule 9's own carve-out is
+      # that a control with words (unlike a bare glyph) gets width for free
+      # from its text, which "Berthe Morisot" already clears by a wide margin.
+      assert_operator box["width"], :>=, 44
+
+      f = fold
+      assert_operator f["plateBottom"], :<, f["viewport"],
+        "the artwork moved below the fold once the artist name became a link"
+      assert_operator f["noteTop"] + f["lineHeight"], :<=, f["viewport"],
+        "the note's first line moved below the fold once the artist name became a link"
+    end
+  end
 end

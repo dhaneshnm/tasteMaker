@@ -15,7 +15,8 @@ class WallTest < ActionDispatch::IntegrationTest
     # publicly cached page already draws — because bouncing that eager frame
     # wrote "Content missing" over the placeholder. See FavoritesController.
     [ "/days", "/feed", "/collection",
-      day_path(daily_picks(:yesterday).scheduled_on.iso8601) ]
+      day_path(daily_picks(:yesterday).scheduled_on.iso8601),
+      artist_path(paintings(:sunflowers).artist_slug) ]
   end
 
   test "cookieless requests bounce to the corner and leak nothing" do

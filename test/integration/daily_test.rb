@@ -196,4 +196,43 @@ class DailyTest < ActionDispatch::IntegrationTest
     assert_select "article.post", count: 0
     assert_select ".sentinel", count: 0
   end
+
+  # Story 0018, eng review X3/X11. `/` is public while `/artists/:slug` is
+  # walled — a link on the front door would bounce every anonymous
+  # first-time reader. The SAME template at `/days/:date` links, because that
+  # route is already behind the wall.
+  test "the artist name is dim and unlinked on the front door" do
+    get root_path
+
+    assert_select ".label__artist a.label__artist-name", count: 0
+    assert_select ".label__artist .label__artist-name--dim",
+      text: paintings(:sunflowers).artist
+  end
+
+  test "the same partial links the artist name on an archived day" do
+    yesterday = daily_picks(:yesterday)
+
+    get day_path(yesterday.scheduled_on.iso8601)
+
+    assert_select ".label__artist a.label__artist-name[href=?]",
+      artist_path(paintings(:harbour).artist_slug), text: paintings(:harbour).artist
+  end
+
+  # Design review D11. A blank artist falls back to `culture` (or "Unknown
+  # artist") and must never look tappable — the unlinkable fallback is the
+  # defect D11 exists to prevent.
+  test "a work with only a culture never renders as a link" do
+    yesterday = daily_picks(:yesterday)
+    # bronze is already claimed by :tomorrow's fixture (painting_id is
+    # unique), and :today would redirect back to root_path (DaysController#
+    # show) — :yesterday is the one date that both frees the painting and
+    # renders through the :archive chrome, where non-blank artists DO link.
+    daily_picks(:tomorrow).destroy!
+    yesterday.update!(painting: paintings(:bronze))
+
+    get day_path(yesterday.scheduled_on.iso8601)
+
+    assert_select ".label__artist a.label__artist-name", count: 0
+    assert_select ".label__artist .label__artist-name--dim", text: paintings(:bronze).artist_display
+  end
 end

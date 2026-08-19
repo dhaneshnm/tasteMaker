@@ -1,0 +1,40 @@
+<%# Everything Tondo holds by one hand (story 0018). Reached only from a
+    linked artist name on `/feed` or `/days/:date` — never from the compass,
+    never self-linking.
+
+    First, second, third: the name, the works, the ending. Nothing else earns
+    the page. Settled by `/plan-design-review` (D1-D17) and `/plan-eng-review`
+    (E1-E5, X1-X11), 2026-08-18 — see specs/0018-the-names-you-know/plan.md. %>
+<% content_for :title, "#{@heading} — Tondo" %>
+<% content_for :description, "Everything Tondo holds by #{@heading}." %>
+
+<%# `here: nil` — the artist page is not one of the four compass surfaces, so
+    all four stay live doors from here, the same treatment `/days/:date` and
+    the 404 already get (settled, plan open question 1). %>
+<%= render "shared/masthead", label: "Artist", here: nil,
+      aside: pluralize(@paintings.size, "work") %>
+
+<main class="page" data-controller="artwork">
+  <div class="artist-page__heading">
+    <h1 class="label__title <%= "label__title--long" if @heading.to_s.length > Painting::LONG_TITLE %>"><%= @heading %></h1>
+    <% if @life_date.present? %>
+      <p class="artist-page__dates"><%= @life_date %></p>
+    <% end %>
+  </div>
+
+  <%# Reuses the feed's post markup wholesale — `show_artist: false` is the
+      only difference, so the name is not repeated once as this h1 and once
+      per work (design review D2). %>
+  <%= render partial: "paintings/painting", collection: @paintings,
+        locals: { show_artist: false } %>
+
+  <%# Ornament only, no count sentence. The drafted copy claimed "the most
+      Tondo keeps by anyone" — false for measured pages of 6, 7 and 9 works
+      (eng review E1, X8) — and rewriting it is hand-written editorial only
+      the user can supply (CLAUDE.md bans AI-written copy). %>
+  <footer class="coda">
+    <div class="ornament" aria-hidden="true">✦</div>
+  </footer>
+
+  <%= render "shared/zoom" %>
+</main>

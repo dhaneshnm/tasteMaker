@@ -1,9 +1,13 @@
 # 0018 — The names you know
 Date: 2026-08-18
-Lane: Full (core). Honest size: **2–3 days across two releases** — Release 1 (artist page)
-is same-day; Release 2 (coverage fill) carries research + a re-curation whose feasibility
-is proven by dry run, not assumed.
-Status: Draft
+Lane: Full (core). Honest size: **1.5–2 days, Release 1 only.**
+Status: Draft — **scope reduced 2026-08-18 by `/plan-eng-review` (E5).**
+
+**Release 2 (the coverage fill) left this story** and sits at the top of `IDEAS.md`
+Considering. The original "same-day" estimate was not credible: it predated the migration
+and backfill, the `_artist_line` extraction across two shipped screens, the
+`NOT_AN_ARTIST` deny-list, the accent-preference rule, and six blocking fixture rows.
+Corrected to 1.5–2 days (X9) — a fact about the work, not a choice about it.
 
 ## Who
 
@@ -58,26 +62,42 @@ pool doesn't become the leader's Euro-canon greatest hits.
   build items the direction memo marks "build before submission." Both promoted from
   `IDEAS.md` (top two Considering entries).
 - **Success signal (prediction, falsifiable and time-bound):**
-  1. By Aug 20: artist name on `/` and `/feed` is a link when `artist` is present; the
-     artist page lists that artist's works (1–5, per the ≤5/artist bar); unknown slug →
-     404; `bin/ci` green including new integration tests.
-  2. By Aug 24: ranked ~200-name list committed (`user-research/0007`, method + data +
-     independent control); every name classified **covered / filled / walled /
-     fails-bars**; every *fillable* gap filled with ≥1 work; `pool:curate` `verify!`
-     passes with all 0013 bars intact (`test/lib/pool_quota_test.rb` green on the new
-     manifest).
-  3. Next gallery run (protocol: `user-research/0006`): artist-name taps land somewhere
-     — count of dead-end taps drops to zero; recognizable-name misses only for names
-     the coverage report classifies walled. **Falsified if** the re-curation cannot
-     meet the 0013 bars at any TARGET (fill abandoned, reason logged), or if the next
-     run still logs misses on names the report claims filled.
+  Rewritten 2026-08-18 (X7): the original #2 and half of #3 belonged to Release 2, and
+  #3's "drops to **zero**" was unachievable by Release 1 alone — a prediction guaranteed
+  to be falsified by scope rather than by the hypothesis, which under R4 measures nothing.
+
+  1. By Aug 20: the artist name links on `/feed` and `/days/:date` whenever the work has a
+     usable artist slug, and renders **dim and unlinked on `/`** (public page, walled
+     target). The artist page lists that artist's works — **1 to 9**, since the measured
+     max is 9, not the ≤5 the original claimed. Unknown slug → 404. `bin/ci` green.
+  2. Next gallery run (protocol: `user-research/0006`): **dead-end artist-name taps drop
+     to zero on `/feed` and `/days/:date`.** Recognizable-name misses are **unchanged and
+     expected** — that is Release 2's job. **Falsified if** participants still tap artist
+     names on those two surfaces and nothing happens, or if they reach an artist page and
+     cannot get back to where they were.
+  3. **Not instrumented, stated plainly.** Session gate 6 (analytics, error tracking) is
+     unmet, so nothing measures whether a reader ever opens `/artists/:slug`. The gallery
+     run is the only instrument this signal has.
+
+  Moved to the Release 2 spec: the ranked ~200-name list, the covered/filled/walled/
+  fails-bars classification, the `pool:curate verify!` gate, and the walled-name clause.
 - **In baseline?** Yes — item 3 (browsable archive/gallery, execution-quality bar 6:
   "curation range beyond Euro-canon") plus the direction memo's pre-submission verdict.
   No exception argument needed.
-- **R7 note:** moves **0 of 5** BET.md thresholds directly. 13 days to kill review; the
-  binary is still not uploaded to App Store Connect. This story is scoped to *not*
-  delay submission — Release 1 is same-day, Release 2 is bounded by the dry-run gate,
-  and neither blocks the upload.
+- **R7 note — corrected 2026-08-18, and the correction is the important part.** Moves
+  **0 of 5** BET.md thresholds. The original claim that this story is "scoped to *not*
+  delay submission" was **false by construction**: R5 means WIP = 1, so there is no
+  parallel track — this story *is* the thing in flight.
+
+  What the outside voice put on the record, verified against the repo: `BET.md:11` set
+  "app live by **Aug 14, 2026**" and that date passed four days ago with the binary never
+  uploaded. All five thresholds sit at zero. There is no `solid_queue` in the `Gemfile`,
+  only `application_job.rb`, and no APNs anywhere in `ios/` — so **Proven-baseline items 1
+  (the daily publish job) and 2 (the daily push, one of only two moats `CLAUDE.md` names)
+  do not exist.** `DailyPick.current` holds the last published day indefinitely.
+
+  The owner was shown all of this and chose to ship Release 1, then submit. Recorded
+  rather than re-argued — but recorded, because the Aug 31 kill review reads this file.
 
 ## Non-goals
 

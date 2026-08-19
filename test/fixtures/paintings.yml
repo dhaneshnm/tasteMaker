@@ -6,6 +6,13 @@
 # ratio, they do not override the intrinsic size. Every fold-budget assertion in
 # the suite was therefore measuring a layout with no artwork in it. See
 # test/system/dynamic_type_test.rb.
+#
+# `artist_slug:` is set explicitly below, per fixture, rather than left to
+# `Painting`'s `before_save` callback (story 0018) — fixtures load by direct
+# INSERT, bypassing every model callback and validation, so a row here whose
+# slug the callback would compute gets NULL instead unless this file says so.
+# Each value is `Painting.artist_slug_for(artist)`, verified by hand against
+# the model at fixture-writing time.
 DEFAULTS: &DEFAULTS
   image_url_800: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAPoAQMAAAAcBQjyAAAABlBMVEWKel48NCrPHChbAAAA3klEQVR42u3NAQkAQAgEsPP7d9YUPghbgSUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABwU/WH5EUikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUhWDX/IA/dRm5FUAAAAAElFTkSuQmCC"
   image_width: 800
@@ -18,6 +25,7 @@ sunflowers:
   source_id: 900001
   title: Sunflowers in a Blue Vase
   artist: Vincent van Gogh
+  artist_slug: vincent-van-gogh
   life_date: 1853–1890
   dated: "1888"
   medium: Oil on canvas
@@ -31,6 +39,7 @@ harbour:
   source_id: 900002
   title: Harbour at Dawn
   artist: Berthe Morisot
+  artist_slug: berthe-morisot
   life_date: 1841–1895
   dated: "1875"
   medium: Oil on canvas
@@ -48,6 +57,7 @@ woodcut:
   source_id: 900004
   title: Rain at Shono
   artist: Utagawa Hiroshige
+  artist_slug: utagawa-hiroshige
   dated: "1833"
   medium: Woodblock print
   description: Museum copy for the day nobody wrote a note.
@@ -58,6 +68,7 @@ imageless:
   source_id: 900005
   title: Lost Panel
   artist: Unknown
+  artist_slug: unknown
   department: Paintings
 
 # A LANDSCAPE work, and the pixels are really landscape. Setting `image_width`
@@ -83,9 +94,63 @@ wide_harbour:
   source_id: 900009
   title: A Wide Harbour
   artist: Berthe Morisot
+  artist_slug: berthe-morisot
   life_date: 1841–1895
   dated: "1875"
   medium: Oil on canvas
   image_url_800: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA+gAAAMgAQAAAACYY3WQAAAAA1BMVEWKel4S204DAAAAeUlEQVR42u3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgzwCJzwABXJCwkwAAAABJRU5ErkJggg=="
   image_width: 1000
   image_height: 800
+
+# Story 0018. Four fixtures below, all with `feed_order:` set high — see the
+# `wide_harbour` comment above: a new painting with a nil `feed_order` can
+# sort ahead of an existing one (fixture ids are hashed, not sequential) and
+# push it below the fold, where Selenium stops calling it visible and
+# unrelated feed system tests start failing. None of these four need to be
+# near the top.
+
+# Two DIFFERENT paintings whose artist strings share one slug by accent
+# alone, and by frequency-tied count too small to settle it — the
+# canonical-name rule (eng review E4) has to prefer the accented spelling
+# regardless, or the artist page titles itself with the misspelling.
+cezanne_plain:
+  <<: *DEFAULTS
+  feed_order: 9001
+  source_id: 900006
+  title: Still Life With Apples
+  artist: Paul Cezanne
+  artist_slug: paul-cezanne
+  dated: "1895"
+  medium: Oil on canvas
+
+cezanne_accented:
+  <<: *DEFAULTS
+  feed_order: 9002
+  source_id: 900007
+  title: The Card Players
+  artist: Paul Cézanne
+  artist_slug: paul-cezanne
+  dated: "1892"
+  medium: Oil on canvas
+
+# A culture string sitting in the `artist` column, not a hand that painted it
+# (eng review E2) — the `NOT_AN_ARTIST` deny-list's forcing function.
+culture_as_artist:
+  <<: *DEFAULTS
+  feed_order: 9003
+  source_id: 900008
+  title: Export Porcelain Plate
+  artist: China
+  dated: 18th century
+  medium: Porcelain
+
+# An OCR-shaped attribution that transliterates to nothing — `"???".
+# parameterize` is `""`. The case that would otherwise build `artist_path`
+# with an empty segment and raise `UrlGenerationError` on `/feed`.
+unparseable_artist:
+  <<: *DEFAULTS
+  feed_order: 9004
+  source_id: 900010
+  title: Damaged Attribution Card
+  artist: "???"
+  dated: unknown

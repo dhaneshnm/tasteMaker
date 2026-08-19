@@ -4,12 +4,10 @@
 
   <div class="label">
     <h2 class="label__title <%= "label__title--long" if painting.long_title? %>"><%= painting.title %></h2>
-    <p class="label__artist">
-      <span class="label__artist-name"><%= painting.artist_display %></span>
-      <% if painting.life_date.present? %>
-        <span class="label__artist-dates"><%= painting.life_date %></span>
-      <% end %>
-    </p>
+    <%# `show_artist:` default true. The artist page passes false — the name
+        already carries the h1 there, and rendering it again under every work
+        would repeat it once per work (design review D2). %>
+    <%= render "shared/artist_line", painting: painting if local_assigns.fetch(:show_artist, true) %>
     <% if painting.meta_line.present? %>
       <p class="label__meta"><%= painting.meta_line %></p>
     <% end %>

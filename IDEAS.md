@@ -21,9 +21,46 @@ feed BET.md's conversation threshold — track in `user-research/`, never as que
 
 ## Inbox
 
-(empty)
+### A Keep rail on every multi-work surface — Better (habit)
+
+Source: `/plan-design-review` on `specs/0018-the-names-you-know/plan.md`, 2026-08-18 (D7).
+
+`/feed` and the new `/artists/:slug` both render works with no `.rail`, so Zoom and Keep
+are unreachable from them. Discovery → keep is the shortest habit loop in the product,
+and the habit mechanic is one of only two moats `CLAUDE.md` names. Tomás landing on 3–5
+newly discovered works by one artist is peak keep intent, and today he has to leave the
+page to act on it.
+
+Not introduced by 0018 — `/feed` has shipped this way since 0013, and 0018 inherits it.
+Cost: N private Turbo frames on a walled page, plus a change to the shared post partial
+that lands on both surfaces at once. Depends on 0018 Release 1.
 
 ## Considering — top = next pick
+
+### The coverage fill — recognizable names — Better (range)
+
+Split out of story 0018 by `/plan-eng-review`, 2026-08-18 (E5). **Next pick once 0018
+Release 1 ships.** Full spec survives verbatim under "Release 2" in
+`specs/0018-the-names-you-know/plan.md` — including the Europe-at-exactly-25.0% arithmetic
+and the `Unmeetable` dry-run gate that proves feasibility before anything is written.
+
+Why it was split: Release 1 is a same-day app fix; this is research plus a re-curation
+whose feasibility the plan itself calls "unknowable without a dry run". An unbounded tail
+does not share a WIP slot with a same-day fix 13 days from kill review (R5).
+
+Depends on 0018 Release 1 — it establishes `artist_slug`, `artist_works_count` and the
+shared slug function this work reads.
+
+Carries three findings deferred into it:
+- Fill depth **2–3**, not ≥1 (design review D17). Under the ≥2 link rule, a filled name
+  that lands one work produces an artist page nobody can reach.
+- Fix `dedup_key`'s normalization (`lib/pool.rb:60`) — the same non-transliterating `gsub`
+  as `artist_key`, so accented and unaccented spellings of one title never dedup. Deferred
+  here because it changes which works survive curation.
+- **The deny-list's one critical gap:** a culture string a future source introduces
+  ("Bhutan") becomes an artist page silently — no test, no handling. Fix is a
+  `pool:report` line flagging single-word artist slugs with more than one work, for a
+  human pass before seeding.
 
 ### Theme/period filters — Proven (nav)
 2026-08-15/16 — gallery test. Observed: theme-seeking in session ("portraits",

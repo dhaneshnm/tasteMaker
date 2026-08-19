@@ -32,7 +32,7 @@ Colour, all contrast ratios measured on the linen paper:
 | `--ink` | `#2a241c` | Prose and titles. 13.4:1 |
 | `--ink-dim` | `#635a4c` | Metadata: medium, dates, table body. 6.0:1 |
 | `--ink-faint` | `#6f6456` | Credit lines, captions, hints. 5.1:1 |
-| `--gold` | `#7d5f18` | Links, artist names, the ornament. 5.3:1 |
+| `--gold` | `#7d5f18` | Links, the ornament, and an artist name **only when it links** (story 0018) — the unlinkable fallback, and every artist name on `/`, step back to `--ink-dim` instead. 5.3:1 |
 | `--gold-deep` | `#5f4711` | Hover only. |
 | `--warn` | `#a33f28` | Form errors, off-target hints. Nothing else. |
 | `--hairline` | `rgba(125, 95, 24, 0.3)` | Rules under the masthead and table headers. |
@@ -412,6 +412,22 @@ curator's desk.
    `min-width` as well. The number is the `--tap` token rather than a literal,
    because story 0014 put it in four places at once and a bar that half-lands is
    the same failure ISSUE-002 was.
+   **An inline link inside running text states the bar with `padding-block`,
+   not a bigger box.** `display: inline-block` plus a negative margin was
+   drafted first for `.label__artist-name` (story 0018) and rejected: it
+   turns the name into an atomic box that cannot wrap where `.label__artist`
+   already does on plenty of works, raising a fold-budget question that
+   padding on a plain inline element does not.
+   **The padding is sized against the font's own content-area metrics, not
+   the paragraph's line-height — measure, do not read it off the cascade.**
+   `getBoundingClientRect()` on an inline non-replaced element tracks its
+   content area (font-size-ish, here ~16px), not `.label__artist`'s
+   1.02rem × 1.4 line-height (22.85px); line-height set on the element itself
+   changes nothing about that box. `application.css`'s comment on
+   `.label__artist-name` targets 46px rather than 44 for exactly this reason
+   — the formula's base is an approximation of a font metric no CSS unit
+   exposes, so the target clears the bar with margin instead of landing on
+   it by luck.
 
 ---
 

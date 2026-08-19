@@ -78,6 +78,14 @@ Rails.application.routes.draw do
   resources :days, only: %i[index show], param: :date,
     constraints: { date: /\d{4}-\d{2}-\d{2}/ }
 
+  # Everything Tondo holds by one hand (story 0018). Slug, not id — readable,
+  # cacheable, and it is the address `Painting#artist_slug` already computes.
+  # Two DIFFERENT artists could in principle share a slug (`parameterize`
+  # collision); none do in the pool as measured (eng review E4) — they would
+  # merge onto one page, accepted until observed.
+  get "artists/:slug" => "artists#show", as: :artist,
+    constraints: { slug: /[a-z0-9\-]+/ }
+
   # A reader's own collection. `control` is the only per-visitor fragment in the
   # product: the day pages stay byte-identical for everyone and publicly
   # cacheable, and this endpoint — private, no-store — carries the personal part.

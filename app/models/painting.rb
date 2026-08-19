@@ -11,6 +11,16 @@ class Painting < ApplicationRecord
     "cma" => { name: "the Cleveland Museum of Art",      url: "https://www.clevelandart.org/art/collection" }
   }.freeze
 
+  # Story 0018. Names that show up as a literal `artist` value but are a
+  # curator field, not a hand that painted anything — the four museums put the
+  # culture or country in the same column when no artist is credited.
+  #
+  # Deny-listed by exact string, not by shape. Single-word suppression was
+  # tried and rejected (eng review E2): it also silences Govardhan, Chokha,
+  # Fayzullah, Basavana and Purkhu, real Mughal and Pahari painters with 2-4
+  # works each in this pool.
+  NOT_AN_ARTIST = %w[China Japan Islamic Tibet India Korea Nepal Egypt].freeze
+
   # Museum copy arrives as HTML from half the collections — Cleveland ships
   # <em>/<i> title italics, Minneapolis ships whole Google Docs paste-ups
   # (<span style>, <font face>, <b id="docs-internal-guid-…">) — and the page
@@ -76,6 +86,38 @@ class Painting < ApplicationRecord
 
   def artist_display
     artist.presence || culture.presence || "Unknown artist"
+  end
+
+  # The slug an artist string resolves to, or nil when it must never carry a
+  # link: blank, a `NOT_AN_ARTIST` culture string, or a name that
+  # transliterates to nothing at all (an OCR-shaped artifact — `parameterize`
+  # on punctuation alone returns ""). One function, so `artist_path` is never
+  # built with an empty segment (`UrlGenerationError`), and the migration
+  # backfill and this row's own write path read the same implementation
+  # (eng review E1/T12).
+  def self.artist_slug_for(artist)
+    name = artist.to_s.strip
+    return nil if name.blank? || NOT_AN_ARTIST.include?(name)
+
+    name.parameterize.presence
+  end
+
+  before_save { self.artist_slug = self.class.artist_slug_for(artist) }
+
+  # The heading for an artist page. Among every distinct string sharing this
+  # slug, the one with the most accented characters wins — an accent is
+  # information and its absence is loss — then the more frequent spelling,
+  # then alphabetical, for a result with no ties in the pool as measured
+  # (eng review E4). "Most frequent" alone titled the 9-work flagship page
+  # "Paul Cezanne" over "Paul Cézanne".
+  def self.canonical_artist_name(slug)
+    where(artist_slug: slug).group(:artist).count
+      .min_by { |name, count| [ -accent_count(name), -count, name ] }
+      &.first
+  end
+
+  def self.accent_count(string)
+    string.to_s.each_char.count { |char| char.ord > 127 }
   end
 
   def meta_line

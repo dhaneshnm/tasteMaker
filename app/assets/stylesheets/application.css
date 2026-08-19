@@ -634,6 +634,33 @@ a:hover { color: var(--gold-deep); }
   color: var(--gold);
   letter-spacing: 0.02em;
 }
+/* Story 0018. The one place a wall label wraps a control. Padding on an
+ * INLINE element (not `inline-block`) extends the tap target without adding
+ * to the line box, so `.label__artist`'s wrap behaviour and the fold-budget
+ * tests that measure it are unaffected — the `inline-block` + negative-margin
+ * draft was rejected for exactly that risk (eng review D10, outside voice
+ * X10).
+ *
+ * The base is NOT `.label__artist`'s line-height (1.02rem × 1.4 = 22.85px).
+ * Measured directly (`getBoundingClientRect`, not read off the cascade): an
+ * inline non-replaced element's own box for hit-testing tracks the font's
+ * content-area metrics, not the paragraph's line-height — line-height on the
+ * element itself changes nothing about it. At a 1.02rem font-size that base
+ * measures ~16px, close to but under 1em, so the formula targets 46px rather
+ * than 44 to clear the bar with margin instead of landing on it by luck:
+ * 45.66px measured at the default root, 45.41-45.59px at the Dynamic Type
+ * range this file's other rules are tested against
+ * (`test/system/dynamic_type_test.rb`). */
+a.label__artist-name {
+  padding-block: calc((46px - 1.02rem) / 2);
+}
+/* The unlinkable artist — blank, culture fallback, or deny-listed — and every
+ * artist name on `/`, where the artist page is walled but the front door is
+ * not (design review D11, eng review X11). Gold means tappable; this keeps
+ * that literally true everywhere it appears. */
+.label__artist-name--dim {
+  color: var(--ink-dim);
+}
 .label__artist-dates {
   color: var(--ink-faint);
   font-style: italic;
@@ -710,6 +737,22 @@ a:hover { color: var(--gold-deep); }
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: var(--ink-dim);
+}
+
+/* ---------- Artist page ----------
+ * The name, the works, the ending — nothing else earns the page (story 0018).
+ * The heading reuses `.label__title` / `.label__title--long` verbatim: it is
+ * the same display type doing the same job, one level up the page.
+ */
+.artist-page__heading { margin-bottom: 1.8rem; }
+
+/* Not `.label__artist-dates` — that class's `::before` prints a leading " · "
+ * meant to follow a name inline, and standing alone that reads as a stray
+ * bullet before the dates. */
+.artist-page__dates {
+  margin: 0.2rem 0 0;
+  font-style: italic;
+  color: var(--ink-faint);
 }
 
 /* ---------- Closing beat ----------

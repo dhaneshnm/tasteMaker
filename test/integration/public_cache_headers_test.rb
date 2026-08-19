@@ -82,6 +82,22 @@ class PublicCacheHeadersTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # Story 0018. `/` gained a per-page local (`link: chrome != :front_door` in
+  # `shared/_artist_line`) so the artist name renders dim instead of linking
+  # to a walled page (eng review X3/X11). A local branching on *chrome*, not
+  # on *who is asking*, must render the identical body for every reader —
+  # the whole point of keeping `/` byte-identical behind a shared cache.
+  test "the front door renders byte-identical markup for a cookieless visitor and a registered device" do
+    get "/"
+    cookieless_body = response.body
+
+    register_device
+    get "/"
+
+    assert_equal cookieless_body, response.body,
+      "/ rendered different markup for a cookieless visitor than for a registered device"
+  end
+
   # The cookie is the defect; the caching is deliberate and must survive the fix.
   test "the front door stays publicly cacheable and still revalidates" do
     get "/"
