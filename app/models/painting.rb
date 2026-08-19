@@ -127,6 +127,54 @@ class Painting < ApplicationRecord
 
   scope :feed_ordered, -> { order(:feed_order, :id) }
 
+  # Story 0022 Release 1. `genre` and `period` are nullable string columns
+  # (plan D1) carrying the canonical DISPLAY value ("19th century",
+  # "Portrait") — never a slug. `genre` has no data source until Release 2;
+  # `period` is written at seed time by `Pool::PeriodBucket`.
+  FACETS = %i[genre period].freeze
+
+  # A value with fewer works than this renders no filter control — the
+  # story's own rule ("a facet with 1 work behind it is a dead end dressed
+  # as a feature") applied to Release 1's real numbers: the period facet
+  # would otherwise light singleton centuries immediately. Provisional;
+  # Release 2's measurement re-decides the number (plan D3).
+  MIN_FACET_WORKS = 5
+
+  # Every distinct value a facet carries in the committed pool, with its
+  # work count. Resolution (`resolve_facet_slug`) works against every value
+  # here, not just the ones that clear the display floor — a deep link a
+  # reader already has (or a value that later drops below the floor) never
+  # silently 500s, it just stops being offered as a button.
+  def self.facet_counts(facet)
+    raise ArgumentError, "unknown facet: #{facet}" unless FACETS.include?(facet)
+
+    where.not(facet => nil).group(facet).count
+  end
+
+  # The subset of `facet_counts` that clears `MIN_FACET_WORKS`, ordered for
+  # display: numeric for period ("10th century" must sort before "9th
+  # century", which string order gets backwards), alphabetical for genre
+  # until Release 2 decides its own order (plan design review pass 1).
+  def self.displayed_facet_values(facet)
+    values = facet_counts(facet).select { |_, count| count >= MIN_FACET_WORKS }.keys
+    facet == :period ? values.sort_by { |value| value[/\d+/].to_i } : values.sort
+  end
+
+  # The URL half of the one reduction function this facet system has (the
+  # `artist_slug_for` lesson: one function, used by both the writer and the
+  # reader, so the two can never disagree).
+  def self.facet_slug(value)
+    value.to_s.parameterize
+  end
+
+  # A URL slug back to the canonical value it names, or nil for a blank,
+  # unknown, or stale slug — never a 500, and never a guess.
+  def self.resolve_facet_slug(facet, slug)
+    return nil if slug.blank?
+
+    facet_counts(facet).each_key.find { |value| facet_slug(value) == slug }
+  end
+
   # The museums actually in the pool, heaviest first. The gallery's closing line
   # credits these rather than a hard-coded list, so it stays true after a reseed
   # changes the mix (story 0013).

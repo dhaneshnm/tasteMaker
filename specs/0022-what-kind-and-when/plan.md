@@ -1,9 +1,11 @@
 # 0022 — What kind, and when · implementation plan
 
 Story: `specs/0022-what-kind-and-when/story.md`
-Status: Draft — **Release 1 only.** Release 2 (the fill) keeps its dry-run-first shape
-from the story and gets its own plan section stub below, the way 0018's plan carried
-Release 2 until eng review split it.
+Status: **Release 1 implemented 2026-08-19.** `bin/ci` green (rubocop, brakeman,
+bundler-audit, importmap audit, 447 unit/integration + 62 system tests). Verified live
+against a real `bin/rails s` — see Deviations. Release 2 (the fill) keeps its
+dry-run-first shape from the story and gets its own plan section stub below, the way
+0018's plan carried Release 2 until eng review split it.
 
 Decisions in this plan were taken without a stop-and-ask round, on explicit instruction
 (2026-08-19). Each is recorded with its reasoning where it lands.
@@ -216,7 +218,37 @@ and asserted `pool_quota_test`-style. Nothing in Release 1 presumes the route: t
 
 ## Deviations (added during build)
 
-- <none yet>
+- **No new backfill file.** D2 anticipated "a one-off `bin/rails runner` backfill." Once
+  `db/seeds.rb` itself computes `period` at write time (which it must, for a fresh seed to
+  carry it at all), it IS the backfill: the metadata-write loop upserts every row
+  unconditionally, and the image-download loop only touches paintings with no image
+  attached — every production row already has one, so `bin/rails db:seed` (or
+  `SKIP_IMAGES=1`, identical result here) re-run post-deploy backfills `period` on all
+  2,000 rows with zero image transfer. Deploy follow-up, not a code task.
+- **Real-manifest parser check, run before wiring the seed:** every one of the 903
+  distinct `dated` strings in the committed manifest, not just the fixture zoo. Zero
+  wrong-parses (confirmed: every loose "b.c"-shaped string in the manifest resolves to
+  nil, none leaked a false CE bucket). 1,984 of 2,002 works land a period; the 18 that
+  don't are BCE dates, blank, "not dated", or (one case, `"c. 25–37 CE"`) a genuine CE
+  date whose year digits are too short for `ANY_YEAR`'s 3-4 digit floor — safe (nil), not
+  wrong, and not worth widening the regex for a single instance. Bucket distribution:
+  12th century (11 works) through 20th (280) all clear `MIN_FACET_WORKS`; 2nd–11th (27
+  works total, seven buckets) stay below it and are reachable only through ALL — the
+  provisional floor is doing real work, not a hypothetical one.
+- **Manually verified against a real `rails s`** (2026-08-19), via the story 0021 mock
+  door: unfiltered `/feed` renders all 9 lit period buckets and no genre row; filtering by
+  `period=16th-century` narrows the count (143 works), dims the active value, and drops
+  its own link; an unresolvable slug (`period=not-a-real-thing`) degrades to the full
+  unfiltered 2,002 with no error; a genuinely empty combined AND (period + genre set by
+  hand on a few dev rows, since Release 1 ships genre dark) renders `.page--empty` with
+  "Nothing here wears both." and the way out; the genre row stays silent below the floor
+  (3 works) and lights only once real values clear it. Dev DB reseeded clean afterward —
+  no scratch genre data left behind.
+- **`.masthead__aside`'s "works · Mia" text left untouched.** Pre-existing leftover from
+  when the pool was Minneapolis-only (confirmed via `git log -p`, predates this story by
+  months) — not in scope for this story, not touched, even though this exact line was
+  edited for the filtered-count behavior. Noted rather than silently carried, since it's
+  the kind of thing that looks like an oversight if found later without this note.
 
 ## GSTACK REVIEW REPORT
 

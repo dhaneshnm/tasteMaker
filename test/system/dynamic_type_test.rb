@@ -358,4 +358,32 @@ class DynamicTypeTest < ApplicationSystemTestCase
         "the note's first line moved below the fold once the artist name became a link"
     end
   end
+
+  # Story 0022 Release 1, design review pass 5. `.caps-link` sets size and
+  # tracking, never height — assuming otherwise is ISSUE-002 (commit
+  # 866bbc2), and the facet row states the bar itself with `min-height:
+  # var(--tap)`. Asserted at the accessibility cap, where the type is
+  # largest and a control built the wrong way is most likely to fall short.
+  test "the facet row's items clear the tap bar at the accessibility cap" do
+    Painting::MIN_FACET_WORKS.times do |i|
+      Painting.create!(source: "mia", source_id: 923_000 + i, title: "Nineteenth #{i}",
+        artist: "A. Painter", image_url_800: paintings(:woodcut).image_url_800,
+        period: "19th century")
+    end
+
+    with_viewport(375, 667) do
+      visit feed_path
+      scale_to CAPPED_ACCESSIBILITY_ROOT
+
+      heights = page.evaluate_script(<<~JS)
+        [...document.querySelectorAll(".facets .caps-link")]
+          .map(el => Math.round(el.getBoundingClientRect().height))
+      JS
+
+      assert heights.any?, "expected at least one facet control to measure"
+      heights.each_with_index do |height, i|
+        assert_operator height, :>=, 44, "facet item #{i} was #{height}px tall at the accessibility cap"
+      end
+    end
+  end
 end
