@@ -36,13 +36,7 @@ and its own story — not a line inside a re-curation. Depends on 0019.
 
 ## Considering — top = next pick
 
-### Theme/period filters — Proven (nav)
-2026-08-15/16 — gallery test. Observed: theme-seeking in session ("portraits",
-"landscapes from the impressionist era").
-Genre facets (~15–25 categories from an existing taxonomy — Getty AAT / Wikidata /
-Iconclass, don't invent one) + period/movement. Country facet is inference — lower
-priority. Not before submission; first candidate after. Build as navigation, not the
-product — the differentiator stays voice + coach; filters are ArtDay's surface.
+(empty — the one entry here promoted to 0022 below)
 
 ## Parked — reason required
 
@@ -79,3 +73,8 @@ product — the differentiator stays voice + coach; filters are ArtDay's surface
   picture itself the zoom trigger, and both surfaces already render `shared/_zoom`. The gap
   is Keep only, and 0020 is scoped to Keep only. Built same day (`b9a6727`), `bin/ci` green.
   Code only — not deployed.
+- 2026-08-19 — Theme/period filters → `specs/0022-what-kind-and-when`. **Sequencing
+  deviation, taken deliberately, not silently:** this entry said "not before submission,"
+  and the app is still not submitted (`BET.md`, all five thresholds zero) — promoted anyway
+  on explicit direction, with the gap named in the story rather than the note quietly
+  dropped.
