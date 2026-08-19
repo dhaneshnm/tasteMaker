@@ -83,8 +83,17 @@ Rails.application.routes.draw do
   # Two DIFFERENT artists could in principle share a slug (`parameterize`
   # collision); none do in the pool as measured (eng review E4) — they would
   # merge onto one page, accepted until observed.
+  #
+  # `_` is in the character class, not just `a-z0-9-`: `String#parameterize`
+  # keeps a literal underscore rather than collapsing it to the separator
+  # (`"Weird_Name".parameterize` => `"weird_name"`), so a slug this route
+  # cannot match is one `artist_slug_for` can still produce and persist. A
+  # narrower constraint here 500s `artist_path` (`UrlGenerationError`) on
+  # every render of that work, on `/feed` and `/days/:date` alike — found by
+  # /code-review, not present in the current pool but not prevented by
+  # anything either.
   get "artists/:slug" => "artists#show", as: :artist,
-    constraints: { slug: /[a-z0-9\-]+/ }
+    constraints: { slug: /[a-z0-9_\-]+/ }
 
   # A reader's own collection. `control` is the only per-visitor fragment in the
   # product: the day pages stay byte-identical for everyone and publicly

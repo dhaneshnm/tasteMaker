@@ -15,15 +15,18 @@ class ArtistsController < ApplicationController
     # see ApplicationController#private_revalidate. Same contract as `/days`.
     private_revalidate
 
-    raise NotFound unless matches.exists?
+    # One query, not two: `exists?` then `cache_key_with_version` measured at
+    # two separate SQL round trips (found by /code-review — the comment here
+    # used to claim parity with `DaysController#index`'s single aggregate,
+    # which was wrong). `pick` with both aggregates in one SELECT covers
+    # existence and freshness together.
+    count, latest = matches.pick(Arel.sql("COUNT(*), MAX(updated_at)"))
+    raise NotFound if count.zero?
 
     # Aggregates first, then bail — the rule DaysController#index states for
     # the same reason: a 304 must not pay for loading attachments and blobs
-    # it is about to discard (eng review E-A2/E-A3). `cache_key_with_version`
-    # is that controller's own idiom (`picks.cache_key_with_version`,
-    # `days_controller.rb:19`) — one aggregate query covering both count and
-    # freshness, not two.
-    return unless stale?(etag: matches.cache_key_with_version)
+    # it is about to discard (eng review E-A2/E-A3).
+    return unless stale?(etag: [ count, latest ])
 
     @paintings = matches.with_attached_image.feed_ordered.to_a
     # Computed from the rows already loaded above, not a second query —

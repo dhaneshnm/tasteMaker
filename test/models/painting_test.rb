@@ -147,12 +147,43 @@ class PaintingTest < ActiveSupport::TestCase
     assert_equal "paul-cezanne", Painting.artist_slug_for("Paul Cézanne")
   end
 
+  # Regression, found by /code-review: `String#parameterize` keeps a literal
+  # underscore rather than collapsing it to the separator, so a slug this
+  # produced routing could not match — `artist_path` raised
+  # `UrlGenerationError`, a 500 on /feed and /days/:date — until the route
+  # constraint in config/routes.rb widened to include it.
+  test "an underscore in the artist name produces a slug the route can match" do
+    slug = Painting.artist_slug_for("Weird_Name")
+
+    assert_equal "weird_name", slug
+    assert_nothing_raised { Rails.application.routes.url_helpers.artist_path(slug) }
+  end
+
+  # E2, case-insensitive. Regression, found by /code-review: `.include?` was
+  # an exact-case match, so a differently-cased duplicate of an already-known
+  # placeholder ("CHINA", "unidentified artist") slipped the deny-list.
+  test "the deny-list matches regardless of case" do
+    assert_nil Painting.artist_slug_for("china")
+    assert_nil Painting.artist_slug_for("CHINA")
+    assert_nil Painting.artist_slug_for("unidentified artist")
+  end
+
   # E4. Neither count nor "most frequent" would settle the fixture pair —
   # both appear once — so only the accent rule decides.
   test "the canonical artist name prefers the variant with more accented characters" do
     names = [ paintings(:cezanne_plain).artist, paintings(:cezanne_accented).artist ]
 
     assert_equal "Paul Cézanne", Painting.canonical_artist_name(names)
+  end
+
+  # Regression, found by /code-review: accent_count counted ANY non-ASCII
+  # character, so a curly quote or em dash — this pool's own museum-paste-up
+  # artifacts (see Painting.plain_text above) — could tip the tie-break on
+  # punctuation rather than a genuine diacritic.
+  test "the accent tie-break ignores punctuation that happens to be non-ASCII" do
+    assert_equal 0, Painting.accent_count("O’Keeffe") # curly apostrophe
+    assert_equal 0, Painting.accent_count("Jean—Paul") # em dash
+    assert_equal 1, Painting.accent_count("Cézanne")
   end
 
   test "the gallery credits the museums actually in the pool, heaviest first" do

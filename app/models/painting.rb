@@ -111,7 +111,12 @@ class Painting < ApplicationRecord
   # (eng review E1/T12).
   def self.artist_slug_for(artist)
     name = artist.to_s.strip
-    return nil if name.blank? || NOT_AN_ARTIST.include?(name)
+    # `casecmp?`, not `.include?` — found by /code-review: a differently-cased
+    # duplicate of an already-known placeholder ("CHINA", "unidentified
+    # artist") would otherwise slip the deny-list on a future reseed. The
+    # list itself stays as-written case (it is also the display fallback
+    # elsewhere); only the comparison folds case.
+    return nil if name.blank? || NOT_AN_ARTIST.any? { |denied| denied.casecmp?(name) }
 
     name.parameterize.presence
   end
@@ -129,8 +134,13 @@ class Painting < ApplicationRecord
     names.tally.min_by { |name, count| [ -accent_count(name), -count, name ] }&.first
   end
 
+  # Counts diacritic letters, not any non-ASCII character — found by
+  # /code-review: a curly quote or em dash (this pool's own museum-paste-up
+  # artifacts, see `plain_text` above) is non-ASCII but not an accent, and
+  # counting it could tip the tie-break on punctuation rather than the
+  # genuine diacritic the rule is about.
   def self.accent_count(string)
-    string.to_s.each_char.count { |char| char.ord > 127 }
+    string.to_s.each_char.count { |char| char.ord > 127 && char.match?(/\p{L}/) }
   end
 
   def meta_line
