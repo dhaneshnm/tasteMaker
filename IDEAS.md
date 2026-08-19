@@ -34,6 +34,26 @@ not merge the pages that already exist.
 The fix rewrites stored attribution data for every reader, so it needs its own evidence
 and its own story — not a line inside a re-curation. Depends on 0019.
 
+### Wikidata P135 artist-movement fill for genre — Better (range)
+
+Source: `specs/0022-what-kind-and-when/plan.md`, Release 2 eng review, 2026-08-19.
+Deferred there on purpose.
+
+124/2,000 pool works route through an artist the existing 0007 QID list already
+resolves, and 98% of those QIDs (95/97 sampled) carry a real Wikidata `P135` movement
+claim once reconciled — the reconciliation coverage is the bottleneck, not the data.
+Not built in Release 2 because folding it in broke that release's own CMA/MIA-has-no-genre
+invariant (`P135` is artist-based, not museum-based, so it reaches CMA/MIA works too
+unless explicitly scoped away from them) and needs a genuinely new Wikidata SPARQL
+client — nothing in `lib/` or `app/` talks SPARQL today; the only precedent is a
+throwaway Python research script.
+
+If ever picked up: scope the route to AIC/MET works only (or re-derive a fresh
+CMA/MIA invariant that accounts for it), build the SPARQL client as a first-class
+`lib/pool/` module reusing `Pool::Sources.get_json`'s retry/backoff idiom, and batch the
+QID lookup in one `VALUES` clause — the dry-run already proved that query shape works
+live against Wikidata's public endpoint.
+
 ## Considering — top = next pick
 
 (empty — the one entry here promoted to 0022 below)
