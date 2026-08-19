@@ -12,8 +12,9 @@ Decisions in this plan were taken without a stop-and-ask round, on explicit inst
 
 Two facets on `/feed`, filtered by query params, rendered as rows of `.caps-link` items
 in the product's own idiom. One structural rule enforced in the view: **a facet value
-renders only when at least one work carries it**, so the genre row — empty until
-Release 2 — renders nothing at all, and the page is byte-identical to today's.
+renders only when at least `MIN_FACET_WORKS` works carry it** (see D3), so the genre
+row — empty until Release 2 — renders nothing at all, and the unfiltered page is
+byte-identical to today's except the period row.
 
 ```
 GET /feed?period=19th-century&genre=portrait&page=2
@@ -64,10 +65,37 @@ Reseed semantics decide where classification lives (the 0019 machinery is the co
 
 The parser targets the measured format zoo: `"1913"`, `"c. 951–953"`,
 `"second half 16th century"`, `"mid 19th century"`, `"1837–38"`, `"first half of 19th
-century"`, `"c. 1900"`. Output: century buckets ("10th century" … "20th century"),
-taking the **start** of a range ("1837–38" → 19th century; "c. 951–953" → 10th).
-Unparseable → nil → the work simply never matches a period filter, and no bucket renders
-for a value no work carries.
+century"`, `"c. 1900"` — plus the shapes the outside voice measured in the manifest that
+the first draft missed: `"about 1213–1069 BCE"` and 4 more BCE dates, `"c. 1100s"`,
+`"1560s?"`, `"16th/17th century"`, `"Mid–1850s"`. Output: a century bucket with its
+ordinal, taking the **start** of a range ("1837–38" → 19th century; "c. 951–953" → 10th).
+Whatever centuries the data yields render — the committed pool runs 1st through 20th,
+not "10th–20th" as the first draft claimed.
+
+**Two failure modes, and only one is safe.** Unparseable → nil → the work never matches
+a period filter — safe. Parsing *falsely* — a BCE date's start-year grabbed and labeled
+13th century **CE** — puts an actively wrong label on a rendered facet, which is worse
+than no label. So: **any string carrying `BCE`/`B.C.` maps to nil**, never a CE bucket
+(5 works; a "13th century BCE" singleton bucket would also be a dead end), and the
+fixture zoo pins every wrong-parse trap above, not just the happy formats.
+
+**Provisional facet floor in Release 1** (outside voice F5): the story calls a 1-work
+facet "a dead end dressed as a feature," and without a floor the period facet lights
+singleton centuries immediately (10th: ~6 works, earlier: 1–2). `MIN_FACET_WORKS = 5`,
+one named constant — a value renders only when at least that many works carry it; works
+below the floor stay reachable through ALL. Release 2's measurement re-decides the
+number; the constant is where it lands.
+
+Two conventions pinned here so no future edit flips them silently (eng review):
+
+- **Century arithmetic is the strict convention**: `((year - 1) / 100) + 1`, so 1900 is
+  the 19th century (1801–1900) and 1901 opens the 20th. Pinned by a parser test fixture,
+  because "c. 1900" reads colloquially as 20th and an unpinned choice re-buckets the
+  facet on somebody's future "fix."
+- **Chronological ordering is numeric, never lexical**: "10th century" sorts before
+  "9th century" as a string. The parser exposes the century ordinal alongside the label;
+  `Painting.facet_values(:period)` sorts by it. Pinned by a test with 9th/10th both
+  present.
 
 Centuries, not movements, because centuries are what `dated` can honestly answer.
 "Impressionism" is an attribution claim, not an arithmetic one — it arrives in Release 2
@@ -139,6 +167,12 @@ states follow, both missed by the first draft:
 filtered page is a different URL with a different body. The `@total` in the masthead
 becomes the filtered count — free, and it doubles as the "N works match" feedback.
 
+Rendering the facet rows costs two `DISTINCT` plucks per request (eng review A3) —
+considered and accepted: 2,000 rows in SQLite, on a walled page, is not a cost worth a
+process-global cache and its staleness bugs. A stale bookmarked filter URL after a
+Release 2 value rename degrades to the unfiltered gallery by the unknown-slug rule —
+graceful by construction, no redirect machinery needed (eng review A2).
+
 ## Files — Release 1
 
 | File | Change |
@@ -160,7 +194,9 @@ becomes the filtered count — free, and it doubles as the "N works match" feedb
 
 | Test | Pins |
 |---|---|
-| `pool_period_bucket_test` | every measured `dated` format maps to its century; garbage → nil; range takes the start; "second half 16th century" → 16th, not 17th |
+| `pool_period_bucket_test` | every measured `dated` format maps to its century; garbage → nil; range takes the start; "second half 16th century" → 16th, not 17th; **"1900" → 19th century** (the strict-convention pin); the ordinal accompanies the label; **every BCE form → nil, never a CE bucket**; "c. 1100s" → 12th (the off-by-one trap); "1560s?" and "16th/17th century" pinned |
+| `feed_filter_test` | the provisional floor: a value carried by fewer than `MIN_FACET_WORKS` works renders no control, and its works stay reachable through ALL |
+| `test/models/painting_test.rb` (extend) | `facet_values(:period)` orders 9th before 10th — numeric, not lexical (eng review A1) |
 | `feed_filter_test` | `?period=<slug>` filters; unknown slug = unfiltered (no 500, no empty-page trap); combined genre+period ANDs; filtered `@total` in the masthead aside; pagination frame src preserves both params; page 2 of a filtered view stays filtered |
 | `feed_filter_test` | **the non-empty rule**: a facet with no values renders no row (fixtures with nil genre → no genre row); a value present in fixtures renders exactly once |
 | `feed_filter_test` | **the empty combined-filter state** (design review): a genre+period AND with zero matches renders `.page--empty` with its own line and a link back to the unfiltered gallery — never the "walked the whole gallery" coda over nothing |
@@ -187,17 +223,23 @@ and asserted `pool_quota_test`-style. Nothing in Release 1 presumes the route: t
 | Review | Trigger | Why | Runs | Status | Findings |
 |--------|---------|-----|------|--------|----------|
 | CEO Review | `/plan-ceo-review` | Scope & strategy | 0 | — | — |
-| Codex Review | `/codex review` | Independent 2nd opinion | 0 | — | — |
-| Eng Review | `/plan-eng-review` | Architecture & tests (required) | 0 | — | not yet run on this plan |
+| Codex Review | `/codex review` | Independent 2nd opinion | 0 | — | rate-limited; Claude subagent ran as outside voice |
+| Eng Review | `/plan-eng-review` | Architecture & tests (required) | 1 | CLEAR (PLAN) | 4 issues + 7 outside-voice findings, 4 folded |
 | Design Review | `/plan-design-review` | UI/UX gaps | 1 | CLEAR (FULL) | score: 6/10 → 9/10, 6 decisions |
 | DX Review | `/plan-devex-review` | Developer experience gaps | 0 | — | — |
 
-- **VERDICT:** DESIGN CLEARED — eng review required before implementation.
-- Decisions auto-taken on explicit owner instruction (no stop-and-ask): chronological
-  period order with self-identifying values and no row labels; `.page--empty` +
-  filtered-coda copy for the two filter states; edge-clipping as the only scroll
-  affordance; 44px bar stated on the row (ISSUE-002); `<nav aria-label>` landmarks with
-  `aria-current="true"`. Mockups skipped: the component reuses the test-enforced
-  `.caps-link` compass grammar, and the mockup feedback loop is interactive by design.
+- **CROSS-MODEL:** the outside voice's strongest finding (BCE dates parsing to false CE
+  centuries) was a class the first-party review missed entirely — wrong-parse vs
+  no-parse. Folded, with the fixture zoo grown to pin it.
+- **VERDICT:** DESIGN + ENG CLEARED — ready to implement Release 1.
+- Eng decisions auto-taken on explicit owner instruction: numeric century ordering
+  (lexical-sort trap); strict century convention pinned ("1900" → 19th); BCE → nil,
+  never a CE bucket; `MIN_FACET_WORKS = 5` provisional floor (outside voice F5, the
+  story's own dead-end rule applied to R1); complexity check named (12 files) and
+  proceeded — 5 are tests, 3 are one-line touches. Outside-voice findings skipped with
+  reasons: F1 (submission displacement — owner decided twice, recorded in story), F2
+  (genre plumbing — the machinery is generic, the R1/R2 split was the owner's explicit
+  instruction), F7 (store-the-slug — resolution reuses the pluck the rows already need,
+  display-value column keeps R2 vocabulary options open).
 
 NO UNRESOLVED DECISIONS
