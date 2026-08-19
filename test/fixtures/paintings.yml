@@ -63,12 +63,13 @@ woodcut:
   description: Museum copy for the day nobody wrote a note.
 
 # Deliberately has no image at all: nothing to attach, nothing to hotlink.
+# `artist: Unknown` is deny-listed (NOT_AN_ARTIST, found by /qa 2026-08-19 —
+# a museum placeholder, not a name), so `artist_slug` is nil, not "unknown".
 imageless:
   source: mia
   source_id: 900005
   title: Lost Panel
   artist: Unknown
-  artist_slug: unknown
   department: Paintings
 
 # A LANDSCAPE work, and the pixels are really landscape. Setting `image_width`

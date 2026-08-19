@@ -13,13 +13,27 @@ class Painting < ApplicationRecord
 
   # Story 0018. Names that show up as a literal `artist` value but are a
   # curator field, not a hand that painted anything — the four museums put the
-  # culture or country in the same column when no artist is credited.
+  # culture, country, or a placeholder in the same column when no artist is
+  # credited.
   #
   # Deny-listed by exact string, not by shape. Single-word suppression was
   # tried and rejected (eng review E2): it also silences Govardhan, Chokha,
   # Fayzullah, Basavana and Purkhu, real Mughal and Pahari painters with 2-4
   # works each in this pool.
-  NOT_AN_ARTIST = %w[China Japan Islamic Tibet India Korea Nepal Egypt].freeze
+  #
+  # The five placeholder strings below (found by /qa, 2026-08-19, browsing
+  # /feed) are the second shape of the same defect: E2's review query asked
+  # only "is `artist` a literal country/culture name", so `Painting.where(
+  # artist: "Unidentified artist")` — a museum's own "we don't know" marker —
+  # was never checked and rendered as a live, tappable artist page. Exhaustive
+  # for the pool as measured: `Painting.where.not(artist: [nil, ""]).distinct.
+  # pluck(:artist).select { |a| a =~ /unidentified|unknown|anonymous|various|
+  # not identified|maker unknown/i }` returns exactly these five, 9 works
+  # total, none previously in this list.
+  NOT_AN_ARTIST = [
+    "China", "Japan", "Islamic", "Tibet", "India", "Korea", "Nepal", "Egypt",
+    "Unidentified", "Unknown", "Artist unknown", "Unidentified artist", "Various artists"
+  ].freeze
 
   # Museum copy arrives as HTML from half the collections — Cleveland ships
   # <em>/<i> title italics, Minneapolis ships whole Google Docs paste-ups

@@ -130,6 +130,18 @@ class PaintingTest < ActiveSupport::TestCase
     assert_equal "govardhan", Painting.artist_slug_for("Govardhan")
   end
 
+  # Regression: a museum's own "we don't know" marker rendered as a live,
+  # tappable artist page — the same E2 defect the review's query missed
+  # because it only checked literal country/culture names, not attribution
+  # placeholders.
+  # Found by /qa on 2026-08-19 — browsing /feed, "Unidentified artist" (5
+  # works) linked to a page. Report: .gstack/qa-reports/qa-report-*.md
+  test "museum attribution placeholders are not artist pages" do
+    [ "Unidentified", "Unknown", "Artist unknown", "Unidentified artist", "Various artists" ].each do |placeholder|
+      assert_nil Painting.artist_slug_for(placeholder), "#{placeholder.inspect} should not resolve to a slug"
+    end
+  end
+
   # An OCR-shaped artifact that parameterizes to nothing — the case that
   # would otherwise build `artist_path` with an empty segment.
   test "a name that transliterates to nothing resolves to no slug" do
