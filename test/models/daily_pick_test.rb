@@ -255,6 +255,54 @@ class DailyPickTest < ActiveSupport::TestCase
     assert_equal Date.current, DailyPick.first.scheduled_on
   end
 
+  # Code review, testing specialist: the ladder tests above only ever
+  # exercise tier 1 and tier 4 — a conflict inside a 1-2 day gap never lands
+  # in tier 3's 7-day window. This pins tier 3 specifically: a repeat artist
+  # 10 days out is still inside tier 1/2's 30-day window (blocked) but
+  # outside tier 3's 7-day window (allowed).
+  test "auto_fill! relaxes to tier 3 when the only conflict is more than 7 but within 30 days" do
+    isolate_pool_to(paintings(:auto_repeat_artist_1), paintings(:auto_repeat_artist_2))
+    target = Date.current + 10
+    DailyPick.create!(painting: paintings(:auto_repeat_artist_1), scheduled_on: target - 10, blurb: "A note.")
+
+    assert DailyPick.send(:fill_one!, target)
+
+    pick = DailyPick.find_by(scheduled_on: target)
+    assert_equal 3, pick.auto_tier
+    assert_equal paintings(:auto_repeat_artist_2), pick.painting
+  end
+
+  # Code review, testing specialist: every other test passes an explicit
+  # horizon, so the literal default (7, the value FillQueueJob actually
+  # runs with) is never itself exercised.
+  test "auto_fill!'s default horizon fills exactly 7 days" do
+    isolate_pool_to(
+      paintings(:auto_repeat_artist_1), paintings(:auto_repeat_artist_2),
+      paintings(:auto_shared_culture_1), paintings(:auto_shared_culture_2),
+      paintings(:auto_placeholder_artist_1), paintings(:auto_placeholder_artist_2),
+      paintings(:auto_blank_artist_1), paintings(:auto_blank_artist_2)
+    )
+
+    DailyPick.auto_fill!
+
+    assert_equal (Date.current...(Date.current + 7)).to_a, DailyPick.order(:scheduled_on).pluck(:scheduled_on)
+  end
+
+  # `fill_one!`'s `RecordNotUnique` rescue (the exists?-check fixed by code
+  # review, adversarial finding #2) has no direct test, and that gap is
+  # deliberate, not missed: Rails' own uniqueness validation always runs a
+  # SELECT before every INSERT, so within one connection a duplicate
+  # `scheduled_on` or `painting_id` is caught as `RecordInvalid` before the
+  # DB constraint that raises `RecordNotUnique` is ever reached — confirmed
+  # by trying to provoke it directly while writing this suite. The real
+  # trigger is two Solid Queue runs racing on two different connections at
+  # once, which this suite's transactional fixtures (one connection, rolled
+  # back per test) cannot construct, and no other test in this codebase
+  # attempts cross-connection concurrency either. `test/models/favorite_test.rb`
+  # proves the DB-level constraint itself fires (`save(validate: false)`
+  # bypasses the validation that would otherwise mask it) — this method's
+  # decision logic once that exception arrives is what's unverified.
+
   test "a machine pick's tier clears when the curator swaps its painting" do
     isolate_pool_to(paintings(:auto_filler_1), paintings(:auto_filler_2))
     DailyPick.auto_fill!(horizon: 1)
@@ -300,6 +348,16 @@ class DailyPickTest < ActiveSupport::TestCase
 
     assert_equal 2, DailyPick.days_scheduled_ahead
     assert_equal Date.current + 1, DailyPick.scheduled_through
+  end
+
+  # Code review, adversarial finding #1: this predicate is the fix — both
+  # today being scheduled AND the buffer meeting LOW_BUFFER_DAYS are
+  # required, not just one or the other.
+  test "queue_healthy? requires both today scheduled and a full buffer" do
+    assert DailyPick.queue_healthy?(today_scheduled: true, days_ahead: DailyPick::LOW_BUFFER_DAYS)
+    assert_not DailyPick.queue_healthy?(today_scheduled: false, days_ahead: 30)
+    assert_not DailyPick.queue_healthy?(today_scheduled: true, days_ahead: DailyPick::LOW_BUFFER_DAYS - 1)
+    assert_not DailyPick.queue_healthy?(today_scheduled: false, days_ahead: 0)
   end
 
   private

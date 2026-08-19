@@ -9,11 +9,16 @@
 
   <p><%= link_to "Schedule a day →", new_admin_daily_pick_path, class: "caps-link" %></p>
 
-  <%# story 0021: the dead man's switch for the curator's own eyes. The same
-      count /queue-health serves an external monitor, so "how many days
-      ahead" reads identically in both places. %>
-  <p class="adm__hint <%= "is-off-target" if @days_scheduled_ahead < DailyPick::LOW_BUFFER_DAYS %>">
-    <% if @scheduled_through %>
+  <%# story 0021: the dead man's switch for the curator's own eyes. Same
+      predicate /queue-health answers for an external monitor
+      (DailyPick.queue_healthy?) — a depth count alone would read "fine" the
+      moment today itself dropped off the schedule while later days stayed
+      buffered, exactly the gap this hint exists to surface (code review). %>
+  <p class="adm__hint <%= "is-off-target" unless @queue_healthy %>">
+    <% if !@today_scheduled && @scheduled_through %>
+      Today is not scheduled. Scheduled through <%= @scheduled_through.to_fs(:daily) %>
+      (<%= pluralize(@days_scheduled_ahead, "day") %> ahead).
+    <% elsif @scheduled_through %>
       Scheduled through <%= @scheduled_through.to_fs(:daily) %>
       (<%= pluralize(@days_scheduled_ahead, "day") %> ahead).
     <% else %>

@@ -92,6 +92,20 @@ class DailyPick < ApplicationRecord
     from_today.maximum(:scheduled_on)
   end
 
+  # The one predicate "is the queue okay" answers to — both the admin hint
+  # and `/queue-health` call this rather than each re-deriving it, so a
+  # shared LOW_BUFFER_DAYS number can't paper over two different questions.
+  # A prior draft only compared `days_ahead` and let the admin page read
+  # "healthy" the moment TODAY itself dropped off the schedule while later
+  # days stayed buffered — exactly the state this story exists to catch
+  # (code review, adversarial finding #1). `today_scheduled` and
+  # `days_ahead` are parameters, not queries, so a caller already holding
+  # the data (the admin controller, from its own loaded `@picks`) never
+  # pays for a second round trip to ask the question.
+  def self.queue_healthy?(today_scheduled:, days_ahead:)
+    today_scheduled && days_ahead >= LOW_BUFFER_DAYS
+  end
+
   # Every painting that already has a day, or will once `pick` (if given)
   # saves. `pick&.id` excludes the pick's own existing row so editing it never
   # makes its own painting disappear from its own dropdown. One home for this
@@ -167,6 +181,16 @@ class DailyPick < ApplicationRecord
   # Queue's recurring executor is enqueue-once, not run-once, so two
   # overlapping runs racing to fill the same date is an expected shape, not
   # a bug to raise on.
+  #
+  # `daily_picks` carries two unique indexes, not one — `scheduled_on` AND
+  # `painting_id` — and a bare rescue can't tell which one just fired. If a
+  # concurrent run claimed this *painting* for a *different* date, `date`
+  # itself is still open, and returning `true` on the assumption alone would
+  # tell the caller this date is filled when nothing was actually saved for
+  # it (code review, adversarial finding #2). The `exists?` check is the
+  # cheap way to ask which constraint fired: only stop trying this date if
+  # something is now actually scheduled on it; otherwise this candidate
+  # collided on its painting, and the next one in the tier still might not.
   def self.fill_one!(date)
     RELAXATION_TIERS.each do |tier, rules|
       candidates_for(date, rules).each do |painting|
@@ -176,7 +200,8 @@ class DailyPick < ApplicationRecord
           Rails.logger.info("DailyPick.auto_fill!: #{date} filled at tier #{tier}") if tier > 1
           return true
         rescue ActiveRecord::RecordNotUnique
-          return true
+          return true if exists?(scheduled_on: date)
+          next
         rescue ActiveRecord::RecordInvalid
           next
         end
@@ -206,15 +231,17 @@ class DailyPick < ApplicationRecord
   # `where.not(column: list)` compiles to a bare `NOT IN`, and SQL's NULL
   # semantics make a bare `NOT IN` silently drop every NULL row from the
   # result — which here would wrongly exclude every blank-artist or
-  # blank-culture candidate instead of exempting it. One helper, so the two
-  # rules can't drift on that fix.
+  # blank-culture candidate instead of exempting it.
+  #
+  # Written out at each call site rather than behind a shared helper taking
+  # the column expression as a parameter: passing it through a method
+  # argument is exactly the shape Brakeman's SQL-injection check can no
+  # longer prove is a hardcoded constant, even though both call sites below
+  # only ever pass `ARTIST_KEY_SQL` or the literal `"paintings.culture"" —
+  # never anything derived from user input (code review). The scanner
+  # staying able to verify that by reading the call site, not by trusting a
+  # comment, is worth the six duplicated lines.
   ARTIST_KEY_SQL = "COALESCE(NULLIF(paintings.artist_slug, ''), NULLIF(paintings.artist, ''))"
-
-  def self.exclude_unless_null(scope, column_sql, values)
-    return scope if values.blank?
-    scope.where("#{column_sql} NOT IN (?) OR #{column_sql} IS NULL", values)
-  end
-  private_class_method :exclude_unless_null
 
   def self.candidates_for(date, rules)
     scope = Painting.where.not(id: spoken_for).where.not(description: [ nil, "" ])
@@ -225,13 +252,17 @@ class DailyPick < ApplicationRecord
         .where(scheduled_on: (date - window)..(date + window))
         .pluck(Arel.sql(ARTIST_KEY_SQL))
         .compact
-      scope = exclude_unless_null(scope, ARTIST_KEY_SQL, used_keys)
+      if used_keys.present?
+        scope = scope.where("#{ARTIST_KEY_SQL} NOT IN (?) OR #{ARTIST_KEY_SQL} IS NULL", used_keys)
+      end
     end
 
     if rules[:culture_rule]
       neighbour_cultures = [ nearest_scheduled_before(date), nearest_scheduled_after(date) ]
         .compact.filter_map { |pick| pick.painting.culture.presence }
-      scope = exclude_unless_null(scope, "paintings.culture", neighbour_cultures)
+      if neighbour_cultures.present?
+        scope = scope.where("paintings.culture NOT IN (?) OR paintings.culture IS NULL", neighbour_cultures)
+      end
     end
 
     scope.order(Arel.sql("RANDOM()"))

@@ -6,11 +6,13 @@ module Admin
     def index
       # The queue lists titles, not pictures, so the images stay unloaded.
       @picks = DailyPick.includes(:painting).order(scheduled_on: :desc).to_a
-      # Derived from @picks rather than two more queries — the full table is
+      # Derived from @picks rather than more queries — the full table is
       # already in hand (simplify pass).
       future = @picks.select { |pick| pick.scheduled_on >= Date.current }
       @days_scheduled_ahead = future.size
       @scheduled_through = future.map(&:scheduled_on).max
+      @today_scheduled = @picks.any? { |pick| pick.scheduled_on == Date.current }
+      @queue_healthy = DailyPick.queue_healthy?(today_scheduled: @today_scheduled, days_ahead: @days_scheduled_ahead)
     end
 
     def new

@@ -42,6 +42,13 @@ plugin :tmp_restart
 # plugin anyway.
 plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"] == "true"
 
+# One supervisor is the whole point above — this precondition is implicit
+# nowhere else, so it's named here. `WEB_CONCURRENCY` stays unset (single
+# process, default) deliberately: if cluster mode is ever turned on without
+# revisiting this, every worker boots its own Solid Queue supervisor against
+# the same queue database and the fill job runs once per worker, not once
+# (code review, adversarial finding #4).
+
 # Specify the PID file. Defaults to tmp/pids/server.pid in development.
 # In other environments, only set the PID file if requested.
 pidfile ENV["PIDFILE"] if ENV["PIDFILE"]

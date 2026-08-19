@@ -77,6 +77,21 @@ module Admin
       assert_select ".adm__hint.is-off-target", /Nothing scheduled from today forward/
     end
 
+    # Code review, adversarial finding #1: a depth-only check reads "healthy"
+    # here — the buffer has plenty of days — even though today has no pick
+    # at all and the front door is serving yesterday's painting. The desk
+    # has to flag this the same way `/queue-health` does, not just count
+    # rows.
+    test "the desk flags a full buffer that is still missing today" do
+      daily_picks(:today).destroy!
+      publish_day(Date.current + 2)
+      publish_day(Date.current + 3)
+
+      get admin_daily_picks_path, headers: curator_headers
+
+      assert_select ".adm__hint.is-off-target", /Today is not scheduled/
+    end
+
     test "a machine-picked row is marked, a hand-picked one is not" do
       daily_picks(:tomorrow).update!(auto_tier: 2)
 

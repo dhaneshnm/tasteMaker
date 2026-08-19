@@ -31,6 +31,22 @@ class QueueHealthTest < ActionDispatch::IntegrationTest
     assert_match(/today scheduled, 1 day\(s\) ahead/, response.body)
   end
 
+  # Code review, adversarial finding #1: a depth-only check would read
+  # "healthy" here — the buffer has plenty of days — even though TODAY
+  # itself has no pick and the front door is serving yesterday's painting.
+  # `DailyPick.queue_healthy?` requires both; this pins that both are still
+  # required after the admin page's own check was found to only ask one.
+  test "reports unhealthy when today is missing even with a full buffer of future days" do
+    daily_picks(:today).destroy!
+    publish_day(Date.current + 2)
+    publish_day(Date.current + 3)
+
+    get queue_health_path
+
+    assert_response :service_unavailable
+    assert_match(/today NOT scheduled/, response.body)
+  end
+
   test "is reachable with no reader identity at all — no wall, no basic auth" do
     get queue_health_path
 

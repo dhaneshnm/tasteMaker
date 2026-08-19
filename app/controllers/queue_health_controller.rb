@@ -5,7 +5,7 @@
 # pings this URL, and a dead scheduler alerts days before the front door
 # would ever actually go stale.
 #
-#   request ──> QueueHealthController ──> 200 today scheduled, >=2 days buffer
+#   request ──> QueueHealthController ──> 200 DailyPick.queue_healthy?
 #                    │                └──> 503 otherwise
 #                    │
 #                    └── inherits ActionController::Base, NOT
@@ -21,7 +21,10 @@ class QueueHealthController < ActionController::Base
     days_ahead = DailyPick.days_scheduled_ahead
     scheduled_through = DailyPick.scheduled_through
 
-    if today_scheduled && days_ahead >= DailyPick::LOW_BUFFER_DAYS
+    # Same predicate the admin hint reads (DailyPick.queue_healthy?) — a
+    # depth-only check here previously agreed with the admin page by
+    # coincidence, not by construction (code review, adversarial finding #1).
+    if DailyPick.queue_healthy?(today_scheduled: today_scheduled, days_ahead: days_ahead)
       render plain: "ok — scheduled through #{scheduled_through} (#{days_ahead} days ahead)"
     else
       render plain: "queue low — today #{today_scheduled ? "scheduled" : "NOT scheduled"}, " \
