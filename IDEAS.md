@@ -98,3 +98,9 @@ live against Wikidata's public endpoint.
   and the app is still not submitted (`BET.md`, all five thresholds zero) — promoted anyway
   on explicit direction, with the gap named in the story rather than the note quietly
   dropped.
+- 2026-08-19 — Auto-fill the daily queue: system picks the day's painting →
+  `specs/0021-the-standing-order` — Proven (pipeline: "curated queue → daily publish job").
+  Captured and promoted same day: source is a direct operator report ("manual picking has
+  become unsustainable"), WIP slot was open, and `config/deploy.yml:115` had carried the
+  IOU for this exact job since first deploy. Direction forks (7-day buffer; random +
+  spacing) settled in `decisions/0015`. Spec + plan written; not started.
