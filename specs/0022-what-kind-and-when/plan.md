@@ -208,13 +208,134 @@ graceful by construction, no redirect machinery needed (eng review A2).
 | `test/system/feed_test.rb` | tap a period link → filtered feed, tapped value now unlinked/dimmed with `aria-current`, "ALL" restores |
 | existing feed/design/dynamic-type suites | unchanged — the R1 page with no genre data must render byte-identically except the period row |
 
-## Release 2 — the fill (stub; own plan section before building)
+## Release 2 — the fill
 
-Per the story: dry-run coverage measurement first (Wikidata `P135` artist-movement via
-`Pool::Recognizable`, work-level `P136`, Getty AAT/Iconclass, department heuristics) →
-the numbers pick the route → manifest gains the field → facet floor set by measurement
-and asserted `pool_quota_test`-style. Nothing in Release 1 presumes the route: the
-`genre` column takes whatever canonical vocabulary the dry-run wins with.
+Status: Draft. Dry-run measured 2026-08-19 — against the real committed pool, the real
+mirrors, and live calls to all three external sources (AIC, MET, Wikidata) named as
+candidates. Not yet design- or eng-reviewed.
+
+### The dry run
+
+**Pool split, measured:** CMA 853 (43%), MIA 746 (37%), AIC 236 (12%), MET 167 (8%).
+Any route's ceiling is capped by which museums it can reach.
+
+**Route 1 — Wikidata `P135` artist-movement, via the existing 0019 QID list.**
+Re-measured with the REAL matcher (`Pool::Recognizable.match`), not a naive slug
+lookup — the first pass of this measurement made exactly the mistake the module's own
+header warns about (a naive check said 308 works; the real matcher says **124**, because
+naive slug intersection against the union of every name's alias set produces false
+positives the real collision-aware matcher doesn't). 105 of the 200 recognizable names
+match something in the pool at all. **124/2000 works (6.2%) route through an artist this
+list already has a QID for.** Of those QIDs, 95/97 sampled (98%) carry a real `P135`
+claim — so the bottleneck is reconciliation coverage, not Wikidata's data. Extending
+reconciliation to the pool's other ~775 distinct unresolved artist strings is a research
+project the size of building the 0007 list itself, with an unmeasured ceiling — out of
+scope for a 1–2 day release.
+
+**Route 2 — museum-native subject/genre fields, checked live against each museum's own
+API** (the committed mirrors never captured these — `lib/pool/sources.rb`'s
+`AIC_FIELDS`/CMA/MIA field lists were built for the app's existing columns and never
+requested a subject field, so this had to be checked against the live APIs, not the
+cached JSON):
+
+| Museum | Share | Native field | Sampled | Genre-mappable |
+|---|---|---|---|---|
+| CMA | 43% | **none** — full key list checked on a real object (`/api/artworks/94979`); no subject/tag/style/movement field exists | — | 0% (structurally) |
+| MIA | 37% | **none** — same check against `search.artsmia.org`'s real response keys | — | 0% (structurally) |
+| AIC | 12% | `subject_titles` (real, rich, per-object — e.g. `["portraits: male subject", "portrait", ...]`) | 25 random works | **21/25 (84%)** matched a plain 17-term genre dictionary |
+| MET | 8% | `tags` (Getty-AAT-linked per the Met's own API docs), plus `artistWikidata_URL`/`objectWikidata_URL` directly on the object | 25 random works (18 parsed — 7 hit a control-character JSON bug in this probe script, not a data gap) | **11/18 (61%)**, likely undercounted: misses included Buddhist-subject works whose tags were accurate but outside a Western-leaning term list |
+
+**CMA and MIA are 80% of the pool and have no reachable genre signal without a much
+larger research investment** (full artist-QID reconciliation, or a different route not
+yet found). This is the headline number the rest of this plan has to be honest about.
+
+**Combined ceiling: roughly 20–25% of the pool** (AIC + MET native tags, with Route 1's
+124 works mostly overlapping rather than adding much — recognizable-name works are
+disproportionately the same famous pieces AIC and MET already tag well). The exact
+number is Step 1 below, not this estimate.
+
+### What the dry run changed
+
+The story's own falsification clause fires: *"if every candidate route covers only a
+small minority of the pool... ship the facets that clear the floor and log the
+shortfall, not invent a taxonomy."* 20–25% is that minority. This is not a reason to
+cancel Release 2 — a real, honestly-labeled genre facet over a fifth of the pool is
+still a real feature, and the floor mechanism Release 1 already shipped (`MIN_FACET_WORKS`)
+handles a partial fill by construction, no new code needed there. It changes what
+Release 2 promises: **a genre facet that is real where it exists and silent where it
+doesn't, not a claim of pool-wide coverage.**
+
+**P135 movement values fold into the genre facet, not period's.** The story's Release 2
+section lists `P135` alongside `P136`/AAT/Iconclass as candidate routes for the SAME
+target — genre, since period was Release 1's job and is already shipped and pinned.
+"Impressionism"/"Baroque" are movement labels, not subject matter, but the founding
+evidence quote itself doesn't separate them ("landscapes from the impressionist era" —
+one phrase, a genre word and a movement word together), and reopening the period facet
+Release 1 already tested would touch shipped, pinned code for a 124-work gain. Movement
+values ship as genre values.
+
+**A real product tension, named rather than shipped silently:** a genre-filtered view
+will skew toward AIC's and MET's collecting emphasis, not the pool's actual subject
+distribution — CMA and MIA carry meaningfully different holdings (MIA alone: 439 works
+in "Indian and Southeast Asian Art," 443 in "Asian Art," per the department breakdown),
+so "Portrait" as a filter undercounts real portraits sitting in the 80% this route can't
+reach, and skews what's reachable back toward the two more Western-canon-encyclopedic
+collections — the exact tension persona 3 (Amara) exists to guard. Not blocking: named
+so the design review and the shipped copy can address it (a caveat in the empty/thin
+state, or simply not over-promoting genre in the UI's visual weight versus period).
+Recommendation, not yet a decision: genre stays a secondary row under period, never
+implied to be exhaustive.
+
+### Steps
+
+1. **The real coverage measurement** (not the sample above — the full run). Extend
+   `lib/pool/sources.rb`'s AIC and MET adapters to also capture `subject_titles` /
+   `tags` (both already requested per-object above; this makes it a first-class mirror
+   field, `Pool::Candidate#genre_tags` or similar, not a second ad-hoc fetch). Re-run
+   `pool:mirror` for AIC and MET only — CMA and MIA mirrors are untouched, since neither
+   route touches them. Full 236 + 167 works measured, not 50 sampled.
+2. **The genre dictionary.** A term → canonical genre value map, built from Getty AAT's
+   own genre vocabulary (the story's constraint: "don't invent one") — Portrait,
+   Landscape, Still Life, Religious Art, Mythological Art, History Painting, Marine Art,
+   Animal Painting, Nude, Allegory, Battle Painting, Cityscape — plus whatever the full
+   measurement in step 1 shows is common and currently unmapped (the Buddhist-subject
+   gap found above is a named example, not the only one; a broader first pass than the
+   probe's 17 terms is the fix, not a footnote). Committed as data
+   (`lib/pool/genre_terms.rb` or a YAML file), same idiom as `Pool::PLACES`.
+3. **Wikidata `P135` for the existing 124 works** — one SPARQL call per distinct QID
+   already in `Pool::Recognizable.names` (105 names, not 2,000 works), cached the way
+   `pool:mirror` caches everything else. Movement label becomes the genre value for
+   those works, through the same dictionary as step 2 where a mapping exists (Wikidata's
+   movement labels won't always match AAT terms 1:1 — measured, not assumed, in the real
+   run).
+4. **Backfill into the manifest**, same shape Release 1 already reads: `genre` in
+   `db/seeds/paintings.json`, `db/seeds.rb` copies it through unchanged (no app-code
+   change — Release 1 already wrote `genre: attrs["genre"]`).
+5. **Facet floor** — no new mechanism. `MIN_FACET_WORKS` and `displayed_facet_values`
+   already do this job; step 1's real numbers are what feed it.
+6. **`pool:coverage`-style report** — genre coverage by museum, by bucket, and the
+   CMA/MIA shortfall stated in the same report, matching 0019's own coverage report
+   shape rather than inventing a new one.
+
+### Not decided here — real open questions for design/eng review
+
+- Whether the museum-skew caveat needs UI treatment or just stays in the pool report.
+- Whether MET's `objectWikidata_URL` (present on several sampled objects even without
+  an artist QID) is worth a second, smaller measurement pass — unexplored past finding
+  it exists.
+- The exact genre dictionary size and whether Iconclass adds meaningfully over AAT terms
+  alone for this pool's actual subject mix — step 1/2's real run answers this, this plan
+  doesn't guess further.
+
+### Files (Release 2 — approximate, firms up after step 1's real numbers)
+
+| File | Change |
+|---|---|
+| `lib/pool/sources.rb` | AIC/MET adapters capture `subject_titles`/`tags` |
+| `lib/pool/genre_terms.rb` (or `.yml`) | new — the AAT-sourced dictionary |
+| `lib/pool/curator.rb` or a new `lib/pool/genre_fill.rb` | the P135 lookup + dictionary mapping pass |
+| `db/seeds/paintings.json`, `db/seeds/pool_report.md` | genre backfilled, coverage reported |
+| `test/lib/pool_genre_*_test.rb` | dictionary mapping, P135 lookup, the CMA/MIA-stays-nil guarantee |
 
 ## Deviations (added during build)
 
