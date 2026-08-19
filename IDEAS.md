@@ -77,5 +77,5 @@ product — the differentiator stays voice + coach; filters are ArtDay's surface
   **Corrected on promotion:** the Inbox line claimed Zoom *and* Keep were unreachable on
   `/feed` and `/artists/:slug`. Zoom is reachable — `shared/_plate.html.erb:7` makes the
   picture itself the zoom trigger, and both surfaces already render `shared/_zoom`. The gap
-  is Keep only, and 0020 is scoped to Keep only. Design + eng review both clear; the WIP
-  slot is free now that 0019 has shipped, so this is next.
+  is Keep only, and 0020 is scoped to Keep only. Built same day (`b9a6727`), `bin/ci` green.
+  Code only — not deployed.
