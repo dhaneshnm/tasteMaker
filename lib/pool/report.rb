@@ -116,8 +116,9 @@ module Pool
                "#{filled.sum { |_, r| r[:taken] }} works taken at a depth target of #{Recognizable::DEPTH}."
       lines << ""
       if missed.any?
-        lines << "**#{missed.size} matched but took nothing** — every candidate was refused by a cap " \
-                 "(`room_for?`), which is the fill failing to be complete rather than a bar breaking:"
+        lines << "**#{missed.size} matched but took nothing** — every candidate was refused, either by a cap " \
+                 "(`room_for?`) or by the plate resolver finding no reachable image (`resolved?`, the MIA " \
+                 "403 case). Either way the fill is incomplete rather than a bar broken:"
         lines << ""
         missed.keys.first(20).each { |name| lines << "- #{name}" }
         lines << ""
@@ -158,7 +159,17 @@ module Pool
     def place_as_artist_section
       slugs = @works.filter_map { |c| Painting.artist_slug_for(c.artist) }
       single = slugs.tally.select { |slug, _| slug.exclude?("-") }.sort_by { |_, count| -count }
-      placey = @works.map(&:artist).compact.select { |name| Pool.place_shaped?(name) }
+      # `slugs` is already `artist_slug_for` output, so a denied string is
+      # absent from it by construction.
+      # Filtered through `artist_slug_for`, exactly like `single` above. The
+      # first version selected on `place_shaped?` alone, so the committed
+      # report listed 35 strings under the header "this ships as a live
+      # /artists/:slug page" when 34 of them were already denied and shipped
+      # nothing. A reviewer had to re-check 34 handled strings to find the one
+      # that mattered — which is plausibly why "Anonymous" survived the pass
+      # and reached production (code review finding 1).
+      placey = @works.map(&:artist).compact
+                     .select { |name| Pool.place_shaped?(name) && Painting.artist_slug_for(name).present? }
                      .tally.sort_by { |_, count| -count }
       return "" if single.empty? && placey.empty?
 
@@ -172,8 +183,8 @@ module Pool
         "",
         single.map { |slug, count| "- `#{slug}` — #{count}" }.join("\n"),
         "",
-        "**Strings containing a place or culture word** (#{placey.size} strings, " \
-        "#{placey.sum(&:last)} works) — the rule that actually catches the defect:",
+        "**Still-linkable strings containing a place or culture word** (#{placey.size} strings, " \
+        "#{placey.sum(&:last)} works) — already-denied strings are omitted, so everything below is live:",
         "",
         placey.map { |name, count| "- #{name.inspect} — #{count}" }.join("\n"),
         ""

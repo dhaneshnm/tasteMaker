@@ -25,6 +25,13 @@ namespace :pool do
     end
   end
 
+  # A module, not bare `def`s. `def` inside a `namespace` block defines private
+  # instance methods on Object — visible to every other rake task and every
+  # object in the process once this file loads, and `mirror_candidates` is a
+  # generic enough name to collide (code review finding 8).
+  module Tasks
+    module_function
+
   # Both `curate` and `coverage` read the same four files; keeping one loader
   # means the coverage report can never be measured against a different mirror
   # than the curation it is judging.
@@ -37,9 +44,9 @@ namespace :pool do
     end
   end
 
-  # Every 0007 row carries a hand-decided `rights` value. Without it a name
-  # absent from the mirrors cannot be told from a name in copyright — all four
-  # sources are already public-domain-filtered at fetch, so mirror-absence
+  # Every 0007 row carries a `rights` value. Without it a name absent from the
+  # mirrors cannot be told from a name in copyright — all four sources are
+  # already public-domain-filtered at fetch, so mirror-absence alone
   # discriminates nothing.
   def abort_on_missing_rights
     missing = Pool::Recognizable.rows_missing_rights
@@ -48,13 +55,14 @@ namespace :pool do
     abort "#{missing.size} recognizable name(s) carry no `rights` (#{Pool::Recognizable::RIGHTS.join('/')}): " \
           "#{missing.first(8).map { |e| e['name'] }.join(', ')}#{'…' if missing.size > 8}"
   end
+  end
 
   desc "Curate the mirror down to the shipped pool (manifest + report)"
   task curate: :environment do
-    candidates = mirror_candidates
+    candidates = Tasks.mirror_candidates
     puts "#{candidates.size} candidates from #{Pool::Sources.all.size} museums"
     if Pool::Recognizable.available?
-      abort_on_missing_rights
+      Tasks.abort_on_missing_rights
       puts "#{Pool::Recognizable.names.size} recognizable names loaded (story 0019)"
     else
       warn "  ⚠ no recognizable-name list at #{Pool::Recognizable::LIST.relative_path_from(Rails.root)} — " \
@@ -117,9 +125,9 @@ namespace :pool do
     unless Pool::Recognizable.available?
       abort "no recognizable-name list — see specs/0019-the-coverage-fill/plan.md step 1"
     end
-    abort_on_missing_rights
+    Tasks.abort_on_missing_rights
 
-    raw = mirror_candidates
+    raw = Tasks.mirror_candidates
     scratch = Pool::Curator.new(raw)
     usable = scratch.dedup(scratch.reject_unusable(raw))
 

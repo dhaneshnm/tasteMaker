@@ -92,90 +92,51 @@ counted from the committed manifest, `db/seeds/paintings.json`.
 
 Read both lists before seeding. A place or culture string here is `Painting::NOT_AN_ARTIST` missing an entry, and it ships as a live `/artists/:slug` page.
 
-**Single-word slugs** (43) — mostly real one-word painters; scan for a country:
+**Single-word slugs** (39) — mostly real one-word painters; scan for a country:
 
 - `govardhan` — 4
-- `taketsugu` — 3
-- `fayzullah` — 3
 - `chokha` — 3
+- `fayzullah` — 3
+- `taketsugu` — 3
+- `purkhu` — 2
+- `gantai` — 2
+- `hashim` — 2
+- `kiyokata` — 2
+- `fujimaro` — 2
 - `basavana` — 2
 - `ganku` — 2
-- `kiyokata` — 2
 - `sanju` — 2
-- `hashim` — 2
-- `fujimaro` — 2
-- `purkhu` — 2
 - `ghasi` — 2
-- `gantai` — 2
 - `jokei` — 1
-- `geiai` — 1
-- `eigyo` — 1
+- `ruknuddin` — 1
 - `caravaggio` — 1
-- `mianyi` — 1
-- `teotihuacan` — 1
-- `yong` — 1
-- `yeoseol` — 1
-- `genga` — 1
-- `sanwalah` — 1
-- `juran` — 1
-- `kuncan` — 1
-- `anonymous` — 1
-- `raphael` — 1
-- `donatello` — 1
-- `chancay` — 1
-- `sadiqi` — 1
 - `bhora` — 1
-- `bichitr` — 1
-- `nainsukh` — 1
-- `shafi` — 1
-- `bishandas` — 1
-- `balchand` — 1
+- `eigyo` — 1
+- `yeoseol` — 1
+- `mushfiq` — 1
+- `sanwalah` — 1
+- `donatello` — 1
 - `miskin` — 1
 - `kushala` — 1
-- `mushfiq` — 1
-- `ruknuddin` — 1
-- `gujarati` — 1
-- `manohar` — 1
+- `nainsukh` — 1
+- `yong` — 1
+- `bichitr` — 1
+- `genga` — 1
+- `bishandas` — 1
 - `mingzhong` — 1
+- `raphael` — 1
+- `manohar` — 1
+- `mianyi` — 1
+- `geiai` — 1
+- `balchand` — 1
+- `juran` — 1
+- `kuncan` — 1
+- `shafi` — 1
+- `sadiqi` — 1
 
-**Strings containing a place or culture word** (35 strings, 78 works) — the rule that actually catches the defect:
+**Still-linkable strings containing a place or culture word** (1 strings, 1 works) — already-denied strings are omitted, so everything below is live:
 
-- "Tibet" — 5
-- "Probably Mexico" — 5
-- "Persia (Iran)" — 5
-- "China" — 5
-- "Japan" — 5
-- "Islamic" — 5
-- "India" — 5
-- "India (Calcutta)" — 5
-- "Korea" — 4
-- "India (Rajasthan)" — 3
-- "United States" — 2
-- "Mewar school" — 2
-- "Nepal" — 2
-- "India (Madhya Pradesh)" — 2
-- "Egypt" — 2
-- "Ancient Egyptian" — 2
-- "Austria (Tyrol)" — 1
-- "Spanish" — 1
-- "Ethiopia" — 1
-- "Mexico (Mexico City)" — 1
-- "Egypt; or Mesopotamia (Iraq)" — 1
-- "Possibly Persia (Iran); or Turkey" — 1
 - "Mewar Stipple Master" — 1
-- "India (Bikaner)" — 1
-- "India (Kangra)" — 1
-- "India (Marwar)" — 1
-- "India (Jaipur, Rajasthan)" — 1
-- "India (Mewar)" — 1
-- "India (Gujarat)" — 1
-- "Workshop: Mewar (Udaipur) workshop" — 1
-- "India (Thanjavur, Tamil Nadu)" — 1
-- "India (Deccan)" — 1
-- "India (Kishangarh)" — 1
-- "India (Chambra)" — 1
-- "Painter: Mughal school" — 1
-
 
 ## Rejected before selection
 

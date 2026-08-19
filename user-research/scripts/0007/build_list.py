@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build the ranked recognizable-artist list from two independent instruments."""
-import json, os
+import json, os, re
 S = os.path.dirname(os.path.abspath(__file__))
 
 # Occupations that mean "famous for something other than making pictures".
@@ -94,11 +94,29 @@ mn_rank = {r["qid"]: i + 1 for i, r in enumerate(by_mentions)}
 
 TOP = 200
 final = kept[:TOP]
+# Mirror evidence beats the date rule. A name with works in the four CC0
+# mirrors is demonstrably reachable, whatever a term calculation says — the
+# first version labelled Kandinsky, Munch, Mondrian and Matisse "in copyright,
+# unreachable at any effort" while their works sat in the mirrors (code review
+# finding 3). Only when there is no evidence either way does the US term
+# decide: 95 years from publication, so published before 1931 in 2026.
 US_CUTOFF = 1931
+IN_MIRRORS = set()
+_mirror_file = os.path.join(S, "mirror-artist-slugs.json")
+if os.path.exists(_mirror_file):
+    IN_MIRRORS = set(json.load(open(_mirror_file)))
+
+def slugish(name):
+    return re.sub(r"[^a-z0-9]+", "-", name.lower().strip()).strip("-")
 out = []
 for i, r in enumerate(final):
     died = r.get("died")
-    rights = "public_domain" if (died is not None and died < US_CUTOFF) else "walled"
+    if slugish(r["name"]) in IN_MIRRORS:
+        rights = "public_domain"            # evidence, not a term calculation
+    elif died is not None and died < US_CUTOFF:
+        rights = "public_domain"
+    else:
+        rights = "walled"
     d = None
     if r["qid"] in mn_rank:
         gap = mn_rank[r["qid"]] - pv_rank[r["qid"]]

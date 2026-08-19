@@ -48,7 +48,11 @@ class PoolQuotaTest < ActiveSupport::TestCase
 
   # Persona 3: "repeated tired old Van Goghs which are already super famous."
   test "no artist holds more than the ceiling" do
-    counts = POOL.group_by { |w| w["artist"].to_s.downcase.gsub(/[^a-z0-9]/, "") }
+    # `parameterize`, matching `Pool::Candidate#artist_key` after story 0019's
+    # C3. The old `downcase.gsub(/[^a-z0-9]/, "")` here no longer corresponded
+    # to anything in the codebase: it split MORE buckets than the enforced key
+    # does, so it could not fail when the real ceiling was breached.
+    counts = POOL.group_by { |w| w["artist"].to_s.parameterize }
                  .reject { |name, _| name.empty? } # anonymous works are not one artist
                  .transform_values(&:size)
     worst, count = counts.max_by { |_, c| c }
@@ -163,6 +167,25 @@ class PoolQuotaTest < ActiveSupport::TestCase
   # with 5 of them. This is the assertion those two rounds lacked. Narrow on
   # purpose: only a string that IS a place word, so it can be made green by
   # extending the deny-list and cannot fire on a painter named for a place.
+  # FOURTH recurrence of one defect: 0018's E2 found culture-as-artist by
+  # sampling, `/qa` ISSUE-001 found five museum placeholders the same way,
+  # 0019's eng review found 49 works over 31 place strings, and 0019's code
+  # review found `/artists/anonymous` live in the re-curated manifest. Every
+  # round was a human reading a list. Unlike a place name, the placeholder
+  # vocabulary is a small closed set of English words, so this one can be an
+  # assertion — and an assertion is the only thing that has not been tried.
+  test "no museum placeholder for an unknown maker resolves to an artist page" do
+    placeholder = /\A(anonymous|unknown|unidentified|various|not identified|maker unknown|no artist)\b/i
+    live = POOL.map { |w| w["artist"] }.compact
+               .select { |name| name.match?(placeholder) }
+               .select { |name| Painting.artist_slug_for(name).present? }
+               .tally
+
+    assert_empty live,
+      "a museum's \"we don't know\" marker is shipping as a tappable artist page — " \
+      "add it to Painting::NOT_AN_ARTIST"
+  end
+
   test "no artist string that is simply a place name resolves to an artist page" do
     live = POOL.map { |w| w["artist"] }.compact
                .select { |name| Pool::PLACE_WORDS.include?(name.downcase.strip) }

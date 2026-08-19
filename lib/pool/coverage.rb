@@ -42,11 +42,11 @@ module Pool
     def rows
       @rows ||= begin
         pool_matches, = Recognizable.match(@manifest.map { |row| candidate_for(row) })
-        mirror_matches, @collisions = Recognizable.match(@usable)
+        _, @collisions = Recognizable.match(@usable)
         raw_matches, = Recognizable.match(@raw)
 
         by_name = ->(matches) { matches.to_h { |m| [ m.name, m ] } }
-        in_pool, in_mirror, in_raw = by_name[pool_matches], by_name[mirror_matches], by_name[raw_matches]
+        in_pool, in_mirror, in_raw = by_name[pool_matches], mirror_by_name, by_name[raw_matches]
 
         Recognizable.names.each_with_index.map do |entry, index|
           name = entry["name"]
@@ -139,9 +139,10 @@ module Pool
         lines << ""
       end
 
-      lines << "`walled` vs `absent` comes from each 0007 row's hand-decided `rights` field, not from a " \
-               "death-year rule: all four sources are US institutions already filtered to US public domain at " \
-               "fetch, so absence from the mirrors cannot tell copyright from a collection gap."
+      lines << "`walled` vs `absent` reads the `rights` field on each 0007 row. That field is seeded by a " \
+               "stated rule — present in the mirrors ⇒ `public_domain`, else the US 95-years-from-publication " \
+               "term (died before 1931) — and is correctable by hand, which is why it lives on the row rather " \
+               "than in a branch. It errs toward `walled`, the direction that cannot invent a collection gap."
       lines.join("\n")
     end
 
@@ -150,12 +151,17 @@ module Pool
     # A `fillable` name whose every qualifying candidate is a Met row is only
     # provisionally fillable — see the note this feeds in `to_markdown`.
     def met_only_provisional
-      mirror_matches, = Recognizable.match(@usable)
-      by_name = mirror_matches.to_h { |m| [ m.name, m ] }
+      by_name = mirror_by_name
       rows.count do |row|
         row.bucket == :fillable &&
           (works = by_name[row.name]&.works).present? && works.all? { |c| c.source == "met" }
       end
+    end
+
+    # `rows` already ran this match and threw it away; over ~11k candidates a
+    # second full pass is real work for a count the first one supports.
+    def mirror_by_name
+      @mirror_by_name ||= Recognizable.match(@usable).first.to_h { |m| [ m.name, m ] }
     end
 
     def candidate_for(row)
@@ -169,7 +175,10 @@ module Pool
         pages: pool&.pages.to_i, primary_slug: (pool || mirror)&.primary_slug
       }
 
-      if pool
+      if pool&.collided || mirror&.collided
+        Row.new(**base, bucket: :fillable,
+                note: "every page this name could claim belongs to a higher-ranked name — see the collision list")
+      elsif pool
         Row.new(**base, bucket: :covered)
       elsif mirror
         Row.new(**base, bucket: :fillable)
@@ -183,13 +192,19 @@ module Pool
         # public domain, not held" from an empty directory.
         Row.new(**base, bucket: :unknown, note: "no mirrors on disk — nothing was measured")
       else
-        # `rights` is decided once, by hand, on the 0007 row. NOT a death-year
-        # heuristic: all four sources are US institutions already filtered to
-        # US public domain at fetch (`Pool::Sources`), so absence from the
-        # mirrors cannot discriminate copyright from a collection gap, and
-        # life + 70 is the wrong frame besides — it calls Frida Kahlo (died
-        # 1954) public domain while every US museum treats her as restricted
-        # under the 95-years-from-publication term.
+        # `rights` is a field ON THE ROW, which is the point: it is data a
+        # human can inspect and correct, not arithmetic buried in a branch.
+        # It is *seeded* by a stated rule and then corrected — see
+        # `user-research/scripts/0007/build_list.py`: a name with works in the
+        # mirrors is demonstrably reachable and marked `public_domain`;
+        # otherwise the US term decides (published before 1931, i.e. died
+        # before then). Not life + 70, which calls Frida Kahlo (died 1954)
+        # public domain while every US museum treats her as restricted under
+        # the 95-years-from-publication term for pre-1978 works.
+        #
+        # The rule is a prior, and it is wrong in one direction on purpose: a
+        # name it cannot place is called `walled`, which under-reports the
+        # collection gap rather than inventing one.
         case entry["rights"]
         when "walled" then Row.new(**base, bucket: :walled, note: "in copyright (0007 `rights`)")
         when "public_domain" then Row.new(**base, bucket: :absent, note: "public domain, not held by these four")

@@ -46,7 +46,7 @@ module Pool
          in\s+the\s+style\s+of|imitator\s+of|copy\s+after)\b
     )\s*/xi
 
-    Match = Struct.new(:name, :rank, :primary_slug, :by_slug, :works, keyword_init: true) do
+    Match = Struct.new(:name, :rank, :primary_slug, :by_slug, :works, :collided, keyword_init: true) do
       def total = works.size
       def pages = by_slug.size
     end
@@ -65,12 +65,15 @@ module Pool
 
       def available? = names.any?
 
-      # `rights` decides the `walled` / `absent` split in `Pool::Coverage`, and
-      # it is a hand call per name — not a death-year rule. A row missing it
-      # cannot be classified, so the two commands that need the classification
-      # refuse to run rather than reporting a name as "not held" when the truth
-      # may be "in copyright". Returned, not raised: `Recognizable` is loaded by
-      # the whole app and a research file is not a boot dependency.
+      # `rights` decides the `walled` / `absent` split in `Pool::Coverage`. It
+      # is a value ON THE ROW — seeded by the rule in the 0007 build script and
+      # correctable by hand — rather than arithmetic inside the classifier, so
+      # a wrong call is visible in the data and fixable without a code change.
+      # A row missing it cannot be classified at all, so the two commands that
+      # need the classification refuse to run rather than reporting a name as
+      # "not held" when the truth may be "in copyright". Returned, not raised:
+      # `Recognizable` is loaded by the whole app and a research file is not a
+      # boot dependency.
       RIGHTS = %w[walled public_domain].freeze
 
       def rows_missing_rights = names.reject { |entry| RIGHTS.include?(entry["rights"]) }
@@ -154,10 +157,20 @@ module Pool
             claimed.key?(page) ? collisions << { slug: page, kept: claimed[page], dropped: name }
                                : claimed[page] = name
           end
-          mine = mine.select { |page| claimed[page] == name }
-          next if mine.empty?
+          owned = mine.select { |page| claimed[page] == name }
+          # Two different empties, and collapsing them is a lie in one
+          # direction. No candidate page at all means the collections do not
+          # hold this artist — the caller should hear nothing. Candidate pages
+          # that were all claimed by a higher-ranked name means the artist IS
+          # held; dropped silently, `Coverage#build_row` would fall through to
+          # the `rights` branch and report "none of the four collections holds
+          # a qualifying painting". Zero collisions in the current run, so this
+          # is a latent lie rather than a live one.
+          next if owned.empty? && mine.empty?
+          next Match.new(name:, rank: entry["rank"] || index + 1, primary_slug: nil,
+                         by_slug: {}, works: [], collided: true) if owned.empty?
 
-          grouped = mine.to_h { |page| [ page, pages[page].uniq ] }
+          grouped = owned.to_h { |page| [ page, pages[page].uniq ] }
           # The page a reader lands on is the one worth making deep, so the
           # deepest one is filled first: Goya's works are spread over four
           # pages, and taking one from each would make four thin pages where

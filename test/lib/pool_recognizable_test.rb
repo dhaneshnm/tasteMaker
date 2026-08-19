@@ -96,8 +96,16 @@ class PoolRecognizableTest < ActiveSupport::TestCase
     ]
     with_list(colliding) do
       matches, collisions = Pool::Recognizable.match([ candidate("Monet", 1) ])
+      winner = matches.find { |m| m.name == "Claude Monet" }
+      loser  = matches.find { |m| m.name == "Berthe Morisot" }
 
-      assert_equal [ "Claude Monet" ], matches.map(&:name), "the higher-ranked name keeps the slug"
+      assert_equal 1, winner.total, "the higher-ranked name keeps the slug"
+      assert_not winner.collided
+      # The loser is RETURNED, flagged, holding nothing. Dropped instead, the
+      # coverage report would call her "not held by these four collections"
+      # when the truth is that her only page went to Monet.
+      assert loser.collided, "the losing name must not vanish from the matches"
+      assert_equal 0, loser.total
       assert_equal 1, collisions.size
       assert_equal({ slug: "monet", kept: "Claude Monet", dropped: "Berthe Morisot" }, collisions.first)
     end

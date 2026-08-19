@@ -134,7 +134,7 @@ class PoolCoverageTest < ActiveSupport::TestCase
       assert_match(/Johannes Vermeer/, markdown)
       assert_match(/1 qualifying work/, markdown)
       assert_match(/Reachable coverage: 50\.0%/, markdown)
-      assert_match(/hand-decided `rights` field/, markdown)
+      assert_match(/reads the `rights` field on each 0007 row/, markdown)
     end
   end
 end

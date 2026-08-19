@@ -48,9 +48,24 @@ class Painting < ApplicationRecord
   # instead of after — which is the forcing function the first two rounds lacked.
   NOT_AN_ARTIST = [
     # Museum placeholders: "we don't know" in the artist column.
-    "Unidentified", "Unknown", "Artist unknown", "Unidentified artist", "Various artists",
+    #
+    # "Anonymous" is the sixth, and it is the FOURTH time this defect has been
+    # found by hand rather than by a check (0018 E2 → /qa ISSUE-001 → 0019's
+    # eng review → 0019's code review, which caught `/artists/anonymous` live
+    # in the re-curated manifest). The placeholder shape is a closed set of
+    # English words, so it is now an assertion in `pool_quota_test` rather
+    # than a list somebody has to remember to read.
+    "Unidentified", "Unknown", "Anonymous", "Artist unknown", "Unidentified artist",
+    "Various artists",
     # A country or culture standing in for a hand.
+    #
+    # Teotihuacan, Chancay and Gujarati came in with the re-curation and are
+    # not in `Pool::PLACES` — that vocabulary maps works to REGIONS, so
+    # widening it to catch culture names would change `region_for` and the
+    # range bars with it. They are caught the way every other one is: the
+    # report lists them, a human reads it.
     "China", "Japan", "Islamic", "Tibet", "India", "Korea", "Nepal", "Egypt",
+    "Teotihuacan", "Chancay", "Gujarati",
     "Italy", "Ethiopia", "Sweden", "United States", "Mughal",
     "Italian", "French", "German", "Spanish", "Dutch", "Flemish", "British", "English", "Austrian",
     "Ancient Egyptian", "Probably Mexico", "Mewar school", "Painter: Mughal school",
