@@ -16,7 +16,7 @@
 
 <main class="page" data-controller="artwork">
   <div class="artist-page__heading">
-    <h1 class="label__title <%= "label__title--long" if @heading.to_s.length > Painting::LONG_TITLE %>"><%= @heading %></h1>
+    <h1 class="label__title <%= "label__title--long" if Painting.long_title?(@heading) %>"><%= @heading %></h1>
     <% if @life_date.present? %>
       <p class="artist-page__dates"><%= @life_date %></p>
     <% end %>

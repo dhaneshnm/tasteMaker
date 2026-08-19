@@ -8,18 +8,25 @@
 # artist_slug_for` is the one implementation the write path, the backfill, and
 # any future migration all read.
 #
-# `update_column`, not `save!`: these rows are already valid, and a backfill
-# should not bump `updated_at` (which the ETags on `/` and `/days` key off) or
-# run every other callback and validation for a single derived column.
+# `update_all`, not `save!` per row: these rows are already valid, and a
+# backfill should not bump `updated_at` (which the ETags on `/` and `/days`
+# key off — `update_all` never touches timestamps) or run every other
+# callback and validation for a single derived column.
 class AddArtistSlugToPaintings < ActiveRecord::Migration[8.1]
   def up
     add_column :paintings, :artist_slug, :string
-    add_index :paintings, :artist_slug
 
+    # Grouped by the SLUG each distinct artist string resolves to, not one
+    # UPDATE per row: two spellings sharing a slug (accent variants) share
+    # one query, and the whole pool backfills in ~1,000 statements instead of
+    # ~2,000. The index is built after, over final data, rather than being
+    # incrementally maintained through every one of those writes.
     Painting.reset_column_information
-    Painting.find_each do |painting|
-      painting.update_column(:artist_slug, Painting.artist_slug_for(painting.artist))
+    Painting.distinct.pluck(:artist).group_by { |artist| Painting.artist_slug_for(artist) }.each do |slug, artists|
+      Painting.where(artist: artists).update_all(artist_slug: slug)
     end
+
+    add_index :paintings, :artist_slug
   end
 
   def down

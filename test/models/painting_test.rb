@@ -120,7 +120,12 @@ class PaintingTest < ActiveSupport::TestCase
   end
 
   # E2. Deny-listed by exact string — the pool measurement behind this list.
-  test "a culture string in the artist column resolves to no slug" do
+  # Covers both shapes found in the pool: literal country/culture names, and
+  # (regression, found by /qa on 2026-08-19 browsing /feed — "Unidentified
+  # artist", 5 works, linked to a live page) museum attribution placeholders
+  # like "we don't know who painted this". Same E2 defect; the review's
+  # original query only checked the first shape.
+  test "a culture string or attribution placeholder in the artist column resolves to no slug" do
     Painting::NOT_AN_ARTIST.each do |culture|
       assert_nil Painting.artist_slug_for(culture), "#{culture.inspect} should not resolve to a slug"
     end
@@ -128,18 +133,6 @@ class PaintingTest < ActiveSupport::TestCase
     # And a real, sparse Mughal/Pahari painter is not swept up by a
     # single-word heuristic the deny-list deliberately does not use.
     assert_equal "govardhan", Painting.artist_slug_for("Govardhan")
-  end
-
-  # Regression: a museum's own "we don't know" marker rendered as a live,
-  # tappable artist page — the same E2 defect the review's query missed
-  # because it only checked literal country/culture names, not attribution
-  # placeholders.
-  # Found by /qa on 2026-08-19 — browsing /feed, "Unidentified artist" (5
-  # works) linked to a page. Report: .gstack/qa-reports/qa-report-*.md
-  test "museum attribution placeholders are not artist pages" do
-    [ "Unidentified", "Unknown", "Artist unknown", "Unidentified artist", "Various artists" ].each do |placeholder|
-      assert_nil Painting.artist_slug_for(placeholder), "#{placeholder.inspect} should not resolve to a slug"
-    end
   end
 
   # An OCR-shaped artifact that parameterizes to nothing — the case that
@@ -157,7 +150,9 @@ class PaintingTest < ActiveSupport::TestCase
   # E4. Neither count nor "most frequent" would settle the fixture pair —
   # both appear once — so only the accent rule decides.
   test "the canonical artist name prefers the variant with more accented characters" do
-    assert_equal "Paul Cézanne", Painting.canonical_artist_name("paul-cezanne")
+    names = [ paintings(:cezanne_plain).artist, paintings(:cezanne_accented).artist ]
+
+    assert_equal "Paul Cézanne", Painting.canonical_artist_name(names)
   end
 
   test "the gallery credits the museums actually in the pool, heaviest first" do

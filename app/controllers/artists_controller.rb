@@ -15,16 +15,20 @@ class ArtistsController < ApplicationController
     # see ApplicationController#private_revalidate. Same contract as `/days`.
     private_revalidate
 
-    count = matches.count
-    raise NotFound if count.zero?
+    raise NotFound unless matches.exists?
 
     # Aggregates first, then bail — the rule DaysController#index states for
     # the same reason: a 304 must not pay for loading attachments and blobs
-    # it is about to discard (eng review E-A2/E-A3).
-    return unless stale?(etag: [ count, matches.maximum(:updated_at)&.to_f ])
+    # it is about to discard (eng review E-A2/E-A3). `cache_key_with_version`
+    # is that controller's own idiom (`picks.cache_key_with_version`,
+    # `days_controller.rb:19`) — one aggregate query covering both count and
+    # freshness, not two.
+    return unless stale?(etag: matches.cache_key_with_version)
 
     @paintings = matches.with_attached_image.feed_ordered.to_a
-    @heading = Painting.canonical_artist_name(params[:slug])
+    # Computed from the rows already loaded above, not a second query —
+    # `matches` and `@paintings` are the identical row set.
+    @heading = Painting.canonical_artist_name(@paintings.map(&:artist))
     @life_date = uniform_life_date(@paintings)
   end
 
@@ -33,6 +37,6 @@ class ArtistsController < ApplicationController
     # formats belongs to no single fact worth stating there.
     def uniform_life_date(paintings)
       dates = paintings.filter_map { |painting| painting.life_date.presence }.uniq
-      dates.first if dates.size == 1
+      dates.first if dates.one?
     end
 end

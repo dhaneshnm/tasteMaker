@@ -118,16 +118,15 @@ class Painting < ApplicationRecord
 
   before_save { self.artist_slug = self.class.artist_slug_for(artist) }
 
-  # The heading for an artist page. Among every distinct string sharing this
-  # slug, the one with the most accented characters wins — an accent is
-  # information and its absence is loss — then the more frequent spelling,
-  # then alphabetical, for a result with no ties in the pool as measured
-  # (eng review E4). "Most frequent" alone titled the 9-work flagship page
-  # "Paul Cezanne" over "Paul Cézanne".
-  def self.canonical_artist_name(slug)
-    where(artist_slug: slug).group(:artist).count
-      .min_by { |name, count| [ -accent_count(name), -count, name ] }
-      &.first
+  # The heading for an artist page, computed over the artist strings the page
+  # is already holding (never re-queried — the caller has the rows loaded).
+  # Among every distinct string, the one with the most accented characters
+  # wins — an accent is information and its absence is loss — then the more
+  # frequent spelling, then alphabetical, for a result with no ties in the
+  # pool as measured (eng review E4). "Most frequent" alone titled the
+  # 9-work flagship page "Paul Cezanne" over "Paul Cézanne".
+  def self.canonical_artist_name(names)
+    names.tally.min_by { |name, count| [ -accent_count(name), -count, name ] }&.first
   end
 
   def self.accent_count(string)
@@ -147,10 +146,16 @@ class Painting < ApplicationRecord
   end
 
   # Museum titles run long. Past this the daily page steps the type down
-  # rather than truncating — a title is never cut.
+  # rather than truncating — a title is never cut. A class method too: the
+  # artist page's heading is a bare string, not a Painting, and needs the
+  # same threshold (story 0018) — one comparison, not two copies of it.
   LONG_TITLE = 60
 
+  def self.long_title?(string)
+    string.to_s.length > LONG_TITLE
+  end
+
   def long_title?
-    title.to_s.length > LONG_TITLE
+    self.class.long_title?(title)
   end
 end
