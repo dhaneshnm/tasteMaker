@@ -1,0 +1,30 @@
+<%# The self-submit-to-OmniAuth frame (extracted from sessions/start.html.erb
+    by story 0021). OmniAuth's request phase is POST-only, and two callers
+    need to turn a GET into that POST: the auth sheet (`ASWebAuthenticationSession`
+    can only open a URL) and the dev-only mock sign-in door (a human clicking
+    a button). One definition, so a future change to the CSRF handling or the
+    markup can't drift between two copies.
+
+    `url:` is the only local — everything else about the frame is identical
+    between callers. No layout: this frame exists for milliseconds and must
+    not pull the masthead, the compass or the corner into it.
+
+    `<noscript>` carries a real button — better a control than a dead end. %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Signing in — Tondo</title>
+    <%= csrf_meta_tags %>
+    <style>
+      html, body { height: 100%; margin: 0; background: #f4efe6; }
+    </style>
+  </head>
+  <body>
+    <%= form_with url: url, method: :post, id: "start", data: { turbo: false } do |f| %>
+      <noscript><%= f.submit "Continue" %></noscript>
+    <% end %>
+    <script>document.getElementById("start").submit();</script>
+  </body>
+</html>

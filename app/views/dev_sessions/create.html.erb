@@ -1,0 +1,6 @@
+<%# Renders with layout: false (DevSessionsController#create). Same
+    self-submit-to-OmniAuth idiom sessions/start.html.erb uses, for the same
+    reason: OmniAuth's request phase is POST-only. No `?native=1` — this is
+    the plain web flow, the one SessionsController#create (not #handoff)
+    answers. %>
+<%= render "shared/auto_submit_auth_form", url: "/auth/#{@provider}" %>

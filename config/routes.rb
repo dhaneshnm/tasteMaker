@@ -37,6 +37,19 @@ Rails.application.routes.draw do
   get "auth/failure" => "sessions#failure"
   delete "session" => "sessions#destroy", as: :session
 
+  # The dev-only mock sign-in door (story 0021). The route is always DRAWN —
+  # the constraint decides whether it RESOLVES, checked at request time
+  # against `config.x.dev_sign_in_enabled` (true only in development.rb).
+  # A boot-time `if Rails.env.development?` around the route declaration
+  # would guarantee the same production safety but make the route
+  # permanently unreachable by Minitest, since routes load once at boot and
+  # the suite always boots in `test`. The constraint form lets one test flip
+  # the flag for its own duration and drive the real path.
+  constraints(->(_req) { Rails.application.config.x.dev_sign_in_enabled }) do
+    get  "dev/sign_in" => "dev_sessions#new",    as: :dev_sign_in
+    post "dev/sign_in" => "dev_sessions#create", as: :dev_sign_in_submit
+  end
+
   # The reader's own corner (story 0017) — the fifth surface, and the second
   # unwalled one after `/`. It holds the sign-in doors, so it cannot require an
   # identity: `require_reader` bounces every cookieless visitor here.

@@ -1,0 +1,35 @@
+<%# Dev-only mock sign-in (story 0021). Real layout — this is an internal
+    tool page, not the auth sheet, so there's no reason to strip chrome. %>
+<h1>Sign in as…</h1>
+<p>Local-only mock identity. Submitting flips <code>OmniAuth.config.test_mode</code>
+  on for the rest of this server process — see the terminal if a later real
+  sign-in unexpectedly behaves like this one.</p>
+
+<%# `data: { turbo: false }` — code review (story 0021): Turbo Drive is pinned
+    and imported globally (config/importmap.rb, the default layout). It
+    intercepts non-GET form submissions and requires either a redirect or a
+    turbo-stream response; `#create`'s happy path renders a plain 200 HTML
+    page (the next auto-submit frame), which Turbo refuses to render for a
+    form it intercepted ("Form responses must redirect to another
+    location"). Without this, the door is inert in a real browser even
+    though curl (no JS engine) never notices — that's exactly how the first
+    version of this shipped broken. %>
+<%= form_with url: dev_sign_in_submit_path, method: :post, data: { turbo: false } do |f| %>
+  <div>
+    <%= f.label :provider %>
+    <%= f.select :provider, DevSessionsController::PROVIDERS %>
+  </div>
+  <div>
+    <%= f.label :uid %>
+    <%= f.text_field :uid, value: DevSessionsController::DEFAULT_UID %>
+  </div>
+  <div>
+    <%= f.label :email %>
+    <%= f.text_field :email, value: "dev@example.com" %>
+  </div>
+  <div>
+    <%= f.label :name %>
+    <%= f.text_field :name, value: "Dev Reader" %>
+  </div>
+  <%= f.submit "Sign in" %>
+<% end %>

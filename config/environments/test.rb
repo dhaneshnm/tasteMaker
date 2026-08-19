@@ -42,4 +42,10 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # The dev-only mock sign-in door (story 0021) stays off here — `true` only
+  # in development.rb. A test that needs it flips
+  # `Rails.application.config.x.dev_sign_in_enabled` for its own duration and
+  # restores it; see test/integration/dev_sign_in_routing_test.rb.
+  config.x.dev_sign_in_enabled = false
 end

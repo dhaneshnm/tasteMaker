@@ -70,4 +70,8 @@ Rails.application.configure do
   #
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+
+  # The dev-only mock sign-in door (story 0021) stays off here — `true` only
+  # in development.rb.
+  config.x.dev_sign_in_enabled = false
 end

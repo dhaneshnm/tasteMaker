@@ -1,37 +1,12 @@
 <%# The auth sheet's first frame (story 0017 Release 2). No layout.
 
     ASWebAuthenticationSession can only open a URL, and OmniAuth's request phase
-    is POST-only, so something has to turn the one into the other. This page is
-    that something: it exists for the handful of milliseconds between the sheet
-    opening and the provider's consent screen replacing it.
+    is POST-only — `shared/_auto_submit_auth_form` (story 0021) is what turns
+    the one into the other; this file only supplies the URL.
 
-    Linen and nothing else. A reader on a slow connection sees the product's own
-    paper rather than a white flash, and no words — words here would be read as
-    a step in the flow rather than the absence of one.
-
-    `<noscript>` carries a real button. The sheet has JavaScript, so this is for
-    the case where it does not: better a control than a dead end. %>
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Signing in — Tondo</title>
-    <%= csrf_meta_tags %>
-    <style>
-      html, body { height: 100%; margin: 0; background: #f4efe6; }
-    </style>
-  </head>
-  <body>
-    <%# `native=1` rides the QUERY STRING, not a hidden field, and that is not a
-        style choice. OmniAuth's request phase stashes `request.GET` — only the
-        query — into the session as `omniauth.params`, and hands that back on
-        the callback. A field in the POST body is never seen again, so the
-        callback could not tell the sheet's flow from a browser's. %>
-    <%= form_with url: "/auth/#{@provider}?native=1", method: :post, id: "start",
-          data: { turbo: false } do |f| %>
-      <noscript><%= f.submit "Continue" %></noscript>
-    <% end %>
-    <script>document.getElementById("start").submit();</script>
-  </body>
-</html>
+    `native=1` rides the QUERY STRING, not a hidden field, and that is not a
+    style choice. OmniAuth's request phase stashes `request.GET` — only the
+    query — into the session as `omniauth.params`, and hands that back on the
+    callback. A field in the POST body is never seen again, so the callback
+    could not tell the sheet's flow from a browser's. %>
+<%= render "shared/auto_submit_auth_form", url: "/auth/#{@provider}?native=1" %>

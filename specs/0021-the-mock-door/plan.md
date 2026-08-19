@@ -1,8 +1,10 @@
-# 0020 — The mock door · implementation plan
+# 0021 — The mock door · implementation plan
 
-Story: `specs/0020-the-mock-door/story.md`
-Status: Draft. `/plan-design-review` skipped — dev-only tooling with no product surface,
-no UI significant per build flow step 3 (same reasoning 0009 used).
+Story: `specs/0021-the-mock-door/story.md`
+Status: Implemented 2026-08-19. `bin/ci` green (rubocop, brakeman, bundler-audit, importmap
+audit, 421 unit/integration + 49 system tests). `/plan-design-review` skipped — dev-only
+tooling with no product surface, no UI significant per build flow step 3 (same reasoning
+0009 used).
 
 ## Approach
 
@@ -64,7 +66,7 @@ silently diverge the two sides without someone reading both.
 1. **Config flag** — `config.x.dev_sign_in_enabled`:
    - `config/environments/development.rb`: `config.x.dev_sign_in_enabled = true`
    - `config/environments/test.rb`: `config.x.dev_sign_in_enabled = false  # dev-only mock
-     sign-in door (story 0020) — flip true only inside the one test that needs it, via
+     sign-in door (story 0021) — flip true only inside the one test that needs it, via
      Rails.application.config.x.dev_sign_in_enabled=`
    - `config/environments/production.rb`: same `false`, same comment.
 
@@ -187,4 +189,79 @@ Every codepath the plan introduces now has automated coverage; nothing is
 
 ## Deviations (added during build)
 
-- <none yet>
+- **No `ActionController::TestCase` in this repo** — `rails-controller-testing` isn't in
+  the Gemfile and `test/controllers/` was empty before this story. `DevSessionsController
+  .build_auth_hash` is a plain class method with no request/controller instance involved,
+  so `test/controllers/dev_sessions_controller_test.rb` is a plain `ActiveSupport::TestCase`
+  calling it directly. The behavioral tests (routing, the bad-provider guard, the full
+  sign-in path) all live in `test/integration/dev_sign_in_routing_test.rb`, where an actual
+  request is the point anyway.
+- **A routing miss is `assert_response :not_found`, not `assert_raises(RoutingError)`.**
+  `config/application.rb` sets `config.exceptions_app = routes`, so a routing miss is
+  rescued and rendered as a normal 404 response through this app's own `errors#not_found` —
+  the same shape `sessions_test.rb` already pins for the constrained-out
+  `auth/:provider/callback` route. Discovered by running the test as originally specified
+  in this plan and watching it fail with "nothing was raised."
+- **The happy-path test needs a THIRD leg, not two.** `SessionsController#create` carries
+  `skip_forgery_protection only: :create` (Apple's real cross-site POST cannot carry a
+  Rails CSRF token). `DevSessionsController#create` carries no such skip — same-origin form
+  submission, no reason to need one — which means under `with_forgery_protection` it also
+  requires a REAL token to accept the POST, not just to render one. The test now does
+  `GET /dev/sign_in` first (extract its token) → `POST /dev/sign_in` with that token
+  (extract the auto-submit form's token) → `POST /auth/:provider` with that second token.
+  All three legs inside one `with_forgery_protection` block. This is stricter than "wrap
+  both requests" (the outside-voice fix) and incidentally also proves
+  `DevSessionsController#new`'s own form isn't CSRF-broken — a free bonus, not the point.
+- **Manually verified against a real `rails s`, both providers** (2026-08-19): full round
+  trip via curl with a cookie jar — `GET /dev/sign_in` → `POST /dev/sign_in` → auto-submit
+  `POST /auth/google_oauth2` → lands at `/days`, `/you` shows "Google as dev@example.com",
+  `/collection` returns 200, and the process-global warning line appears in
+  `log/development.log`. Repeated for `apple` with blank email/name — lands at `/days`,
+  `/you` shows bare "Apple" (no email), matching `User#signed_in_summary`'s fallback.
+- **`/simplify` pass (4 parallel angles), one fix applied:** the two `constraints:` lambdas
+  on the GET/POST route pair were identical and written twice — collapsed into one
+  `constraints(->(_req) { ... }) do ... end` block wrapping both.
+- **`/simplify` — two findings skipped, both flagged by 3 of 4 angles:**
+  - The provider list is now three independent copies (`omniauth.rb`'s `provider
+    :google_oauth2`/`:apple` DSL calls, `routes.rb`'s two regex constraints, and
+    `DevSessionsController::PROVIDERS`). This is the same question eng review's Issue 4
+    already put to you this session — different comparison point (the OmniAuth initializer
+    instead of the routes.rb regex), same decision: a 2-item list not expected to grow,
+    already explicitly declined once. Not re-litigated.
+  - `DevSessionsController.build_auth_hash` and `test/test_helper.rb`'s `mock_auth`
+    (`:82-88`) both build an `OmniAuth::AuthHash` from provider/uid/email/name, with
+    already-drifted presence/compact rules. Real duplication, verified the fix would be
+    behaviorally safe for every existing call site (checked: no test ever passes a blank
+    string for uid/email/name, only real values or explicit `nil`) — but the fix means
+    editing `test_helper.rb`, this project's suite-wide auth harness with 7+ callers across
+    the whole suite. Disproportionate blast radius to bundle into a dev-only door's story.
+    Left as a named future cleanup, not done here.
+- **`/code-review` pass (10-angle, parallel-forked), one P0 and two real fixes applied:**
+  - **P0 — the door was inert in a real browser.** `dev_sessions/new.html.erb`'s form had
+    no `data: { turbo: false }`. Turbo Drive is pinned and imported globally
+    (`config/importmap.rb`, the default layout); it intercepts non-GET form submissions and
+    requires a redirect or turbo-stream response, and `#create`'s happy path renders a
+    plain 200 ("Form responses must redirect to another location"). Neither the integration
+    test (drives requests directly, no Turbo) nor this story's own curl-based manual
+    verification (no JS engine) could have caught this — both bypass the exact mechanism
+    that broke. **Added `test/system/dev_sign_in_test.rb`**, a real headless-Chrome click
+    through `#new` → `#create` → `/auth/:provider` → `/days`; confirmed it fails red without
+    the fix (temporarily reverted, re-ran, reverted the revert) before trusting it green.
+  - **Reversed the Approach section's "no controller-level guard" call.** Code review's
+    argument: this controller mints a real signed-in identity from attacker-chosen
+    provider/uid/email through the genuine `SessionsController#create` path, and an
+    identity-minting endpoint shouldn't depend on `config/routes.rb` staying correctly
+    shaped forever (a bad merge, or a route added outside the `constraints do...end` block,
+    would otherwise ship it live with nothing in the controller to stop it). Added
+    `before_action :ensure_dev_sign_in_enabled!`, a one-boolean-read belt for the routing
+    constraint's suspender. The original reasoning ("don't validate what can't happen")
+    still holds for ordinary bugs; it doesn't hold for a control surface this sensitive.
+  - **`DEFAULT_UID` constant** replaces the `"dev-uid-1"` string literal duplicated between
+    `build_auth_hash`'s fallback and the form's pre-filled value.
+  - **Noted, not fixed:** `OmniAuth.config.mock_auth`/`test_mode` are process-global
+    (OmniAuth's own design), so two concurrent uses of the door for the same provider (two
+    tabs, or a multi-worker Puma config) can race and sign one tab in as the other's
+    identity. Same root cause and same acceptance as the `test_mode` flip's existing
+    trade-off — single-developer local convenience, not shared state; closing it would add
+    real complexity for a threat model that doesn't apply here. Now documented in the class
+    comment alongside the `test_mode` note rather than only in this deviation entry.
