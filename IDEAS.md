@@ -54,6 +54,16 @@ CMA/MIA invariant that accounts for it), build the SPARQL client as a first-clas
 QID lookup in one `VALUES` clause — the dry-run already proved that query shape works
 live against Wikidata's public endpoint.
 
+### Rejected-memory for machine picks — — (untriaged)
+
+Source: eng review of `specs/0021-the-standing-order`, outside voice finding O7,
+2026-08-19. Deleting an auto-picked future day is a re-roll, not a veto — the machine
+refills the date next morning, possibly with the same painting (random order, no memory
+of rejections). 0021 documents swap-in-place as the veto and says so in the destroy
+flash. If re-rolls repeating rejected works annoys in practice, a small "not this one"
+memory earns its keep; until the curator actually hits it, it is infrastructure for
+later.
+
 ## Considering — top = next pick
 
 (empty — the one entry here promoted to 0022 below)

@@ -37,3 +37,18 @@ Not changed, deliberately: the PWA manifest and the default meta description sti
 "a short hand-written note". That is what the product is; the fallback is the bounded
 exception this decision allows, and the prediction above is the thing that keeps it
 bounded. If the ratio breaks 20%, the copy is not what needs fixing.
+
+## Amendment — 2026-08-19, story 0021 (the standing order)
+
+The 20% prediction above was made under the manual regime, where every published day
+implied a curator choosing it. Story 0021 makes the machine fill the queue and museum
+text the default output of a *correct* system — under an unsplit count the banner would
+go permanently red within weeks and this bet would read as falsified by regime change,
+not by evidence.
+
+Amended, not retired: **the 20% line now measures hand-picked days only** — the
+population the bet was made about. Auto-picked days are measured by decisions/0015's
+one-third-blurb tripwire on their own line of the same banner (binding read at 30
+auto-picked published days, ~Sep 20, 2026). The `auto_tier` column ships with 0021 and
+is what makes the split countable. If the *hand-picked* ratio breaks 20%, this decision
+still says the copy is not what needs fixing.

@@ -36,7 +36,27 @@ blurbless day today.
 1. **Every calendar day from deploy through Aug 31, 2026 publishes a pick dated that day
    (Eastern) with zero same-day admin action.** Falsified by one query over
    `daily_picks.scheduled_on` showing a gap while eligible paintings existed.
-2. **Tripwire on the moat trade:** if by Aug 31 fewer than a third of auto-picked
-   *published* days carry a hand-written blurb, the buffer bought nothing over morning-of
-   — reopen D1 with that number rather than defending the extra machinery. Measurable
-   because the plan ships an `auto` provenance column with the feature (R1).
+2. **Tripwire on the moat trade:** if fewer than a third of auto-picked *published* days
+   carry a hand-written blurb, the buffer bought nothing over morning-of — reopen D1 with
+   that number rather than defending the extra machinery. Measurable because the plan
+   ships an `auto_tier` provenance column with the feature (R1).
+
+## Amendments — eng review, 2026-08-19 (same day)
+
+- **`auto` boolean became `auto_tier` integer** (nil = hand, 1–4 = relaxation tier the
+  machine filled at). Reason: the audit for prediction 1's spacing rules originally
+  lived in `Rails.logger`, and Kamal container logs do not survive a redeploy — the
+  instrument would have evaporated before the kill review. Tier-on-the-row makes both
+  predictions one durable query each.
+- **Provenance clears when a curator swaps the painting or moves the date** on a machine
+  pick (human re-pick / spacing no longer vouched for); blurb edits keep it. Without
+  this, the tripwire's denominator counts curator choices as machine picks.
+- **Small-n timing on the tripwire (outside voice):** at most ~10 auto-picked days
+  publish by Aug 31 — a third of 10 is noise. The Aug 31 read is directional; the
+  **binding read is at 30 auto-picked published days (~Sep 20, 2026)**.
+- **decisions/0004's 20% museum-text bet keeps its original population:** the admin
+  banner now counts hand-picked days only against 0004's 20%, and auto-picked days
+  against this decision's one-third tripwire. Auto-fill makes museum-text days the
+  default output of a *correct* system; unsplit, the 0004 receipt would read as
+  falsified by regime change rather than by evidence. Cross-amendment recorded in
+  `decisions/0004`.

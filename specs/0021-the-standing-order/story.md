@@ -69,13 +69,18 @@ repeat and the streak the push notification promises is actually kept.
      `daily_picks.scheduled_on`.
   3. **Spacing holds in production, measured not asserted:** over all auto-picked days, no
      artist repeats within 30 days and no culture runs two days straight, except where the
-     relaxation ladder logged that it had to give way. **Falsified if** the audit query
-     finds a violation with no corresponding log line.
+     relaxation ladder had to give way — and the row itself says so: the machine stamps
+     the tier it filled at into `auto_tier` (eng review folded this out of log lines,
+     which don't survive a Kamal redeploy). **Falsified if** the audit query finds a
+     violation on a tier-1 row.
   4. **Moat tripwire, stated plainly, not a promise:** the buffer is only worth its extra
      machinery over morning-of picking (decisions/0015, D1) if the write-ahead window
      actually gets used. If by Aug 31 fewer than a third of auto-picked published days
      carry a hand-written blurb, the buffer is not protecting the voice — museum text has
      become the norm anyway, and D1 should be reopened with that number in hand.
+     **Small-n caveat (eng review, outside voice):** at most ~10 auto-picked days will
+     have published by Aug 31 — that read is directional only; the binding read is at 30
+     auto-picked published days (~Sep 20), recorded in decisions/0015.
 - **In baseline?** Yes — this *is* Proven-baseline pipeline: "curated queue → daily
   publish job (Solid Queue)." No exception argument owed. The one stack addition (Solid
   Queue) is pre-authorized by CLAUDE.md for exactly this unit of work.
