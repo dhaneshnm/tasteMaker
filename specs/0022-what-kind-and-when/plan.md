@@ -92,15 +92,46 @@ ALL · 16TH C · 17TH C · … · 20TH C     ← period row (new, not sticky)
 [genre row: renders nothing in R1 — no values exist]
 ```
 
-- Same `.caps-link` type, tracking, and 44px targets as the compass — the product
-  already teaches this exact grammar ("the one you're on loses its link and steps back
-  to `--ink-dim`", `aria-current`).
-- The active value is the unlinked, dimmed one; "ALL" is active when no filter is set.
+- Same `.caps-link` type and tracking as the compass — the product already teaches this
+  exact grammar ("the one you're on loses its link and steps back to `--ink-dim`").
+  **The row states the 44px bar itself** (design review pass 5): `.caps-link` sets size
+  and tracking, never height — assuming otherwise is ISSUE-002 (commit 866bbc2), and
+  DESIGN.md rule 9 lists every control that had to learn this. `min-height: var(--tap)`
+  on the row's items, the token not a literal.
+- The active value is the unlinked, dimmed one, carrying `aria-current="true"` — not
+  `"page"` (the compass marks a *location*; this marks a *filter*). "ALL" is active when
+  no filter is set. Each row is its own `<nav aria-label="Filter by period">` landmark
+  (design review pass 6).
+- **Within-row order is chronological** for period (design review pass 1). No row labels:
+  century names and genre names self-identify, and a "PERIOD:" prefix is chrome the
+  compass precedent doesn't carry. Genre's order is Release 2's call, made when the
+  values exist.
 - The row scrolls horizontally (`overflow-x: auto`) rather than wrapping — a wrapped row
   costs 44px of fold budget per line, the exact cost DESIGN.md's rule 9 discussion
-  polices. Never sticky: it rides with the masthead.
+  polices. Never sticky: it rides with the masthead (rule 5's sticky budget on `/feed`
+  is spent on the compass rail, and this row doesn't earn a second exception).
+  **The scroll affordance is the next value clipping at the viewport edge** — no fade
+  masks, no indicators, no scrollbar styling (rule 6: no decoration; design review
+  pass 4).
 - No pills, no fills, no borders — `.days`' "never a card" rule generalizes.
 - Filter links are plain GETs. No Stimulus, no form.
+
+### D5a — The two states a filter can put the page in (design review pass 2)
+
+Combined filters can produce **zero results even though every offered value has works**:
+genre=portrait has works, period=16th-century has works, their AND may be empty. Two copy
+states follow, both missed by the first draft:
+
+- **Empty filtered page:** without a spec, `_page.html.erb` renders zero posts and then
+  the coda — "You have walked the whole gallery," over a page holding nothing, with no
+  way out. Instead: the `.page--empty` variant (already in DESIGN.md's vocabulary),
+  ornament + one display-italic line — "Nothing here wears both." — and a `.caps-link`
+  back to the unfiltered gallery. An empty state is a feature: warmth, a way out,
+  context.
+- **The end of a filtered walk:** "You have walked the whole gallery" is false under a
+  filter — the reader walked a subset. The coda's line becomes "Every match, end to
+  end." when any filter is active; the museum-credit note and back-to-top stay as they
+  are. One conditional in the coda, not a copy system.
 
 ### D6 — Freshness and caching need nothing new
 
@@ -132,6 +163,9 @@ becomes the filtered count — free, and it doubles as the "N works match" feedb
 | `pool_period_bucket_test` | every measured `dated` format maps to its century; garbage → nil; range takes the start; "second half 16th century" → 16th, not 17th |
 | `feed_filter_test` | `?period=<slug>` filters; unknown slug = unfiltered (no 500, no empty-page trap); combined genre+period ANDs; filtered `@total` in the masthead aside; pagination frame src preserves both params; page 2 of a filtered view stays filtered |
 | `feed_filter_test` | **the non-empty rule**: a facet with no values renders no row (fixtures with nil genre → no genre row); a value present in fixtures renders exactly once |
+| `feed_filter_test` | **the empty combined-filter state** (design review): a genre+period AND with zero matches renders `.page--empty` with its own line and a link back to the unfiltered gallery — never the "walked the whole gallery" coda over nothing |
+| `feed_filter_test` | the coda line under an active filter reads the filtered variant, and the unfiltered gallery keeps the original line |
+| `test/system/dynamic_type_test.rb` or `feed_test.rb` (extend) | the facet row's items clear the 44px bar at the accessibility cap — the ISSUE-002 regression, asserted not assumed |
 | `feed_filter_test` | filtered view is URL-addressable: a cold GET with params works with no prior state |
 | `test/system/feed_test.rb` | tap a period link → filtered feed, tapped value now unlinked/dimmed with `aria-current`, "ALL" restores |
 | existing feed/design/dynamic-type suites | unchanged — the R1 page with no genre data must render byte-identically except the period row |
@@ -147,3 +181,23 @@ and asserted `pool_quota_test`-style. Nothing in Release 1 presumes the route: t
 ## Deviations (added during build)
 
 - <none yet>
+
+## GSTACK REVIEW REPORT
+
+| Review | Trigger | Why | Runs | Status | Findings |
+|--------|---------|-----|------|--------|----------|
+| CEO Review | `/plan-ceo-review` | Scope & strategy | 0 | — | — |
+| Codex Review | `/codex review` | Independent 2nd opinion | 0 | — | — |
+| Eng Review | `/plan-eng-review` | Architecture & tests (required) | 0 | — | not yet run on this plan |
+| Design Review | `/plan-design-review` | UI/UX gaps | 1 | CLEAR (FULL) | score: 6/10 → 9/10, 6 decisions |
+| DX Review | `/plan-devex-review` | Developer experience gaps | 0 | — | — |
+
+- **VERDICT:** DESIGN CLEARED — eng review required before implementation.
+- Decisions auto-taken on explicit owner instruction (no stop-and-ask): chronological
+  period order with self-identifying values and no row labels; `.page--empty` +
+  filtered-coda copy for the two filter states; edge-clipping as the only scroll
+  affordance; 44px bar stated on the row (ISSUE-002); `<nav aria-label>` landmarks with
+  `aria-current="true"`. Mockups skipped: the component reuses the test-enforced
+  `.caps-link` compass grammar, and the mockup feedback loop is interactive by design.
+
+NO UNRESOLVED DECISIONS
