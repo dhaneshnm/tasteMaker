@@ -125,6 +125,35 @@ class DynamicTypeTest < ApplicationSystemTestCase
       "the reserve term is no longer what bounds the plate at 375x667"
   end
 
+  # Story 0020, T4 (`/plan-design-review`) — the same −44px trade extended to
+  # `/feed`, and to the size that matters most: the accessibility cap.
+  # `fold()` reads `.label__note p, .label__text`, and no feed post carries
+  # either the daily note markup or a guaranteed matching description, so
+  # this measures `.plate__img` directly the same way
+  # `feed_test.rb`'s CSS-reserve test does — just at both root sizes instead
+  # of only the default.
+  #
+  # `19rem` scales with the root font size and the reserve does not (rule 9:
+  # a finger does not get bigger), so the plate is not free to stay at 319
+  # here — measured, not assumed: 243 at the cap, smaller than 319 but never
+  # collapsed to nothing.
+  test "the gallery's plate shrinks, but never collapses, at the accessibility text cap" do
+    visit feed_path
+    assert_selector ".plate__img"
+
+    scale_to DEFAULT_ROOT
+    default_height = page.evaluate_script(
+      "Math.round(document.querySelector('.plate__img').getBoundingClientRect().height)")
+    assert_equal 319, default_height, "the default-root reserve regressed"
+
+    scale_to CAPPED_ACCESSIBILITY_ROOT
+    capped_height = page.evaluate_script(
+      "Math.round(document.querySelector('.plate__img').getBoundingClientRect().height)")
+    assert_equal 243, capped_height,
+      "the gallery's plate did not shrink the way the daily page's does at the accessibility cap"
+    assert_operator capped_height, :>, 0, "the plate collapsed rather than shrinking"
+  end
+
   # The other half of the accepted cost: a WIDE painting pays nothing anywhere,
   # because a landscape plate runs out of width long before any height cap can
   # reach it. Only works tall enough to be height-capped ever move, which is what

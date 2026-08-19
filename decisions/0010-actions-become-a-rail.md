@@ -140,6 +140,35 @@ Falsified if a reader misreads a glyph, if the rail acquires a slot with nothing
 behind it, if the row wraps to two lines at 375px at the accessibility cap, or if
 keeping requires a scroll on any published day.
 
+## Narrowed 2026-08-19 — story 0020, `/plan-design-review` D1
+
+The rail spread to two more screens: `/feed` and `/artists/:slug`, both walled
+and private, each rendering the control inline rather than fetched
+(`specs/0020-keep-where-you-find-it/plan.md`). On those two screens the count
+— `3 kept` — does not render. **This narrows one of the two mitigations this
+decision bought the label-less rail with**, and the narrowing was reviewed
+here, not assumed elsewhere.
+
+Kept whole: the other mitigation, accessible names on every glyph, is
+unchanged and full-strength on all four screens the rail now appears on.
+
+Why narrow rather than keep the count everywhere: the count would render ten
+times down one scroll on `/feed` and up to nine times on an artist page —
+noise the design review judged worse than the literacy cost, on the reasoning
+that literacy is taught once, on the surface every reader opens every day.
+`/` is that surface by construction: the push destination, the front door,
+and the only unwalled one. A reader cannot reach `/feed` or `/artists/:slug`
+without an identity, and the ordinary route to one runs through `/` — so the
+word teaches the glyph there, before a reader ever reaches a surface that
+cannot teach it again.
+
+**The tripwire this decision named does not move.** *"If a reader misreads a
+glyph in the five `BET.md` conversations, this is the line that was wrong and
+labels are the fix already costed."* That sentence now covers `/feed` and
+`/artists/:slug` too — a misread there is evidence against mark-only on the
+walled surfaces specifically, and the fix is still the one already costed
+above: labels, not a redesign.
+
 ## Enforcement
 
 Owed by the story that implements this, not by this file:

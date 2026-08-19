@@ -722,7 +722,33 @@ fine and probably faster end to end.
 
 ## Deviations (added during build)
 
-- _(none yet)_
+- **2026-08-19: system tests need a `reveal` helper the plan never named.**
+  `reveal_controller.js` fades every `.post` in from `opacity: 0` via its own
+  `IntersectionObserver`, and this driver treats `opacity: 0` as not-visible —
+  so any Capybara finder targeting a post past the first couple on `/feed` or
+  the second work on an artist page raised `ElementNotFound` until the post
+  was scrolled into view first. Not a product bug; `feed_test.rb`'s own
+  `scrolled_to` helper exists for the same reason on the compass. Added a
+  `reveal(aria_label)` helper (`element.scrollIntoView`) to both new system
+  test files rather than working around it per-test.
+- **2026-08-19: the CSS-reserve system test measures the first plate only,
+  not every `.plate__img` on the page.** First draft averaged across all of
+  them; `feed_test.rb`'s own filler paintings carry deliberately unreachable
+  `https://example.test/*.jpg` URLs (no network in a system test), and a
+  broken image reports zero intrinsic size and collapses to ~2px regardless
+  of any CSS reserve — asserting uniformity across all images was measuring
+  "did the image load," not "does the reserve apply." Fixed to match how
+  `dynamic_type_test.rb` has always measured this: `document.querySelector`,
+  singular, against the fixture's real 800×1000 bytes.
+- **2026-08-19: `Rack::ETag`'s automatic digest confirmed by reading the
+  gem, then twice more by the test suite.** The freshness section's
+  reasoning (see above) was verified three separate ways before being
+  trusted: reading `rack-3.2.6/lib/rack/etag.rb` directly, `EXPLAIN QUERY
+  PLAN` against a replica of the shipped schema for the `kept_ids_for`
+  query, and finally the mandatory regression test (`artists_test.rb`,
+  "a kept mark never comes back stale on revalidation") actually failing
+  red against the OLD code before the fix, then green after. No part of
+  this section shipped on inference alone.
 
 ## GSTACK REVIEW REPORT
 

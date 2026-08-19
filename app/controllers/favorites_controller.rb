@@ -1,5 +1,8 @@
 # Keeping a work, letting it go, and the room the kept ones live in.
 #
+# TWO CALLERS, TWO ARCHITECTURES since story 0020 — this diagram is the first
+# of them, the one this controller's own `#control` action answers.
+#
 # The whole design turns on one constraint: `/` is `Cache-Control: public`,
 # and production runs behind Thruster's HTTP cache. So the public HTML has to
 # be byte-identical for every reader, and everything personal lives behind one
@@ -17,6 +20,22 @@
 #          └── <turbo-frame src=…> ───────────────┘   POST/DELETE reply into
 #              (static markup + the                   the same frame
 #
+# The second caller never reaches `#control` at all. `/feed` and
+# `/artists/:slug` are walled and private — no shared cache to poison — so
+# `paintings/_painting.html.erb` renders `favorites/_control` INLINE, with no
+# `src`, carrying the real button from the first paint:
+#
+#   GET /feed, GET /artists/:slug
+#     private, no-cache (or nothing at all on /feed) — no fetch, no round trip
+#     renders this reader's state directly, `compact: true`
+#          │
+#          └── <turbo-frame> (no src) ── POST/DELETE reply into the same frame,
+#                                         `compact: true` carried on the form
+#
+# `#create` and `#destroy` are the ONE shared endpoint both diagrams write
+# through — `render_control` below reads `params[:compact]` off the form's
+# hidden field, not off which diagram the caller came from, so one write path
+# serves both.
 class FavoritesController < ApplicationController
   # `#control` answers an unidentified caller too (story 0017), and it has to.
   #
@@ -143,15 +162,30 @@ class FavoritesController < ApplicationController
       # behind the wall.
       collection = identified? ? reader_favorites : Favorite.none
 
-      # An unidentified caller is always the eager frame's initial GET, never a
-      # write, and `_control.html.erb` states the rule: a fragment arriving
-      # unbidden must not steal focus. Pinned here rather than left to the
-      # accident that `#control` happens to pass the default.
-      render partial: "favorites/control", locals: {
-        painting: @painting, autofocus: autofocus && collection.present?,
-        kept: kept.nil? ? collection.exists?(painting: @painting) : kept,
-        count: collection.count
+      # The one hidden field the compact form carries (`_control.html.erb`),
+      # read here rather than passed by the caller: `#create`/`#destroy` are the
+      # ONE endpoint both architectures write through, and which one a given
+      # request came from is a fact about the SUBMITTED FORM, not about which
+      # action ran. `params[:compact]` is that fact.
+      compact = params[:compact].present?
+
+      locals = {
+        painting: @painting, compact: compact,
+        # An unidentified caller is always the eager frame's initial GET, never
+        # a write, and `_control.html.erb` states the rule: a fragment arriving
+        # unbidden must not steal focus. Pinned here rather than left to the
+        # accident that `#control` happens to pass the default.
+        autofocus: autofocus && collection.present?,
+        kept: kept.nil? ? collection.exists?(painting: @painting) : kept
       }
+      # Not computed at all on the compact path, and not defaulted to `0`
+      # either — the partial reads `count` only inside its `unless compact`
+      # guard, so a `0` sitting unused in this hash would be a local the day
+      # that guard is ever removed, silently rendering a wrong count instead of
+      # raising. See `_control.html.erb`.
+      locals[:count] = collection.count unless compact
+
+      render partial: "favorites/control", locals: locals
     end
 
   # `reader_favorites` and `reader_identity_attributes` moved to

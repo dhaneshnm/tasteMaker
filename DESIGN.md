@@ -252,7 +252,10 @@ then `__credit`.
 note and a link. Ends the daily ritual, ends the archive, carries the empty
 state.
 
-`.post` — one item in the archive. Adds the spacing and the rule between works.
+`.post` — one item in the gallery (`/feed`) or on an artist page. Adds the
+spacing and the rule between works. **Carries its own `.rail`** since story
+0020 — Keep alone, no Zoom, no count; see `.rail` below for the full account
+of how that differs from `/`'s.
 
 `.days` — the contents list of past days. One row per day: the date in small caps,
 the title, the artist, and an uncropped thumbnail on the right (112px desktop,
@@ -268,8 +271,22 @@ gold in the row belongs to the one part that does not navigate.
 
 `.rail` — the row of actions **directly under the plate**, above the wall label.
 Line icons in `--gold` at a 23px box, `1.4px` stroke, each in its own 44px target
-(rule 9). **Zoom, then Keep, then the count.** Decided 2026-08-14,
-`decisions/0010-actions-become-a-rail.md`.
+(rule 9). **On `/` and `/days/:date`: Zoom, then Keep, then the count.** Decided
+2026-08-14, `decisions/0010-actions-become-a-rail.md`.
+
+**On `/feed` and `/artists/:slug`: Keep alone** (story 0020). Two differences
+from the rail above, both because the surface is different, not because the
+component is:
+
+- **No Zoom.** The plate is already the zoom trigger on these two screens
+  (`shared/_plate.html.erb`), and both already mount `shared/_zoom` —
+  unlike `/`, where the plate competes with a wall label for attention and
+  zoom was added to the rail for exactly that reason (`decisions/0010`). A
+  second zoom control here would be a duplicate tab stop for one action.
+- **No count.** See "The count keeps its word" below.
+
+Same tokens, same targets, same glyph — one component, fewer children on the
+walled surfaces.
 
 **Zoom is first for a structural reason, not emphasis.** Keep and its count share
 one Turbo frame, a frame is one contiguous flex item, and the count only exists
@@ -277,12 +294,22 @@ after the fetch — so the frame grows and shoves whatever sits to its right abo
 60px, on every open, for exactly the reader who already has a collection. Last
 position means there is nothing to its right to shove.
 
-**The frame ships default content.** The un-kept outline glyph is identical for
-every visitor, so it is not personal data and belongs in the cached page; only
-the filled state and the count come from the private fragment. Without it the
-rail paints an empty 44px box where the habit mechanic should be for as long as
-the fetch takes, which is the same bug moved from the bottom of the page to the
-top.
+**The frame ships default content — on `/` and `/days/:date`, and only there.**
+The un-kept outline glyph is identical for every visitor, so it is not personal
+data and belongs in the cached page; only the filled state and the count come
+from the private fragment. Without it the rail paints an empty 44px box where
+the habit mechanic should be for as long as the fetch takes, which is the same
+bug moved from the bottom of the page to the top.
+
+**On `/feed` and `/artists/:slug` there is no fetch to cover** (story 0020).
+Both are walled and private — no shared cache for a live `button_to` to
+poison — so `paintings/_painting.html.erb` renders the real control inline,
+with no `src`, from the first paint. The mark is correct immediately; the
+placeholder-then-private-fragment split exists only where a public page forces
+it. Do not "fix" the walled surfaces back into fetching frames — that would
+reintroduce the loading state this design deletes, for no benefit, since the
+constraint the split answers (`/` is `Cache-Control: public` behind Thruster)
+does not hold there.
 
 **No labels, and that is why the targets state both axes.** Rule 9 says
 `min-height` and nothing about width, because every control it names is a
@@ -297,9 +324,18 @@ a real `.rail__act` before the fetch resolves, and Zoom sits *before* the frame,
 so a frame that grows has nothing to its right to move. Reserving it a second
 time would be scaffolding for a default that is tested to exist.
 
-**The count keeps its word.** `3 kept`, never `3`. With the labels gone it is the
-only word in the rail, and it is the one thing telling a first-time reader what
-the glyph beside it does.
+**The count keeps its word — on `/` and `/days/:date`.** `3 kept`, never `3`.
+With the labels gone it is the only word in the rail, and it is the one thing
+telling a first-time reader what the glyph beside it does.
+
+**`/feed` and `/artists/:slug` are mark-only — no count at all** (story 0020,
+`/plan-design-review` D1, 2026-08-19). This narrows one of the two mitigations
+`decisions/0010` bought the label-less rail with — see that file for the full
+reasoning and the tripwire. In short: the count is scoped to `/` because that
+is the surface every reader opens every day and the only unwalled one, so
+glyph literacy is taught there, once, before a reader ever reaches a walled
+surface that cannot teach it again. The other mitigation, the accessible name
+on every glyph, is unchanged and full-strength on all four screens.
 
 **It sits next to the artwork because that is what fixes the fold.** Actions used
 to be the last row of the wall label, which put the product's only habit mechanic
@@ -318,15 +354,22 @@ save-for-later. **The kept state is the filled glyph** — no colour shift, no
 second mark — and the accessible name carries what `Kept · Remove` used to say in
 words. `aria-pressed` is unchanged; it never depended on the label.
 
-**The rail costs one touch target on rule 2's third cap term** — the reserve goes
-`19rem` → `19rem + var(--tap)`, and the split is the point. The `19rem` is the
-label's text budget and scales with Dynamic Type; the rail's height does not,
-because a finger does not get bigger when a reader raises their text size. The
-plan said `22rem` and `dynamic_type_test.rb` rejected it: charging a fixed cost
-in `rem` billed the picture 60px it never spent. Free at 402×874, where 55vh
-still wins. **−44px** of artwork at 375×667, on works tall enough to be
-height-capped. That trade is the one rule 2 allows: a smaller picture, never a
-cropped one.
+**The rail costs one touch target on rule 2's third cap term, on every screen
+that carries one** — the reserve goes `19rem` → `19rem + var(--tap)`, and the
+split is the point. The `19rem` is the label's text budget and scales with
+Dynamic Type; the rail's height does not, because a finger does not get bigger
+when a reader raises their text size. The plan said `22rem` and
+`dynamic_type_test.rb` rejected it: charging a fixed cost in `rem` billed the
+picture 60px it never spent. Free at 402×874, where 55vh still wins.
+**−44px** of artwork at 375×667, on works tall enough to be height-capped.
+That trade is the one rule 2 allows: a smaller picture, never a cropped one.
+
+Decided for `/` and `/days/:date` on 2026-08-14; extended to `/feed` and
+`/artists/:slug` on 2026-08-19 (story 0020, `/plan-design-review`) — not a new
+trade, the same one, on two more screens that now carry the rail. On `/feed`
+this repeats **once per post**, ~110 times down the product's only unbounded
+scroll; accepted as the price of the control existing where the reader found
+the work, not discovered later.
 
 `.walk` — previous / next day at the foot of a past day. Two `.caps-link`s, and
 nothing else; the way back to today sits under them.
