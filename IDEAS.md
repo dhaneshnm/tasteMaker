@@ -113,4 +113,5 @@ later.
   Captured and promoted same day: source is a direct operator report ("manual picking has
   become unsustainable"), WIP slot was open, and `config/deploy.yml:115` had carried the
   IOU for this exact job since first deploy. Direction forks (7-day buffer; random +
-  spacing) settled in `decisions/0015`. Spec + plan written; not started.
+  spacing) settled in `decisions/0015`. Built same day (`fb67cf7`), `bin/ci` green.
+  Code only — not deployed.

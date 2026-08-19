@@ -3,7 +3,10 @@
 Date: 2026-08-19
 Lane: **Full (≤ 3-day core).** New gem (Solid Queue), one migration, one job, one
 selection policy with tests. No reader-facing UI change.
-Status: **Spec — not started.**
+Status: **Shipped — code only, not deployed** (`fb67cf7`, `bin/ci` green: rubocop,
+bundler-audit, importmap audit, brakeman, 451 unit/integration + 59 system tests).
+See `SHIPLOG.md` 2026-08-19 for the full receipt and `plan.md`'s Deviations for
+what changed during build and review.
 
 Captured and promoted same day (`IDEAS.md` 2026-08-19): the source is a direct operator
 report, not an inference, and the WIP slot is open (0020 shipped code-complete).

@@ -278,7 +278,56 @@ re-verify, ship with SHIPLOG receipt.
 
 ## Deviations
 
-(None yet — filled in during implementation.)
+Implemented per plan through `bin/ci` green (commit `5681596`), then `/simplify`
+(`7a830cc`) and `/code-review` (`fb67cf7`) each found real issues folded back in.
+Everything below is a deviation from what the eng-reviewed plan specified, not from
+what shipped — the shipped shape is this section plus the plan above.
+
+- **`exclude_unless_null` helper introduced by `/simplify`, then reverted by
+  `/code-review`.** The simplify pass collapsed the two NOT-IN-OR-NULL SQL
+  exclusions in `candidates_for` into one shared private method taking the column
+  expression as a parameter. Brakeman then flagged it as a possible SQL injection:
+  passing the column SQL through a method argument is exactly the shape its static
+  analysis can no longer prove is always a hardcoded constant, even though both
+  call sites only ever pass `ARTIST_KEY_SQL` or the literal `"paintings.culture"`.
+  Reverted to two inline calls (six duplicated lines) rather than add a scanner
+  suppression file — the code stays provably safe by inspection, which was judged
+  worth more than the DRY win.
+- **`DailyPick.queue_healthy?(today_scheduled:, days_ahead:)` — not in the
+  eng-reviewed plan.** Code review's adversarial pass found that the admin
+  queue-depth hint and `/queue-health` computed "is the queue okay" two different
+  ways: the admin hint only ever checked buffer depth (`@days_scheduled_ahead`),
+  never whether *today itself* had a pick. A curator deleting today's already-
+  published pick — an ordinary action, not a machine-pick re-roll — would see the
+  admin hint read clean (future days still buffered) while `/queue-health` was
+  already returning 503 and the front door was serving yesterday's painting. The
+  plan's own `LOW_BUFFER_DAYS` sharing (from the simplify pass) made the *number*
+  agree between the two surfaces; it didn't make the *predicate* agree. Fixed with
+  one shared class method both consumers call, taking already-known inputs so
+  neither caller pays for an extra query it didn't already need.
+- **`fill_one!`'s `RecordNotUnique` rescue was under-specified.** The plan's
+  text ("treated as 'already handled'") didn't account for `daily_picks` carrying
+  *two* unique indexes, not one — `scheduled_on` and `painting_id`. A collision on
+  `painting_id` (two concurrent runs claiming the same painting for different
+  dates) left the target date still open while the original code returned `true`
+  anyway, silently discarding a valid candidate and reporting false progress. Now
+  checks `exists?(scheduled_on: date)` before deciding whether to stop trying this
+  date or move to the next candidate. Not directly testable in this suite (see the
+  comment above the rescue and the test file) — Rails' uniqueness validation
+  always runs a SELECT before every INSERT, so a single-connection test can only
+  ever hit `RecordInvalid` first; the real trigger needs two Solid Queue runs
+  racing on separate connections, which transactional fixtures structurally can't
+  construct. Stated plainly rather than papered over with a misleading test.
+- **Two test gaps the plan's own coverage diagram didn't catch, found by the
+  code review's testing specialist:** every ladder test either resolved at tier 1
+  or fell straight to tier 4 (all used horizon 1-2, too short a gap for tier 3's
+  7-day window to ever matter) — tier 3 was unverified. And `auto_fill!`'s actual
+  default (`horizon: 7`, what `FillQueueJob` runs with in production) was never
+  itself exercised — every test passed an explicit horizon. Both now have direct
+  tests (`test/models/daily_pick_test.rb`).
+- **QA pass found zero bugs** against a real dev server with the full 2000-painting
+  seed (screenshots in `~/.gstack/qa-reports/`) — worth recording since it means
+  every finding above surfaced from code review, not from exercising the UI.
 
 ## GSTACK REVIEW REPORT
 
