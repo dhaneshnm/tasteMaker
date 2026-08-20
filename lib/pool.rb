@@ -148,6 +148,17 @@ module Pool
     "modern and contemporary art" => nil
   }.freeze
 
+  # Whole-word, case-sensitive-by-default match: "Indiana" is not India, an
+  # incantation is not Inca. Shared by every module that classifies a museum
+  # string against a term list (`region_for`/`place_shaped?` below,
+  # `Pool::Tradition` — story 0024's eng review + simplify found three
+  # independent copies of this one regex idiom).
+  def self.word_match?(haystack, term, case_insensitive: false)
+    return haystack.match?(/\b#{Regexp.escape(term)}\b/i) if case_insensitive
+
+    haystack.match?(/\b#{Regexp.escape(term)}\b/)
+  end
+
   def self.region_for(country:, culture:, department:, continent: nil)
     haystack = [ country, culture, continent ].compact.join(" ").downcase
     dept = department.to_s.downcase
@@ -161,7 +172,7 @@ module Pool
 
     # Whole words only: "Indiana" is not India, and an incantation is not Inca.
     PLACES.each do |region, terms|
-      return region if terms.any? { |t| haystack.match?(/\b#{Regexp.escape(t)}\b/) }
+      return region if terms.any? { |t| word_match?(haystack, t) }
     end
 
     # An ambiguous department is better than nothing once the place has failed.
@@ -206,7 +217,7 @@ module Pool
     return false if tokens.empty? || tokens.size > 4
 
     tokens.any? { |token| PLACE_WORDS.include?(token) } ||
-      PLACE_WORDS.any? { |place| place.include?(" ") && base.downcase.match?(/\b#{Regexp.escape(place)}\b/) }
+      PLACE_WORDS.any? { |place| place.include?(" ") && word_match?(base.downcase, place) }
   end
 
   # Museum date fields are prose ("c. 1570–75", "Edo period (1615–1868)"). The

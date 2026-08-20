@@ -131,8 +131,10 @@ class Painting < ApplicationRecord
   # Each is a nullable string column carrying the canonical DISPLAY value
   # ("19th century", "Portrait", "Mughal Painting") — never a slug. `genre`
   # has no data source until Release 2; `period` and `tradition` are written
-  # at seed time by `Pool::PeriodBucket` and `Pool::Tradition`.
-  FACETS = %i[genre period tradition].freeze
+  # at seed time by `Pool::PeriodBucket` and `Pool::Tradition`. Order here IS
+  # the `/feed` display order (`PaintingsController#index` and the view both
+  # iterate this array), not just an allowlist.
+  FACETS = %i[period genre tradition].freeze
 
   # A value with fewer works than this renders no filter control — the
   # story's own rule ("a facet with 1 work behind it is a dead end dressed

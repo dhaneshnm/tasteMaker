@@ -63,4 +63,18 @@ class PoolTest < ActiveSupport::TestCase
 
     assert_not_equal a.dedup_key, b.dedup_key
   end
+
+  # Story 0024 simplify: extracted from three independent inline copies
+  # (`region_for`, `place_shaped?`, `Pool::Tradition`) into one shared
+  # primitive.
+  test "word_match? matches whole words only" do
+    assert Pool.word_match?("Indiana Jones", "Indiana")
+    assert_not Pool.word_match?("Indianapolis", "India")
+    assert_not Pool.word_match?("an incantation", "Inca")
+  end
+
+  test "word_match? is case-sensitive by default, case-insensitive on request" do
+    assert_not Pool.word_match?("CHINA", "china")
+    assert Pool.word_match?("CHINA", "china", case_insensitive: true)
+  end
 end

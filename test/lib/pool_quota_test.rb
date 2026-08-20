@@ -214,35 +214,34 @@ class PoolQuotaTest < ActiveSupport::TestCase
   # Story 0024. `tradition` is a seed-time derivation, not a manifest field
   # (same shape as `period`), so this recomputes it directly from each row's
   # own culture/country/department/artist strings — the manifest's own
-  # invariant, not a live-DB proxy for it. No free-text ever leaks into the
-  # facet: every non-nil output must be one of `Pool::Tradition::TABLE`'s
-  # canonical values.
+  # invariant, not a live-DB proxy for it. One pass over `POOL` feeds both
+  # assertions below (simplify: the vocabulary check and the floor check
+  # were two independent loops over the same derivation).
+  POOL_TRADITIONS = POOL.filter_map do |w|
+    value = Pool::Tradition.from_strings(
+      culture: w["culture"], country: w["country"], department: w["department"], artist: w["artist"]
+    )
+    [ w, value ] if value
+  end.freeze
+
+  # No free-text ever leaks into the facet: every non-nil output must be one
+  # of `Pool::Tradition::TABLE`'s canonical values.
   test "every derived tradition value is in the canonical vocabulary" do
     canonical = Pool::Tradition::TABLE.map(&:first)
 
-    stray = POOL.filter_map do |w|
-      value = Pool::Tradition.from_strings(
-        culture: w["culture"], country: w["country"], department: w["department"], artist: w["artist"]
-      )
-      "#{w['source']}:#{w['source_id']} => #{value.inspect}" if value && !canonical.include?(value)
+    stray = POOL_TRADITIONS.filter_map do |w, value|
+      "#{w['source']}:#{w['source_id']} => #{value.inspect}" unless canonical.include?(value)
     end
 
     assert_empty stray, "every stamped tradition must be a TABLE value, never free text"
   end
 
-  # Story 0024. Every canonical value clears the display floor on the
-  # committed pool — a value that never renders is a facet in name only
-  # (the Jain-bucket regression this story's eng review caught at plan time,
-  # before the `gujarat` pattern was restored).
+  # Every canonical value clears the display floor on the committed pool —
+  # a value that never renders is a facet in name only (the Jain-bucket
+  # regression this story's eng review caught at plan time, before the
+  # `gujarat` pattern was restored).
   test "every canonical tradition value clears MIN_FACET_WORKS on the committed pool" do
-    counts = Hash.new(0)
-    POOL.each do |w|
-      value = Pool::Tradition.from_strings(
-        culture: w["culture"], country: w["country"], department: w["department"], artist: w["artist"]
-      )
-      counts[value] += 1 if value
-    end
-
+    counts = POOL_TRADITIONS.each_with_object(Hash.new(0)) { |(_, value), h| h[value] += 1 }
     starved = Pool::Tradition::TABLE.map(&:first).select { |value| counts[value].to_i < Painting::MIN_FACET_WORKS }
 
     assert_empty starved,
