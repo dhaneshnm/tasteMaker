@@ -55,6 +55,17 @@ namespace :pool do
     abort "#{missing.size} recognizable name(s) carry no `rights` (#{Pool::Recognizable::RIGHTS.join('/')}): " \
           "#{missing.first(8).map { |e| e['name'] }.join(', ')}#{'…' if missing.size > 8}"
   end
+
+  # Story 0026. Candidates built from the PREVIOUS committed manifest's own
+  # rows — never a mirror lookup, so mirror absence/drift can't touch a
+  # pinned work (eng review + outside voice). `[]` on a first-ever curation,
+  # when no manifest is committed yet.
+  def pinned_candidates
+    return [] unless Pool::MANIFEST.exist?
+
+    field_strs = Pool::FIELDS.map(&:to_s)
+    JSON.parse(Pool::MANIFEST.read).map { |row| Pool::Candidate.new(**row.slice(*field_strs).symbolize_keys) }
+  end
   end
 
   desc "Curate the mirror down to the shipped pool (manifest + report)"
@@ -69,15 +80,21 @@ namespace :pool do
            "curating WITHOUT the coverage fill. See specs/0019-the-coverage-fill/plan.md step 1."
     end
 
+    pinned = Tasks.pinned_candidates
+    puts "#{pinned.size} pinned works from the committed manifest (story 0026, Jordan's contract)" if pinned.any?
+
     resolved = 0
     curator = Pool::Curator.new(
       candidates,
       target: (ENV["TARGET"] || Pool::Curator::TARGET).to_i,
+      pinned: pinned,
       # Every plate is proven to exist before its work can enter the pool.
       # Sampling was not enough: Minneapolis publishes `rights_type: "Public
       # Domain"` and `Rights_Image_Display: "Full"` for works whose image then
       # 403s, and 43 of them reached the seed and stayed blank. The Met's check
       # is its own, because reading the plate's dimensions already proves it.
+      # Never called for pinned candidates (`Curator#take(resolve: false)`) —
+      # their plates are already cached locally and on the prod volume.
       resolver: ->(candidate) {
         resolved += 1
         puts "  verifying plates… #{resolved}" if (resolved % 250).zero?
@@ -90,19 +107,33 @@ namespace :pool do
     selected = curator.curate!
     puts "\nselected #{selected.size}; rejected #{curator.rejected.map { |k, v| "#{k}=#{v}" }.join(' ')}"
 
-    # Prove the plates exist before committing a manifest that points at them.
-    print "checking plates… "
-    dead = Pool::Sources.check_plates(selected)
+    # Story 0026: only the NEW candidates' plates are re-checked here — a
+    # pinned identity's plate already lives in Active Storage, so an
+    # upstream re-check buys nothing and costs ~2,000 requests.
+    pinned_identities = pinned.map(&:identity).to_set
+    new_candidates = selected.reject { |c| pinned_identities.include?(c.identity) }
+
+    print "checking plates on #{new_candidates.size} new work(s)… "
+    dead = Pool::Sources.check_plates(new_candidates)
     raise "unreachable images:\n  #{dead.join("\n  ")}" if dead.any?
 
     puts "all sampled plates reachable"
 
-    # The feed order is fixed here, once, over the whole pool — the same stable
-    # shuffle db/seeds.rb has always used, moved to where the pool is decided.
-    ordered = selected.shuffle(random: Random.new(Pool::Curator::SEED))
-    Pool::MANIFEST.write(JSON.pretty_generate(ordered.each_with_index.map { |c, i|
-      c.to_manifest.merge("feed_order" => i)
-    }))
+    # Story 0026: pinned rows are written back VERBATIM from the OLD
+    # manifest's own dicts — never through `Candidate#to_manifest`, which
+    # would drop `genre` (`Pool::GenreFill`, story 0022) and `feed_order`
+    # both, since neither is a `Candidate` field. New works append after,
+    # feed_order continuing from where the pinned block ends, shuffled only
+    # among themselves — every bookmarked `/feed` offset inside the pinned
+    # range survives untouched, and appending (not interleaving) is the one
+    # scheme where prod's existing 0..N-1 numbering can never collide with
+    # the backfill (eng review + outside voice, plan step 2).
+    old_manifest_rows = pinned.any? ? JSON.parse(Pool::MANIFEST.read) : []
+    ordered_new = new_candidates.shuffle(random: Random.new(Pool::Curator::SEED))
+    new_rows = ordered_new.each_with_index.map { |c, i|
+      c.to_manifest.merge("feed_order" => old_manifest_rows.size + i)
+    }
+    Pool::MANIFEST.write(JSON.pretty_generate(old_manifest_rows + new_rows))
 
     report = Pool::Report.new(curator).to_markdown
     Pool::REPORT.write(report)

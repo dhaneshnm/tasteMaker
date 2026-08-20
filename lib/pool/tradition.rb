@@ -40,6 +40,28 @@
 #     "Persian miniature" demand: the pool's ~19 works span Persian,
 #     Ottoman and Indo-Islamic sources. Splitting drops every piece below
 #     the display floor.
+#
+# Story 0026 adds two rows, measured against the mirrors before their quota
+# was set (plan step 3):
+#
+#   - "Madhubani Painting" (`madhubani`, `mithila`) — 11 CC0 CMA candidates,
+#     culture "Eastern India, Bihar ... Mithila". Placed BEFORE Tibetan &
+#     Nepalese: `mithila`/`nepal` co-occur on the region's border-adjacent
+#     culture strings and Nepal must not win the tie.
+#   - "Ukiyo-e Painting" is NOT a culture-string term — `ukiyo`/`floating
+#     world` fire on zero mirror candidates; museums catalogue these works
+#     by school and format, never the English art-historical label. Matched
+#     instead by a curated artist allowlist (the story's own framing:
+#     "Moronobu, Toyohiro, Katsushika Ōi") plus a medium check that keeps
+#     woodblock PRINTS out — "ukiyo-e" spans both, and this facet is
+#     specifically the pool's genuine hand-painted works (nikuhitsu-ga).
+#     `ukiyo_e?` runs before the TABLE loop, ahead of Japanese Painting's
+#     bare `japan` term. Measured 126 candidates across all four museums —
+#     wider than 0008's 16 (that probe scoped to AIC+CMA only; MIA alone
+#     holds 53 explicitly tagged `medium: "... (nikuhitsu) ..."`, the
+#     museums' own term for a hand-painted hanging scroll, as opposed to a
+#     print). Deviation from the plan's assumed culture-substring approach,
+#     logged in specs/0026-the-wider-pool/plan.md Deviations.
 module Pool
   module Tradition
     TABLE = [
@@ -48,6 +70,7 @@ module Pool
       [ "Rajput Painting", %w[rajput mewar marwar bundi kota bikaner kishangarh] ],
       [ "Kalighat Painting", %w[kalighat] ],
       [ "Jain Manuscript Painting", %w[jain gujarat] ],
+      [ "Madhubani Painting", %w[madhubani mithila] ],
       [ "Korean Painting", %w[korea] ],
       [ "Chinese Painting", %w[china chinese] ],
       [ "Japanese Painting", %w[japan] ],
@@ -55,16 +78,47 @@ module Pool
       [ "Tibetan & Nepalese Painting", %w[tibet nepal] ]
     ].freeze
 
+    # Exact-name allowlist, not substring — the same caution `Recognizable`
+    # takes with attribution: a school name like "Katsukawa Shunsho" is
+    # matched by inclusion against `artist`, never a loose word.
+    UKIYO_E_ARTISTS = %w[
+      Moronobu Toyohiro Toyoharu Toyokuni Hokusai Hiroshige Utamaro Sharaku
+      Kuniyoshi Kunisada Harunobu Kiyonaga Kiyomasu Kiyonobu Eizan Eisen Eishi
+      Koryusai Koryūsai Shunsho Shunshō Shunkō Shunman Masanobu Sukenobu
+      Choshun Chōshun Settei Katsushika Yoshitoshi Kaigetsudō Kaigetsudo
+    ].freeze
+
+    def self.ukiyo_e?(artist:, medium:)
+      return false if artist.blank? || medium.blank?
+      return false unless UKIYO_E_ARTISTS.any? { |name| artist.include?(name) }
+
+      m = medium.downcase
+      return false if m.include?("print") || m.include?("woodblock") || m.include?("book")
+
+      m.include?("hanging scroll") || m.include?("nikuhitsu") || m.include?("fan painting")
+    end
+
     # `TABLE`'s terms compiled to `\b`-anchored, case-insensitive `Regexp`s
     # once at load time, not per painting — `from_strings` runs once per
     # work on every seed and every `backfill!` row (eng review: ~15,000
     # regex compiles per run against `TABLE` uncompiled).
     PATTERNS = TABLE.map { |value, terms| [ value, terms.map { |t| /\b#{Regexp.escape(t)}\b/i } ] }.freeze
 
+    # The full canonical vocabulary `from_strings` can return — `TABLE`'s
+    # values plus "Ukiyo-e Painting", which is matched by `ukiyo_e?` before
+    # the TABLE loop ever runs and so is not itself a TABLE row. Callers that
+    # need "every value this function can produce" (the quota test's
+    # vocabulary/floor assertions) should use this, not `TABLE.map(&:first)`.
+    VALUES = (TABLE.map(&:first) + [ "Ukiyo-e Painting" ]).freeze
+
     # Returns the canonical display value or nil. `artist` participates in
-    # the match ONLY when it is a NOT_AN_ARTIST placeholder — a real name is
-    # never pattern-matched.
-    def self.from_strings(culture:, country:, department:, artist: nil)
+    # the TABLE match ONLY when it is a NOT_AN_ARTIST placeholder — a real
+    # name is never pattern-matched there. `medium` is used only by
+    # `ukiyo_e?`, checked first (before Japanese Painting's bare `japan`
+    # term would otherwise win).
+    def self.from_strings(culture:, country:, department:, artist: nil, medium: nil)
+      return "Ukiyo-e Painting" if ukiyo_e?(artist: artist, medium: medium)
+
       fields = [ culture, country, department ]
       fields << artist if artist.present? && Painting.artist_slug_for(artist).nil?
 
@@ -87,7 +141,12 @@ module Pool
       "Japanese Painting" => 276, "Chinese Painting" => 180, "Mughal Painting" => 102,
       "Rajput Painting" => 102, "Pahari Painting" => 84, "Jain Manuscript Painting" => 52,
       "Kalighat Painting" => 44, "Korean Painting" => 32, "Tibetan & Nepalese Painting" => 24,
-      "Persian & Islamic Painting" => 19
+      "Persian & Islamic Painting" => 19,
+      # Story 0026: Ukiyo-e's researched figure is 0008's AIC+CMA-only "16
+      # strict" scope; the shipped matcher measures all four museums (126) —
+      # a wider net by design, not a starved bucket, so this entry exists for
+      # the record rather than to gate `starved?`.
+      "Ukiyo-e Painting" => 16, "Madhubani Painting" => 11
     }.freeze
 
     BackfillResult = Struct.new(:updated, :total, keyword_init: true)
@@ -101,7 +160,7 @@ module Pool
       Painting.find_each do |painting|
         total += 1
         value = from_strings(culture: painting.culture, country: painting.country,
-          department: painting.department, artist: painting.artist)
+          department: painting.department, artist: painting.artist, medium: painting.medium)
         next if painting.tradition == value
 
         painting.update_column(:tradition, value)

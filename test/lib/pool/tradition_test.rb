@@ -1,8 +1,9 @@
 require "test_helper"
 
 class Pool::TraditionTest < ActiveSupport::TestCase
-  def match(culture: nil, country: nil, department: nil, artist: nil)
-    Pool::Tradition.from_strings(culture: culture, country: country, department: department, artist: artist)
+  def match(culture: nil, country: nil, department: nil, artist: nil, medium: nil)
+    Pool::Tradition.from_strings(culture: culture, country: country, department: department,
+      artist: artist, medium: medium)
   end
 
   test "one fixture per canonical value" do
@@ -135,5 +136,43 @@ class Pool::TraditionTest < ActiveSupport::TestCase
     assert result.sample.all? { |p| p.tradition.present? }
     assert_includes result.sample.map(&:title), "Only Korean",
       "the sole member of the smallest bucket must appear in a weighted sample"
+  end
+
+  # --- story 0026 additions -----------------------------------------------
+
+  test "Madhubani Painting matches culture strings" do
+    assert_equal "Madhubani Painting", match(culture: "Eastern India, Bihar, Mithila region")
+    assert_equal "Madhubani Painting",
+      match(culture: "Eastern India, Bihar State, Mithila or Madhubani School, 20th century")
+  end
+
+  test "precedence: Madhubani fires before Tibetan & Nepalese on a border-adjacent culture string" do
+    assert_equal "Madhubani Painting", match(culture: "Mithila region, near Nepal border")
+  end
+
+  test "Ukiyo-e Painting matches an allowlisted artist on a hand-painted hanging scroll, never a print" do
+    assert_equal "Ukiyo-e Painting",
+      match(artist: "Katsushika Hokusai", medium: "Hanging scroll; ink and color on silk")
+    assert_equal "Ukiyo-e Painting",
+      match(artist: "Utagawa Toyohiro", medium: "Hanging scroll (nikuhitsu), ink and color on paper")
+    assert_nil match(artist: "Katsushika Hokusai", medium: "Woodblock print; ink and color on paper"),
+      "a woodblock print is ukiyo-e in the broad sense but not this pool's genuine-painting facet"
+    assert_nil match(artist: "Katsushika Hokusai", medium: "Ink on paper; woodblock-printed books")
+  end
+
+  test "Ukiyo-e Painting requires both the allowlisted artist AND a painting-format medium" do
+    assert_nil match(artist: "Katsushika Hokusai", medium: nil), "no medium, no match"
+    assert_nil match(artist: "Rembrandt van Rijn", medium: "Hanging scroll; ink and color on silk"),
+      "a real artist not on the allowlist never matches, regardless of medium"
+  end
+
+  test "precedence: Ukiyo-e fires before Japanese Painting's bare `japan` term" do
+    assert_equal "Ukiyo-e Painting",
+      match(artist: "Katsushika Hokusai", country: "Japan", medium: "Hanging scroll; ink and color on silk")
+  end
+
+  test "an unlisted Japanese painter on the same medium still falls through to Japanese Painting" do
+    assert_equal "Japanese Painting",
+      match(artist: "Matsumura Goshun", country: "Japan", medium: "Hanging scroll; ink and color on silk")
   end
 end

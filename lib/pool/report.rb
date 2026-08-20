@@ -126,6 +126,8 @@ module Pool
 
         #{range_note}
 
+        #{themes_section}
+
         #{recognizable_section}
 
         #{place_as_artist_section}
@@ -137,6 +139,31 @@ module Pool
     end
 
     private
+
+    # Story 0026. The demand stage's want/took/shortfall, per theme — the
+    # 0019 report idiom (below) extended, and the artifact decisions/0016
+    # prediction 2 (Sep 20) is read against. `want` is an absolute floor on
+    # the whole pool, so `took` can exceed the newly-added count when a
+    # theme already had pinned stock.
+    def themes_section
+      themes = @curator.themes
+      return "" if themes.blank?
+
+      lines = [ "## Theme quotas (story 0026)", "" ]
+      lines << "| Theme | Want | Took | Shortfall |"
+      lines << "|---|---:|---:|---:|"
+      themes.each do |name, r|
+        lines << "| #{name} | #{r[:want]} | #{r[:took]} | #{r[:shortfall].zero? ? "—" : r[:shortfall]} |"
+      end
+      short = themes.select { |_, r| r[:shortfall].positive? }
+      if short.any?
+        lines << ""
+        lines << "**#{short.size} theme(s) short of their floor** — stock failed adjudication " \
+                 "(bad plates, wrong attribution) rather than the matcher missing candidates; " \
+                 "this is decisions/0016 falsification 2, logged per-theme not papered over."
+      end
+      lines.join("\n")
+    end
 
     # Story 0019. What the recognizable-name stage managed, and where it fell
     # short — a name the mirrors can only supply one work for gets one, and

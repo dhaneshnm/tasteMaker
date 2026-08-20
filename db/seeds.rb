@@ -60,9 +60,10 @@ paintings.each do |attrs|
     genre: attrs["genre"] || Pool::TitleGenre.infer(attrs["title"]),
     # Story 0024. Same reseed-safe pattern: derived from culture/country/
     # department (plus artist, when it's a placeholder) on every seed.
+    # Story 0026: `medium` added for the Ukiyo-e Painting allowlist check.
     tradition: Pool::Tradition.from_strings(
       culture: attrs["culture"], country: attrs["country"],
-      department: attrs["department"], artist: attrs["artist"]
+      department: attrs["department"], artist: attrs["artist"], medium: attrs["medium"]
     )
   )
   painting.save!

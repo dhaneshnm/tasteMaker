@@ -212,6 +212,46 @@ predictions 1–2 get their first read here; the Sep 20 read is the binding one.
   If the sequence slips, 0026 ships after the review against the same spec; nothing
   here expires on Aug 31 except the deadline numbers.
 
+## Deviations
+
+Implement time, 2026-08-20:
+
+- **Pre-flight headroom probe (step 4), against the committed mirrors:** text-
+  bearing usable non-pinned candidates 1,778 (need 489 of the 1,000 taken);
+  post-1900 usable non-pinned candidates 395 (need 88). Both floors clear with
+  wide margin — falsification 1 does not fire on these two bars.
+- **Ukiyo-e Painting is NOT a culture-string `Tradition::TABLE` row** — the
+  plan's draft assumed `ukiyo`/`floating world` would work as substring terms;
+  measured against the mirrors, both fire on **zero** candidates (museums
+  catalogue by school/format, never the English label). Implemented instead as
+  a curated artist allowlist (`Tradition::UKIYO_E_ARTISTS`) plus a medium-field
+  check excluding prints (`ukiyo_e?`, checked before the TABLE loop) — the
+  story's own framing ("Moronobu, Toyohiro, Katsushika Ōi") was already
+  artist-based. Measured 126 candidates across all four museums (0008's "16"
+  scoped to AIC+CMA only; MIA alone holds 53 works whose medium field says
+  "... (nikuhitsu) ..." — the museums' own term for hand-painted, as opposed to
+  printed). `Tradition.from_strings` gained a `medium:` parameter for this one
+  check; `Tradition::VALUES` added as the canonical-vocabulary list (`TABLE`'s
+  rows + "Ukiyo-e Painting", since it isn't a TABLE row itself).
+- **Cityscape does not reuse Landscape's bare `/\Aview of\b/i`** — measured
+  against the mirrors, 44 "View of X" titles exist and the large majority are
+  natural/river views ("View of Cotopaxi", "View of a Lake"), not cities;
+  reusing the bare pattern for Cityscape would have mislabeled all 44.
+  Implemented as a curated city-name allowlist (`TitleGenre::CITIES`) with a
+  lookahead pattern (a real title puts the city after an article or a
+  river/quai phrase — "View of the Town of Alkmaar" — so the match cannot
+  anchor immediately after "View of"). Measured 12 candidates this way (want
+  10).
+- **Madhubani rights check, live against CMA's API** (plan step 3): all 11
+  mirror candidates carry `share_license_status: CC0` in a fresh per-object
+  GET against `openaccess-api.clevelandart.org`, matching the mirror's own
+  recorded `image_license`. The CMA mirror is already fetched with the API's
+  own `cc0=1` filter (`Pool::Sources.cma`), so this check confirms the
+  fetch-time filter rather than catching a drift — no fails, nothing shorts
+  the quota on rights grounds. (Measured 11 candidates, not the story's
+  cited 9 — 0008's count undercounted by 2; both extra rows are the same
+  Mithila-region CC0 stock, not a different bucket.)
+
 ## What already exists (reused, not rebuilt)
 
 Curator stage pattern (`fill_recognizable`), bars-as-shares, `verify!`/`Unmeetable`,

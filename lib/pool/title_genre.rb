@@ -42,6 +42,29 @@
 # "Flowers" is a stated deviation from 0022's Getty-AAT-terms constraint
 # (AAT's concept is "flower pieces") — it is the reader's word ("paintings
 # of flowers", 0008 §3.3), logged in the 0025 plan, not a silent widening.
+#
+# Story 0026 adds three rows, each measured against the mirrors first (plan
+# step 3) and each placed ahead of a row it would otherwise be swallowed by:
+#
+#   Vanitas   > Still Life — "Vanitas Still Life with a Flag..." already
+#                             matches `\bstill life\b`; Vanitas is the more
+#                             specific reading and the theme this story asks
+#                             the pool to name.
+#   Icon      > Religious Art — `icon` is already a RELIGIOUS_TERMS word;
+#                             "Icon of the Mother of God" is a distinct,
+#                             named demand (0008), not generic religious art.
+#   Cityscape > Landscape — Landscape's own `\Aview of\b` is a blunt
+#                             instrument: measured against the mirrors, most
+#                             "View of X" titles are natural or river views
+#                             ("View of Cotopaxi", "View of a Lake"), not
+#                             cities. Cityscape does NOT reuse that bare
+#                             pattern — it anchors on a curated city-name
+#                             list (`CITIES`), so a genuine city view
+#                             ("View of Genoa", "View of the Town of
+#                             Alkmaar") reclassifies while a volcano or lake
+#                             stays Landscape. Measured 12 candidates this
+#                             way (quota wants 10); the blunt pattern would
+#                             have wrongly relabeled all 44.
 module Pool
   module TitleGenre
     # Deity/saint/scene names, each reviewed against the manifest's actual
@@ -67,6 +90,21 @@ module Pool
       tulips lilies hollyhocks poppies hydrangeas wisteria lotus
     ].freeze
 
+    # Major historically-painted cities/towns — a curated allowlist, not a
+    # bare noun match, matching the caution `Tradition`'s PLACES table takes
+    # (0008 §3.5 named this bucket "Cityscape/veduta"; "veduta" and
+    # "cityscape" never appear verbatim in a museum title, so a term match
+    # yields zero — this list is the only way in).
+    CITIES = %w[
+      Rome Florence Venice Genoa Naples Milan Bologna Turin Siena Pisa
+      Paris Lyon Marseille Bordeaux Rouen
+      London Amsterdam Haarlem Delft Alkmaar Antwerp Bruges Ghent Rotterdam Utrecht Leiden
+      Toledo Madrid Seville Lisbon Cordoba Granada
+      Vienna Prague Dresden Munich Cologne Emmerich
+      Tangier Cairo Constantinople Istanbul
+      Beijing Kyoto Edo Osaka Nanjing Suzhou Hangzhou Shanghai Canton Guangzhou
+    ].freeze
+
     TABLE = [
       [ "Portrait", [
         /\bportrait of\b/i,
@@ -76,6 +114,14 @@ module Pool
       [ "Mythological Art", [
         /\b(#{MYTHOLOGICAL_TERMS.join("|")})\b/i,
         /\bmytholog/i
+      ] ],
+      [ "Vanitas", [
+        /\bvanitas\b/i,
+        /\btrompe.l.?oeil\b/i
+      ] ],
+      [ "Icon", [
+        /\Aicon\b/i,
+        /\bicon of\b/i
       ] ],
       [ "Religious Art", [
         /\b(#{RELIGIOUS_TERMS.join("|")})\b/i,
@@ -93,6 +139,14 @@ module Pool
         /\bvase of (#{FLOWER_NOUNS.join("|")})\b/i,
         /\bbirds? and flowers?\b/i,
         /\A(#{FLOWER_NOUNS.join("|")})\b/i
+      ] ],
+      [ "Cityscape", [
+        # Lookahead, not an anchored "View of <city>": real titles put the
+        # city name after an article or a river/quai phrase ("View of the
+        # Town of Alkmaar", "View of the Saône ... (Lyon, France)") — the
+        # requirement is "starts with View of AND a known city appears
+        # anywhere", not "immediately follows".
+        /\Aview of\b(?=.*\b(?:#{CITIES.join("|")})\b)/i
       ] ],
       [ "Landscape", [
         /\Alandscape\b/i,
@@ -161,7 +215,10 @@ module Pool
     PROBE_CEILINGS = {
       "Religious Art" => 302, "Landscape" => 210, "Portrait" => 163,
       "Flowers" => 148, "Still Life" => 27, "Mythological Art" => 24,
-      "Marine Art" => 12, "Nude" => 11
+      "Marine Art" => 12, "Nude" => 11,
+      # Story 0026 — measured against the mirrors at plan step 3, not the
+      # 0008 probe (which never scoped these three).
+      "Vanitas" => 7, "Icon" => 8, "Cityscape" => 12
     }.freeze
 
     ReconciliationRow = Struct.new(:value, :shipped, :ceiling, :starved?, :sub_floor?, keyword_init: true)

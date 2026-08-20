@@ -30,6 +30,56 @@ class PoolQuotaTest < ActiveSupport::TestCase
 
   def share(count) = count.to_f / POOL.size
 
+  # Story 0026, Jordan's contract. A snapshot of the manifest as committed
+  # BEFORE this story's expansion — (source, source_id, feed_order, genre)
+  # only, not the full 13 MB manifest (plan step 2). Regenerated deliberately
+  # at any future expansion, never silently.
+  PRIOR_MANIFEST = JSON.parse(Rails.root.join("test/fixtures/files/0026-prior-manifest-snapshot.json").read).freeze
+
+  test "every work in the prior committed manifest is still in the pool (the pin)" do
+    current_ids = POOL.map { |w| [ w["source"], w["source_id"] ] }.to_set
+    missing = PRIOR_MANIFEST.reject { |w| current_ids.include?([ w["source"], w["source_id"] ]) }
+
+    assert_empty missing.map { |w| "#{w['source']}/#{w['source_id']}" },
+      "a work from the prior manifest vanished from the pool — Jordan's contract is broken"
+  end
+
+  # MANDATORY regression (review rule): pinned rows keep their exact
+  # `feed_order` — a bookmarked `/feed` offset must never reshuffle.
+  test "REGRESSION: pinned feed_order is preserved byte-for-byte across the expansion" do
+    current_by_id = POOL.index_by { |w| [ w["source"], w["source_id"] ] }
+
+    wrong = PRIOR_MANIFEST.filter_map do |prior|
+      current = current_by_id[[ prior["source"], prior["source_id"] ]]
+      next if current.nil? # covered by the pin test above
+
+      "#{prior['source']}/#{prior['source_id']}: was #{prior['feed_order']}, now #{current['feed_order']}" \
+        unless current["feed_order"] == prior["feed_order"]
+    end
+
+    assert_empty wrong, "pinned feed_order values must never change — every reader's bookmarked page depends on it"
+  end
+
+  # MANDATORY regression (review rule): every pre-existing `genre` value
+  # (248 at expansion time, museum-tag route, story 0022) survives the
+  # manifest rewrite — the bug the eng review's critical finding caught: a
+  # `Candidate#to_manifest` round-trip would silently drop this field.
+  test "REGRESSION: every pre-existing genre value survives the manifest rewrite" do
+    current_by_id = POOL.index_by { |w| [ w["source"], w["source_id"] ] }
+    had_genre = PRIOR_MANIFEST.select { |w| w["genre"].present? }
+    assert_operator had_genre.size, :>=, 200, "fixture sanity: expected ~248 pre-tagged rows"
+
+    wrong = had_genre.filter_map do |prior|
+      current = current_by_id[[ prior["source"], prior["source_id"] ]]
+      next if current.nil? # covered by the pin test above
+
+      "#{prior['source']}/#{prior['source_id']}: was #{prior['genre'].inspect}, now #{current['genre'].inspect}" \
+        unless current["genre"] == prior["genre"]
+    end
+
+    assert_empty wrong, "a pre-existing genre value was dropped or changed by re-curation"
+  end
+
   test "the manifest is the pool the story asked for" do
     assert_operator POOL.size, :>=, Pool::Curator::TARGET,
       "pool has shrunk below the target"
@@ -219,21 +269,23 @@ class PoolQuotaTest < ActiveSupport::TestCase
   # were two independent loops over the same derivation).
   POOL_TRADITIONS = POOL.filter_map do |w|
     value = Pool::Tradition.from_strings(
-      culture: w["culture"], country: w["country"], department: w["department"], artist: w["artist"]
+      culture: w["culture"], country: w["country"], department: w["department"],
+      artist: w["artist"], medium: w["medium"]
     )
     [ w, value ] if value
   end.freeze
 
   # No free-text ever leaks into the facet: every non-nil output must be one
-  # of `Pool::Tradition::TABLE`'s canonical values.
+  # of `Pool::Tradition::VALUES`' canonical values (TABLE's rows plus
+  # "Ukiyo-e Painting", matched outside TABLE — story 0026).
   test "every derived tradition value is in the canonical vocabulary" do
-    canonical = Pool::Tradition::TABLE.map(&:first)
+    canonical = Pool::Tradition::VALUES
 
     stray = POOL_TRADITIONS.filter_map do |w, value|
       "#{w['source']}:#{w['source_id']} => #{value.inspect}" unless canonical.include?(value)
     end
 
-    assert_empty stray, "every stamped tradition must be a TABLE value, never free text"
+    assert_empty stray, "every stamped tradition must be a canonical value, never free text"
   end
 
   # Every canonical value clears the display floor on the committed pool —
@@ -242,7 +294,7 @@ class PoolQuotaTest < ActiveSupport::TestCase
   # `gujarat` pattern was restored).
   test "every canonical tradition value clears MIN_FACET_WORKS on the committed pool" do
     counts = POOL_TRADITIONS.each_with_object(Hash.new(0)) { |(_, value), h| h[value] += 1 }
-    starved = Pool::Tradition::TABLE.map(&:first).select { |value| counts[value].to_i < Painting::MIN_FACET_WORKS }
+    starved = Pool::Tradition::VALUES.select { |value| counts[value].to_i < Painting::MIN_FACET_WORKS }
 
     assert_empty starved,
       "these tradition values are in the table but never clear the display floor: #{starved}"
@@ -291,5 +343,25 @@ class PoolQuotaTest < ActiveSupport::TestCase
 
     assert_operator flowers, :>=, Painting::MIN_FACET_WORKS,
       "Flowers ships #{flowers} works — below the display floor, it never renders"
+  end
+
+  # Story 0026 success signal 3: each new theme value the expansion targeted
+  # actually lights on /feed, pinned as data assertions so a future
+  # re-curation can't silently unlight a facet (plan step 6).
+  NEW_GENRE_VALUES = %w[Vanitas Icon Cityscape].freeze
+  NEW_TRADITION_VALUES = [ "Ukiyo-e Painting", "Madhubani Painting" ].freeze
+
+  test "every story 0026 genre value clears MIN_FACET_WORKS on the committed pool" do
+    counts = POOL_GENRES.each_with_object(Hash.new(0)) { |(_, value), h| h[value] += 1 }
+    starved = NEW_GENRE_VALUES.select { |value| counts[value].to_i < Painting::MIN_FACET_WORKS }
+
+    assert_empty starved, "these story 0026 genre values never clear the display floor: #{starved} (#{counts})"
+  end
+
+  test "every story 0026 tradition value clears MIN_FACET_WORKS on the committed pool" do
+    counts = POOL_TRADITIONS.each_with_object(Hash.new(0)) { |(_, value), h| h[value] += 1 }
+    starved = NEW_TRADITION_VALUES.select { |value| counts[value].to_i < Painting::MIN_FACET_WORKS }
+
+    assert_empty starved, "these story 0026 tradition values never clear the display floor: #{starved} (#{counts})"
   end
 end

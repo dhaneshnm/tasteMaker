@@ -138,10 +138,53 @@ class Pool::TitleGenreTest < ActiveSupport::TestCase
     assert_equal "Still Life", infer("still life with fruit")
   end
 
-  test "culled buckets do not fire: Genre Scene, Cityscape and Animal shapes stay nil" do
+  test "culled buckets still stay nil: Genre Scene and Animal are museum-tag-only" do
     assert_nil infer("The Bohemian Peasant Girl"), "Genre Scene culled — 2 works can never clear the display floor"
-    assert_nil infer("Street Scene in Paris"), "Cityscape culled — probe ceiling 1"
     assert_nil infer("Two Tigers"), "Animal stays museum-tag-only this story (plan D2)"
+  end
+
+  test "a generic street scene is not a cityscape — no known city name, no 'view of' prefix either" do
+    assert_nil infer("Street Scene in Paris"),
+      "Cityscape (story 0026) is anchored on 'View of <city>', not a bare street-scene phrase"
+  end
+
+  # ---- story 0026 additions -------------------------------------------------
+
+  test "one fixture per Vanitas pattern" do
+    assert_equal "Vanitas", infer("Vanitas Still Life")
+    assert_equal "Vanitas", infer("Trompe-l'Oeil Still Life with a Flower Garland and a Curtain")
+    assert_equal "Vanitas", infer("Trompe l'oeil with Palettes and Miniature")
+  end
+
+  test "order: Vanitas precedes Still Life — 'Vanitas Still Life' is Vanitas, not Still Life" do
+    assert_equal "Vanitas", infer("A Vanitas Still Life with a Flag, Candlestick, and Hourglass")
+  end
+
+  test "one fixture per Icon pattern" do
+    assert_equal "Icon", infer("Icon with the Virgin and Child")
+    assert_equal "Icon", infer("Icon of the Mother of God and Infant Christ (Virgin Eleousa)")
+  end
+
+  test "order: Icon precedes Religious Art — 'icon' is already a RELIGIOUS_TERMS word" do
+    assert_equal "Icon", infer("Icon of the New Testament Trinity")
+  end
+
+  test "a mid-title icon does not fire the narrower Icon row, only Religious Art's bare term" do
+    assert_equal "Religious Art", infer("Diptych icon")
+  end
+
+  test "one fixture per Cityscape pattern — a known city, not a bare 'View of'" do
+    assert_equal "Cityscape", infer("View of Genoa")
+    assert_equal "Cityscape", infer("View of Rome from Monte Pincio")
+    assert_equal "Cityscape", infer("View of the Town of Alkmaar")
+    assert_equal "Cityscape", infer("View of the Saône and the Château Pierre-Scize (Lyon, France)")
+  end
+
+  test "order: Cityscape precedes Landscape, but only for a known city — a natural view stays Landscape" do
+    assert_equal "Cityscape", infer("View of Florence")
+    assert_equal "Landscape", infer("View of Cotopaxi"), "a volcano is not a city — Landscape's own catch-all"
+    assert_equal "Landscape", infer("View of a Lake")
+    assert_equal "Landscape", infer("View of Niagara Falls")
   end
 
   # ---- backfill! (plan D4/F7) ----------------------------------------------
