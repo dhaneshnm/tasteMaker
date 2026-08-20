@@ -4,8 +4,20 @@
   <% if next_page %>
     <%# Story 0022: the filter params ride every lazy page fetch, or a
         scroll past page 1 of a filtered gallery would quietly drop the
-        filter. %>
-    <%= turbo_frame_tag "feed-page-#{next_page}",
+        filter.
+
+        `target: "_top"` HERE, not only on the loaded content's own wrapper
+        above: Turbo swaps a frame's fetched response into its *existing*
+        DOM element by replacing children, not by replacing the element
+        itself — the element's own attributes, set at placeholder time,
+        never get overwritten by whatever the response's matching frame tag
+        carries. Without this, every artist-name link on page 2+ scopes its
+        click to this frame (Turbo's default when no ancestor sets `_top`),
+        `/artists/:slug` has no `feed-page-N` frame in its response, and
+        Turbo replaces the whole page's worth of cards with the words
+        "Content missing" — reported live, reproduced by forcing this
+        frame's load and clicking an artist link inside it. %>
+    <%= turbo_frame_tag "feed-page-#{next_page}", target: "_top",
           src: feed_path(**filter_params, page: next_page), loading: :lazy do %>
       <div class="sentinel" aria-label="Loading more paintings">
         <span class="sentinel__ring" aria-hidden="true"></span>
