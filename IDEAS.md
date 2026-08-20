@@ -74,6 +74,22 @@ ukiyo-e"). Cheapest demand-supply match found by 0008: a hand-checked mapping ta
 over data already stored, riding the shipped facet UI/floor/URL machinery. No external
 dependency.
 
+### Theme-gap re-curation: swap pool works toward demanded themes — Better (range)
+
+Source: `user-research/0008-recognizable-themes.md` §3.7 addendum, 2026-08-20.
+
+The mirrors hold qualifying stock for exactly the themes 0008 found under-supplied:
+Persian miniature 760 (pool ~19), thangka 473 (~24), still life/flowers 338 (15),
+16 genuine ukiyo-e paintings (pool ~18 Edo works), **Madhubani 9 (pool 0 — a
+selection gap, not an acquisition wall)**, marine 56 (1), mythological 71 (4). All
+counts exclude the Met (no image URLs in mirror) — floors, not ceilings. Mechanism
+precedent exists: 0019's `fill_recognizable` ran a targeted stage before random
+selection and re-curated within TARGET=2,000 under `verify!`. A theme-quota stage is
+the same shape. TARGET stays 2,000 unless a `decisions/` entry argues otherwise
+(0019's wrong-if named "fill only by growing TARGET" as the failure smell).
+Sequencing: only pays after a facet makes themes findable — expansion before
+findability adds works nobody can reach.
+
 ### Genre fill v2: title/description keywords — Better (range)
 
 Source: `user-research/0008-recognizable-themes.md` N2/N5, 2026-08-20.

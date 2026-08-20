@@ -252,6 +252,41 @@ routes. The dry run's "15–20% ceiling" was a ceiling on one route, not on the 
 (The Animal count is the noisiest — bird/lion words fire inside religious and landscape
 titles; treat it as an upper bound on candidates, not a fill estimate.)
 
+### 3.7 Addendum (same day): expansion stock in the mirrors
+
+Follow-up probe (`scripts/0008/probe_mirrors.py`): for each under-supplied
+high-demand theme, qualifying works sitting in the four mirrors **outside** the
+committed pool (9,339 works outside; counts are regex candidates needing the same
+adjudication `pool:curate` applies — ceilings, not curations). **All counts exclude
+the Met**: its 3,848 mirror rows carry no image URL in the mirror — photograph
+existence is knowable only at selection time (0007's known limitation) — so every
+number below is a floor.
+
+| Theme (pool today) | With image | …and description | Where |
+|---|---:|---:|---|
+| Persian/Islamic miniature (~19) | 760 | 268 | CMA 721 |
+| Baroque-era European, 1600–1750 proxy (9 via P135) | 493 | 332 | AIC 232 |
+| Landscape (76) | 482 | 285 | CMA 245 |
+| Thangka/Tibetan-Nepalese (~24) | 473 | 55 | CMA 421 |
+| Portrait (113) | 357 | 216 | AIC 157 |
+| Still life / flowers (15) | 338 | 220 | CMA 205 |
+| Romantic-era European, 1780–1850 proxy (19) | 294 | 138 | AIC/CMA |
+| Edo-period painting (~18) | 280 | 179 | CMA 274 |
+| — strict ukiyo-e paintings within that | **16** | — | AIC+CMA (Moronobu, Toyohiro, Katsushika Ōi) |
+| Mythological (4) | 71 | 55 | spread |
+| Marine/seascape (1) | 56 | 38 | AIC/CMA |
+| Cityscape/veduta (1) | 25 | 22 | spread |
+| Icon (kin 25) | 14 | 13 | CMA 11 |
+| **Madhubani (0)** | **9** | **0** | **CMA — N6's "pool has none" is a selection gap, not an acquisition wall** |
+| Vanitas/trompe-l'œil (0) | 6 | 6 | AIC 4 |
+
+Two headline corrections to §5: **Madhubani is fillable** (9 CMA works, all
+blurbless — they'd spend the text-bar budget), and **ukiyo-e has 16 genuine
+nikuhitsu-ga paintings available**, roughly doubling what the pool could honestly
+put behind that 306K-lookup label. Era-proxy rows (Baroque/Romantic) are the loosest
+matches here — movement expansion should pick by P135-verified artists, not by date
+arithmetic, once a reconciliation story exists.
+
 ---
 
 ## 4. Claim-by-claim adjudication
