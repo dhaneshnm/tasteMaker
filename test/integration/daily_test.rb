@@ -33,6 +33,22 @@ class DailyTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # Story 0021 — the one reader-visible surface auto-fill could break.
+  # `daily/show` has no branch on `auto_tier` at all; this pins that an
+  # auto-picked day renders exactly like a hand-picked one.
+  test "an auto-picked day with no note runs the museum's text exactly like a hand-picked one" do
+    daily_picks(:today).update!(blurb: nil, auto_tier: 2)
+
+    get root_path
+
+    assert_response :success
+    assert_select ".label__note", count: 0
+    assert_select ".label__body#daily-note[data-controller=expand]" do
+      assert_select "p.label__text", /catalogue text/
+      assert_select "p.label__source", text: "From the Minneapolis Institute of Art"
+    end
+  end
+
   test "an emptied note is stored as nothing, so museum days stay countable" do
     pick = daily_picks(:today)
     pick.update!(blurb: "   ")
@@ -117,9 +133,11 @@ class DailyTest < ActionDispatch::IntegrationTest
     get feed_path
 
     assert_response :success
-    # Derived, not hardcoded: this counts "every fixture painting", and a story
-    # that adds one for its own reasons should not fail a test about the feed.
-    assert_select "article.post", count: Painting.count
+    # Derived, not hardcoded: this counts "every fixture painting up to one
+    # page", so a story that adds fixtures for its own reasons (story 0021's
+    # auto_* pool) does not fail a test about the feed just by growing past
+    # a single page.
+    assert_select "article.post", count: [ Painting.count, PaintingsController::PER_PAGE ].min
     assert_select "img[src=?]", paintings(:sunflowers).image_url_800
   end
 

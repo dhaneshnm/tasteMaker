@@ -155,3 +155,119 @@ unparseable_artist:
   title: Damaged Attribution Card
   artist: "???"
   dated: unknown
+
+# Story 0021 — dedicated pool for DailyPick.auto_fill! tests. All carry a
+# museum description and a displayable image (auto-fill's baseline
+# eligibility) unless a fixture's own comment says otherwise; none are
+# claimed by the today/yesterday/tomorrow fixture picks. Grouped by which
+# spacing scenario they exist to exercise.
+
+# A same-artist pair, ±30 days apart is still inside every tier but 4 — the
+# ladder has to relax all the way down to place the second one.
+auto_repeat_artist_1:
+  <<: *DEFAULTS
+  feed_order: 9010
+  source_id: 900011
+  title: Repeat Artist Study One
+  artist: Auto Fill Repeat Artist
+  artist_slug: auto-fill-repeat-artist
+  description: Museum copy, first of a same-artist pair.
+
+auto_repeat_artist_2:
+  <<: *DEFAULTS
+  feed_order: 9011
+  source_id: 900012
+  title: Repeat Artist Study Two
+  artist: Auto Fill Repeat Artist
+  artist_slug: auto-fill-repeat-artist
+  description: Museum copy, second of a same-artist pair.
+
+# Two different artists sharing one culture — the culture-adjacency rule
+# forces tier 2 for whichever lands second.
+auto_shared_culture_1:
+  <<: *DEFAULTS
+  feed_order: 9012
+  source_id: 900013
+  title: Shared Culture Study One
+  artist: Auto Fill Culture Artist One
+  artist_slug: auto-fill-culture-artist-one
+  culture: Auto Fill Shared Culture
+  description: Museum copy, first of a shared-culture pair.
+
+auto_shared_culture_2:
+  <<: *DEFAULTS
+  feed_order: 9013
+  source_id: 900014
+  title: Shared Culture Study Two
+  artist: Auto Fill Culture Artist Two
+  artist_slug: auto-fill-culture-artist-two
+  culture: Auto Fill Shared Culture
+  description: Museum copy, second of a shared-culture pair.
+
+# Two deny-listed-placeholder works — nil artist_slug on both. Proves the
+# spacing rule falls back to the raw `artist` string rather than silently
+# exempting the whole placeholder cohort (eng review, outside voice O3).
+auto_placeholder_artist_1:
+  <<: *DEFAULTS
+  feed_order: 9014
+  source_id: 900015
+  title: Placeholder Attribution One
+  artist: China
+  description: Museum copy, first placeholder-attributed work.
+
+auto_placeholder_artist_2:
+  <<: *DEFAULTS
+  feed_order: 9015
+  source_id: 900016
+  title: Placeholder Attribution Two
+  artist: China
+  description: Museum copy, second placeholder-attributed work.
+
+# No artist and no culture at all — must never be excluded by either
+# spacing rule, and must never itself exclude another blank-artist work.
+auto_blank_artist_1:
+  <<: *DEFAULTS
+  feed_order: 9016
+  source_id: 900017
+  title: Blank Attribution One
+  description: Museum copy, first work with no attribution at all.
+
+auto_blank_artist_2:
+  <<: *DEFAULTS
+  feed_order: 9017
+  source_id: 900018
+  title: Blank Attribution Two
+  description: Museum copy, second work with no attribution at all.
+
+# Has a description but no image at all — deliberately not using DEFAULTS,
+# same shape as `imageless` above. Auto-fill's SQL prefilter only checks
+# description; this candidate must be skipped at `save!` time by
+# `painting_must_have_an_image`, the same validation a hand pick answers to.
+auto_no_image:
+  department: Paintings
+  source: mia
+  source_id: 900019
+  title: Described But Pictureless
+  artist: Auto Fill No Image Artist
+  artist_slug: auto-fill-no-image-artist
+  description: Museum copy for a work with nothing to show.
+
+# Plain filler, no spacing conflicts with anything above — pads the eligible
+# pool for tests that need several ordinary, uncontested candidates.
+auto_filler_1:
+  <<: *DEFAULTS
+  feed_order: 9018
+  source_id: 900020
+  title: Auto Fill Filler One
+  artist: Auto Fill Filler Artist One
+  artist_slug: auto-fill-filler-artist-one
+  description: Museum copy, an ordinary filler candidate.
+
+auto_filler_2:
+  <<: *DEFAULTS
+  feed_order: 9019
+  source_id: 900021
+  title: Auto Fill Filler Two
+  artist: Auto Fill Filler Artist Two
+  artist_slug: auto-fill-filler-artist-two
+  description: Museum copy, another ordinary filler candidate.

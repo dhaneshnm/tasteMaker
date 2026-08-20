@@ -47,6 +47,11 @@ gem "omniauth-rails_csrf_protection"
 # since Ruby 3.4.
 gem "csv", "~> 3.3"
 
+# Database-backed Active Job backend [https://github.com/rails/solid_queue].
+# Story 0021 — the daily publish job. CLAUDE.md reserves this gem for exactly
+# this unit of work; not added before there was a job that needed it.
+gem "solid_queue"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

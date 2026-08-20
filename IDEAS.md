@@ -54,6 +54,16 @@ CMA/MIA invariant that accounts for it), build the SPARQL client as a first-clas
 QID lookup in one `VALUES` clause — the dry-run already proved that query shape works
 live against Wikidata's public endpoint.
 
+### Rejected-memory for machine picks — — (untriaged)
+
+Source: eng review of `specs/0021-the-standing-order`, outside voice finding O7,
+2026-08-19. Deleting an auto-picked future day is a re-roll, not a veto — the machine
+refills the date next morning, possibly with the same painting (random order, no memory
+of rejections). 0021 documents swap-in-place as the veto and says so in the destroy
+flash. If re-rolls repeating rejected works annoys in practice, a small "not this one"
+memory earns its keep; until the curator actually hits it, it is infrastructure for
+later.
+
 ## Considering — top = next pick
 
 (empty — the one entry here promoted to 0022 below)
@@ -98,3 +108,10 @@ live against Wikidata's public endpoint.
   and the app is still not submitted (`BET.md`, all five thresholds zero) — promoted anyway
   on explicit direction, with the gap named in the story rather than the note quietly
   dropped.
+- 2026-08-19 — Auto-fill the daily queue: system picks the day's painting →
+  `specs/0021-the-standing-order` — Proven (pipeline: "curated queue → daily publish job").
+  Captured and promoted same day: source is a direct operator report ("manual picking has
+  become unsustainable"), WIP slot was open, and `config/deploy.yml:115` had carried the
+  IOU for this exact job since first deploy. Direction forks (7-day buffer; random +
+  spacing) settled in `decisions/0015`. Built same day (`fb67cf7`), `bin/ci` green.
+  Code only — not deployed.

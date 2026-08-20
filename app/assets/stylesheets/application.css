@@ -1308,6 +1308,7 @@ html.zoom-open body { overflow: hidden; }
 
 .adm__hint { margin: 0.35rem 0 0; font-size: 0.8rem; color: var(--ink-faint); }
 .adm__hint.is-off-target { color: var(--warn); }
+.adm__muted.is-off-target { color: var(--warn); font-style: normal; }
 
 .adm__thumb {
   margin-top: 0.6rem;

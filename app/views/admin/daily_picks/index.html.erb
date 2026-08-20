@@ -9,20 +9,52 @@
 
   <p><%= link_to "Schedule a day →", new_admin_daily_pick_path, class: "caps-link" %></p>
 
+  <%# story 0021: the dead man's switch for the curator's own eyes. Same
+      predicate /queue-health answers for an external monitor
+      (DailyPick.queue_healthy?) — a depth count alone would read "fine" the
+      moment today itself dropped off the schedule while later days stayed
+      buffered, exactly the gap this hint exists to surface (code review). %>
+  <p class="adm__hint <%= "is-off-target" unless @queue_healthy %>">
+    <% if !@today_scheduled && @scheduled_through %>
+      Today is not scheduled. Scheduled through <%= @scheduled_through.to_fs(:daily) %>
+      (<%= pluralize(@days_scheduled_ahead, "day") %> ahead).
+    <% elsif @scheduled_through %>
+      Scheduled through <%= @scheduled_through.to_fs(:daily) %>
+      (<%= pluralize(@days_scheduled_ahead, "day") %> ahead).
+    <% else %>
+      Nothing scheduled from today forward.
+    <% end %>
+  </p>
+
   <% if @picks.empty? %>
     <p class="adm__muted">Nothing scheduled yet. The site is showing its empty state.</p>
   <% else %>
-    <%# The receipt for decisions/0004: the prediction is that fewer than one
-        published day in five runs museum text. Countable at a glance, not by
-        writing a query at the kill review. %>
+    <%# The receipt for decisions/0004 and decisions/0015: two bets, two
+        populations. A hand-picked day is the curator's own choice — 0004's
+        20% line. An auto-picked day (story 0021) is the machine's, and
+        auto-fill makes museum text its default output, so it is measured
+        against 0015's one-third tripwire instead. Splitting the count keeps
+        a correct system from reading as a broken bet. %>
     <% published = @picks.select(&:published?) %>
-    <% borrowed = published.reject(&:hand_written?).size %>
-    <% if borrowed.positive? %>
-      <p class="adm__hint <%= "is-off-target" if borrowed * 5 > published.size %>">
-        <%= borrowed %> of <%= pluralize(published.size, "published day") %>
-        <%= borrowed == 1 ? "is running" : "are running" %> museum text
-        (<%= (borrowed * 100.0 / published.size).round %>%). The bet in
-        decisions/0004 is that this stays under 20%.
+    <% hand_published, auto_published = published.partition { |pick| pick.auto_tier.nil? } %>
+
+    <% hand_borrowed = hand_published.reject(&:hand_written?).size %>
+    <% if hand_borrowed.positive? %>
+      <p class="adm__hint <%= "is-off-target" if hand_borrowed * 5 > hand_published.size %>">
+        <%= hand_borrowed %> of <%= pluralize(hand_published.size, "hand-picked published day") %>
+        <%= hand_borrowed == 1 ? "is running" : "are running" %> museum text
+        (<%= (hand_borrowed * 100.0 / hand_published.size).round %>%). decisions/0004's bet
+        is that this stays under 20%.
+      </p>
+    <% end %>
+
+    <% auto_borrowed = auto_published.reject(&:hand_written?).size %>
+    <% if auto_borrowed.positive? %>
+      <p class="adm__hint <%= "is-off-target" if auto_borrowed * 3 > auto_published.size %>">
+        <%= auto_borrowed %> of <%= pluralize(auto_published.size, "machine-picked published day") %>
+        <%= auto_borrowed == 1 ? "is running" : "are running" %> museum text
+        (<%= (auto_borrowed * 100.0 / auto_published.size).round %>%). decisions/0015's
+        tripwire is a third — binding once 30 auto-picked days have published.
       </p>
     <% end %>
     <div class="adm__queue-scroll">
@@ -45,15 +77,21 @@
             <td>
               <%= pick.painting.title %><br>
               <span class="adm__muted"><%= pick.painting.artist_display %></span>
+              <% if pick.auto_tier.present? %>
+                <br><span class="adm__muted">auto · tier <%= pick.auto_tier %></span>
+              <% end %>
             </td>
             <td>
               <%# A museum day reads "0" otherwise, which is indistinguishable
                   from a data error — and counting these is how decisions/0004's
-                  prediction gets checked at the kill review. %>
+                  and decisions/0015's predictions get checked at the kill review. %>
               <% if pick.hand_written? %>
                 <%= pick.blurb_word_count %>
               <% else %>
-                <span class="adm__muted">museum text</span>
+                <%# Upcoming + no note yet: the write-ahead window (decisions/0015
+                    D1) only works if a blurbless future day is visible without
+                    opening it — flagged the same way a low buffer is. %>
+                <span class="adm__muted <%= "is-off-target" unless pick.published? %>">museum text</span>
               <% end %>
             </td>
             <td>

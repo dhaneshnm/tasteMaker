@@ -26,10 +26,17 @@ test:
 #
 # Similarly, if you deploy your application as a Docker container, you must
 # ensure the database is located in a persisted volume.
+#
+# Two databases, not one: `queue` backs Solid Queue (story 0021's daily fill
+# job). Split out because Solid Queue's writer polls constantly and a
+# separate SQLite file means that polling never contends with a reader's
+# request. Both files live under storage/, which is the one Kamal volume
+# (config/deploy.yml) — a queue db outside it would be wiped every deploy.
 production:
-  <<: *default
-  # Inside the container this is /rails/storage, which config/deploy.yml mounts
-  # as a named Docker volume. SQLite needs a persistent disk and Kamal replaces
-  # the container on every deploy — without the volume, every deploy would ship
-  # a fresh empty database and take the curator's queue with it.
-  database: storage/production.sqlite3
+  primary: &production_primary
+    <<: *default
+    database: storage/production.sqlite3
+  queue:
+    <<: *production_primary
+    database: storage/production_queue.sqlite3
+    migrations_paths: db/queue_migrate
