@@ -66,6 +66,12 @@ class Painting < ApplicationRecord
     # report lists them, a human reads it.
     "China", "Japan", "Islamic", "Tibet", "India", "Korea", "Nepal", "Egypt",
     "Teotihuacan", "Chancay", "Gujarati",
+    # Story 0026 audit: AIC's own convention for many Native American works
+    # is a tribal-nation attribution, not an individual maker — "Cheyenne"
+    # (aic/182617, a painted tipi curtain) and "Lakota" (aic/122887, a Sun
+    # Dance scene) are the nation credited as maker, same shape as "China"
+    # or "Japan" above, not a person named Cheyenne or Lakota.
+    "Cheyenne", "Lakota",
     "Italy", "Ethiopia", "Sweden", "United States", "Mughal",
     "Italian", "French", "German", "Spanish", "Dutch", "Flemish", "British", "English", "Austrian",
     "Ancient Egyptian", "Probably Mexico", "Mewar school", "Painter: Mughal school",
