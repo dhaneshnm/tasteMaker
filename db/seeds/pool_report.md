@@ -145,3 +145,28 @@ Read both lists before seeding. A place or culture string here is `Painting::NOT
 - **anonymous** — 23
 - **no plate** — 22
 - **too small** — 11
+
+## Genre (story 0022 Release 2)
+
+Museum-native subject tags only — AIC `subject_titles`, MET `tags`. Wikidata P135
+artist-movement was scoped out of Release 2 during eng review (`IDEAS.md`). CMA and
+MIA carry no subject-tag field in their APIs, so their coverage is structurally 0%,
+not a gap in the fetch.
+
+248/2000 works (12.4%) carry a genre. By source: aic 185/236 (78%), cma 0/853 (0%),
+met 63/167 (38%), mia 0/746 (0%). One work (`met:435643`) never fetched across four
+retry passes of transient DNS failures and was accepted as a final skip rather than
+retried further — genre is only ever set on a fresh match, never cleared, so it stays
+safe to retry later.
+
+11 value(s) have any coverage; 5 clear `MIN_FACET_WORKS` (5) and render as a control
+on `/feed`:
+
+- Portrait — 113
+- Landscape — 76
+- Religious Art — 25
+- Still Life — 15
+- Animal Painting — 8
+
+6 stay below the floor, reachable only through ALL: Mythological Art (4), Nude (3),
+Battle Painting (1), Cityscape (1), Genre Scene (1), Marine Art (1).

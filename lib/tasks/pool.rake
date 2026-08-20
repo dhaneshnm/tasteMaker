@@ -115,6 +115,22 @@ namespace :pool do
     puts Pool::REPORT.read
     puts
     puts Pool::Report.artist_slug_section
+    puts
+    puts Pool::Report.genre_section
+  end
+
+  # Story 0022 Release 2. One targeted API call per AIC/MET work already in
+  # the committed manifest — see lib/pool/genre_fill.rb for why this is not
+  # a pool:mirror re-run. DRY_RUN=1 fetches and reports without writing.
+  desc "Backfill genre from AIC/MET native tags into the committed manifest"
+  task genre_fill: :environment do
+    result = Pool::GenreFill.run!(dry_run: ENV["DRY_RUN"].present?)
+    puts "AIC/MET works considered: #{result.total}"
+    puts "fetched successfully: #{result.fetched}"
+    puts "skipped (fetch failed): #{result.skipped}"
+    puts "  #{result.skipped_ids.join(', ')}" if result.skipped_ids.any?
+    puts "matched a genre: #{result.matched}"
+    puts ENV["DRY_RUN"].present? ? "DRY_RUN — manifest not written" : "db/seeds/paintings.json updated"
   end
 
   # Story 0019. Run it BEFORE re-curating to get the baseline, and after to get

@@ -53,6 +53,42 @@ module Pool
       lines.join("\n")
     end
 
+    # Story 0022 Release 2. Live, not manifest-derived — same reason
+    # `artist_slug_section` above reads the seeded table instead of a
+    # curator: `genre` reaches the manifest via `Pool::GenreFill`, a
+    # standalone enrichment pass that runs after curation, and the question
+    # this answers is "what does the shipped app show."
+    def self.genre_section
+      by_source = Painting.group(:source).count
+      covered = Painting.where.not(genre: nil).group(:source).count
+      by_bucket = Painting.where.not(genre: nil).group(:genre).count.sort_by { |_, count| -count }
+      # `displayed_facet_values` applies MIN_FACET_WORKS — this is the exact
+      # set /feed actually renders as a control, not every bucket that has
+      # any coverage at all (bug, caught by reading this report's own first
+      # real output: an earlier draft printed all 11 buckets and claimed all
+      # of them "clear the floor").
+      displayed = Painting.displayed_facet_values(:genre)
+
+      lines = []
+      lines << "## Genre (live, story 0022 Release 2)"
+      lines << ""
+      lines << "Museum-native subject tags only — AIC `subject_titles`, MET `tags`. Wikidata " \
+        "P135 artist-movement was scoped out of Release 2 during eng review (IDEAS.md)."
+      lines << ""
+      by_source.keys.sort.each do |source|
+        total = by_source[source]
+        n = covered[source].to_i
+        lines << "  #{source}: #{n}/#{total} (#{total.zero? ? 0 : (100.0 * n / total).round}%)"
+      end
+      lines << ""
+      lines << "#{by_bucket.size} value(s) have any coverage; #{displayed.size} clear " \
+        "MIN_FACET_WORKS (#{Painting::MIN_FACET_WORKS}) and render as a control on /feed:"
+      by_bucket.each do |genre, count|
+        lines << "  #{genre}: #{count}#{" — below the floor, ALL only" unless displayed.include?(genre)}"
+      end
+      lines.join("\n")
+    end
+
     def to_markdown
       <<~MARKDOWN
         # Pool report
