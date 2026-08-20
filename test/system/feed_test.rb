@@ -105,6 +105,31 @@ class FeedTest < ApplicationSystemTestCase
     assert_current_path feed_path
   end
 
+  # Story 0024. Same idiom as the period facet above, on the tradition column.
+  test "tapping a tradition filter narrows the gallery to matching works and marks itself active" do
+    Painting::MIN_FACET_WORKS.times do |i|
+      Painting.create!(source: "mia", source_id: 923_000 + i, title: "Mughal #{i}",
+        artist: "A. Painter", image_url_800: paintings(:woodcut).image_url_800,
+        tradition: "Mughal Painting")
+    end
+
+    visit feed_path
+    within(".facets") { click_on "Mughal Painting" }
+
+    # `text-transform: uppercase` renders "MUGHAL PAINTING" — same
+    # case-insensitive trap the period test above documents, for the
+    # rendered-text assertions below (click_on itself matches the
+    # underlying DOM text, not the CSS-rendered case).
+    assert_current_path feed_path(tradition: "mughal-painting")
+    within(".facets") do
+      assert_selector "span.facets__here[aria-current='true']", text: /mughal painting/i
+      assert_no_selector "a", text: /mughal painting/i
+
+      click_on "All"
+    end
+    assert_current_path feed_path
+  end
+
   # `.zoom` is z-index 20 and the rail is 1. Reading a work full screen from the
   # gallery must not leave a navigation bar sitting on top of the picture.
   test "the full-screen view covers the rail" do

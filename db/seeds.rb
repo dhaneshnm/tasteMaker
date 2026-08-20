@@ -55,7 +55,13 @@ paintings.each do |attrs|
     # Release 2 adds it to the manifest; nil until then is the honest state,
     # not a placeholder to fill in later.
     period: Pool::PeriodBucket.from_dated(attrs["dated"]),
-    genre: attrs["genre"]
+    genre: attrs["genre"],
+    # Story 0024. Same reseed-safe pattern: derived from culture/country/
+    # department (plus artist, when it's a placeholder) on every seed.
+    tradition: Pool::Tradition.from_strings(
+      culture: attrs["culture"], country: attrs["country"],
+      department: attrs["department"], artist: attrs["artist"]
+    )
   )
   painting.save!
 end

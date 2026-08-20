@@ -5,18 +5,21 @@ class PaintingsController < ApplicationController
     @page = params.fetch(:page, 1).to_i.clamp(1, 10_000)
     offset = (@page - 1) * PER_PAGE
 
-    # Story 0022 Release 1. Resolution happens once, here — the controller
-    # never touches a raw slug again after this. An unknown or absent slug
-    # resolves to nil, which is indistinguishable from "no filter": the
-    # graceful-degradation the plan calls out (a stale bookmark after a
-    # Release 2 value rename just lands on the unfiltered gallery).
+    # Story 0022 Release 1 (period, genre), extended by 0024 (tradition).
+    # Resolution happens once, here — the controller never touches a raw
+    # slug again after this. An unknown or absent slug resolves to nil,
+    # which is indistinguishable from "no filter": the graceful-degradation
+    # the plan calls out (a stale bookmark after a facet-value rename just
+    # lands on the unfiltered gallery).
     @period = Painting.resolve_facet_slug(:period, params[:period])
     @genre = Painting.resolve_facet_slug(:genre, params[:genre])
-    @filtered = @period.present? || @genre.present?
+    @tradition = Painting.resolve_facet_slug(:tradition, params[:tradition])
+    @filtered = @period.present? || @genre.present? || @tradition.present?
 
     scope = Painting.with_attached_image.feed_ordered
     scope = scope.where(period: @period) if @period
     scope = scope.where(genre: @genre) if @genre
+    scope = scope.where(tradition: @tradition) if @tradition
 
     @paintings = scope.offset(offset).limit(PER_PAGE)
 
@@ -29,14 +32,16 @@ class PaintingsController < ApplicationController
     @total = scope.count
     @next_page = @page + 1 if @total > offset + PER_PAGE
 
-    # The two facet rows — non-empty values only (Painting.displayed_facet_values
+    # The three facet rows — non-empty values only (Painting.displayed_facet_values
     # already applies the floor), and the slugs each row's links carry to
-    # preserve the OTHER active facet when a reader switches one.
+    # preserve the OTHER active facets when a reader switches one.
     @period_values = Painting.displayed_facet_values(:period)
     @genre_values = Painting.displayed_facet_values(:genre)
+    @tradition_values = Painting.displayed_facet_values(:tradition)
     @filter_params = {
       period: (Painting.facet_slug(@period) if @period),
-      genre: (Painting.facet_slug(@genre) if @genre)
+      genre: (Painting.facet_slug(@genre) if @genre),
+      tradition: (Painting.facet_slug(@tradition) if @tradition)
     }.compact
 
     # `/feed` is walled and private (story 0015) — no shared cache to poison,

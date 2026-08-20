@@ -220,7 +220,59 @@ No critical gaps: every silent failure mode above has a named test.
 - **Facet-value caching** (Issue 6) — measured sub-ms; premature.
 - **Manifest changes** — derivation is seed-time pure function (0022 D2 pattern).
 
-## GSTACK REVIEW REPORT
+## Deviations
+
+**Dry run, before any UI work (2026-08-20), per plan step 2's mandate.** Shipping
+table run over the committed 2,000-work manifest:
+
+| Tradition | Shipping table | 0008 §3.5 probe | Δ | Why |
+|---|---:|---:|---:|---|
+| Japanese Painting | 276 | 276 | 0 | exact match |
+| Chinese Painting | 180 | 180 | 0 | exact match |
+| Mughal Painting | 103 | 102 | +1 | placeholder-artist union (`Painter: Mughal school`) |
+| Rajput Painting | 93 | 102 | −9 | bare `rajasthan` deliberately dropped (plan call) |
+| Pahari Painting | 85 | 84 | +1 | placeholder-artist union |
+| Jain Manuscript Painting | 53 | ~52 | +1 | `gujarat` retained per O1; without it: **1** |
+| Kalighat Painting | 44 | 44 | 0 | exact match |
+| Korean Painting | 32 | 32 | 0 | exact match, Korea-first order confirmed on all 4 colonial-era rows |
+| Tibetan & Nepalese Painting | 24 | 24 | 0 | exact match |
+| Persian & Islamic Painting | 19 | 19 | 0 | exact match |
+
+All 10 clear `MIN_FACET_WORKS = 5` by a wide margin (min 19). Total stamped:
+909/2,000 (45.5%) — expected, since 0008's probe covered exactly these 10
+buckets and nothing else. Rajput's −9 is the one deliberate departure from the
+probe count, traced to the `rajasthan` drop named in step 2 — not a bug.
+Placeholder-artist union verified firing correctly — and verified NARROW:
+`Mewar school` and `Painter: Mughal school` are genuine `NOT_AN_ARTIST`
+placeholders (country `India` alone matches no table term; the artist string
+is the only signal), correctly resolving to Rajput/Mughal. `Workshop: Studio
+of Ding Yunpeng` and `Baysunghur school` are NOT on the deny-list — real (if
+uncredited) attributions — and correctly do NOT participate in the match;
+their rows resolved via `country` (China, Iran) instead. Unit test caught
+this the moment it was written (a first-draft assertion assumed `Baysunghur
+school` was a placeholder like the others; it isn't), which is exactly what
+the placeholder-gated design is for. A real-name false-negative check
+(`Workshop or Circle of Wäldä Maryam`, Ethiopian culture) correctly resolves
+nil — no tradition in the table claims Ethiopian work.
+
+**Backfill + audit run against the dev DB (2026-08-20).** `bin/rails
+tradition:backfill` stamped 910 of 2,002 rows (2 more than the manifest's 909 —
+fixture rows carrying real culture strings). `bin/rails tradition:audit`:
+reconciliation table matched the manifest dry-run above exactly; precision
+sample of 50 rows, weighted toward the smallest bucket (Persian & Islamic, 10
+of its 19), hand-checked at **49/50 correct (98%)** — clears the 95% gate.
+
+**The one miss is the exact risk named in step 2's Persian & Islamic call:**
+"Great Indian Fruit Bat" by Bhawani Das (a Mughal court painter, country
+`India`, culture blank) stamped Persian & Islamic Painting purely because the
+Met's own department field reads `"Islamic Art"` — an org-chart artifact, not
+a tradition claim. This is very likely the same work outside voice finding O7
+flagged from static reading ("one work matches only on the Met's Islamic Art
+department"), now confirmed live. **Accepted, not fixed**: excluding
+department-only matches would need a stronger signal than this story budgets
+for (co-occurring culture/country, or a department-specific carve-out), and
+one work in a 19-work bucket is 95%+ on its own count. Logged here as the
+concrete instance of a risk the plan already named and gated, not a surprise.
 
 | Review | Trigger | Why | Runs | Status | Findings |
 |--------|---------|-----|------|--------|----------|

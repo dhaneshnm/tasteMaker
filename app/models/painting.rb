@@ -127,11 +127,12 @@ class Painting < ApplicationRecord
 
   scope :feed_ordered, -> { order(:feed_order, :id) }
 
-  # Story 0022 Release 1. `genre` and `period` are nullable string columns
-  # (plan D1) carrying the canonical DISPLAY value ("19th century",
-  # "Portrait") — never a slug. `genre` has no data source until Release 2;
-  # `period` is written at seed time by `Pool::PeriodBucket`.
-  FACETS = %i[genre period].freeze
+  # Story 0022 Release 1 (genre, period), extended by story 0024 (tradition).
+  # Each is a nullable string column carrying the canonical DISPLAY value
+  # ("19th century", "Portrait", "Mughal Painting") — never a slug. `genre`
+  # has no data source until Release 2; `period` and `tradition` are written
+  # at seed time by `Pool::PeriodBucket` and `Pool::Tradition`.
+  FACETS = %i[genre period tradition].freeze
 
   # A value with fewer works than this renders no filter control — the
   # story's own rule ("a facet with 1 work behind it is a dead end dressed
@@ -153,8 +154,8 @@ class Painting < ApplicationRecord
 
   # The subset of `facet_counts` that clears `MIN_FACET_WORKS`, ordered for
   # display: numeric for period ("10th century" must sort before "9th
-  # century", which string order gets backwards), alphabetical for genre
-  # until Release 2 decides its own order (plan design review pass 1).
+  # century", which string order gets backwards), alphabetical for every
+  # other facet (genre, tradition).
   def self.displayed_facet_values(facet)
     values = facet_counts(facet).select { |_, count| count >= MIN_FACET_WORKS }.keys
     facet == :period ? values.sort_by { |value| value[/\d+/].to_i } : values.sort
