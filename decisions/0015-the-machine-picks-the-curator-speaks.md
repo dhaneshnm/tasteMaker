@@ -1,7 +1,7 @@
 # 0015 — The machine picks, the curator speaks
 
 Date: 2026-08-19
-Spec: `specs/0021-the-standing-order` (story + plan written this session).
+Spec: `specs/0023-the-standing-order` (story + plan written this session).
 
 Position: daily-pick supply goes automatic — a recurring Solid Queue job keeps the queue
 filled **7 days ahead** (D1a), choosing **randomly with spacing rules** (D2a: no artist

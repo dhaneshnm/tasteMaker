@@ -1,4 +1,4 @@
-# 0021 — The standing order
+# 0023 — The standing order
 
 Date: 2026-08-19
 Lane: **Full (≤ 3-day core).** New gem (Solid Queue), one migration, one job, one

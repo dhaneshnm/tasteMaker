@@ -33,7 +33,7 @@ class DailyTest < ActionDispatch::IntegrationTest
     end
   end
 
-  # Story 0021 — the one reader-visible surface auto-fill could break.
+  # Story 0023 — the one reader-visible surface auto-fill could break.
   # `daily/show` has no branch on `auto_tier` at all; this pins that an
   # auto-picked day renders exactly like a hand-picked one.
   test "an auto-picked day with no note runs the museum's text exactly like a hand-picked one" do
@@ -134,7 +134,7 @@ class DailyTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     # Derived, not hardcoded: this counts "every fixture painting up to one
-    # page", so a story that adds fixtures for its own reasons (story 0021's
+    # page", so a story that adds fixtures for its own reasons (story 0023's
     # auto_* pool) does not fail a test about the feed just by growing past
     # a single page.
     assert_select "article.post", count: [ Painting.count, PaintingsController::PER_PAGE ].min

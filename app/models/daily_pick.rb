@@ -33,7 +33,7 @@ class DailyPick < ApplicationRecord
   # guarantees `auto_tier` vouches for no longer hold at the new painting or
   # the new date, so the row stops claiming the machine placed it. A blurb
   # edit is not a re-pick: it changes who *speaks* (`hand_written?`), not who
-  # *picked* (story 0021 eng review, finding 4 + outside voice O4).
+  # *picked* (story 0023 eng review, finding 4 + outside voice O4).
   before_update { self.auto_tier = nil if painting_id_changed? || scheduled_on_changed? }
 
   scope :published, -> { where(scheduled_on: ..Date.current) }
@@ -42,7 +42,7 @@ class DailyPick < ApplicationRecord
 
   # Below this many days of buffer, both the curator's own queue-depth hint
   # and `/queue-health`'s external monitor call it low — one number, so the
-  # two readings of "how many days ahead" can never drift apart (story 0021
+  # two readings of "how many days ahead" can never drift apart (story 0023
   # simplify pass).
   LOW_BUFFER_DAYS = 2
 
@@ -81,7 +81,7 @@ class DailyPick < ApplicationRecord
   end
 
   # How full the buffer is, from today forward — shared by the admin
-  # queue-depth hint and `/queue-health` (story 0021) so "how many days
+  # queue-depth hint and `/queue-health` (story 0023) so "how many days
   # ahead" means the same number in both places the curator and an outside
   # monitor read it.
   def self.days_scheduled_ahead
@@ -111,7 +111,7 @@ class DailyPick < ApplicationRecord
   # makes its own painting disappear from its own dropdown. One home for this
   # rule — `selectable_paintings` and `auto_fill!`'s candidate scope both
   # read it, so the day the one-day-per-painting constraint relaxes, it
-  # relaxes in one place (story 0021 eng review, finding 5).
+  # relaxes in one place (story 0023 eng review, finding 5).
   def self.spoken_for(pick = nil)
     where.not(id: pick&.id).select(:painting_id)
   end
@@ -141,7 +141,7 @@ class DailyPick < ApplicationRecord
   end
 
   # Machine-picked days are stamped with the tier that filled them — the
-  # audit instrument for the spacing prediction (story 0021 decisions/0015).
+  # audit instrument for the spacing prediction (story 0023 decisions/0015).
   # A day always fills: each tier gives up one guarantee the tier before it
   # held, in order, and never invents a rule beyond "any eligible painting".
   #
@@ -223,7 +223,7 @@ class DailyPick < ApplicationRecord
   # the slug is nil. A slug is nil for every deny-listed placeholder
   # ("China", "Unidentified artist", …, see `Painting::NOT_AN_ARTIST`) — keying
   # on slug alone would silently exempt every placeholder-attributed work
-  # from the artist window and let that whole cohort clump (story 0021 eng
+  # from the artist window and let that whole cohort clump (story 0023 eng
   # review, outside voice O3). Only a painting with no artist at all, in
   # either form, is exempt from the rule.
   #
@@ -291,7 +291,7 @@ class DailyPick < ApplicationRecord
 
   # Deleting this pick is a re-roll, not a veto: the date is still in the
   # future and the machine placed it, so `auto_fill!` refills it at the next
-  # run rather than leaving a gap (story 0021, outside voice O7).
+  # run rather than leaving a gap (story 0023, outside voice O7).
   def reroll_on_delete?
     !published? && auto_tier.present?
   end

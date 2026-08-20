@@ -45,7 +45,7 @@ module Admin
     end
 
     def destroy
-      # Deleting a future machine pick is a re-roll, not a veto (story 0021,
+      # Deleting a future machine pick is a re-roll, not a veto (story 0023,
       # outside voice O7) — the date refills at the next 05:00, possibly with
       # the same painting, since there is no rejected-memory. Swap the
       # painting in place to actually overrule the machine; say so here,

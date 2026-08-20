@@ -27,7 +27,7 @@ test:
 # Similarly, if you deploy your application as a Docker container, you must
 # ensure the database is located in a persisted volume.
 #
-# Two databases, not one: `queue` backs Solid Queue (story 0021's daily fill
+# Two databases, not one: `queue` backs Solid Queue (story 0023's daily fill
 # job). Split out because Solid Queue's writer polls constantly and a
 # separate SQLite file means that polling never contends with a reader's
 # request. Both files live under storage/, which is the one Kamal volume

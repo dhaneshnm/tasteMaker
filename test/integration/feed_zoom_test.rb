@@ -7,7 +7,7 @@ class FeedZoomTest < ActionDispatch::IntegrationTest
     get feed_path
 
     # Scoped to one page, same order the controller queries in — a fixture
-    # count that outgrows a single page (story 0021's auto_* pool did) must
+    # count that outgrows a single page (story 0023's auto_* pool did) must
     # not make this assert a stale number either way.
     page_paintings = Painting.feed_ordered.limit(PaintingsController::PER_PAGE)
     assert_select "article.post", count: page_paintings.count

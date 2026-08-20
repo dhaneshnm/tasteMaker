@@ -56,10 +56,10 @@ live against Wikidata's public endpoint.
 
 ### Rejected-memory for machine picks — — (untriaged)
 
-Source: eng review of `specs/0021-the-standing-order`, outside voice finding O7,
+Source: eng review of `specs/0023-the-standing-order`, outside voice finding O7,
 2026-08-19. Deleting an auto-picked future day is a re-roll, not a veto — the machine
 refills the date next morning, possibly with the same painting (random order, no memory
-of rejections). 0021 documents swap-in-place as the veto and says so in the destroy
+of rejections). 0023 documents swap-in-place as the veto and says so in the destroy
 flash. If re-rolls repeating rejected works annoys in practice, a small "not this one"
 memory earns its keep; until the curator actually hits it, it is infrastructure for
 later.
@@ -109,7 +109,7 @@ later.
   on explicit direction, with the gap named in the story rather than the note quietly
   dropped.
 - 2026-08-19 — Auto-fill the daily queue: system picks the day's painting →
-  `specs/0021-the-standing-order` — Proven (pipeline: "curated queue → daily publish job").
+  `specs/0023-the-standing-order` — Proven (pipeline: "curated queue → daily publish job").
   Captured and promoted same day: source is a direct operator report ("manual picking has
   become unsustainable"), WIP slot was open, and `config/deploy.yml:115` had carried the
   IOU for this exact job since first deploy. Direction forks (7-day buffer; random +

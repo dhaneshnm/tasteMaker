@@ -162,7 +162,7 @@ class DailyPickTest < ActiveSupport::TestCase
     assert_equal expected_ids, DailyPick.selectable_paintings.map(&:id).sort
   end
 
-  # Story 0021 — DailyPick.auto_fill!. Each test isolates the eligible pool
+  # Story 0023 — DailyPick.auto_fill!. Each test isolates the eligible pool
   # to a couple of dedicated `auto_*` fixtures (test/fixtures/paintings.yml)
   # so the ladder's outcome is exact rather than a coin flip against every
   # other painting in the suite.

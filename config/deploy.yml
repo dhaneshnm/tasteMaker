@@ -85,7 +85,7 @@ env:
     # `Date.current` means "today in New York" — the day has to roll over at the
     # same instant for every reader, wherever they are.
     TZ: America/New_York
-    # Story 0021: the daily queue-fill job runs inside this Puma process.
+    # Story 0023: the daily queue-fill job runs inside this Puma process.
     # config/puma.rb compares this against the literal string "true" — never
     # remove the quotes below to "simplify" this into a YAML boolean, or the
     # comparison silently goes false and the job never runs.

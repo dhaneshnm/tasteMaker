@@ -1,6 +1,6 @@
 require "test_helper"
 
-# The dead man's switch (story 0021) — the one detector for a scheduler that
+# The dead man's switch (story 0023) — the one detector for a scheduler that
 # stopped running silently. Public and unwalled: an uptime monitor has no
 # reader identity and is not a modern browser, so this controller inherits
 # ActionController::Base directly, the same pattern PagesController set.

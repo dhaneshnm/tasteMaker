@@ -33,7 +33,7 @@ module Admin
       assert_select ".adm__hint.is-off-target"
     end
 
-    # Story 0021 — the same banner splits by who picked the day: 0004's bet
+    # Story 0023 — the same banner splits by who picked the day: 0004's bet
     # only ever described the curator's own choices, and auto-fill makes
     # museum text the machine's default output, not a broken promise.
     test "an auto-picked museum day is measured against the 0015 tripwire, not the 0004 bet" do
@@ -52,7 +52,7 @@ module Admin
       assert_select ".adm__hint", { count: 0, text: /published day/ }
     end
 
-    # Story 0021 — the dead man's switch the curator can see without leaving
+    # Story 0023 — the dead man's switch the curator can see without leaving
     # the desk: how many days the buffer already covers.
     test "the desk states how many days the buffer covers" do
       get admin_daily_picks_path, headers: curator_headers
@@ -205,7 +205,7 @@ module Admin
       assert_select ".adm__flash", "Removed from the queue."
     end
 
-    # Story 0021, outside voice O7 — destroy is a re-roll, not a veto: the
+    # Story 0023, outside voice O7 — destroy is a re-roll, not a veto: the
     # date refills at the next 05:00, possibly with the same painting. The
     # curator hears that at the moment it could otherwise surprise them.
     test "pulling a future machine pick says it will be refilled, not just removed" do

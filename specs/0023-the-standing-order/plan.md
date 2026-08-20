@@ -1,4 +1,4 @@
-# 0021 — The standing order — implementation plan
+# 0023 — The standing order — implementation plan
 
 Date: 2026-08-19 (eng-reviewed same day; all findings folded)
 Story: `story.md` in this directory.

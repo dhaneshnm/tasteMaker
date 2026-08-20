@@ -34,7 +34,7 @@ port ENV.fetch("PORT", 3000)
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
 
-# Story 0021: the daily queue-fill job runs inside this Puma process rather
+# Story 0023: the daily queue-fill job runs inside this Puma process rather
 # than a second container — one VPS, one process to keep alive. The env var
 # is a string from Kamal, so this must compare against "true" and never rely
 # on truthiness: ENV["SOLID_QUEUE_IN_PUMA"] is the string "false" when unset

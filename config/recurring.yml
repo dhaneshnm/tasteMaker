@@ -10,7 +10,7 @@
 #     schedule: at 5am every day
 
 production:
-  # Story 0021: keeps the queue filled 7 days ahead. 05:00 ET is after the
+  # Story 0023: keeps the queue filled 7 days ahead. 05:00 ET is after the
   # Eastern rollover the whole app clocks on (config/application.rb) and
   # before any human's morning — the buffer exists so the curator finds
   # today's day already scheduled, not waiting on a cron job.

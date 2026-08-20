@@ -1,4 +1,4 @@
-# The dead man's switch (story 0021). The 7-day buffer removes the
+# The dead man's switch (story 0023). The 7-day buffer removes the
 # curator's daily reason to open the admin — which removes the only failure
 # detector the manual regime had. Error tracking is still unwired (session
 # gate 6), so this is the minimal stand-in: an external uptime monitor

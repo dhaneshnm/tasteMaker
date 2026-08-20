@@ -2,7 +2,7 @@ require "test_helper"
 require "fugit"
 
 # Proves config/recurring.yml is syntactically wired to a real job — it does
-# NOT prove the Solid Queue supervisor actually fires it (story 0021 plan,
+# NOT prove the Solid Queue supervisor actually fires it (story 0023 plan,
 # step 4: that is a production-only check, held by the next-morning receipt
 # and /queue-health, not by this test).
 class RecurringScheduleTest < ActiveSupport::TestCase

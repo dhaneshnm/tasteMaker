@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # The dead man's switch for story 0021's daily fill job — point an external
+  # The dead man's switch for story 0023's daily fill job — point an external
   # uptime monitor here. Deliberately not /up: that only proves the app
   # boots, not that the queue is actually being kept full.
   get "queue-health" => "queue_health#show", as: :queue_health
