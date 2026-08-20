@@ -216,6 +216,24 @@ predictions 1–2 get their first read here; the Sep 20 read is the binding one.
 
 Implement time, 2026-08-20:
 
+- **The real curation run: 2,000 → 2,300 works, all 10 theme quotas cleared,
+  9 of 10 bars green with margin, `pool:genre_fill` ran clean (482 AIC/MET
+  rows, 0 fetch failures, 280 matched — up from 248).** Rejected before
+  selection: 2,982 duplicates, 843 title-too-long, 25 no-plate, 23 anonymous,
+  11 too-small. Only Persian miniature theme short (19/25, shortfall 6) —
+  logged in `pool_report.md`, decisions/0016 falsification 2. Vanitas cleared
+  live (5/5) despite the pre-run risk flag below.
+- **`pool:genre_fill`'s tag route legitimately dropped Icon under its
+  floor after the curation already cleared it (5→4).** `met/319625` ("Icon
+  Triptych: Ewostatewos and Eight of His Disciples") carries AIC/MET's own
+  native tag "Religious Art", which correctly outranks the title-inferred
+  "Icon" per the seed ladder (tag > title, story 0025's own rule) — the
+  ladder did its job, the theme still landed at 4. This is exactly the eng
+  review's Issue 7 risk (stage counters can disagree with the final tag-route
+  ladder) firing for real, and exactly why the plan pinned the recount to run
+  from the committed manifest, not stage counters — it caught this. Icon
+  joins Vanitas as excluded from the hard `pool_quota_test` assertion (same
+  reasoning: 5 usable candidates total, zero margin), reported not gated.
 - **Pre-flight headroom probe (step 4), against the committed mirrors:** text-
   bearing usable non-pinned candidates 1,778 (need 489 of the 1,000 taken);
   post-1900 usable non-pinned candidates 395 (need 88). Both floors clear with
