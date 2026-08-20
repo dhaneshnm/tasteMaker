@@ -130,6 +130,29 @@ class FeedTest < ApplicationSystemTestCase
     assert_current_path feed_path
   end
 
+  # Story 0025. Same idiom again, on the genre column's one new value —
+  # Flowers is title-route-filled data riding the same machinery, so the
+  # tap-through proves the whole chain: value → chip → filter → active mark.
+  test "tapping the Flowers genre filter narrows the gallery and marks itself active" do
+    Painting::MIN_FACET_WORKS.times do |i|
+      Painting.create!(source: "mia", source_id: 924_000 + i, title: "Peonies #{i}",
+        artist: "A. Painter", image_url_800: paintings(:woodcut).image_url_800,
+        genre: "Flowers")
+    end
+
+    visit feed_path
+    within(".facets") { click_on "Flowers" }
+
+    assert_current_path feed_path(genre: "flowers")
+    within(".facets") do
+      assert_selector "span.facets__here[aria-current='true']", text: /flowers/i
+      assert_no_selector "a", text: /^flowers$/i
+
+      click_on "All"
+    end
+    assert_current_path feed_path
+  end
+
   # `.zoom` is z-index 20 and the rail is 1. Reading a work full screen from the
   # gallery must not leave a navigation bar sitting on top of the picture.
   test "the full-screen view covers the rail" do

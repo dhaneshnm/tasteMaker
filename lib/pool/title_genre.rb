@@ -1,0 +1,212 @@
+# Turns a work's TITLE into a genre value for works the museum-tag route
+# (story 0022, `Pool::GenreFill`) left nil — story 0025. `Tradition`'s twin:
+# a pure function over an ordered pattern table, first match wins, compiled
+# once at load.
+#
+# Two routes, one column, one ladder (plan D1 — stated here because this
+# file is where route two lives):
+#
+#   db/seeds.rb / backfill! per work:
+#     genre = manifest genre (museum tag, 0022)  ← tags outrank titles
+#             || TitleGenre.infer(title)         ← this file, TITLE-ONLY
+#             || nil
+#
+# TITLE-ONLY is load-bearing, not an abbreviation (plan F2): description
+# matching was measured against the real manifest and bought ~31 fills
+# (~1.5% coverage) while its first sampled hit was a false positive —
+# "Falcon on a Perch", description "this painting may be a portrait of a
+# favorite bird". Museum prose hedges ("may be", "reminiscent of") are
+# exactly what anchored patterns cannot see coming. One argument, one
+# precision surface — do not add a description parameter back without
+# re-running that measurement.
+#
+# Table order is the tie-break (the `GenreTerms`/`Tradition` idiom). Three
+# measured traps pin it (plan F3 + implement-time adjudication over the
+# manifest's real genre-nil titles — wrong-label-worse-than-no-label,
+# 0022's BCE lesson, 0024's Korea-before-Japan lesson):
+#
+#   Portrait  > Mythological — "Portrait of Diana Mary Barker" is a person
+#                              named Diana, not the huntress
+#   Mythological > Religious — "Diana or Artemis, Goddess of the Hunt"
+#                              fires `goddess`; classical myth, not
+#                              religious art
+#   Religious > Flowers      — "Lotus Sutra with a Frontispiece" opens with
+#                              a flower noun; it is a Buddhist manuscript
+#
+# Patterns are anchored phrase shapes, not bare nouns — a title that IS the
+# thing ("Peonies", "Portrait of a Lady") is the museum saying what the
+# picture is; a mid-string noun is not. Every pattern here was promoted
+# from the 0008 probe's candidate lists (user-research/scripts/0008/
+# pool_coverage.py) and carries a fixture in pool_title_genre_test.rb.
+#
+# "Flowers" is a stated deviation from 0022's Getty-AAT-terms constraint
+# (AAT's concept is "flower pieces") — it is the reader's word ("paintings
+# of flowers", 0008 §3.3), logged in the 0025 plan, not a silent widening.
+module Pool
+  module TitleGenre
+    # Deity/saint/scene names, each reviewed against the manifest's actual
+    # genre-nil titles (0008 probe list minus the unanchorable). Names only
+    # ever match the TITLE — an artist string never participates (unlike
+    # `Tradition`, there is no placeholder-artist edge here).
+    RELIGIOUS_TERMS = %w[
+      madonna virgin christ crucifixion annunciation adoration
+      apostle apostles sutra mandala icon
+      buddha bodhisattva bodhisattvas guanyin arhat arhats luohan
+      krishna shiva vishnu devi goddess deity deities
+    ].freeze
+
+    MYTHOLOGICAL_TERMS = %w[
+      venus apollo diana cupid jupiter bacchus nymph nymphs muse muses
+      hercules perseus andromeda leda europa danae orpheus
+    ].freeze
+
+    # Leading-position flower plurals: the whole title is (or opens with)
+    # the flower, so the flower is the subject, not an ornament mid-title.
+    FLOWER_NOUNS = %w[
+      flowers blossoms peonies peony chrysanthemums irises orchids roses
+      tulips lilies hollyhocks poppies hydrangeas wisteria lotus
+    ].freeze
+
+    TABLE = [
+      [ "Portrait", [
+        /\bportrait of\b/i,
+        /\bself-portrait\b/i,
+        /\Aportrait\b/i
+      ] ],
+      [ "Mythological Art", [
+        /\b(#{MYTHOLOGICAL_TERMS.join("|")})\b/i,
+        /\bmytholog/i
+      ] ],
+      [ "Religious Art", [
+        /\b(#{RELIGIOUS_TERMS.join("|")})\b/i,
+        /\bsaints?\b(?!-)/i,
+        # Not the historical Rani Lakshmi Bai of Jhansi (audit catch: one
+        # 1857-rebellion history painting is not religious art).
+        /\blakshmi\b(?!\s+bai)/i,
+        /\bholy family\b/i
+      ] ],
+      [ "Still Life", [
+        /\bstill life\b/i
+      ] ],
+      [ "Flowers", [
+        /\bbouquet\b/i,
+        /\bvase of (flowers|roses|tulips|peonies|lilies)\b/i,
+        /\bbirds? and flowers?\b/i,
+        /\A(#{FLOWER_NOUNS.join("|")})\b/i
+      ] ],
+      [ "Landscape", [
+        /\Alandscape\b/i,
+        /\blandscape with\b/i,
+        /\Aview of\b/i
+      ] ],
+      [ "Marine Art", [
+        /\bseascape\b/i,
+        /\bshipwreck\b/i,
+        /\bharbou?r\b/i
+      ] ],
+      [ "Nude", [
+        /\bnude\b/i,
+        /\bbathers\b/i
+      ] ]
+    ].freeze
+
+    # Returns the canonical display value or nil. Title-only, by design —
+    # see the header comment before widening the signature.
+    def self.infer(title)
+      return nil if title.blank?
+
+      TABLE.each do |value, patterns|
+        return value if patterns.any? { |re| re.match?(title) }
+      end
+      nil
+    end
+
+    # The committed manifest's tag-route genre per (source, source_id) —
+    # route one of the ladder, loaded once. `backfill!` recomputes the FULL
+    # ladder for every row (plan D4/F7): a "nil rows only" runner would be
+    # one-way — a wrong title-route value shipped to prod could never be
+    # retracted by narrowing this table, because reruns would skip it.
+    # Recomputing tag || infer for all rows makes narrow-and-rerun a real
+    # correction path, and reproduces museum-tag values from the manifest so
+    # they stand by construction (story non-goal).
+    def self.manifest_genres(manifest_path: Pool::MANIFEST)
+      JSON.parse(manifest_path.read).each_with_object({}) do |entry, map|
+        map[[ entry["source"], entry["source_id"].to_s ]] = entry["genre"]
+      end
+    end
+
+    BackfillResult = Struct.new(:updated, :total, keyword_init: true)
+
+    def self.backfill!(manifest_path: Pool::MANIFEST)
+      tag_route = manifest_genres(manifest_path: manifest_path)
+      updated = 0
+      total = 0
+      Painting.find_each do |painting|
+        total += 1
+        value = tag_route[[ painting.source, painting.source_id.to_s ]] || infer(painting.title)
+        next if painting.genre == value
+
+        painting.update_column(:genre, value)
+        updated += 1
+      end
+      BackfillResult.new(updated: updated, total: total)
+    end
+
+    # The 0008 §3.6 probe's candidate counts over the genre-nil works —
+    # CEILINGS (loose candidate-finder regexes needing adjudication), not
+    # expectations, unlike `Tradition::RESEARCH_COUNTS`. The reconciliation
+    # therefore flags "well under half the ceiling" only as a look-here,
+    # and its real job is catching a bucket that never clears the display
+    # floor (plan D5) — the Jain-bucket class of regression.
+    PROBE_CEILINGS = {
+      "Religious Art" => 302, "Landscape" => 210, "Portrait" => 163,
+      "Flowers" => 148, "Still Life" => 27, "Mythological Art" => 24,
+      "Marine Art" => 12, "Nude" => 11
+    }.freeze
+
+    ReconciliationRow = Struct.new(:value, :shipped, :ceiling, :starved?, :sub_floor?, keyword_init: true)
+    AuditResult = Struct.new(:reconciliation, :sample, keyword_init: true)
+
+    # Precision sample is 100 rows, not 50 (plan F5): with a 95% gate, a
+    # 50-row sample fails ~46% of the time when true precision is exactly
+    # 95% — the gate would be a coin flip at its own bar. Weighted toward
+    # the smallest bucket (the 0024 `SMALLEST_BUCKET_WEIGHT` lesson): a
+    # small bucket's errors move its own percentage most, and an unweighted
+    # draw would make Marine/Flowers errors structurally invisible under
+    # Portrait's bulk.
+    SMALLEST_BUCKET_WEIGHT = 0.2
+
+    # Audits TITLE-ROUTE fills only — tag-route values are the museum's own
+    # and were 0022's audit's job. A row is title-route when the manifest
+    # carries no genre for it but `infer` fires on its title.
+    def self.audit(sample_size: 100, manifest_path: Pool::MANIFEST)
+      tag_route = manifest_genres(manifest_path: manifest_path)
+      title_route = Painting.where.not(genre: nil).reject do |p|
+        tag_route[[ p.source, p.source_id.to_s ]].present?
+      end
+
+      counts = title_route.group_by(&:genre).transform_values(&:size)
+      reconciliation = (PROBE_CEILINGS.keys | counts.keys).sort.map do |value|
+        shipped = counts[value] || 0
+        ceiling = PROBE_CEILINGS[value]
+        deficit = Painting::MIN_FACET_WORKS - Painting.where(genre: value).count
+        ReconciliationRow.new(value: value, shipped: shipped, ceiling: ceiling,
+          starved?: ceiling && shipped < ceiling * 0.25,
+          sub_floor?: deficit.positive?)
+      end
+
+      AuditResult.new(reconciliation: reconciliation,
+        sample: sample_rows(title_route, counts, sample_size))
+    end
+
+    def self.sample_rows(title_route, counts, sample_size)
+      return title_route.shuffle.first(sample_size) if counts.size < 2
+
+      smallest = counts.min_by { |_, n| n }.first
+      small_rows, rest = title_route.partition { |p| p.genre == smallest }
+      small_take = [ (sample_size * SMALLEST_BUCKET_WEIGHT).round, small_rows.size ].min
+      small_rows.shuffle.first(small_take) + rest.shuffle.first(sample_size - small_take)
+    end
+    private_class_method :sample_rows
+  end
+end

@@ -203,27 +203,54 @@ from 0024. The plan reuses all of them; nothing is rebuilt.
 
 ## Deviations
 
-(filled at implement time — audit result, floor-pin number, pattern drops)
+Implement time, 2026-08-20:
+
+- **Coverage: 248 → 730 of 2,000** (482 title-route fills). Success signal 1 (≥ 500)
+  met with margin. Floor pin set at **600** in `pool_quota_test` — headroom for
+  future narrowing, still above the signal.
+- **Audit: 98/100 on the weighted sample — gate PASSED (≥ 95%).** Two catches:
+  *"The Mutiny of the Heroine Rani Lakshmi Bai of Jhansi"* (historical figure fired
+  `lakshmi`; fixed with `(?!\s+bai)` lookahead, retraction verified live — the D4
+  rerun updated exactly 1 row) and *"Portrait of a Greyhound Dog"* (borderline;
+  kept — the museum's own title calls it a portrait).
+- **Order grew two more measured traps beyond D2's draft:** Portrait > Mythological
+  ("Portrait of Diana Mary Barker") and Mythological > Religious ("Diana or
+  Artemis, Goddess of the Hunt"). Final order: Portrait, Mythological, Religious,
+  Still Life, Flowers, Landscape, Marine, Nude.
+- **Pattern deltas from adjudication over the real genre-nil titles:** dropped
+  `/\bst\. /` (place-name class: "St. Anthony Falls", "St. Paul's Cathedral");
+  `saints?` gained `(?!-)` ("Saint-Rémy", "Sainte-Victoire" landscapes); added
+  `sutra mandala icon apostle` to the reviewed religious terms ("Lotus Sutra"
+  would otherwise stamp Flowers).
+- **Genre Scene culled at implement** (1 title fill + 1 tag work = 2 < floor 5),
+  joining Cityscape and Animal from the plan. Nude ships (4 + 3 = 7 ≥ 5).
+- **Reconciliation STARVED flags on Flowers (21/148) and Landscape (51/210) are
+  expected**, not regressions: ceilings came from the probe's loose candidate
+  regexes (mid-string "flowers?", bare "landscape"); the shipped table anchors
+  hard — precision over recall per D2. Stated here so the audit flag reads as
+  measured context, not an open question.
+- Success signals: **1 ✓** (730 ≥ 500) · **2 ✓** (98%) · **3 ✓** (Flowers 21 ≥ 5,
+  renders on /feed).
 
 ## Implementation Tasks
 
 Synthesized from the eng review's findings. Checkbox as you ship.
 
-- [ ] **T1 (P1, human: ~4h / CC: ~25min)** — `lib/pool/title_genre.rb` — build `Pool::TitleGenre`: title-only, Religious-first `TABLE`, compiled `PATTERNS` at load
+- [x] **T1 (P1, human: ~4h / CC: ~25min)** — `lib/pool/title_genre.rb` — build `Pool::TitleGenre`: title-only, Religious-first `TABLE`, compiled `PATTERNS` at load
   - Surfaced by: F2 (desc-route noise), F3 (lotus/deity ordering), D2
   - Verify: `bin/rails test test/lib/pool_title_genre_test.rb`
-- [ ] **T2 (P1, human: ~2h / CC: ~15min)** — `test/lib/pool_quota_test.rb` — keep CMA/MIA manifest invariant verbatim; add derived-genre vocabulary + floor-pin + Flowers-floor tests (`POOL_TRADITIONS` shape)
+- [x] **T2 (P1, human: ~2h / CC: ~15min)** — `test/lib/pool_quota_test.rb` — keep CMA/MIA manifest invariant verbatim; add derived-genre vocabulary + floor-pin + Flowers-floor tests (`POOL_TRADITIONS` shape)
   - Surfaced by: F1, F8 (D3)
   - Verify: `bin/rails test test/lib/pool_quota_test.rb`
-- [ ] **T3 (P1, human: ~2h / CC: ~15min)** — `TitleGenre.backfill!` recomputes EVERY row via manifest map `|| infer`, nil allowed (retraction path) + thin `genre:backfill` rake
+- [x] **T3 (P1, human: ~2h / CC: ~15min)** — `TitleGenre.backfill!` recomputes EVERY row via manifest map `|| infer`, nil allowed (retraction path) + thin `genre:backfill` rake
   - Surfaced by: F7 (D4)
   - Verify: unit test — fills nil, retracts on narrowed dictionary, never disturbs tag-route value
-- [ ] **T4 (P1, human: ~3h / CC: ~20min)** — `TitleGenre.audit`: 100-row smallest-bucket-weighted sample + reconciliation vs 0008 ceilings; thin `genre:audit` rake
+- [x] **T4 (P1, human: ~3h / CC: ~20min)** — `TitleGenre.audit`: 100-row smallest-bucket-weighted sample + reconciliation vs 0008 ceilings; thin `genre:audit` rake
   - Surfaced by: F5, F6 (D5)
   - Verify: audit run output + hand-check → Deviations
-- [ ] **T5 (P2, human: ~2h / CC: ~15min)** — negative-zoo fixtures: lotus deity scene, "View of Delft", desc-only no-fire, "Landscape Study, verso", blank/CJK titles
+- [x] **T5 (P2, human: ~2h / CC: ~15min)** — negative-zoo fixtures: lotus deity scene, "View of Delft", desc-only no-fire, "Landscape Study, verso", blank/CJK titles
   - Surfaced by: D2 negative zoo + F3
-- [ ] **T6 (P2, human: ~1h / CC: ~10min)** — drop Cityscape patterns; Genre Scene/Nude conditional on measured floor clearance via reconciliation
+- [x] **T6 (P2, human: ~1h / CC: ~10min)** — drop Cityscape patterns; Genre Scene/Nude conditional on measured floor clearance via reconciliation
   - Surfaced by: F11
 
 _No new tasks from Performance review._

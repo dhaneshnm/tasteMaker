@@ -247,4 +247,49 @@ class PoolQuotaTest < ActiveSupport::TestCase
     assert_empty starved,
       "these tradition values are in the table but never clear the display floor: #{starved}"
   end
+
+  # Story 0025. Genre's SECOND route: `TitleGenre.infer(title)` fills what
+  # museum tags left nil, at seed time — it never writes the manifest, which
+  # is why the CMA/MIA invariant above stays true and stays load-bearing.
+  # This recomputes the full ladder (manifest tag || title inference) per
+  # manifest row, one pass feeding every assertion below — the same shape
+  # as POOL_TRADITIONS.
+  POOL_GENRES = POOL.filter_map do |w|
+    value = w["genre"].presence || Pool::TitleGenre.infer(w["title"])
+    [ w, value ] if value
+  end.freeze
+
+  # No free-text ever leaks into the facet: both routes map into one
+  # canonical vocabulary (plan risk: double-labeling drift — one vocabulary,
+  # two routes, so tag "portraits" and title "Portrait of" cannot diverge).
+  test "every derived genre value is in the canonical vocabulary, whichever route produced it" do
+    canonical = Pool::GenreTerms::DICTIONARY.values | Pool::TitleGenre::TABLE.map(&:first)
+
+    stray = POOL_GENRES.filter_map do |w, value|
+      "#{w['source']}:#{w['source_id']} => #{value.inspect}" unless canonical.include?(value)
+    end
+
+    assert_empty stray, "every derived genre must be a dictionary value, never free text"
+  end
+
+  # The story's coverage claim, pinned so a reseed or a dictionary edit
+  # cannot silently regress it. Measured 730 at ship time; pinned at 600 —
+  # headroom for audit-driven narrowing, still comfortably above the
+  # story's 500 success signal. A red here means the title route lost
+  # meaningful reach: re-measure, then either fix the regression or move
+  # this pin WITH a Deviations note (0022's falsification idiom).
+  test "the genre facet's derived coverage holds the story 0025 floor" do
+    assert_operator POOL_GENRES.size, :>=, 600,
+      "derived genre coverage fell below the 0025 pin (measured 730 at ship)"
+  end
+
+  # Success signal 3 as a test: the one vocabulary addition demand made
+  # (0008 N5) actually renders — a value under the display floor is a facet
+  # in name only (the Jain-bucket lesson, genre edition).
+  test "Flowers clears MIN_FACET_WORKS on the committed pool" do
+    flowers = POOL_GENRES.count { |_, value| value == "Flowers" }
+
+    assert_operator flowers, :>=, Painting::MIN_FACET_WORKS,
+      "Flowers ships #{flowers} works — below the display floor, it never renders"
+  end
 end

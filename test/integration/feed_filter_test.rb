@@ -168,4 +168,21 @@ class FeedFilterTest < ActionDispatch::IntegrationTest
     end
     assert_select ".post", count: 0
   end
+
+  # Story 0025's one vocabulary addition. The machinery is value-agnostic —
+  # this pins that the new value rides it end to end: chip when it clears
+  # the floor, filtering when tapped, slug round-trip via `facet_slug`.
+  test "the Flowers value renders its chip and filters, like any other genre" do
+    create_paintings(MIN, source_id_start: 9_300, genre: "Flowers")
+    create_paintings(MIN, source_id_start: 9_350, genre: "Portrait")
+
+    get feed_path
+    assert_select "nav.facets[aria-label='Filter by genre']" do
+      assert_select "a", text: "Flowers"
+    end
+
+    get feed_path(genre: "flowers")
+    assert_response :success
+    assert_select ".masthead__aside", text: "#{MIN} works · Mia"
+  end
 end
