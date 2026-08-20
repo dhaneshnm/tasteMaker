@@ -62,46 +62,6 @@ payoff is a movement facet, not a genre patch — and the hard part (artist
 reconciliation) is the same work the canonicalisation entry above needs. The two
 entries plus 0008's evidence are probably one story.
 
-### Tradition facet from culture strings — Better (range)
-
-Source: `user-research/0008-recognizable-themes.md` N3, 2026-08-20.
-
-~700 works (35% of pool) carry a nameable painting tradition in free-text
-culture/country strings — Mughal 102, Rajput 102, Pahari 84, Kalighat 44, Chinese 180,
-Japanese 276, Jain manuscript 52 — each drawing 15K–72K annual lookups, none
-expressible by any shipped facet. Persona 3's verbatim ask ("Mughal miniatures,
-ukiyo-e"). Cheapest demand-supply match found by 0008: a hand-checked mapping table
-over data already stored, riding the shipped facet UI/floor/URL machinery. No external
-dependency.
-
-### Theme-gap re-curation: swap pool works toward demanded themes — Better (range)
-
-Source: `user-research/0008-recognizable-themes.md` §3.7 addendum, 2026-08-20.
-
-The mirrors hold qualifying stock for exactly the themes 0008 found under-supplied:
-Persian miniature 760 (pool ~19), thangka 473 (~24), still life/flowers 338 (15),
-16 genuine ukiyo-e paintings (pool ~18 Edo works), **Madhubani 9 (pool 0 — a
-selection gap, not an acquisition wall)**, marine 56 (1), mythological 71 (4). All
-counts exclude the Met (no image URLs in mirror) — floors, not ceilings. Mechanism
-precedent exists: 0019's `fill_recognizable` ran a targeted stage before random
-selection and re-curated within TARGET=2,000 under `verify!`. A theme-quota stage is
-the same shape. TARGET stays 2,000 unless a `decisions/` entry argues otherwise
-(0019's wrong-if named "fill only by growing TARGET" as the failure smell).
-Sequencing: only pays after a facet makes themes findable — expansion before
-findability adds works nobody can reach.
-
-### Genre fill v2: title/description keywords — Better (range)
-
-Source: `user-research/0008-recognizable-themes.md` N2/N5, 2026-08-20.
-
-Keyword probe over the 1,752 genre-nil works finds ~600–900 adjudicated fills
-plausible (Religious 302, Landscape 210, Portrait 163, Flowers 148 candidates …) vs
-248 shipped. Titles exist on every work, so this route reaches the CMA/MIA 80% that
-0022's museum-tag route structurally cannot. Adds a Flowers value — "paintings of
-flowers" is a top-3 autocomplete completion. Probe dictionary in
-`user-research/scripts/0008/pool_coverage.py` is the candidate list, not the fill;
-adjudication is the work.
-
 ### Rejected-memory for machine picks — — (untriaged)
 
 Source: eng review of `specs/0023-the-standing-order`, outside voice finding O7,
@@ -138,6 +98,15 @@ later.
 
 ## Promoted
 
+- 2026-08-20 — Tradition facet from culture strings → `specs/0024-the-named-traditions`.
+  First of the three-story decisions/0016 sequence (findability → findability →
+  expansion).
+- 2026-08-20 — Genre fill v2: title/description keywords → `specs/0025-what-the-title-says`.
+  Second of the sequence; rewrites the CMA/MIA-never-genre invariant on purpose.
+- 2026-08-20 — Theme-gap re-curation → `specs/0026-the-wider-pool`. **Mechanism
+  inverted on promotion by owner decision (decisions/0016):** the Inbox entry
+  proposed swap-within-2,000; the owner chose additive expansion to TARGET 3,000
+  with swaps as the recorded fallback. Evidence carried over; mechanism did not.
 - 2026-08-18 — Artist page + recognizable-artist coverage fill →
   `specs/0018-the-names-you-know` (Release 1 only; Release 2 split out by eng review E5)
 - 2026-08-19 — The coverage fill — recognizable names → `specs/0019-the-coverage-fill`.
