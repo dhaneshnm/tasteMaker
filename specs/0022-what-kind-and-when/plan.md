@@ -537,11 +537,14 @@ step before it (mirror capture → dictionary → fill → backfill → report).
   Battle Painting, Cityscape, Genre Scene, Marine Art, Nude — 1–4 works each) stay
   reachable only through ALL, exactly as designed — the provisional floor doing real
   work on real data, not a hypothetical.
-- **The fetch hit transient DNS failures across three passes** (14, then 1, then 3
-  records — different IDs each time, confirmed as network flakiness, not a
-  source-specific or ID-specific problem), each time skip-and-continue working exactly
-  as designed rather than aborting the run. Retried until 403/403 fetched successfully
-  (100%). Live-verified afterward via a real `rails s` (the story 0021 mock door):
+- **The fetch hit transient DNS failures across four passes** (14, then 3, then 1,
+  then 0 records skipped — different IDs each time, confirmed as network flakiness, not
+  a source-specific or ID-specific problem), each time skip-and-continue working exactly
+  as designed rather than aborting the run. Final pass: 402/403 (99.75%) fetched
+  successfully; `met:435643` skipped on its last retry and accepted as final, per
+  explicit owner instruction not to loop further on transient skips — genre is only ever
+  set on a fresh match, never cleared, so a later re-run stays safe to retry if desired.
+  Live-verified afterward via a real `rails s` (the story 0021 mock door):
   unfiltered `/feed` renders both facet rows; `genre=portrait` narrows to 113; a combined
   `genre=portrait&period=17th-century` AND narrows to 12; `genre=not-a-real-genre`
   degrades to the full unfiltered 2,002; a genuinely empty AND
