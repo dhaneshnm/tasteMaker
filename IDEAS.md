@@ -21,6 +21,8 @@ feed BET.md's conversation threshold — track in `user-research/`, never as que
 
 ## Inbox
 
+- 2026-08-20 — Facet-usage receipt: instrument/query whether readers tap ?genre= / ?tradition= before the expansion story starts (0025 eng review F12, outside voice — every facet success signal so far is an input metric)
+
 ### Canonicalise the artist string so one artist is one page — Better (range)
 
 Source: `specs/0019-the-coverage-fill/plan.md` C4b, 2026-08-19. Deferred there on purpose.
