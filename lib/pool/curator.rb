@@ -160,6 +160,12 @@ module Pool
       true
     end
 
+    # Story 0026: a receipt-counting stage (`fill_themes`, `fill_recognizable`)
+    # needs to credit an already-pinned identity toward its own tally without
+    # re-spending a `take` on it — `take` itself already no-ops for a taken
+    # identity via `room_for?`, but returns `false`, which would undercount.
+    def count_or_take(candidate) = @taken.include?(candidate.identity) || take(candidate)
+
     # Asked once per candidate that has already cleared every cap, so the cost
     # is one request per work that actually enters the pool. A well-formed URL
     # is not a reachable one — this is the only place that difference is found
@@ -216,7 +222,7 @@ module Pool
           break if took >= want
           next unless matcher.call(c)
 
-          took += 1 if @taken.include?(c.identity) || take(c)
+          took += 1 if count_or_take(c)
         end
         @themes[name] = { want: want, took: took, shortfall: [ want - took, 0 ].max }
       end
@@ -256,7 +262,7 @@ module Pool
         match.works.each do |candidate|
           break if taken >= Recognizable::DEPTH
 
-          taken += 1 if @taken.include?(candidate.identity) || take(candidate)
+          taken += 1 if count_or_take(candidate)
         end
         @recognizable[match.name] = { taken:, available: match.total, pages: match.pages,
                                       primary_slug: match.primary_slug }

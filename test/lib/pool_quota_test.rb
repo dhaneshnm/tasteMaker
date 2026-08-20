@@ -35,10 +35,12 @@ class PoolQuotaTest < ActiveSupport::TestCase
   # only, not the full 13 MB manifest (plan step 2). Regenerated deliberately
   # at any future expansion, never silently.
   PRIOR_MANIFEST = JSON.parse(Rails.root.join("test/fixtures/files/0026-prior-manifest-snapshot.json").read).freeze
+  # Shared by all three pin/regression tests below — one index over POOL,
+  # not one rebuilt per test.
+  POOL_BY_ID = POOL.index_by { |w| [ w["source"], w["source_id"] ] }.freeze
 
   test "every work in the prior committed manifest is still in the pool (the pin)" do
-    current_ids = POOL.map { |w| [ w["source"], w["source_id"] ] }.to_set
-    missing = PRIOR_MANIFEST.reject { |w| current_ids.include?([ w["source"], w["source_id"] ]) }
+    missing = PRIOR_MANIFEST.reject { |w| POOL_BY_ID.key?([ w["source"], w["source_id"] ]) }
 
     assert_empty missing.map { |w| "#{w['source']}/#{w['source_id']}" },
       "a work from the prior manifest vanished from the pool — Jordan's contract is broken"
@@ -47,10 +49,8 @@ class PoolQuotaTest < ActiveSupport::TestCase
   # MANDATORY regression (review rule): pinned rows keep their exact
   # `feed_order` — a bookmarked `/feed` offset must never reshuffle.
   test "REGRESSION: pinned feed_order is preserved byte-for-byte across the expansion" do
-    current_by_id = POOL.index_by { |w| [ w["source"], w["source_id"] ] }
-
     wrong = PRIOR_MANIFEST.filter_map do |prior|
-      current = current_by_id[[ prior["source"], prior["source_id"] ]]
+      current = POOL_BY_ID[[ prior["source"], prior["source_id"] ]]
       next if current.nil? # covered by the pin test above
 
       "#{prior['source']}/#{prior['source_id']}: was #{prior['feed_order']}, now #{current['feed_order']}" \
@@ -65,12 +65,11 @@ class PoolQuotaTest < ActiveSupport::TestCase
   # manifest rewrite — the bug the eng review's critical finding caught: a
   # `Candidate#to_manifest` round-trip would silently drop this field.
   test "REGRESSION: every pre-existing genre value survives the manifest rewrite" do
-    current_by_id = POOL.index_by { |w| [ w["source"], w["source_id"] ] }
     had_genre = PRIOR_MANIFEST.select { |w| w["genre"].present? }
     assert_operator had_genre.size, :>=, 200, "fixture sanity: expected ~248 pre-tagged rows"
 
     wrong = had_genre.filter_map do |prior|
-      current = current_by_id[[ prior["source"], prior["source_id"] ]]
+      current = POOL_BY_ID[[ prior["source"], prior["source_id"] ]]
       next if current.nil? # covered by the pin test above
 
       "#{prior['source']}/#{prior['source_id']}: was #{prior['genre'].inspect}, now #{current['genre'].inspect}" \

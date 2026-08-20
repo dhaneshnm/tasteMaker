@@ -272,7 +272,7 @@ class PoolCuratorTest < ActiveSupport::TestCase
   # the pin, a cap collision that must raise rather than silently drop.
 
   def pin(id, artist: "Pinned Painter #{id}", region: "europe")
-    candidate(source: "cma", id: id, artist: artist, region: region, edge: 3000)
+    candidate(source: "cma", id: id, artist: artist, region: region)
   end
 
   test "every pinned work is taken, resolver never called for any of them" do
@@ -360,10 +360,8 @@ class PoolCuratorTest < ActiveSupport::TestCase
     assert_equal 25, row[:want]
     assert_equal 25, row[:took]
     assert_equal 0, row[:shortfall]
-    assert_operator curator.selected.count { |c|
-      Pool::Tradition.from_strings(culture: c.culture, country: c.country, department: c.department,
-        artist: c.artist, medium: c.medium) == "Persian & Islamic Painting"
-    }, :>=, 25
+    is_persian = Pool::ThemeTargets.tradition_matcher("Persian & Islamic Painting")
+    assert_operator curator.selected.count { |c| is_persian.call(c) }, :>=, 25
   end
 
   test "a theme short of stock reports the shortfall instead of raising" do
@@ -382,10 +380,8 @@ class PoolCuratorTest < ActiveSupport::TestCase
 
     curator = curate(wide_pool + blurbless + with_text, target: 200)
 
-    persian_selected = curator.selected.select { |c|
-      Pool::Tradition.from_strings(culture: c.culture, country: c.country, department: c.department,
-        artist: c.artist, medium: c.medium) == "Persian & Islamic Painting"
-    }
+    is_persian = Pool::ThemeTargets.tradition_matcher("Persian & Islamic Painting")
+    persian_selected = curator.selected.select { |c| is_persian.call(c) }
     assert_equal 5, persian_selected.count(&:text?), "all 5 text-bearing Persian works should be taken"
   end
 

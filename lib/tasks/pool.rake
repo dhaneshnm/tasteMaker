@@ -58,13 +58,17 @@ namespace :pool do
 
   # Story 0026. Candidates built from the PREVIOUS committed manifest's own
   # rows — never a mirror lookup, so mirror absence/drift can't touch a
-  # pinned work (eng review + outside voice). `[]` on a first-ever curation,
-  # when no manifest is committed yet.
+  # pinned work (eng review + outside voice). Returns `[raw_rows,
+  # candidates]`, the manifest parsed exactly once: `raw_rows` carries
+  # `genre`/`feed_order` (not `Candidate` fields) for the verbatim write-back
+  # in `curate`, `candidates` is what `Curator` pins. `[[], []]` on a
+  # first-ever curation, when no manifest is committed yet.
   def pinned_candidates
-    return [] unless Pool::MANIFEST.exist?
+    return [ [], [] ] unless Pool::MANIFEST.exist?
 
-    field_strs = Pool::FIELDS.map(&:to_s)
-    JSON.parse(Pool::MANIFEST.read).map { |row| Pool::Candidate.new(**row.slice(*field_strs).symbolize_keys) }
+    raw_rows = JSON.parse(Pool::MANIFEST.read)
+    candidates = raw_rows.map { |row| Pool::Candidate.new(**row.symbolize_keys.slice(*Pool::FIELDS)) }
+    [ raw_rows, candidates ]
   end
   end
 
@@ -80,7 +84,7 @@ namespace :pool do
            "curating WITHOUT the coverage fill. See specs/0019-the-coverage-fill/plan.md step 1."
     end
 
-    pinned = Tasks.pinned_candidates
+    old_manifest_rows, pinned = Tasks.pinned_candidates
     puts "#{pinned.size} pinned works from the committed manifest (story 0026, Jordan's contract)" if pinned.any?
 
     resolved = 0
@@ -110,8 +114,7 @@ namespace :pool do
     # Story 0026: only the NEW candidates' plates are re-checked here — a
     # pinned identity's plate already lives in Active Storage, so an
     # upstream re-check buys nothing and costs ~2,000 requests.
-    pinned_identities = pinned.map(&:identity).to_set
-    new_candidates = selected.reject { |c| pinned_identities.include?(c.identity) }
+    new_candidates = selected.reject { |c| curator.pinned?(c) }
 
     print "checking plates on #{new_candidates.size} new work(s)… "
     dead = Pool::Sources.check_plates(new_candidates)
@@ -128,7 +131,6 @@ namespace :pool do
     # range survives untouched, and appending (not interleaving) is the one
     # scheme where prod's existing 0..N-1 numbering can never collide with
     # the backfill (eng review + outside voice, plan step 2).
-    old_manifest_rows = pinned.any? ? JSON.parse(Pool::MANIFEST.read) : []
     ordered_new = new_candidates.shuffle(random: Random.new(Pool::Curator::SEED))
     new_rows = ordered_new.each_with_index.map { |c, i|
       c.to_manifest.merge("feed_order" => old_manifest_rows.size + i)
