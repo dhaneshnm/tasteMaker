@@ -45,3 +45,37 @@ crawl. `MAX_PER_ARTIST = 5` holds (0.25% → 0.17% of pool).
 per-day, not per-work — 0023's tripwire unaffected); curation + audit time inside an
 11-day window to kill review, moving 0 of 5 `BET.md` thresholds. Sequenced third
 behind two findability stories for exactly that reason.
+
+## Result (2026-08-20) — prediction 1 falsified, on the record
+
+`pool:curate` at TARGET=3,000 raised `Unmeetable` against the real mirrors: pool size
+2,847/3,000, museum text 1,999/2,100. A target search (binary search over `Pool::
+Curator::TARGET`, same candidates and bars) found the additive ceiling is
+**~2,428, not 3,000** — the exact mechanism is `MAX_REGION_SHARE = 0.25`, which caps
+europe/south_asia/east_asia at a quarter of the pool each, combined with the real fact
+that these four museums' CC0 painting holdings carry almost no North American work
+(531 total, pinned + new — a hard ceiling, not a caps artifact) and little in the
+remaining smaller regions combined (~76). `pool_size = 0.75·TARGET +
+min(607, 0.25·TARGET)`, which equals TARGET only up to ≈2,428 — above that, the
+region cap and the region's own real-world thinness pull in opposite directions and
+the smaller number wins.
+
+**This is prediction 1's own falsification clause firing exactly as written**: "the
+fallback (swap within whatever total the bars allow) executes." Re-reading that
+clause against the actual math: a swap of *which specific works* are pinned does not
+change the ceiling — the constraint is supply (how much CC0 North American painting
+these four museums hold) and policy (the region cap that exists specifically to
+protect range, persona 3's complaint), neither of which moves by reshuffling
+identities within the same total. "Whatever total the bars allow" **is** the lower
+additive target — swap and "accept ~2,428" are the same fallback, not two different
+ones. Shipped at **`Pool::Curator::TARGET = 2,300`** (a safety margin below the
+~2,428 ceiling, chosen so the real network-verified run succeeds without a second
+multi-hour attempt), not 3,000. Not reopened: the region cap itself is not loosened —
+that would resolve the falsification by deleting the thing it's protecting.
+
+Prediction 2 (per-theme floors) reads separately, mostly upheld: 9 of 10 targeted
+themes clear `MIN_FACET_WORKS` at the achieved size; Vanitas (5 usable candidates in
+all four museums combined) is the one at genuine risk, logged per-theme in
+`pool_report.md`, not gated in `bin/ci` (see `test/lib/pool_quota_test.rb`).
+
+Full numbers: `specs/0026-the-wider-pool/plan.md` Deviations.

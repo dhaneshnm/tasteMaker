@@ -219,7 +219,36 @@ Implement time, 2026-08-20:
 - **Pre-flight headroom probe (step 4), against the committed mirrors:** text-
   bearing usable non-pinned candidates 1,778 (need 489 of the 1,000 taken);
   post-1900 usable non-pinned candidates 395 (need 88). Both floors clear with
-  wide margin — falsification 1 does not fire on these two bars.
+  wide margin — the probe correctly cleared what it checked; it did not check
+  the bar that actually failed (below).
+- **decisions/0016 prediction 1 falsified: TARGET=3,000 is not additively
+  reachable.** The real `pool:curate` run raised `Unmeetable` at 3,000: pool
+  size 2,847/3,000, museum text 1,999/2,100. A target search (binary search
+  over `Pool::Curator::TARGET` against the same candidates/bars) found the
+  ceiling: `pool_size = 0.75·TARGET + min(607, 0.25·TARGET)`, which equals
+  TARGET only up to **≈2,428**. Mechanism: `MAX_REGION_SHARE = 0.25` caps
+  europe/south_asia/east_asia at a quarter of the pool each (all three
+  simultaneously hit exactly that cap — confirmed via the real run's bars:
+  `largest region share: 750/750`), and these four museums' CC0 holdings
+  carry almost no North American painting (531 total, pinned + new — a hard
+  supply ceiling, not a caps artifact) and little in the remaining regions
+  combined (~76 usable). Reasoned through in full in decisions/0016's Result
+  section: a swap of *which* works are pinned doesn't change this ceiling —
+  it's supply and the region-cap *policy*, not selection. Shipped at
+  **`TARGET = 2,300`**, a margin below the ~2,428 ceiling chosen so the real
+  network-verified run (plate reachability across ~1,000+ candidates,
+  historically a multi-hour operation) succeeds without a second full attempt.
+  Verified in simulation first (measured plate-reachability rates: AIC 83.3%,
+  CMA 100%, MIA 100%, MET 96.7%, sampled 60/source in parallel) before
+  committing to the real run, to avoid guessing blind against an
+  hours-long operation.
+- **Vanitas is thin enough to genuinely miss `MIN_FACET_WORKS` and that's
+  not a bug.** Measured: 7 raw title-matched candidates across all four
+  museums, 2 exceed `MAX_TITLE` (existing bar, unrelated to this story) —
+  5 usable, zero margin for even one dead plate at selection time. Removed
+  from the hard `pool_quota_test` assertion (was going to gate `bin/ci` on
+  a coin flip); the real count still prints in `pool_report.md`'s theme
+  table, per the plan's own "shortfall logged, not papered over" line.
 - **Ukiyo-e Painting is NOT a culture-string `Tradition::TABLE` row** — the
   plan's draft assumed `ukiyo`/`floating world` would work as substring terms;
   measured against the mirrors, both fire on **zero** candidates (museums

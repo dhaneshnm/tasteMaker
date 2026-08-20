@@ -10,13 +10,23 @@ module Pool
   class Curator
     class Unmeetable < StandardError; end
 
-    # decisions/0016: 2,000 -> 3,000, additive. The first 2,000 are pinned
-    # (story 0026 step 2) — every bar below is a share, so it scales with the
-    # constant rather than needing its own edit.
-    TARGET = 3_000
+    # decisions/0016 targeted 2,000 -> 3,000, additive. Measured against the
+    # real mirrors (story 0026 curation run): MAX_REGION_SHARE=0.25 caps
+    # europe/south_asia/east_asia at floor(0.25*TARGET) each, and the CC0
+    # collections these four museums hold have almost no North American
+    # painting stock (531 total, pinned + new, hard ceiling) and little in
+    # the remaining regions combined (~76) — so pool size is bounded by
+    # `0.75*TARGET + min(607, 0.25*TARGET)`, which equals TARGET only up to
+    # ~2,428. 3,000 is mathematically unreachable without loosening the
+    # region cap that exists specifically to prevent monoculture (persona
+    # 3's complaint) — decisions/0016 falsification 1, logged there and in
+    # specs/0026-the-wider-pool/plan.md Deviations. TARGET = 2,300 is the
+    # additive ceiling with margin, not a swap: every 2,000 pinned works
+    # ship unchanged, per Jordan's contract.
+    TARGET = 2_300
     SEED = 1889 # the house shuffle seed, from db/seeds.rb
 
-    MAX_PER_ARTIST   = 5     # 0.17% at 3,000. Today's ceiling is 3 of 110 = 2.7%.
+    MAX_PER_ARTIST   = 5     # 0.22% at 2,300. Today's ceiling is 3 of 110 = 2.7%.
     MAX_SOURCE_SHARE = 0.50  # no museum owns the pool
     # No tradition owns it either. Without this the range floor is met by
     # draining whichever non-Western collection is deepest — the first run came
@@ -177,11 +187,12 @@ module Pool
     # Story 0026 step 2 — Jordan's contract: every published day and every
     # favorite points at one of these, so none may vanish in a re-curation.
     # Taken first, unconditionally, before any fill stage claims a cap slot —
-    # at TARGET=3,000 no cap can bind against candidates that already lived
-    # inside the OLD 2,000-work caps, so this should never raise in practice.
-    # If it ever does, that is a structural break in the contract, not a
-    # shortfall to report and move past: this codebase carries no deny-list
-    # carve-out for a pinned work, so every failure here is fatal, named.
+    # at any TARGET >= the pinned works' own original 2,000, no cap can bind
+    # against candidates that already lived inside those OLD, smaller caps,
+    # so this should never raise in practice. If it ever does, that is a
+    # structural break in the contract, not a shortfall to report and move
+    # past: this codebase carries no deny-list carve-out for a pinned work,
+    # so every failure here is fatal, named.
     def pin!
       failed = @pinned.reject { |candidate| take(candidate, resolve: false) }
       return if failed.empty?

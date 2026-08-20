@@ -1,13 +1,18 @@
 # Story 0026 step 3 — the demand stage's target list: theme name -> matcher
 # -> want. `user-research/0008` §3.1-3.7 measured both sides (demand ranking,
-# mirror stock) and named this the 3,000-work story's whole reason to exist.
+# mirror stock) and named this expansion story's whole reason to exist. The
+# pool's actual ceiling turned out to be 2,300, not the 3,000 decisions/0016
+# targeted (`Curator::TARGET`'s comment has the falsification) — the theme
+# quotas below are `want`ed against whatever pool the curator actually
+# produces; a theme short at the achieved size reports its shortfall in
+# `pool_report.md` rather than failing silently (see `Curator#fill_themes`).
 #
 # Each matcher reuses `Pool::Tradition.from_strings` or `Pool::TitleGenre.
 # infer` — the SAME pure functions that stamp the facet at seed time — so
 # "counted toward this theme's quota" and "lights the /feed facet" cannot
 # disagree (the 0023 `queue_healthy?` lesson, applied in advance, plan step
-# 3). `want` is an ABSOLUTE floor on the final 3,000-work pool (pinned +
-# new), not a delta the expansion must add on top — the pinned 2,000
+# 3). `want` is an ABSOLUTE floor on the final pool (pinned + new), not a
+# delta the expansion must add on top — the pinned 2,000
 # already carries some stock for most of these (0008's own numbers: Persian
 # ~19, thangka ~24, marine 1, still life/flowers 15...), and `Curator#take`
 # is idempotent against an already-pinned identity, so `fill_themes` only
