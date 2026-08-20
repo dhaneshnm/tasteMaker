@@ -54,6 +54,38 @@ CMA/MIA invariant that accounts for it), build the SPARQL client as a first-clas
 QID lookup in one `VALUES` clause — the dry-run already proved that query shape works
 live against Wikidata's public endpoint.
 
+**Re-sized by `user-research/0008`, 2026-08-20:** the 6.2% (124-work) figure was the
+floor from the 200-name QID list alone. A top-80-artist sample puts P135 reach at
+≥70% of works by attributed top artists, and movements are the highest-demand theme
+vocabulary readers look up (Impressionism 466K annual pageviews vs portrait 57K). The
+payoff is a movement facet, not a genre patch — and the hard part (artist
+reconciliation) is the same work the canonicalisation entry above needs. The two
+entries plus 0008's evidence are probably one story.
+
+### Tradition facet from culture strings — Better (range)
+
+Source: `user-research/0008-recognizable-themes.md` N3, 2026-08-20.
+
+~700 works (35% of pool) carry a nameable painting tradition in free-text
+culture/country strings — Mughal 102, Rajput 102, Pahari 84, Kalighat 44, Chinese 180,
+Japanese 276, Jain manuscript 52 — each drawing 15K–72K annual lookups, none
+expressible by any shipped facet. Persona 3's verbatim ask ("Mughal miniatures,
+ukiyo-e"). Cheapest demand-supply match found by 0008: a hand-checked mapping table
+over data already stored, riding the shipped facet UI/floor/URL machinery. No external
+dependency.
+
+### Genre fill v2: title/description keywords — Better (range)
+
+Source: `user-research/0008-recognizable-themes.md` N2/N5, 2026-08-20.
+
+Keyword probe over the 1,752 genre-nil works finds ~600–900 adjudicated fills
+plausible (Religious 302, Landscape 210, Portrait 163, Flowers 148 candidates …) vs
+248 shipped. Titles exist on every work, so this route reaches the CMA/MIA 80% that
+0022's museum-tag route structurally cannot. Adds a Flowers value — "paintings of
+flowers" is a top-3 autocomplete completion. Probe dictionary in
+`user-research/scripts/0008/pool_coverage.py` is the candidate list, not the fill;
+adjudication is the work.
+
 ### Rejected-memory for machine picks — — (untriaged)
 
 Source: eng review of `specs/0023-the-standing-order`, outside voice finding O7,

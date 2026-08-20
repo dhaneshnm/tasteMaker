@@ -1,0 +1,850 @@
+{
+ "generated_on": "2026-08-20",
+ "sample_frame": "top 80 attributed artist strings by work count",
+ "attributed_artist_strings": 851,
+ "attributed_works": 1383,
+ "sampled_works": 353,
+ "sampled_works_with_p135_artist": 249,
+ "p135_rate_in_sample": 0.705,
+ "movement_work_counts_in_sample": {
+  "Impressionism": 83,
+  "Post-impressionism": 33,
+  "Hudson River school": 29,
+  "French Realism": 23,
+  "Neoclassicism": 21,
+  "Symbolism": 19,
+  "Romanticism": 19,
+  "Expressionism": 18,
+  "Neo-impressionism": 14,
+  "realism": 13,
+  "Rococo": 11,
+  "Baroque": 9,
+  "Aestheticism": 8,
+  "Classicism": 5,
+  "Barbizon school": 5,
+  "Flemish Baroque painting": 5,
+  "Dada": 5,
+  "modern art": 5,
+  "Fauvism": 5,
+  "divisionism": 5,
+  "expressionism": 5,
+  "De Stijl": 5,
+  "Luminism": 5,
+  "Pont-Aven School": 5,
+  "synthetism": 5,
+  "primitivism": 5,
+  "cloisonnism": 5,
+  "Ky\u014d-Kan\u014d School": 5,
+  "Baroque painting": 5,
+  "Rimpa school": 4,
+  "Ashcan School": 4,
+  "American realism": 4,
+  "English painting": 4,
+  "Orientalism": 4,
+  "academic art": 4,
+  "Neo-Grec": 4,
+  "neo-Pompeian": 4,
+  "pointillism": 4,
+  "Naturalism": 4,
+  "Bauhaus": 3,
+  "Pre-Raphaelite Brotherhood": 3,
+  "Etruscan school": 3,
+  "German Renaissance": 3
+ },
+ "artists": [
+  {
+   "artist": "George Inness",
+   "works": 5,
+   "qid": "Q704868",
+   "matched_label": "George Inness",
+   "matched_description": "American landscape painter (1825-1894)",
+   "movements": [
+    "Hudson River school"
+   ]
+  },
+  {
+   "artist": "Gustave Courbet",
+   "works": 5,
+   "qid": "Q34618",
+   "matched_label": "Gustave Courbet",
+   "matched_description": "French painter (1819\u20131877)",
+   "movements": [
+    "French Realism"
+   ]
+  },
+  {
+   "artist": "Nicolas Poussin",
+   "works": 5,
+   "qid": "Q41554",
+   "matched_label": "Nicolas Poussin",
+   "matched_description": "French painter (1594-1665)",
+   "movements": [
+    "Classicism"
+   ]
+  },
+  {
+   "artist": "Camille Corot",
+   "works": 5,
+   "qid": "Q148475",
+   "matched_label": "Jean-Baptiste Camille Corot",
+   "matched_description": "French landscape and portrait painter and printmaker in etching (1796-1875)",
+   "movements": [
+    "Barbizon school",
+    "French Realism"
+   ]
+  },
+  {
+   "artist": "Henri de Toulouse-Lautrec",
+   "works": 5,
+   "qid": "Q82445",
+   "matched_label": "Henri de Toulouse-Lautrec",
+   "matched_description": "French painter and illustrator (1864\u20131901)",
+   "movements": [
+    "Post-impressionism"
+   ]
+  },
+  {
+   "artist": "Shibata Zeshin",
+   "works": 5,
+   "qid": "Q2386947",
+   "matched_label": "Shibata Zeshin",
+   "matched_description": "Japanese painter and lacquerer (1807\u20131891)",
+   "movements": []
+  },
+  {
+   "artist": "John Frederick Kensett",
+   "works": 5,
+   "qid": "Q982284",
+   "matched_label": "John Frederick Kensett",
+   "matched_description": "American artist (1816-1872)",
+   "movements": [
+    "Hudson River school"
+   ]
+  },
+  {
+   "artist": "Thomas Sully",
+   "works": 5,
+   "qid": "Q786545",
+   "matched_label": "Thomas Sully",
+   "matched_description": "American painter (1783-1872)",
+   "movements": [
+    "Neoclassicism"
+   ]
+  },
+  {
+   "artist": "Pierre-Auguste Renoir",
+   "works": 5,
+   "qid": "Q39931",
+   "matched_label": "Pierre-Auguste Renoir",
+   "matched_description": "French painter and sculptor (1841\u20131919)",
+   "movements": [
+    "Impressionism",
+    "Impressionism",
+    "Impressionism",
+    "Impressionism"
+   ]
+  },
+  {
+   "artist": "Henry Keller",
+   "works": 5,
+   "qid": "Q111227056",
+   "matched_label": "Henry Keller",
+   "matched_description": "American politician \u2013 Minnesota -Senate 1887-90 (District 40); Senate 1891-98 (District 45)",
+   "movements": []
+  },
+  {
+   "artist": "Thomas Cole",
+   "works": 5,
+   "qid": "Q334001",
+   "matched_label": "Thomas Cole",
+   "matched_description": "19th-century American painter (1801-1848)",
+   "movements": [
+    "Hudson River school"
+   ]
+  },
+  {
+   "artist": "Camille Pissarro",
+   "works": 5,
+   "qid": "Q134741",
+   "matched_label": "Camille Pissarro",
+   "matched_description": "Danish-French painter (1830-1903)",
+   "movements": [
+    "Impressionism",
+    "Neo-impressionism"
+   ]
+  },
+  {
+   "artist": "Winslow Homer",
+   "works": 5,
+   "qid": "Q344838",
+   "matched_label": "Winslow Homer",
+   "matched_description": "American landscape painter (1836\u20131910)",
+   "movements": [
+    "realism"
+   ]
+  },
+  {
+   "artist": "Probably Mexico",
+   "works": 5,
+   "qid": null,
+   "matched_label": null,
+   "matched_description": null,
+   "movements": []
+  },
+  {
+   "artist": "Peter Paul Rubens",
+   "works": 5,
+   "qid": "Q5599",
+   "matched_label": "Peter Paul Rubens",
+   "matched_description": "Flemish painter (1577\u20131640)",
+   "movements": [
+    "Baroque",
+    "Flemish Baroque painting"
+   ]
+  },
+  {
+   "artist": "Marsden Hartley",
+   "works": 5,
+   "qid": "Q553259",
+   "matched_label": "Marsden Hartley",
+   "matched_description": "American artist (1877\u20131943)",
+   "movements": [
+    "Dada",
+    "Expressionism"
+   ]
+  },
+  {
+   "artist": "Amedeo Modigliani",
+   "works": 5,
+   "qid": "Q120993",
+   "matched_label": "Amedeo Modigliani",
+   "matched_description": "Italian painter and sculptor (1884\u20131920)",
+   "movements": [
+    "modern art"
+   ]
+  },
+  {
+   "artist": "John Singleton Copley",
+   "works": 5,
+   "qid": "Q316016",
+   "matched_label": "John Singleton Copley",
+   "matched_description": "American painter (1738-1815)",
+   "movements": [
+    "realism"
+   ]
+  },
+  {
+   "artist": "Muhammad Rizavi Hindi",
+   "works": 5,
+   "qid": null,
+   "matched_label": null,
+   "matched_description": null,
+   "movements": []
+  },
+  {
+   "artist": "Alexis Jean Fournier",
+   "works": 5,
+   "qid": "Q16856160",
+   "matched_label": "Alexis Jean Fournier",
+   "matched_description": "US painter (1865-1948)",
+   "movements": []
+  },
+  {
+   "artist": "Wang Qinyun",
+   "works": 5,
+   "qid": "Q45570912",
+   "matched_label": "Wang Qinyun",
+   "matched_description": "Qing dynasty person CBDB = 121098",
+   "movements": []
+  },
+  {
+   "artist": "Henri Matisse",
+   "works": 5,
+   "qid": "Q5589",
+   "matched_label": "Henri Matisse",
+   "matched_description": "French artist (1869\u20131954)",
+   "movements": [
+    "Impressionism",
+    "Neo-impressionism",
+    "Fauvism",
+    "Post-impressionism",
+    "divisionism"
+   ]
+  },
+  {
+   "artist": "Fukuda Kod\u014djin",
+   "works": 5,
+   "qid": "Q98822317",
+   "matched_label": "Fukuda Kod\u00f6jin",
+   "matched_description": "Japanese painter (1865\u20131944)",
+   "movements": []
+  },
+  {
+   "artist": "Claude Monet",
+   "works": 5,
+   "qid": "Q296",
+   "matched_label": "Claude Monet",
+   "matched_description": "French painter (1840\u20131926)",
+   "movements": [
+    "Impressionism"
+   ]
+  },
+  {
+   "artist": "Gilbert Stuart",
+   "works": 5,
+   "qid": "Q41402",
+   "matched_label": "Gilbert Stuart",
+   "matched_description": "American painter (1755\u20131828)",
+   "movements": [
+    "Neoclassicism"
+   ]
+  },
+  {
+   "artist": "\u00c9douard Manet",
+   "works": 5,
+   "qid": "Q40599",
+   "matched_label": "\u00c9douard Manet",
+   "matched_description": "French painter (1832\u20131883)",
+   "movements": [
+    "Impressionism"
+   ]
+  },
+  {
+   "artist": "John Singer Sargent",
+   "works": 5,
+   "qid": "Q155626",
+   "matched_label": "John Singer Sargent",
+   "matched_description": "American painter (1856\u20131925)",
+   "movements": [
+    "Impressionism"
+   ]
+  },
+  {
+   "artist": "Ernst Ludwig Kirchner",
+   "works": 5,
+   "qid": "Q229272",
+   "matched_label": "Ernst Ludwig Kirchner",
+   "matched_description": "German painter, sculptor, engraver and printmaker (1880\u20131938)",
+   "movements": [
+    "Expressionism",
+    "expressionism"
+   ]
+  },
+  {
+   "artist": "Piet Mondrian",
+   "works": 5,
+   "qid": "Q151803",
+   "matched_label": "Piet Mondrian",
+   "matched_description": "Dutch painter (1872\u20131944)",
+   "movements": [
+    "Symbolism",
+    "Post-impressionism",
+    "De Stijl"
+   ]
+  },
+  {
+   "artist": "Sheikh Zain al-Din",
+   "works": 5,
+   "qid": null,
+   "matched_label": null,
+   "matched_description": null,
+   "movements": []
+  },
+  {
+   "artist": "Vincent van Gogh",
+   "works": 5,
+   "qid": "Q5582",
+   "matched_label": "Vincent van Gogh",
+   "matched_description": "Dutch painter (1853\u20131890)",
+   "movements": [
+    "Expressionism",
+    "Post-impressionism"
+   ]
+  },
+  {
+   "artist": "Childe Hassam",
+   "works": 5,
+   "qid": "Q737635",
+   "matched_label": "Childe Hassam",
+   "matched_description": "American painter (1859-1935)",
+   "movements": [
+    "Impressionism"
+   ]
+  },
+  {
+   "artist": "William Merritt Chase",
+   "works": 5,
+   "qid": "Q265820",
+   "matched_label": "William Merritt Chase",
+   "matched_description": "American painter (1849\u20131916)",
+   "movements": [
+    "Impressionism"
+   ]
+  },
+  {
+   "artist": "Thomas Eakins",
+   "works": 5,
+   "qid": "Q214905",
+   "matched_label": "Thomas Eakins",
+   "matched_description": "American painter (1844\u20131916)",
+   "movements": [
+    "French Realism"
+   ]
+  },
+  {
+   "artist": "Martin Johnson Heade",
+   "works": 5,
+   "qid": "Q3123472",
+   "matched_label": "Martin Johnson Heade",
+   "matched_description": "American painter (1819-1904)",
+   "movements": [
+    "Hudson River school",
+    "Luminism"
+   ]
+  },
+  {
+   "artist": "Paul Gauguin",
+   "works": 5,
+   "qid": "Q37693",
+   "matched_label": "Paul Gauguin",
+   "matched_description": "French painter and printmaker (1848\u20131903)",
+   "movements": [
+    "Impressionism",
+    "Symbolism",
+    "Post-impressionism",
+    "Pont-Aven School",
+    "synthetism",
+    "primitivism",
+    "cloisonnism"
+   ]
+  },
+  {
+   "artist": "James McNeill Whistler",
+   "works": 5,
+   "qid": "Q203643",
+   "matched_label": "James McNeill Whistler",
+   "matched_description": "American painter (1834-1903)",
+   "movements": [
+    "Aestheticism"
+   ]
+  },
+  {
+   "artist": "Kano Sanraku",
+   "works": 5,
+   "qid": "Q3064625",
+   "matched_label": "Kan\u014d Sanraku",
+   "matched_description": "painter (1559-1635)",
+   "movements": [
+    "Ky\u014d-Kan\u014d School"
+   ]
+  },
+  {
+   "artist": "Benjamin West",
+   "works": 5,
+   "qid": "Q313498",
+   "matched_label": "Benjamin West",
+   "matched_description": "18th- and 19th-century English painter (1738\u20131820)",
+   "movements": [
+    "Neoclassicism",
+    "Romanticism"
+   ]
+  },
+  {
+   "artist": "Sanford Robinson Gifford",
+   "works": 5,
+   "qid": "Q110896330",
+   "matched_label": "Sanford Robinson Gifford",
+   "matched_description": "American ophthalmologist",
+   "movements": []
+  },
+  {
+   "artist": "Xiang Shengmo",
+   "works": 5,
+   "qid": "Q3570960",
+   "matched_label": "Xiang Shengmo",
+   "matched_description": "Chinese painter (1597-1658)",
+   "movements": []
+  },
+  {
+   "artist": "Anthony van Dyck",
+   "works": 5,
+   "qid": "Q150679",
+   "matched_label": "Anthony van Dyck",
+   "matched_description": "Flemish Baroque artist (1599\u20131641)",
+   "movements": [
+    "Baroque painting"
+   ]
+  },
+  {
+   "artist": "Albert Bierstadt",
+   "works": 5,
+   "qid": "Q77132",
+   "matched_label": "Albert Bierstadt",
+   "matched_description": "American painter (1830\u20131902)",
+   "movements": [
+    "Hudson River school"
+   ]
+  },
+  {
+   "artist": "Tawaraya S\u014dtatsu",
+   "works": 4,
+   "qid": "Q1281252",
+   "matched_label": "Tawara S\u014dtatsu",
+   "matched_description": "Japanese artist (1570\u20131643)",
+   "movements": [
+    "Rimpa school"
+   ]
+  },
+  {
+   "artist": "Yamamoto Baiitsu",
+   "works": 4,
+   "qid": "Q3571447",
+   "matched_label": "Yamamoto Baiitsu",
+   "matched_description": "Japanese painter (1783-1856)",
+   "movements": []
+  },
+  {
+   "artist": "Sesson Sh\u016bkei",
+   "works": 4,
+   "qid": "Q3480606",
+   "matched_label": "Sesson Shukei",
+   "matched_description": "Japanese artist (1504-1589)",
+   "movements": []
+  },
+  {
+   "artist": "Fan Qi",
+   "works": 4,
+   "qid": "Q131168534",
+   "matched_label": "Fan Qi",
+   "matched_description": "researcher (ORCID 0000-0003-1461-7100)",
+   "movements": []
+  },
+  {
+   "artist": "George Bellows",
+   "works": 4,
+   "qid": "Q167132",
+   "matched_label": "George Bellows",
+   "matched_description": "American painter (1882-1925)",
+   "movements": [
+    "Ashcan School",
+    "American realism"
+   ]
+  },
+  {
+   "artist": "Urakami Shunkin",
+   "works": 4,
+   "qid": null,
+   "matched_label": null,
+   "matched_description": null,
+   "movements": []
+  },
+  {
+   "artist": "Eug\u00e8ne Delacroix",
+   "works": 4,
+   "qid": "Q33477",
+   "matched_label": "Eug\u00e8ne Delacroix",
+   "matched_description": "French painter (1798\u20131863)",
+   "movements": [
+    "Romanticism"
+   ]
+  },
+  {
+   "artist": "Paul Cezanne",
+   "works": 4,
+   "qid": "Q35548",
+   "matched_label": "Paul C\u00e9zanne",
+   "matched_description": "French painter (1839\u20131906)",
+   "movements": [
+    "Post-impressionism"
+   ]
+  },
+  {
+   "artist": "Govardhan",
+   "works": 4,
+   "qid": "Q87002153",
+   "matched_label": "Govardhan",
+   "matched_description": "male given name",
+   "movements": []
+  },
+  {
+   "artist": "Gustave Caillebotte",
+   "works": 4,
+   "qid": "Q295144",
+   "matched_label": "Gustave Caillebotte",
+   "matched_description": "French painter (1848\u20131894)",
+   "movements": [
+    "Impressionism"
+   ]
+  },
+  {
+   "artist": "Jasper F. Cropsey",
+   "works": 4,
+   "qid": "Q1451318",
+   "matched_label": "Jasper Francis Cropsey",
+   "matched_description": "American painter (1823\u20131900)",
+   "movements": []
+  },
+  {
+   "artist": "Thomas Gainsborough",
+   "works": 4,
+   "qid": "Q192720",
+   "matched_label": "Thomas Gainsborough",
+   "matched_description": "English portrait and landscape painter (1727-1788)",
+   "movements": [
+    "Rococo",
+    "English painting"
+   ]
+  },
+  {
+   "artist": "Miyagawa Ch\u014dshun",
+   "works": 4,
+   "qid": "Q3317298",
+   "matched_label": "Miyagawa Ch\u014dshun",
+   "matched_description": "painter (1683-1753)",
+   "movements": []
+  },
+  {
+   "artist": "Jean-L\u00e9on G\u00e9r\u00f4me",
+   "works": 4,
+   "qid": "Q212499",
+   "matched_label": "Jean-L\u00e9on G\u00e9r\u00f4me",
+   "matched_description": "French painter and sculptor (1824\u20131904)",
+   "movements": [
+    "Orientalism",
+    "academic art",
+    "Neo-Grec",
+    "neo-Pompeian"
+   ]
+  },
+  {
+   "artist": "Georges Seurat",
+   "works": 4,
+   "qid": "Q34013",
+   "matched_label": "Georges Seurat",
+   "matched_description": "French painter (1859-1891)",
+   "movements": [
+    "Neo-impressionism",
+    "Post-impressionism",
+    "pointillism"
+   ]
+  },
+  {
+   "artist": "Wang Chen",
+   "works": 4,
+   "qid": "Q469911",
+   "matched_label": "Wang Chen",
+   "matched_description": "Hong Kong badminton player",
+   "movements": []
+  },
+  {
+   "artist": "Rosa Bonheur",
+   "works": 4,
+   "qid": "Q241732",
+   "matched_label": "Rosa Bonheur",
+   "matched_description": "French artist (1822-1899)",
+   "movements": [
+    "Naturalism",
+    "French Realism"
+   ]
+  },
+  {
+   "artist": "Jean-Fran\u00e7ois Millet",
+   "works": 4,
+   "qid": "Q148458",
+   "matched_label": "Jean-Fran\u00e7ois Millet",
+   "matched_description": "French painter (1814\u20131875)",
+   "movements": [
+    "French Realism"
+   ]
+  },
+  {
+   "artist": "Chen Hongshou",
+   "works": 4,
+   "qid": "Q588110",
+   "matched_label": "Chen Hongshou",
+   "matched_description": "Chinese artist (1598-1652)",
+   "movements": []
+  },
+  {
+   "artist": "Gao Qipei",
+   "works": 4,
+   "qid": "Q698454",
+   "matched_label": "Gao Qipei",
+   "matched_description": "Chinese artist (1660-1734)",
+   "movements": []
+  },
+  {
+   "artist": "Frederic Edwin Church",
+   "works": 4,
+   "qid": "Q366212",
+   "matched_label": "Frederic Edwin Church",
+   "matched_description": "American landscape painter (1826\u20131900)",
+   "movements": [
+    "Hudson River school"
+   ]
+  },
+  {
+   "artist": "Eastman Johnson",
+   "works": 4,
+   "qid": "Q1278282",
+   "matched_label": "Eastman Johnson",
+   "matched_description": "American artist (1824-1906)",
+   "movements": []
+  },
+  {
+   "artist": "Kenk\u014d Sh\u014dkei",
+   "works": 4,
+   "qid": "Q3482781",
+   "matched_label": "Kenk\u014d Sh\u014dkei",
+   "matched_description": "Japanese painter",
+   "movements": []
+  },
+  {
+   "artist": "Fran\u00e7ois Boucher",
+   "works": 4,
+   "qid": "Q180932",
+   "matched_label": "Fran\u00e7ois Boucher",
+   "matched_description": "French painter (1703\u20131770)",
+   "movements": [
+    "Rococo"
+   ]
+  },
+  {
+   "artist": "Auguste Renoir",
+   "works": 4,
+   "qid": "Q39931",
+   "matched_label": "Pierre-Auguste Renoir",
+   "matched_description": "French painter and sculptor (1841\u20131919)",
+   "movements": [
+    "Impressionism",
+    "Impressionism",
+    "Impressionism",
+    "Impressionism"
+   ]
+  },
+  {
+   "artist": "Francisco de Zurbar\u00e1n",
+   "works": 4,
+   "qid": "Q209615",
+   "matched_label": "Francisco de Zurbar\u00e1n",
+   "matched_description": "Spanish painter (1598\u20131664)",
+   "movements": [
+    "Baroque"
+   ]
+  },
+  {
+   "artist": "Jacob Eichholtz",
+   "works": 4,
+   "qid": "Q6118567",
+   "matched_label": "Jacob Eichholtz",
+   "matched_description": "American painter (1776-1842)",
+   "movements": [
+    "Romanticism"
+   ]
+  },
+  {
+   "artist": "Elihu Vedder",
+   "works": 3,
+   "qid": "Q389726",
+   "matched_label": "Elihu Vedder",
+   "matched_description": "American artist (1836\u20131923)",
+   "movements": [
+    "Symbolism",
+    "realism"
+   ]
+  },
+  {
+   "artist": "Berthe Morisot",
+   "works": 3,
+   "qid": "Q105320",
+   "matched_label": "Berthe Morisot",
+   "matched_description": "French painter (1841-1895)",
+   "movements": [
+    "Impressionism"
+   ]
+  },
+  {
+   "artist": "Vasily Kandinsky",
+   "works": 3,
+   "qid": "Q61064",
+   "matched_label": "Wassily Kandinsky",
+   "matched_description": "avant-garde painter of Russian origin (1866-1944)",
+   "movements": [
+    "Expressionism",
+    "Bauhaus",
+    "Symbolism"
+   ]
+  },
+  {
+   "artist": "Angelica Kauffmann",
+   "works": 3,
+   "qid": "Q123098",
+   "matched_label": "Angelica Kauffmann",
+   "matched_description": "Swiss artist (1741\u20131807)",
+   "movements": [
+    "Neoclassicism"
+   ]
+  },
+  {
+   "artist": "Th\u00e9odore Gericault",
+   "works": 3,
+   "qid": "Q184212",
+   "matched_label": "Th\u00e9odore G\u00e9ricault",
+   "matched_description": "French painter (1791\u20131824)",
+   "movements": [
+    "Romanticism"
+   ]
+  },
+  {
+   "artist": "Francisco Jos\u00e9 de Goya y Lucientes",
+   "works": 3,
+   "qid": "Q5432",
+   "matched_label": "Francisco Goya",
+   "matched_description": "Spanish painter and printmaker (1746\u20131828)",
+   "movements": [
+    "Romanticism",
+    "Rococo"
+   ]
+  },
+  {
+   "artist": "Henry Ward Ranger",
+   "works": 3,
+   "qid": "Q5729856",
+   "matched_label": "Henry Ward Ranger",
+   "matched_description": "American artist (1858-1916)",
+   "movements": []
+  },
+  {
+   "artist": "Frederic, Lord Leighton",
+   "works": 3,
+   "qid": "Q160252",
+   "matched_label": "Frederic Leighton",
+   "matched_description": "English painter and sculptor (1830\u20131896)",
+   "movements": [
+    "Neoclassicism",
+    "Symbolism",
+    "Pre-Raphaelite Brotherhood",
+    "Aestheticism",
+    "Etruscan school"
+   ]
+  },
+  {
+   "artist": "Song Xu",
+   "works": 3,
+   "qid": "Q101465138",
+   "matched_label": "Song Xu",
+   "matched_description": "researcher ORCID 0000-0002-6760-1703",
+   "movements": []
+  },
+  {
+   "artist": "Albrecht D\u00fcrer",
+   "works": 3,
+   "qid": "Q5580",
+   "matched_label": "Albrecht D\u00fcrer",
+   "matched_description": "German painter, printmaker, mathematician, and theorist (1471-1528)",
+   "movements": [
+    "German Renaissance"
+   ]
+  }
+ ]
+}

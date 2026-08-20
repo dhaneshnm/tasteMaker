@@ -1,0 +1,195 @@
+{
+ "generated_on": "2026-08-20",
+ "pool_size": 2000,
+ "genre": {
+  "shipped": {
+   "Portrait": 113,
+   "Landscape": 76,
+   "Religious Art": 25,
+   "Still Life": 15,
+   "Animal Painting": 8,
+   "Mythological Art": 4,
+   "Nude": 3,
+   "Battle Painting": 1,
+   "Cityscape": 1,
+   "Marine Art": 1,
+   "Genre Scene": 1
+  },
+  "shipped_total": 248,
+  "keyword_probe_headroom": {
+   "Portrait": {
+    "probe_hits_on_genre_nil": 163,
+    "sample_titles": [
+     "Portrait of Diego de \u00c1greda y Mart\u00ednez de Tejada y Cabez\u00f3n, 1st Conde de \u00c1greda",
+     "Portrait of John Scott Bradstreet",
+     "Self-Portrait with Dr. Arrieta",
+     "Portrait of Nawah General Firoz Khan",
+     "Portrait of Robert Erwin Gray"
+    ]
+   },
+   "Landscape": {
+    "probe_hits_on_genre_nil": 210,
+    "sample_titles": [
+     "A Winter Sky",
+     "A Holiday",
+     "View of Lake Pepin, Minnesota",
+     "Landscape with Pines",
+     "View of Niagara Falls"
+    ]
+   },
+   "Still Life": {
+    "probe_hits_on_genre_nil": 27,
+    "sample_titles": [
+     "Still Life with Blue Pitcher",
+     "Roses in a Vase",
+     "Abundant Fruit",
+     "Still life with grapes, apples, chestnuts, almonds, acorns and a red clay bottle",
+     "Still Life: Bouquet of Flowers Emerging from the Grass"
+    ]
+   },
+   "Religious Art": {
+    "probe_hits_on_genre_nil": 302,
+    "sample_titles": [
+     "Seated Amitabha with Attendants",
+     "Baby Krishna Asking for Butter from Yashoda, from a Kalighat album",
+     "The Assumption of the Virgin",
+     "Tantric Devi on Shiva, from a Mandi Devi Series",
+     "Kannon"
+    ]
+   },
+   "Marine Art": {
+    "probe_hits_on_genre_nil": 12,
+    "sample_titles": [
+     "Seascape",
+     "Fishmarket",
+     "Stormy Sea",
+     "Seascape with Barge and Breakwater",
+     "Gloucester Harbor"
+    ]
+   },
+   "Cityscape": {
+    "probe_hits_on_genre_nil": 1,
+    "sample_titles": [
+     "European Costume Scene"
+    ]
+   },
+   "Mythological Art": {
+    "probe_hits_on_genre_nil": 24,
+    "sample_titles": [
+     "Diana and Actaeon (Diana Surprised in Her Bath)",
+     "Diana or Artemis, Goddess of the Hunt",
+     "Two Muses (Erato and Melpomene)",
+     "Nymph of the Luo River",
+     "Young Woman in Undergarments"
+    ]
+   },
+   "Animal Painting": {
+    "probe_hits_on_genre_nil": 192,
+    "sample_titles": [
+     "Two Cranes and a Pine Tree",
+     "Tantric Devi on Shiva, from a Mandi Devi Series",
+     "The Bird's Nest Patriarch",
+     "Landscape with Pines",
+     "Long-tailed Rooster"
+    ]
+   },
+   "Genre Scene": {
+    "probe_hits_on_genre_nil": 17,
+    "sample_titles": [
+     "The Blessed Mother",
+     "Fishmarket",
+     "This Little Pig Went to Market",
+     "A View of the Northern Mountain in Kyoto along the San'ind\u014d Road",
+     "Return from the Fields"
+    ]
+   },
+   "Nude": {
+    "probe_hits_on_genre_nil": 11,
+    "sample_titles": [
+     "Dream Castle in the Sky",
+     "Bathers Playing with a Crab",
+     "Study for \"Bathers at Asni\u00e8res\"",
+     "A Bather",
+     "Beach Study (verso)"
+    ]
+   },
+   "Flowers": {
+    "probe_hits_on_genre_nil": 148,
+    "sample_titles": [
+     "Peonies and Rocks",
+     "Fragrance of the Orchids",
+     "Landscape with Pines",
+     "Palace Ladies",
+     "Long-tailed Rooster"
+    ]
+   }
+  },
+  "note": "probe hits are candidates needing adjudication, not fills"
+ },
+ "medium": {
+  "paint_type": {
+   "oil": 922,
+   "tempera": 457,
+   "ink": 761,
+   "watercolor": 56,
+   "gouache": 8,
+   "acrylic": 1,
+   "pastel": 0,
+   "fresco": 2,
+   "lacquer": 4,
+   "gold": 484,
+   "charcoal": 1,
+   "graphite": 43,
+   "enamel": 0
+  },
+  "support": {
+   "canvas": 780,
+   "paper": 815,
+   "silk": 180,
+   "panel/wood": 251,
+   "plaster": 4,
+   "cloth/cotton": 25
+  },
+  "format": {
+   "hanging scroll": 193,
+   "handscroll": 19,
+   "folding screen": 83,
+   "album leaf": 19,
+   "fan": 2,
+   "thangka": 0
+  },
+  "empty_medium_field": 0
+ },
+ "tradition": {
+  "Mughal painting": 102,
+  "Pahari painting": 84,
+  "Rajput painting": 102,
+  "Kalighat painting": 44,
+  "Jain manuscript": 52,
+  "Japanese painting": 276,
+  "Ukiyo-e (Edo)": 18,
+  "Chinese painting": 180,
+  "Korean painting": 32,
+  "Persian/Islamic": 19,
+  "Tibetan/Nepalese": 24
+ },
+ "period_facet_shipped": {
+  "19th century": 692,
+  "18th century": 357,
+  "17th century": 335,
+  "20th century": 280,
+  "16th century": 143,
+  "15th century": 99,
+  "14th century": 26,
+  "13th century": 25,
+  "(none)": 18,
+  "12th century": 11,
+  "3rd century": 4,
+  "10th century": 3,
+  "7th century": 2,
+  "5th century": 2,
+  "2nd century": 2,
+  "11th century": 2,
+  "8th century": 1
+ }
+}
