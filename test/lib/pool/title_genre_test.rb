@@ -141,13 +141,15 @@ class Pool::TitleGenreTest < ActiveSupport::TestCase
     Pathname.new(file.path)
   end
 
+  def create_painting(source_id, title:, genre: nil)
+    Painting.create!(source: "met", source_id: source_id, title: title,
+      image_url_800: paintings(:woodcut).image_url_800, genre: genre)
+  end
+
   test "backfill! recomputes the full ladder: tag route wins, title route fills, unmatched stays nil" do
-    tagged = Painting.create!(source: "met", source_id: 991_001, title: "Portrait of Nobody",
-      image_url_800: paintings(:woodcut).image_url_800)
-    title_route = Painting.create!(source: "met", source_id: 991_002, title: "Quiet Seascape",
-      image_url_800: paintings(:woodcut).image_url_800)
-    unmatched = Painting.create!(source: "met", source_id: 991_003, title: "Composition VII",
-      image_url_800: paintings(:woodcut).image_url_800)
+    tagged = create_painting(991_001, title: "Portrait of Nobody")
+    title_route = create_painting(991_002, title: "Quiet Seascape")
+    unmatched = create_painting(991_003, title: "Composition VII")
 
     manifest = tmp_manifest([
       { source: "met", source_id: 991_001, genre: "Landscape" } # museum tag disagrees with the title — tag wins
@@ -160,8 +162,7 @@ class Pool::TitleGenreTest < ActiveSupport::TestCase
   end
 
   test "backfill! retracts a stale title-route value after the dictionary narrows — the correction path" do
-    stale = Painting.create!(source: "met", source_id: 991_004, title: "Composition VII",
-      image_url_800: paintings(:woodcut).image_url_800, genre: "Genre Scene")
+    stale = create_painting(991_004, title: "Composition VII", genre: "Genre Scene")
 
     Pool::TitleGenre.backfill!(manifest_path: tmp_manifest([]))
 
@@ -171,14 +172,9 @@ class Pool::TitleGenreTest < ActiveSupport::TestCase
   # ---- audit (plan D5/F5/F6) -----------------------------------------------
 
   test "audit samples only title-route rows and reconciles against the probe ceilings" do
-    tag_row = Painting.create!(source: "met", source_id: 991_100, title: "Tagged by museum",
-      image_url_800: paintings(:woodcut).image_url_800, genre: "Portrait")
-    title_rows = 3.times.map do |i|
-      Painting.create!(source: "met", source_id: 991_101 + i, title: "Quiet Seascape #{i}",
-        image_url_800: paintings(:woodcut).image_url_800, genre: "Marine Art")
-    end
-    Painting.create!(source: "met", source_id: 991_104, title: "Peonies",
-      image_url_800: paintings(:woodcut).image_url_800, genre: "Flowers")
+    tag_row = create_painting(991_100, title: "Tagged by museum", genre: "Portrait")
+    title_rows = 3.times.map { |i| create_painting(991_101 + i, title: "Quiet Seascape #{i}", genre: "Marine Art") }
+    create_painting(991_104, title: "Peonies", genre: "Flowers")
 
     manifest = tmp_manifest([ { source: "met", source_id: 991_100, genre: "Portrait" } ])
     result = Pool::TitleGenre.audit(sample_size: 10, manifest_path: manifest)
@@ -193,12 +189,8 @@ class Pool::TitleGenreTest < ActiveSupport::TestCase
   end
 
   test "audit's weighted sample surfaces the smallest bucket" do
-    9.times do |i|
-      Painting.create!(source: "met", source_id: 991_200 + i, title: "Portrait of Number #{i}",
-        image_url_800: paintings(:woodcut).image_url_800, genre: "Portrait")
-    end
-    Painting.create!(source: "met", source_id: 991_210, title: "Lone Bouquet",
-      image_url_800: paintings(:woodcut).image_url_800, genre: "Flowers")
+    9.times { |i| create_painting(991_200 + i, title: "Portrait of Number #{i}", genre: "Portrait") }
+    create_painting(991_210, title: "Lone Bouquet", genre: "Flowers")
 
     result = Pool::TitleGenre.audit(sample_size: 5, manifest_path: tmp_manifest([]))
 

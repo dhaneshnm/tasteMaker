@@ -90,7 +90,7 @@ module Pool
       ] ],
       [ "Flowers", [
         /\bbouquet\b/i,
-        /\bvase of (flowers|roses|tulips|peonies|lilies)\b/i,
+        /\bvase of (#{FLOWER_NOUNS.join("|")})\b/i,
         /\bbirds? and flowers?\b/i,
         /\A(#{FLOWER_NOUNS.join("|")})\b/i
       ] ],
@@ -135,8 +135,6 @@ module Pool
       end
     end
 
-    BackfillResult = Struct.new(:updated, :total, keyword_init: true)
-
     def self.backfill!(manifest_path: Pool::MANIFEST)
       tag_route = manifest_genres(manifest_path: manifest_path)
       updated = 0
@@ -149,7 +147,9 @@ module Pool
         painting.update_column(:genre, value)
         updated += 1
       end
-      BackfillResult.new(updated: updated, total: total)
+      # Same two-field shape as Tradition's — reused, not redefined (this
+      # file's twin, per the header comment).
+      Pool::Tradition::BackfillResult.new(updated: updated, total: total)
     end
 
     # The 0008 §3.6 probe's candidate counts over the genre-nil works —
@@ -170,29 +170,32 @@ module Pool
     # Precision sample is 100 rows, not 50 (plan F5): with a 95% gate, a
     # 50-row sample fails ~46% of the time when true precision is exactly
     # 95% — the gate would be a coin flip at its own bar. Weighted toward
-    # the smallest bucket (the 0024 `SMALLEST_BUCKET_WEIGHT` lesson): a
-    # small bucket's errors move its own percentage most, and an unweighted
-    # draw would make Marine/Flowers errors structurally invisible under
-    # Portrait's bulk.
-    SMALLEST_BUCKET_WEIGHT = 0.2
+    # the smallest bucket, using `Tradition`'s own weight constant directly
+    # (not a second copy of the same number) — a small bucket's errors move
+    # its own percentage most, and an unweighted draw would make Marine/
+    # Flowers errors structurally invisible under Portrait's bulk.
+    SMALLEST_BUCKET_WEIGHT = Pool::Tradition::SMALLEST_BUCKET_WEIGHT
 
     # Audits TITLE-ROUTE fills only — tag-route values are the museum's own
     # and were 0022's audit's job. A row is title-route when the manifest
     # carries no genre for it but `infer` fires on its title.
     def self.audit(sample_size: 100, manifest_path: Pool::MANIFEST)
       tag_route = manifest_genres(manifest_path: manifest_path)
-      title_route = Painting.where.not(genre: nil).reject do |p|
-        tag_route[[ p.source, p.source_id.to_s ]].present?
-      end
+      title_route = Painting.where.not(genre: nil)
+        .select(:id, :source, :source_id, :genre, :title)
+        .reject { |p| tag_route[[ p.source, p.source_id.to_s ]].present? }
 
+      # One query for the WHOLE facet's per-value counts (simplify: was one
+      # `Painting.where(genre: value).count` per reconciliation row) — the
+      # same `facet_counts` every other facet consumer already uses.
+      total_counts = Painting.facet_counts(:genre)
       counts = title_route.group_by(&:genre).transform_values(&:size)
       reconciliation = (PROBE_CEILINGS.keys | counts.keys).sort.map do |value|
         shipped = counts[value] || 0
         ceiling = PROBE_CEILINGS[value]
-        deficit = Painting::MIN_FACET_WORKS - Painting.where(genre: value).count
         ReconciliationRow.new(value: value, shipped: shipped, ceiling: ceiling,
           starved?: ceiling && shipped < ceiling * 0.25,
-          sub_floor?: deficit.positive?)
+          sub_floor?: total_counts[value].to_i < Painting::MIN_FACET_WORKS)
       end
 
       AuditResult.new(reconciliation: reconciliation,
