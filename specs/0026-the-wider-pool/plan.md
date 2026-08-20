@@ -216,6 +216,32 @@ predictions 1–2 get their first read here; the Sep 20 read is the binding one.
 
 Implement time, 2026-08-20:
 
+- **`/code-review` (4 findings, all applied):** (1) the committed
+  `pool_report.md` theme table was curation-time-only and could claim a
+  genre-route theme (Icon, Vanitas) cleared its floor when the final,
+  post-`genre_fill` count said otherwise — fixed by restructuring
+  `Pool::ThemeTargets::TABLE` to `[name, kind, values, want]` (one
+  declaration, not a precomputed matcher), adding
+  `Pool::Report.theme_recount_section` (reads the committed manifest through
+  the FULL seed ladder, tag > title) called from `pool:genre_fill` and
+  `pool:report`, and appending it to the committed report. Surfaced a fourth
+  affected theme the curation-time table also missed: **Marine 12→11**
+  (still comfortably clears `MIN_FACET_WORKS`). (2) `ukiyo_e?`'s artist match
+  used `Pool.word_match?` without `case_insensitive: true` — a future
+  differently-cased mirror re-fetch could silently miss; fixed. (3) `pin!`
+  took every `@pinned` candidate unconditionally, not checking whether
+  `dedup` had already discarded one to a pinned-vs-pinned collision (should
+  be structurally impossible today — pinned works already survived one
+  dedup pass in the original curation — but not provably so forever, since
+  `dedup_key`'s own definition changed once already, story 0019 C3); `pin!`
+  now checks survivorship against the post-dedup `pool` and raises if a
+  pinned identity didn't make it, same "every failure here is fatal" stance
+  as the rest of the method. (4) a pinned work whose ORIGINAL image download
+  silently failed has no path back to detection now that pins skip the
+  plate resolver — named as an accepted, not-yet-observed risk in IDEAS.md
+  Inbox rather than reverting the resolver-skip (which would undo the
+  ~2,000-request-per-run savings for a hypothetical, unconfirmed problem —
+  the audit's mechanical sample found no evidence of it in the shipped pool).
 - **The real curation run: 2,000 → 2,300 works, all 10 theme quotas cleared
   AT CURATION TIME, 9 of 10 bars green with margin.** Rejected before
   selection: 2,982 duplicates, 843 title-too-long, 25 no-plate, 23 anonymous,

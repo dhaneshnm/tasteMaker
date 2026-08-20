@@ -73,14 +73,21 @@ ones. Shipped at **`Pool::Curator::TARGET = 2,300`** (a safety margin below the
 multi-hour attempt), not 3,000. Not reopened: the region cap itself is not loosened —
 that would resolve the falsification by deleting the thing it's protecting.
 
-Prediction 2 (per-theme floors) reads separately, partially falsified: 8 of 10
-targeted themes clear `MIN_FACET_WORKS` at the achieved size. Persian miniature
-falls short at curation time (19/25). Icon and Vanitas both cleared at curation
-time (5/5 each) and then fell under floor once `pool:genre_fill` ran — the
-museums' own tags legitimately outrank a title-inferred value per the seed
-ladder, and both themes had zero margin to begin with (5 usable candidates each
-in all four museums combined). Icon lands at 4, Vanitas at 2. All three logged
-per-theme in `pool_report.md`, none gated in `bin/ci` (see
-`test/lib/pool_quota_test.rb`).
+Prediction 2 (per-theme floors) reads separately, partially falsified: 7 of 10
+targeted themes clear their `want` at the final, post-pipeline count (all 10
+clear `MIN_FACET_WORKS = 5`, the actual display-floor bar — Icon and Vanitas
+are the two that don't clear their higher story-level `want`). Persian
+miniature falls short from curation time onward (19/25, unaffected by
+`genre_fill` — a tradition-route theme). Icon, Vanitas, and Marine all cleared
+their `want` at curation time and then fell (or, for Marine, narrowly missed)
+once `pool:genre_fill` ran — the museums' own tags legitimately outrank a
+title-inferred value per the seed ladder. Icon 5→4, Vanitas 5→2 (zero margin
+to begin with, 5 usable candidates each in all four museums combined), Marine
+12→11 (still comfortably above `MIN_FACET_WORKS`). Code review caught that the
+curation-time report couldn't see this (a genre-route theme's tag data doesn't
+exist yet when `fill_themes` runs) — `Pool::Report.theme_recount_section` now
+recomputes every theme from the committed manifest through the full ladder
+after `genre_fill`, and `pool_report.md` carries both tables. None of this
+gates `bin/ci` (see `test/lib/pool_quota_test.rb`).
 
 Full numbers: `specs/0026-the-wider-pool/plan.md` Deviations.

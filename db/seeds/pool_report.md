@@ -169,3 +169,21 @@ Read both lists before seeding. A place or culture string here is `Painting::NOT
 - **no plate** — 25
 - **anonymous** — 23
 - **too small** — 11
+
+
+## Theme quotas, final (story 0026 — post pool:genre_fill)
+
+| Theme | Want | Have | Shortfall |
+|---|---:|---:|---:|
+| Persian miniature | 25 | 19 | 6 |
+| Thangka | 15 | 30 | — |
+| Still life / flowers | 40 | 71 | — |
+| Marine | 12 | 11 | 1 |
+| Mythological | 15 | 28 | — |
+| Ukiyo-e (strict) | 5 | 24 | — |
+| Madhubani | 5 | 6 | — |
+| Vanitas / trompe-l'œil | 5 | 2 | 3 |
+| Icon | 5 | 4 | 1 |
+| Cityscape | 10 | 10 | — |
+
+**4 theme(s) short of their floor after the full pipeline** — decisions/0016 falsification 2, logged here rather than only in the curation-time table above (which can disagree once `genre_fill` reassigns a tag).

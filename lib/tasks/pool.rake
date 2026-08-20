@@ -150,6 +150,8 @@ namespace :pool do
     puts Pool::Report.artist_slug_section
     puts
     puts Pool::Report.genre_section
+    puts
+    puts Pool::Report.theme_recount_section
   end
 
   # Story 0022 Release 2. One targeted API call per AIC/MET work already in
@@ -164,6 +166,19 @@ namespace :pool do
     puts "  #{result.skipped_ids.join(', ')}" if result.skipped_ids.any?
     puts "matched a genre: #{result.matched}"
     puts ENV["DRY_RUN"].present? ? "DRY_RUN — manifest not written" : "db/seeds/paintings.json updated"
+
+    # Story 0026 (code review finding): genre_fill's own tag data can
+    # invalidate `pool:curate`'s theme table (a candidate counted as e.g.
+    # "Vanitas" at curation time can ship tagged "Still Life" instead,
+    # since tag > title in the seed ladder) — recount from the manifest
+    # genre_fill just wrote and append the corrected table to the committed
+    # report, so pool_report.md never claims a theme cleared its floor when
+    # the final pipeline output says otherwise.
+    unless ENV["DRY_RUN"].present?
+      recount = Pool::Report.theme_recount_section
+      puts "\n#{recount}"
+      Pool::REPORT.write("#{Pool::REPORT.read}\n\n#{recount}\n")
+    end
   end
 
   # Story 0019. Run it BEFORE re-curating to get the baseline, and after to get

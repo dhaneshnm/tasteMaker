@@ -90,7 +90,7 @@ module Pool
 
     def self.ukiyo_e?(artist:, medium:)
       return false if artist.blank? || medium.blank?
-      return false unless UKIYO_E_ARTISTS.any? { |name| Pool.word_match?(artist, name) }
+      return false unless UKIYO_E_ARTISTS.any? { |name| Pool.word_match?(artist, name, case_insensitive: true) }
 
       m = medium.downcase
       return false if m.include?("print") || m.include?("woodblock") || m.include?("book")

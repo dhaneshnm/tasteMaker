@@ -77,7 +77,7 @@ module Pool
       pool = dedup(@pinned + reject_unusable(@candidates))
       raise Unmeetable, "only #{pool.size} usable candidates for a target of #{@target}" if pool.size < @target
 
-      pin!
+      pin!(pool)
       queue = ordered(pool)
 
       fill_themes(queue)
@@ -146,7 +146,12 @@ module Pool
     # `resolve: false` (pins only): the plate is already cached in Active
     # Storage locally and on the prod volume, so an upstream URL dying now is
     # not evidence the work should drop — skipping the resolver call also
-    # deletes ~2,000 HEAD requests + 167 Met API calls per curate run.
+    # deletes ~2,000 HEAD requests + 167 Met API calls per curate run. This
+    # assumes the plate really was cached; a pin whose ORIGINAL seed silently
+    # failed to attach an image (`db/seeds.rb`'s fetch-failure path warns and
+    # continues rather than raising) has no path back to detection through
+    # this pipeline — named risk, not built, in IDEAS.md Inbox (code review,
+    # story 0026).
     def take(candidate, resolve: true)
       return false unless room_for?(candidate)
       return false if resolve && !resolved?(candidate)
@@ -199,8 +204,16 @@ module Pool
     # structural break in the contract, not a shortfall to report and move
     # past: this codebase carries no deny-list carve-out for a pinned work,
     # so every failure here is fatal, named.
-    def pin!
-      failed = @pinned.reject { |candidate| take(candidate, resolve: false) }
+    # `pool` is post-`dedup` — checked so a pinned identity that lost a
+    # dedup collision (which should be structurally impossible: pinned
+    # candidates already survived one dedup pass in the curation that
+    # originally selected them, so two of them cannot share a `dedup_key`
+    # today unless that key's own definition changed — story 0019's C3
+    # already changed it once) is a fatal failure here too, not a silent
+    # `take` on an object dedup already discarded (code review, story 0026).
+    def pin!(pool)
+      survived = pool.map(&:identity).to_set
+      failed = @pinned.reject { |candidate| survived.include?(candidate.identity) && take(candidate, resolve: false) }
       return if failed.empty?
 
       raise Unmeetable, "#{failed.size} pinned work(s) could not be placed: " +
@@ -216,7 +229,8 @@ module Pool
     # `fill_recognizable`'s receipt (eng review), for the same reason.
     def fill_themes(queue)
       @themes = {}
-      Pool::ThemeTargets::TABLE.each do |name, matcher, want|
+      Pool::ThemeTargets::TABLE.each do |name, kind, values, want|
+        matcher = Pool::ThemeTargets.matcher_for(kind, values)
         took = 0
         queue.each do |c|
           break if took >= want
