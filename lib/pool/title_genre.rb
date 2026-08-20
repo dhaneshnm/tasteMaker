@@ -194,7 +194,7 @@ module Pool
         shipped = counts[value] || 0
         ceiling = PROBE_CEILINGS[value]
         ReconciliationRow.new(value: value, shipped: shipped, ceiling: ceiling,
-          starved?: ceiling && shipped < ceiling * 0.25,
+          starved?: ceiling && shipped < ceiling * 0.5,
           sub_floor?: total_counts[value].to_i < Painting::MIN_FACET_WORKS)
       end
 

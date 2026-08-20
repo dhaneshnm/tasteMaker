@@ -73,6 +73,18 @@ class Pool::TitleGenreTest < ActiveSupport::TestCase
     assert_equal "Religious Art", infer("Lotus Sutra with a Frontispiece")
   end
 
+  # The fourth measured trap, caught by the audit itself (plan Deviations):
+  # the historical Rani Lakshmi Bai of the 1857 rebellion is not the deity
+  # Lakshmi. `\blakshmi\b(?!\s+bai)` must keep firing on the goddess while
+  # staying off the historical figure — pinned so neither direction regresses.
+  test "order trap: the historical Rani Lakshmi Bai is not the goddess Lakshmi" do
+    assert_nil infer("The Mutiny of the Heroine Rani Lakshmi Bai of Jhansi")
+  end
+
+  test "the goddess Lakshmi still fires Religious Art outside the Rani Bai title" do
+    assert_equal "Religious Art", infer("Gajalakshmi: Lakshmi with Elephants")
+  end
+
   test "order: Still Life with Flowers is a still life — Still Life precedes Flowers" do
     assert_equal "Still Life", infer("Still Life with Flowers and Salmon")
   end
