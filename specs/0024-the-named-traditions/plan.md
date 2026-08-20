@@ -181,7 +181,13 @@ receipt: URL of a filtered feed page serving real works.
 - **Third facet row adds one indexed `GROUP BY` per page render** (~11 lazy fetches
   per full scroll ×1 extra query, sub-ms each on ≤3K rows). Reviewed and accepted
   as-is (eng review Issue 6) — memoization here is premature; revisit only if
-  facet count or pool grows 10×.
+  facet count or pool grows 10×. **Correction (code review):** the actual
+  per-facet cost was two queries, not one — `resolve_facet_slug` and
+  `displayed_facet_values` each independently called `facet_counts`. Fixed by
+  passing pre-fetched counts through both (`counts:` kwarg), not by caching
+  across requests — the "premature to cache" call above still stands; this
+  was a same-request duplicate query, the exact shape story 0020 already
+  fixed once for `Painting.count`.
 
 ## What already exists (reused, not rebuilt)
 

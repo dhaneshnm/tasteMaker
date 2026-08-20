@@ -149,10 +149,17 @@ module Pool
   }.freeze
 
   # Whole-word, case-sensitive-by-default match: "Indiana" is not India, an
-  # incantation is not Inca. Shared by every module that classifies a museum
-  # string against a term list (`region_for`/`place_shaped?` below,
-  # `Pool::Tradition` — story 0024's eng review + simplify found three
-  # independent copies of this one regex idiom).
+  # incantation is not Inca. Used by `region_for`/`place_shaped?` below —
+  # story 0024's simplify found this exact regex idiom copied three times,
+  # here and once in `Pool::Tradition`. Only two calls actually route
+  # through this method: `Pool::Tradition::PATTERNS` deliberately keeps its
+  # OWN, separately-compiled copy of the same `\b`-anchored,
+  # case-insensitive shape rather than calling this per candidate — it
+  # precompiles once at load time instead of rebuilding a Regexp on every
+  # call (eng review: ~15,000 calls per seed/backfill run). A fix to the
+  # matching rule here (escaping, anchoring) does NOT reach
+  # `Pool::Tradition` — that file's `PATTERNS` needs the same fix applied
+  # separately.
   def self.word_match?(haystack, term, case_insensitive: false)
     return haystack.match?(/\b#{Regexp.escape(term)}\b/i) if case_insensitive
 

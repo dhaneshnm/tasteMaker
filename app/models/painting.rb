@@ -157,9 +157,14 @@ class Painting < ApplicationRecord
   # The subset of `facet_counts` that clears `MIN_FACET_WORKS`, ordered for
   # display: numeric for period ("10th century" must sort before "9th
   # century", which string order gets backwards), alphabetical for every
-  # other facet (genre, tradition).
-  def self.displayed_facet_values(facet)
-    values = facet_counts(facet).select { |_, count| count >= MIN_FACET_WORKS }.keys
+  # other facet (genre, tradition). `counts:` lets a caller pass an
+  # already-fetched `facet_counts(facet)` result (0024 code review: the
+  # controller resolves a slug AND lists display values for the same facet
+  # in one request — without this, that was two independent `GROUP BY`
+  # queries per facet, the exact duplicate-`COUNT(*)` shape story 0020
+  # already fixed once for `Painting.count`, just not here).
+  def self.displayed_facet_values(facet, counts: facet_counts(facet))
+    values = counts.select { |_, count| count >= MIN_FACET_WORKS }.keys
     facet == :period ? values.sort_by { |value| value[/\d+/].to_i } : values.sort
   end
 
@@ -171,11 +176,12 @@ class Painting < ApplicationRecord
   end
 
   # A URL slug back to the canonical value it names, or nil for a blank,
-  # unknown, or stale slug — never a 500, and never a guess.
-  def self.resolve_facet_slug(facet, slug)
+  # unknown, or stale slug — never a 500, and never a guess. `counts:` — see
+  # `displayed_facet_values` above.
+  def self.resolve_facet_slug(facet, slug, counts: facet_counts(facet))
     return nil if slug.blank?
 
-    facet_counts(facet).each_key.find { |value| facet_slug(value) == slug }
+    counts.each_key.find { |value| facet_slug(value) == slug }
   end
 
   # The museums actually in the pool, heaviest first. The gallery's closing line

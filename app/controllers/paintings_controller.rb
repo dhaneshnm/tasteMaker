@@ -17,8 +17,12 @@ class PaintingsController < ApplicationController
     # from "no filter": the graceful-degradation the plan calls out (a stale
     # bookmark after a facet-value rename just lands on the unfiltered
     # gallery).
-    @active = Painting::FACETS.index_with { |facet| Painting.resolve_facet_slug(facet, params[facet]) }
-    @filtered = @active.values.any?(&:present?)
+    # One `facet_counts` query per facet for the whole request (0024 code
+    # review) — `resolve_facet_slug` and `displayed_facet_values` below both
+    # need it; passing it in once avoids two `GROUP BY`s per facet.
+    counts = Painting::FACETS.index_with { |facet| Painting.facet_counts(facet) }
+    @active = Painting::FACETS.index_with { |facet| Painting.resolve_facet_slug(facet, params[facet], counts: counts[facet]) }
+    @filtered = @active.values.any?
 
     scope = Painting.with_attached_image.feed_ordered
     @active.each { |facet, value| scope = scope.where(facet => value) if value }
@@ -38,7 +42,7 @@ class PaintingsController < ApplicationController
     # already applies the floor), and the slugs each row's links carry to
     # preserve the OTHER active facets when a reader switches one. Keyed by
     # facet so the view can loop `Painting::FACETS` too.
-    @facet_values = Painting::FACETS.index_with { |facet| Painting.displayed_facet_values(facet) }
+    @facet_values = Painting::FACETS.index_with { |facet| Painting.displayed_facet_values(facet, counts: counts[facet]) }
     @filter_params = @active.filter_map { |facet, value| [ facet, Painting.facet_slug(value) ] if value }.to_h
 
     # `/feed` is walled and private (story 0015) — no shared cache to poison,

@@ -113,6 +113,12 @@ module Pool
     ReconciliationRow = Struct.new(:value, :shipped, :researched, :starved?, keyword_init: true)
     AuditResult = Struct.new(:reconciliation, :sample, keyword_init: true)
 
+    # Weight given to the smallest shipped bucket in `audit`'s sample — a
+    # small bucket's errors move its own percentage most, so it is
+    # oversampled relative to its share of the pool (code review: was an
+    # unexplained `sample_size / 5`).
+    SMALLEST_BUCKET_WEIGHT = 0.2
+
     # Two instruments (story 0024 eng review): a precision sample (catches
     # false positives — a wrongly-stamped row) and a reconciliation against
     # `RESEARCH_COUNTS` (catches the failure the sample structurally cannot:
@@ -129,12 +135,25 @@ module Pool
           starved?: researched && shipped < researched * 0.5)
       end
 
-      smallest = stamped.min_by { |_, n| n }&.first
-      weighted_count = [ sample_size / 5, stamped.size ].min
-      sample = Painting.where(tradition: smallest).order("RANDOM()").limit(weighted_count) +
-        Painting.where.not(tradition: nil).order("RANDOM()").limit(sample_size - weighted_count)
+      AuditResult.new(reconciliation: reconciliation, sample: sample_rows(stamped, sample_size))
+    end
 
-      AuditResult.new(reconciliation: reconciliation, sample: sample)
+    # Two non-overlapping queries, not one query with a coincidence between
+    # them (code review: `smallest` and `weighted_count` used to collapse to
+    # matching no-ops only by chance when `stamped` is empty; the id
+    # exclusion below also stops the two random draws from ever returning
+    # the same row twice, which they could when the smallest bucket is a
+    # real subset of "every stamped row").
+    def self.sample_rows(stamped, sample_size)
+      return Painting.none if stamped.empty?
+
+      smallest = stamped.min_by { |_, n| n }.first
+      weighted_count = [ (sample_size * SMALLEST_BUCKET_WEIGHT).round, stamped.size ].min
+
+      weighted = Painting.where(tradition: smallest).order("RANDOM()").limit(weighted_count).to_a
+      rest = Painting.where.not(tradition: nil).where.not(id: weighted.map(&:id))
+        .order("RANDOM()").limit(sample_size - weighted_count)
+      weighted + rest
     end
   end
 end
