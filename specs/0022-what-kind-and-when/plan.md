@@ -210,11 +210,11 @@ graceful by construction, no redirect machinery needed (eng review A2).
 
 ## Release 2 — the fill
 
-Status: **Eng-reviewed 2026-08-19.** Dry-run measured against the real committed pool,
-the real mirrors, and live calls to AIC, MET, and Wikidata. Scope narrowed during eng
-review — see "Route 1, deferred" below. `/plan-design-review` skipped, same reasoning
-0019's fill used: no new UI, Release 1's facet row already renders whatever `genre`
-values exist.
+Status: **Implemented and deployed to the committed manifest, 2026-08-19.** `bin/ci`
+green (rubocop, brakeman, bundler-audit, importmap audit, 464 unit/integration + 62
+system tests). Real coverage measured against all 403 AIC/MET works, not sampled — see
+Deviations. `/plan-design-review` skipped, same reasoning 0019's fill used: no new UI,
+Release 1's facet row already renders whatever `genre` values exist.
 
 ### The dry run
 
@@ -508,6 +508,50 @@ step before it (mirror capture → dictionary → fill → backfill → report).
   route needs its own SPARQL client (none exists yet) and must be explicitly scoped to
   AIC/MET works only, not artist-wide, or it silently breaks the CMA/MIA-has-no-genre
   invariant Release 2 shipped."*
+- **Implementation-time architecture correction: `genre_source_terms` never touched
+  `Candidate`/`FIELDS`/`curator.rb` at all** — the reviewed plan's literal Files table
+  (`lib/pool.rb` gains a field, all four `sources.rb` adapters change) turned out to be
+  infeasible as written. MET's tags are NOT in its bulk CSV (the mirror's normal MET
+  source) — they exist ONLY on the per-object REST endpoint, confirmed live. Widening
+  the shared `Candidate` struct and re-running `pool:mirror` would have meant fetching
+  tags for MET's full multi-thousand-row CSV, not just the 167 works already shipped —
+  thousands of wasted calls. Built instead: `Pool::GenreFill`, a standalone module
+  (`lib/pool/genre_fill.rb`) that reads the ALREADY-COMMITTED manifest, filters to
+  `source` in `%w[aic met]`, and makes ONE targeted per-object API call per already-
+  shipped work — never touches `Pool::Candidate` at all. This is a smaller diff than
+  reviewed (no `lib/pool.rb` change, no CMA/MIA adapter edits) and makes outside voice
+  finding #2 (the `Struct` nil-vs-`[]` default bug) structurally impossible rather than
+  patched: CMA/MIA rows are never even looked at, by construction, so there's no default
+  to get wrong. Same architecture the review actually cared about (standalone module,
+  not `curator.rb`; dictionary order as tie-break; skip-and-continue on a bad record) —
+  only the fetch mechanism changed. `pool_genre_fill_test.rb` proves the CMA/MIA
+  exclusion directly (a test asserting the stub is never even called for those rows),
+  stronger than the reviewed test could have been.
+- **Real coverage, measured against all 403 AIC/MET works** (not the 50-work sample the
+  dry-run used): **248/2,000 works (12.4%)** carry a genre — AIC 185/236 (78%), MET
+  63/167 (38%), both lower than the dry-run's loose-substring sample suggested, because
+  the shipped dictionary is a strict allowlist (exact match + AIC's own colon-qualifier
+  convention only — no fuzzy matching). 11 genre values have any coverage; **5 clear
+  `MIN_FACET_WORKS` and render as a control**: Portrait (113), Landscape (76), Religious
+  Art (25), Still Life (15), Animal Painting (8). The other 6 (Mythological Art,
+  Battle Painting, Cityscape, Genre Scene, Marine Art, Nude — 1–4 works each) stay
+  reachable only through ALL, exactly as designed — the provisional floor doing real
+  work on real data, not a hypothetical.
+- **The fetch hit transient DNS failures across three passes** (14, then 1, then 3
+  records — different IDs each time, confirmed as network flakiness, not a
+  source-specific or ID-specific problem), each time skip-and-continue working exactly
+  as designed rather than aborting the run. Retried until 403/403 fetched successfully
+  (100%). Live-verified afterward via a real `rails s` (the story 0021 mock door):
+  unfiltered `/feed` renders both facet rows; `genre=portrait` narrows to 113; a combined
+  `genre=portrait&period=17th-century` AND narrows to 12; `genre=not-a-real-genre`
+  degrades to the full unfiltered 2,002; a genuinely empty AND
+  (`genre=animal-painting&period=12th-century`) renders `.page--empty`.
+- **`Pool::Report.genre_section`'s own first real output caught its own bug**: the
+  "N value(s) clear MIN_FACET_WORKS" line printed all 11 buckets with coverage, not the
+  5 that actually clear the floor — `by_bucket` was never filtered through
+  `displayed_facet_values`. Fixed before commit; the report now separates "any
+  coverage" from "clears the floor, is a real control" explicitly, and marks
+  below-floor buckets inline.
 
 ## GSTACK REVIEW REPORT
 

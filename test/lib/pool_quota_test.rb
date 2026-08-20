@@ -196,4 +196,18 @@ class PoolQuotaTest < ActiveSupport::TestCase
       "these are places, not painters, and each one ships as a live artist page — " \
       "add them to Painting::NOT_AN_ARTIST"
   end
+
+  # Story 0022 Release 2, eng review (outside voice #1). Neither museum's
+  # public API carries a subject/genre field — measured live, not assumed —
+  # so the only way a CMA or MIA work could carry a genre is a future change
+  # accidentally matching on a field those sources don't populate. Reads the
+  # committed manifest, the same source Pool::GenreFill writes into, so this
+  # is the manifest's own invariant, not a live-DB proxy for it.
+  test "no CMA or MIA work carries a genre — neither source's API has one to give it" do
+    stray = POOL.select { |w| %w[cma mia].include?(w["source"]) && w["genre"].present? }
+
+    assert_empty stray.map { |w| "#{w['source']}:#{w['source_id']}" },
+      "CMA/MIA has no native genre field — a non-nil genre here means something matched " \
+      "on a field that was never populated for these sources"
+  end
 end

@@ -147,7 +147,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 5
+    "feed_order": 5,
+    "genre": "Mythological Art"
   },
   {
     "source": "cma",
@@ -397,7 +398,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 15
+    "feed_order": 15,
+    "genre": "Landscape"
   },
   {
     "source": "met",
@@ -447,7 +449,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 17
+    "feed_order": 17,
+    "genre": "Landscape"
   },
   {
     "source": "met",
@@ -472,7 +475,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 18
+    "feed_order": 18,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -672,7 +676,8 @@
     "image_height": 3744,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 26
+    "feed_order": 26,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -847,7 +852,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 33
+    "feed_order": 33,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -1147,7 +1153,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 45
+    "feed_order": 45,
+    "genre": "Animal Painting"
   },
   {
     "source": "mia",
@@ -1272,7 +1279,8 @@
     "image_height": 3519,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 50
+    "feed_order": 50,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -1572,7 +1580,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 62
+    "feed_order": 62,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -1622,7 +1631,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 64
+    "feed_order": 64,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -1697,7 +1707,8 @@
     "image_height": 3695,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 67
+    "feed_order": 67,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -1772,7 +1783,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 70
+    "feed_order": 70,
+    "genre": "Battle Painting"
   },
   {
     "source": "aic",
@@ -1797,7 +1809,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 71
+    "feed_order": 71,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -2022,7 +2035,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 80
+    "feed_order": 80,
+    "genre": "Still Life"
   },
   {
     "source": "cma",
@@ -2272,7 +2286,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 90
+    "feed_order": 90,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -2347,7 +2362,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 93
+    "feed_order": 93,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -2447,7 +2463,8 @@
     "image_height": 3720,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 97
+    "feed_order": 97,
+    "genre": "Portrait"
   },
   {
     "source": "aic",
@@ -2472,7 +2489,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 98
+    "feed_order": 98,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -2547,7 +2565,8 @@
     "image_height": 3857,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 101
+    "feed_order": 101,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -2672,7 +2691,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 106
+    "feed_order": 106,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -2747,7 +2767,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 109
+    "feed_order": 109,
+    "genre": "Religious Art"
   },
   {
     "source": "mia",
@@ -3447,7 +3468,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 137
+    "feed_order": 137,
+    "genre": "Portrait"
   },
   {
     "source": "aic",
@@ -3472,7 +3494,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 138
+    "feed_order": 138,
+    "genre": "Still Life"
   },
   {
     "source": "mia",
@@ -3997,7 +4020,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 159
+    "feed_order": 159,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -4172,7 +4196,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 166
+    "feed_order": 166,
+    "genre": "Portrait"
   },
   {
     "source": "aic",
@@ -4197,7 +4222,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 167
+    "feed_order": 167,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -4872,7 +4898,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 194
+    "feed_order": 194,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -4947,7 +4974,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 197
+    "feed_order": 197,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -5197,7 +5225,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 207
+    "feed_order": 207,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -6147,7 +6176,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 245
+    "feed_order": 245,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -6647,7 +6677,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 265
+    "feed_order": 265,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -6897,7 +6928,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 275
+    "feed_order": 275,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -7097,7 +7129,8 @@
     "image_height": 2619,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 283
+    "feed_order": 283,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -7597,7 +7630,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 303
+    "feed_order": 303,
+    "genre": "Portrait"
   },
   {
     "source": "aic",
@@ -7622,7 +7656,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 304
+    "feed_order": 304,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -7972,7 +8007,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 318
+    "feed_order": 318,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -8047,7 +8083,8 @@
     "image_height": 2389,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 321
+    "feed_order": 321,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -8147,7 +8184,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 325
+    "feed_order": 325,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -8522,7 +8560,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 340
+    "feed_order": 340,
+    "genre": "Still Life"
   },
   {
     "source": "mia",
@@ -9147,7 +9186,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 365
+    "feed_order": 365,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -9347,7 +9387,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 373
+    "feed_order": 373,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -9422,7 +9463,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 376
+    "feed_order": 376,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -9547,7 +9589,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 381
+    "feed_order": 381,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -10122,7 +10165,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 404
+    "feed_order": 404,
+    "genre": "Portrait"
   },
   {
     "source": "aic",
@@ -10172,7 +10216,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 406
+    "feed_order": 406,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -10247,7 +10292,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 409
+    "feed_order": 409,
+    "genre": "Religious Art"
   },
   {
     "source": "cma",
@@ -10397,7 +10443,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 415
+    "feed_order": 415,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -10447,7 +10494,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 417
+    "feed_order": 417,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -10947,7 +10995,8 @@
     "image_height": 2625,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 437
+    "feed_order": 437,
+    "genre": "Still Life"
   },
   {
     "source": "cma",
@@ -10997,7 +11046,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 439
+    "feed_order": 439,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -11247,7 +11297,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 449
+    "feed_order": 449,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -11522,7 +11573,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 460
+    "feed_order": 460,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -11822,7 +11874,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 472
+    "feed_order": 472,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -12072,7 +12125,8 @@
     "image_height": 2410,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 482
+    "feed_order": 482,
+    "genre": "Religious Art"
   },
   {
     "source": "cma",
@@ -12122,7 +12176,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 484
+    "feed_order": 484,
+    "genre": "Still Life"
   },
   {
     "source": "mia",
@@ -12197,7 +12252,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 487
+    "feed_order": 487,
+    "genre": "Landscape"
   },
   {
     "source": "aic",
@@ -12222,7 +12278,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 488
+    "feed_order": 488,
+    "genre": "Religious Art"
   },
   {
     "source": "cma",
@@ -12272,7 +12329,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 490
+    "feed_order": 490,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -12372,7 +12430,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 494
+    "feed_order": 494,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -12622,7 +12681,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 504
+    "feed_order": 504,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -12722,7 +12782,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 508
+    "feed_order": 508,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -12897,7 +12958,8 @@
     "image_height": 3713,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 515
+    "feed_order": 515,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -13097,7 +13159,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 523
+    "feed_order": 523,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -13222,7 +13285,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 528
+    "feed_order": 528,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -13397,7 +13461,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 535
+    "feed_order": 535,
+    "genre": "Portrait"
   },
   {
     "source": "aic",
@@ -13597,7 +13662,8 @@
     "image_height": 2951,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 543
+    "feed_order": 543,
+    "genre": "Landscape"
   },
   {
     "source": "aic",
@@ -13622,7 +13688,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 544
+    "feed_order": 544,
+    "genre": "Landscape"
   },
   {
     "source": "aic",
@@ -13647,7 +13714,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 545
+    "feed_order": 545,
+    "genre": "Animal Painting"
   },
   {
     "source": "cma",
@@ -13697,7 +13765,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 547
+    "feed_order": 547,
+    "genre": "Still Life"
   },
   {
     "source": "cma",
@@ -14397,7 +14466,8 @@
     "image_height": 2396,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 575
+    "feed_order": 575,
+    "genre": "Religious Art"
   },
   {
     "source": "cma",
@@ -14447,7 +14517,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 577
+    "feed_order": 577,
+    "genre": "Religious Art"
   },
   {
     "source": "aic",
@@ -14472,7 +14543,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 578
+    "feed_order": 578,
+    "genre": "Landscape"
   },
   {
     "source": "met",
@@ -14897,7 +14969,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 595
+    "feed_order": 595,
+    "genre": "Portrait"
   },
   {
     "source": "met",
@@ -14922,7 +14995,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 596
+    "feed_order": 596,
+    "genre": "Mythological Art"
   },
   {
     "source": "cma",
@@ -15272,7 +15346,8 @@
     "image_height": 3880,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 610
+    "feed_order": 610,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -15597,7 +15672,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 623
+    "feed_order": 623,
+    "genre": "Religious Art"
   },
   {
     "source": "mia",
@@ -16197,7 +16273,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 647
+    "feed_order": 647,
+    "genre": "Still Life"
   },
   {
     "source": "cma",
@@ -16322,7 +16399,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 652
+    "feed_order": 652,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -16422,7 +16500,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 656
+    "feed_order": 656,
+    "genre": "Still Life"
   },
   {
     "source": "cma",
@@ -16547,7 +16626,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 661
+    "feed_order": 661,
+    "genre": "Portrait"
   },
   {
     "source": "met",
@@ -16622,7 +16702,8 @@
     "image_height": 1935,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 664
+    "feed_order": 664,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -16897,7 +16978,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 675
+    "feed_order": 675,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -17097,7 +17179,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 683
+    "feed_order": 683,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -17147,7 +17230,8 @@
     "image_height": 1900,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 685
+    "feed_order": 685,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -17322,7 +17406,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 692
+    "feed_order": 692,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -17522,7 +17607,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 700
+    "feed_order": 700,
+    "genre": "Religious Art"
   },
   {
     "source": "mia",
@@ -17597,7 +17683,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 703
+    "feed_order": 703,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -17697,7 +17784,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 707
+    "feed_order": 707,
+    "genre": "Still Life"
   },
   {
     "source": "aic",
@@ -17722,7 +17810,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 708
+    "feed_order": 708,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -17822,7 +17911,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 712
+    "feed_order": 712,
+    "genre": "Religious Art"
   },
   {
     "source": "mia",
@@ -18072,7 +18162,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 722
+    "feed_order": 722,
+    "genre": "Religious Art"
   },
   {
     "source": "mia",
@@ -18397,7 +18488,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 735
+    "feed_order": 735,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -18447,7 +18539,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 737
+    "feed_order": 737,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -18772,7 +18865,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 750
+    "feed_order": 750,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -18947,7 +19041,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 757
+    "feed_order": 757,
+    "genre": "Religious Art"
   },
   {
     "source": "cma",
@@ -19097,7 +19192,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 763
+    "feed_order": 763,
+    "genre": "Still Life"
   },
   {
     "source": "mia",
@@ -19197,7 +19293,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 767
+    "feed_order": 767,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -19322,7 +19419,8 @@
     "image_height": 3814,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 772
+    "feed_order": 772,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -19672,7 +19770,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 786
+    "feed_order": 786,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -19922,7 +20021,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 796
+    "feed_order": 796,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -20422,7 +20522,8 @@
     "image_height": 3869,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 816
+    "feed_order": 816,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -20547,7 +20648,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 821
+    "feed_order": 821,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -20722,7 +20824,8 @@
     "image_height": 3877,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 828
+    "feed_order": 828,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -20772,7 +20875,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 830
+    "feed_order": 830,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -20847,7 +20951,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 833
+    "feed_order": 833,
+    "genre": "Religious Art"
   },
   {
     "source": "aic",
@@ -20872,7 +20977,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 834
+    "feed_order": 834,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -21022,7 +21128,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 840
+    "feed_order": 840,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -21347,7 +21454,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 853
+    "feed_order": 853,
+    "genre": "Cityscape"
   },
   {
     "source": "mia",
@@ -21422,7 +21530,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 856
+    "feed_order": 856,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -21472,7 +21581,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 858
+    "feed_order": 858,
+    "genre": "Religious Art"
   },
   {
     "source": "cma",
@@ -21572,7 +21682,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 862
+    "feed_order": 862,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -21797,7 +21908,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 871
+    "feed_order": 871,
+    "genre": "Still Life"
   },
   {
     "source": "mia",
@@ -22097,7 +22209,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 883
+    "feed_order": 883,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -22447,7 +22560,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 897
+    "feed_order": 897,
+    "genre": "Portrait"
   },
   {
     "source": "aic",
@@ -22697,7 +22811,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 907
+    "feed_order": 907,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -22822,7 +22937,8 @@
     "image_height": 3973,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 912
+    "feed_order": 912,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -23022,7 +23138,8 @@
     "image_height": 1936,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 920
+    "feed_order": 920,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -23222,7 +23339,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 928
+    "feed_order": 928,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -23672,7 +23790,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 946
+    "feed_order": 946,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -23847,7 +23966,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 953
+    "feed_order": 953,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -24022,7 +24142,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 960
+    "feed_order": 960,
+    "genre": "Portrait"
   },
   {
     "source": "aic",
@@ -24047,7 +24168,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 961
+    "feed_order": 961,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -24397,7 +24519,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 975
+    "feed_order": 975,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -24472,7 +24595,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 978
+    "feed_order": 978,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -24772,7 +24896,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 990
+    "feed_order": 990,
+    "genre": "Animal Painting"
   },
   {
     "source": "mia",
@@ -25097,7 +25222,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1003
+    "feed_order": 1003,
+    "genre": "Mythological Art"
   },
   {
     "source": "mia",
@@ -25172,7 +25298,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1006
+    "feed_order": 1006,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -25647,7 +25774,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1025
+    "feed_order": 1025,
+    "genre": "Landscape"
   },
   {
     "source": "aic",
@@ -25672,7 +25800,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1026
+    "feed_order": 1026,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -25922,7 +26051,8 @@
     "image_height": 3872,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1036
+    "feed_order": 1036,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -27222,7 +27352,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1088
+    "feed_order": 1088,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -27422,7 +27553,8 @@
     "image_height": 2701,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1096
+    "feed_order": 1096,
+    "genre": "Marine Art"
   },
   {
     "source": "cma",
@@ -27522,7 +27654,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1100
+    "feed_order": 1100,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -27622,7 +27755,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1104
+    "feed_order": 1104,
+    "genre": "Nude"
   },
   {
     "source": "mia",
@@ -28072,7 +28206,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1122
+    "feed_order": 1122,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -28247,7 +28382,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1129
+    "feed_order": 1129,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -28397,7 +28533,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1135
+    "feed_order": 1135,
+    "genre": "Religious Art"
   },
   {
     "source": "met",
@@ -28422,7 +28559,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1136
+    "feed_order": 1136,
+    "genre": "Portrait"
   },
   {
     "source": "aic",
@@ -28447,7 +28585,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1137
+    "feed_order": 1137,
+    "genre": "Mythological Art"
   },
   {
     "source": "cma",
@@ -29547,7 +29686,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1181
+    "feed_order": 1181,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -29697,7 +29837,8 @@
     "image_height": 3721,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1187
+    "feed_order": 1187,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -29797,7 +29938,8 @@
     "image_height": 3722,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1191
+    "feed_order": 1191,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -30572,7 +30714,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1222
+    "feed_order": 1222,
+    "genre": "Landscape"
   },
   {
     "source": "aic",
@@ -31047,7 +31190,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1241
+    "feed_order": 1241,
+    "genre": "Animal Painting"
   },
   {
     "source": "aic",
@@ -31072,7 +31216,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1242
+    "feed_order": 1242,
+    "genre": "Still Life"
   },
   {
     "source": "mia",
@@ -31222,7 +31367,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1248
+    "feed_order": 1248,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -31322,7 +31468,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1252
+    "feed_order": 1252,
+    "genre": "Religious Art"
   },
   {
     "source": "cma",
@@ -31422,7 +31569,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1256
+    "feed_order": 1256,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -31747,7 +31895,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1269
+    "feed_order": 1269,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -31822,7 +31971,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1272
+    "feed_order": 1272,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -32022,7 +32172,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1280
+    "feed_order": 1280,
+    "genre": "Portrait"
   },
   {
     "source": "aic",
@@ -32047,7 +32198,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1281
+    "feed_order": 1281,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -32372,7 +32524,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1294
+    "feed_order": 1294,
+    "genre": "Nude"
   },
   {
     "source": "cma",
@@ -32647,7 +32800,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1305
+    "feed_order": 1305,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -32772,7 +32926,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1310
+    "feed_order": 1310,
+    "genre": "Landscape"
   },
   {
     "source": "met",
@@ -32972,7 +33127,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1318
+    "feed_order": 1318,
+    "genre": "Portrait"
   },
   {
     "source": "met",
@@ -33172,7 +33328,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1326
+    "feed_order": 1326,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -33247,7 +33404,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1329
+    "feed_order": 1329,
+    "genre": "Still Life"
   },
   {
     "source": "cma",
@@ -33522,7 +33680,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1340
+    "feed_order": 1340,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -34122,7 +34281,8 @@
     "image_height": 2817,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1364
+    "feed_order": 1364,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -34197,7 +34357,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1367
+    "feed_order": 1367,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -34597,7 +34758,8 @@
     "image_height": 2711,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1383
+    "feed_order": 1383,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -34672,7 +34834,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1386
+    "feed_order": 1386,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -34822,7 +34985,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1392
+    "feed_order": 1392,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -34897,7 +35061,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1395
+    "feed_order": 1395,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -34972,7 +35137,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1398
+    "feed_order": 1398,
+    "genre": "Portrait"
   },
   {
     "source": "met",
@@ -35272,7 +35438,8 @@
     "image_height": 3259,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1410
+    "feed_order": 1410,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -35822,7 +35989,8 @@
     "image_height": 3000,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1432
+    "feed_order": 1432,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -35897,7 +36065,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1435
+    "feed_order": 1435,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -36022,7 +36191,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1440
+    "feed_order": 1440,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -36247,7 +36417,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1449
+    "feed_order": 1449,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -36372,7 +36543,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1454
+    "feed_order": 1454,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -36447,7 +36619,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1457
+    "feed_order": 1457,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -36597,7 +36770,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1463
+    "feed_order": 1463,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -36647,7 +36821,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1465
+    "feed_order": 1465,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -36872,7 +37047,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1474
+    "feed_order": 1474,
+    "genre": "Portrait"
   },
   {
     "source": "aic",
@@ -36897,7 +37073,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1475
+    "feed_order": 1475,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -36972,7 +37149,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1478
+    "feed_order": 1478,
+    "genre": "Religious Art"
   },
   {
     "source": "cma",
@@ -37522,7 +37700,8 @@
     "image_height": 3866,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1500
+    "feed_order": 1500,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -38072,7 +38251,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1522
+    "feed_order": 1522,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -38297,7 +38477,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1531
+    "feed_order": 1531,
+    "genre": "Landscape"
   },
   {
     "source": "aic",
@@ -38322,7 +38503,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1532
+    "feed_order": 1532,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -38497,7 +38679,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1539
+    "feed_order": 1539,
+    "genre": "Nude"
   },
   {
     "source": "mia",
@@ -39072,7 +39255,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1562
+    "feed_order": 1562,
+    "genre": "Religious Art"
   },
   {
     "source": "cma",
@@ -39197,7 +39381,8 @@
     "image_height": 3863,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1567
+    "feed_order": 1567,
+    "genre": "Portrait"
   },
   {
     "source": "aic",
@@ -39222,7 +39407,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1568
+    "feed_order": 1568,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -39422,7 +39608,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1576
+    "feed_order": 1576,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -39522,7 +39709,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1580
+    "feed_order": 1580,
+    "genre": "Portrait"
   },
   {
     "source": "met",
@@ -39597,7 +39785,8 @@
     "image_height": 3722,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1583
+    "feed_order": 1583,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -39822,7 +40011,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1592
+    "feed_order": 1592,
+    "genre": "Still Life"
   },
   {
     "source": "mia",
@@ -39922,7 +40112,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1596
+    "feed_order": 1596,
+    "genre": "Portrait"
   },
   {
     "source": "met",
@@ -40022,7 +40213,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1600
+    "feed_order": 1600,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -40372,7 +40564,8 @@
     "image_height": 3721,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1614
+    "feed_order": 1614,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -40772,7 +40965,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1630
+    "feed_order": 1630,
+    "genre": "Religious Art"
   },
   {
     "source": "cma",
@@ -40997,7 +41191,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1639
+    "feed_order": 1639,
+    "genre": "Landscape"
   },
   {
     "source": "met",
@@ -41022,7 +41217,8 @@
     "image_height": 2907,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1640
+    "feed_order": 1640,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -41097,7 +41293,8 @@
     "image_height": 3890,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1643
+    "feed_order": 1643,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -41347,7 +41544,8 @@
     "image_height": 3832,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1653
+    "feed_order": 1653,
+    "genre": "Religious Art"
   },
   {
     "source": "mia",
@@ -41522,7 +41720,8 @@
     "image_height": 3883,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1660
+    "feed_order": 1660,
+    "genre": "Religious Art"
   },
   {
     "source": "mia",
@@ -41697,7 +41896,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1667
+    "feed_order": 1667,
+    "genre": "Still Life"
   },
   {
     "source": "cma",
@@ -41847,7 +42047,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1673
+    "feed_order": 1673,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -41972,7 +42173,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1678
+    "feed_order": 1678,
+    "genre": "Landscape"
   },
   {
     "source": "met",
@@ -42122,7 +42324,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1684
+    "feed_order": 1684,
+    "genre": "Portrait"
   },
   {
     "source": "met",
@@ -42147,7 +42350,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1685
+    "feed_order": 1685,
+    "genre": "Animal Painting"
   },
   {
     "source": "mia",
@@ -42247,7 +42451,8 @@
     "image_height": 3697,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1689
+    "feed_order": 1689,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -42322,7 +42527,8 @@
     "image_height": 3968,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1692
+    "feed_order": 1692,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -42722,7 +42928,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1708
+    "feed_order": 1708,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -42797,7 +43004,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1711
+    "feed_order": 1711,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -42897,7 +43105,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1715
+    "feed_order": 1715,
+    "genre": "Portrait"
   },
   {
     "source": "met",
@@ -43297,7 +43506,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1731
+    "feed_order": 1731,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -43422,7 +43632,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1736
+    "feed_order": 1736,
+    "genre": "Landscape"
   },
   {
     "source": "cma",
@@ -43772,7 +43983,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1750
+    "feed_order": 1750,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -43822,7 +44034,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1752
+    "feed_order": 1752,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -43922,7 +44135,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1756
+    "feed_order": 1756,
+    "genre": "Religious Art"
   },
   {
     "source": "mia",
@@ -44097,7 +44311,8 @@
     "image_height": 3020,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1763
+    "feed_order": 1763,
+    "genre": "Landscape"
   },
   {
     "source": "met",
@@ -44172,7 +44387,8 @@
     "image_height": 3844,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1766
+    "feed_order": 1766,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -44297,7 +44513,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1771
+    "feed_order": 1771,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -44372,7 +44589,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1774
+    "feed_order": 1774,
+    "genre": "Religious Art"
   },
   {
     "source": "aic",
@@ -44397,7 +44615,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1775
+    "feed_order": 1775,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -44497,7 +44716,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1779
+    "feed_order": 1779,
+    "genre": "Landscape"
   },
   {
     "source": "met",
@@ -44522,7 +44742,8 @@
     "image_height": 3873,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1780
+    "feed_order": 1780,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -44572,7 +44793,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1782
+    "feed_order": 1782,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -44697,7 +44919,8 @@
     "image_height": 3973,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1787
+    "feed_order": 1787,
+    "genre": "Portrait"
   },
   {
     "source": "met",
@@ -44722,7 +44945,8 @@
     "image_height": 4000,
     "image_license": "Public Domain",
     "highlight": false,
-    "feed_order": 1788
+    "feed_order": 1788,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -45622,7 +45846,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1824
+    "feed_order": 1824,
+    "genre": "Animal Painting"
   },
   {
     "source": "aic",
@@ -45647,7 +45872,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1825
+    "feed_order": 1825,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -45872,7 +46098,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1834
+    "feed_order": 1834,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -46147,7 +46374,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1845
+    "feed_order": 1845,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -46247,7 +46475,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1849
+    "feed_order": 1849,
+    "genre": "Animal Painting"
   },
   {
     "source": "cma",
@@ -46447,7 +46676,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1857
+    "feed_order": 1857,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -46547,7 +46777,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1861
+    "feed_order": 1861,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -46872,7 +47103,8 @@
     "image_height": 3875,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1874
+    "feed_order": 1874,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -46922,7 +47154,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1876
+    "feed_order": 1876,
+    "genre": "Religious Art"
   },
   {
     "source": "mia",
@@ -47047,7 +47280,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1881
+    "feed_order": 1881,
+    "genre": "Landscape"
   },
   {
     "source": "mia",
@@ -47497,7 +47731,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1899
+    "feed_order": 1899,
+    "genre": "Landscape"
   },
   {
     "source": "met",
@@ -47597,7 +47832,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1903
+    "feed_order": 1903,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -47897,7 +48133,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1915
+    "feed_order": 1915,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -47947,7 +48184,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1917
+    "feed_order": 1917,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -48047,7 +48285,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1921
+    "feed_order": 1921,
+    "genre": "Portrait"
   },
   {
     "source": "met",
@@ -48472,7 +48711,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1938
+    "feed_order": 1938,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
@@ -48622,7 +48862,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1944
+    "feed_order": 1944,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -48697,7 +48938,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1947
+    "feed_order": 1947,
+    "genre": "Portrait"
   },
   {
     "source": "cma",
@@ -48872,7 +49114,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1954
+    "feed_order": 1954,
+    "genre": "Animal Painting"
   },
   {
     "source": "cma",
@@ -48947,7 +49190,8 @@
     "image_height": 3866,
     "image_license": "Public Domain",
     "highlight": true,
-    "feed_order": 1957
+    "feed_order": 1957,
+    "genre": "Portrait"
   },
   {
     "source": "met",
@@ -49597,7 +49841,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1983
+    "feed_order": 1983,
+    "genre": "Religious Art"
   },
   {
     "source": "aic",
@@ -49697,7 +49942,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1987
+    "feed_order": 1987,
+    "genre": "Religious Art"
   },
   {
     "source": "mia",
@@ -49797,7 +50043,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": true,
-    "feed_order": 1991
+    "feed_order": 1991,
+    "genre": "Genre Scene"
   },
   {
     "source": "aic",
@@ -49822,7 +50069,8 @@
     "image_height": 1686,
     "image_license": "CC0",
     "highlight": false,
-    "feed_order": 1992
+    "feed_order": 1992,
+    "genre": "Portrait"
   },
   {
     "source": "mia",
