@@ -287,16 +287,23 @@ class PoolQuotaTest < ActiveSupport::TestCase
     assert_empty stray, "every stamped tradition must be a canonical value, never free text"
   end
 
-  # Every canonical value clears the display floor on the committed pool —
-  # a value that never renders is a facet in name only (the Jain-bucket
-  # regression this story's eng review caught at plan time, before the
-  # `gujarat` pattern was restored).
-  test "every canonical tradition value clears MIN_FACET_WORKS on the committed pool" do
+  # Every canonical value clears the display floor on the committed pool,
+  # except a named, dated exception set (story 0027, `decisions/0017`: the
+  # floor moved 5 -> 16 by measurement, and Madhubani Painting's 6 works
+  # never cleared any floor above 5). `assert_equal`, not `assert_empty` —
+  # a value that starves or recovers without this list changing is exactly
+  # the drift the Jain-bucket regression already showed once (this story's
+  # eng review caught it at plan time, before the `gujarat` pattern was
+  # restored), and a silently-passing `assert_empty` would hide it again.
+  BELOW_FLOOR_TRADITIONS = [ "Madhubani Painting" ].freeze
+
+  test "every canonical tradition value clears MIN_FACET_WORKS, except the named below-floor set" do
     counts = POOL_TRADITIONS.each_with_object(Hash.new(0)) { |(_, value), h| h[value] += 1 }
     starved = Pool::Tradition::VALUES.select { |value| counts[value].to_i < Painting::MIN_FACET_WORKS }
 
-    assert_empty starved,
-      "these tradition values are in the table but never clear the display floor: #{starved}"
+    assert_equal BELOW_FLOOR_TRADITIONS, starved,
+      "the below-floor tradition set changed — a value starved or recovered; " \
+      "update decisions/0017 and this list together"
   end
 
   # Story 0025. Genre's SECOND route: `TitleGenre.infer(title)` fills what
@@ -321,6 +328,29 @@ class PoolQuotaTest < ActiveSupport::TestCase
     end
 
     assert_empty stray, "every derived genre must be a dictionary value, never free text"
+  end
+
+  # Story 0027, `decisions/0017` (`/code-review`): the tradition side had
+  # this exact "every canonical value, except a named list" test; the genre
+  # side, until this, only pinned the two values 0026 named — so raising
+  # the floor 5 -> 16 dropped Allegory, Animal Painting, Battle Painting,
+  # Cityscape, Genre Scene, History Painting, Icon, Marine Art, Nude, and
+  # Vanitas below it with nothing catching future drift for any of them.
+  # Measured 2026-08-21 against the committed manifest, same shape as
+  # `BELOW_FLOOR_TRADITIONS` above.
+  ALL_BELOW_FLOOR_GENRES = %w[
+    Allegory Animal\ Painting Battle\ Painting Cityscape Genre\ Scene
+    History\ Painting Icon Marine\ Art Nude Vanitas
+  ].freeze
+
+  test "every canonical genre value clears MIN_FACET_WORKS, except the named below-floor set" do
+    canonical = (Pool::GenreTerms::DICTIONARY.values | Pool::TitleGenre::TABLE.map(&:first)).uniq
+    counts = POOL_GENRES.each_with_object(Hash.new(0)) { |(_, value), h| h[value] += 1 }
+    starved = canonical.select { |value| counts[value].to_i < Painting::MIN_FACET_WORKS }
+
+    assert_equal ALL_BELOW_FLOOR_GENRES.sort, starved.sort,
+      "the below-floor genre set changed — a value starved or recovered; " \
+      "update decisions/0017 and this list together"
   end
 
   # The story's coverage claim, pinned so a reseed or a dictionary edit
@@ -364,17 +394,27 @@ class PoolQuotaTest < ActiveSupport::TestCase
   NEW_GENRE_VALUES = %w[Cityscape].freeze
   NEW_TRADITION_VALUES = [ "Ukiyo-e Painting", "Madhubani Painting" ].freeze
 
-  test "every story 0026 genre value clears MIN_FACET_WORKS on the committed pool" do
+  # Story 0027, `decisions/0017`: the floor moving 5 -> 16 reverses this
+  # signal for Cityscape (10 works) — recorded, not silently dropped. See
+  # `BELOW_FLOOR_TRADITIONS` above for the same treatment on the tradition
+  # side.
+  BELOW_FLOOR_GENRES = [ "Cityscape" ].freeze
+
+  test "every story 0026 genre value clears MIN_FACET_WORKS, except the named below-floor set" do
     counts = POOL_GENRES.each_with_object(Hash.new(0)) { |(_, value), h| h[value] += 1 }
     starved = NEW_GENRE_VALUES.select { |value| counts[value].to_i < Painting::MIN_FACET_WORKS }
 
-    assert_empty starved, "these story 0026 genre values never clear the display floor: #{starved} (#{counts})"
+    assert_equal BELOW_FLOOR_GENRES, starved,
+      "the below-floor 0026 genre set changed — a value starved or recovered; " \
+      "update decisions/0017 and this list together"
   end
 
-  test "every story 0026 tradition value clears MIN_FACET_WORKS on the committed pool" do
+  test "every story 0026 tradition value clears MIN_FACET_WORKS, except the named below-floor set" do
     counts = POOL_TRADITIONS.each_with_object(Hash.new(0)) { |(_, value), h| h[value] += 1 }
     starved = NEW_TRADITION_VALUES.select { |value| counts[value].to_i < Painting::MIN_FACET_WORKS }
 
-    assert_empty starved, "these story 0026 tradition values never clear the display floor: #{starved} (#{counts})"
+    assert_equal BELOW_FLOOR_TRADITIONS, starved,
+      "the below-floor 0026 tradition set changed — a value starved or recovered; " \
+      "update decisions/0017 and this list together"
   end
 end

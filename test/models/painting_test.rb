@@ -190,15 +190,15 @@ class PaintingTest < ActiveSupport::TestCase
   # before "9th century" — the reason `displayed_facet_values` sorts by the
   # ordinal embedded in the label rather than the label itself.
   test "displayed_facet_values orders period numerically, not lexically" do
-    5.times { |i| Painting.create!(source: "met", source_id: 7_100 + i, title: "9th #{i}", period: "9th century") }
-    5.times { |i| Painting.create!(source: "met", source_id: 7_200 + i, title: "10th #{i}", period: "10th century") }
+    Painting::MIN_FACET_WORKS.times { |i| Painting.create!(source: "met", source_id: 7_100 + i, title: "9th #{i}", period: "9th century") }
+    Painting::MIN_FACET_WORKS.times { |i| Painting.create!(source: "met", source_id: 7_200 + i, title: "10th #{i}", period: "10th century") }
 
     assert_equal [ "9th century", "10th century" ], Painting.displayed_facet_values(:period)
   end
 
   test "displayed_facet_values orders genre alphabetically" do
-    5.times { |i| Painting.create!(source: "met", source_id: 7_300 + i, title: "L #{i}", genre: "Landscape") }
-    5.times { |i| Painting.create!(source: "met", source_id: 7_400 + i, title: "P #{i}", genre: "Portrait") }
+    Painting::MIN_FACET_WORKS.times { |i| Painting.create!(source: "met", source_id: 7_300 + i, title: "L #{i}", genre: "Landscape") }
+    Painting::MIN_FACET_WORKS.times { |i| Painting.create!(source: "met", source_id: 7_400 + i, title: "P #{i}", genre: "Portrait") }
 
     assert_equal [ "Landscape", "Portrait" ], Painting.displayed_facet_values(:genre)
   end
@@ -225,6 +225,131 @@ class PaintingTest < ActiveSupport::TestCase
     assert_nil Painting.resolve_facet_slug(:period, "not-a-real-century")
     assert_nil Painting.resolve_facet_slug(:period, nil)
     assert_nil Painting.resolve_facet_slug(:period, "")
+  end
+
+  # Story 0027. `scoped_to` is the one AND-builder `#index`, `index_for`, and
+  # `plate_for` all share — the exact drift class the `@filter_params` bug
+  # (`5d90908`) came from, generalized past one hand-copied loop.
+  test "scoped_to ANDs every active facet and ignores nil values" do
+    match = Painting.create!(source: "met", source_id: 7_700, title: "Match",
+      tradition: "Mughal Painting", period: "18th century")
+    Painting.create!(source: "met", source_id: 7_701, title: "Wrong period",
+      tradition: "Mughal Painting", period: "17th century")
+    Painting.create!(source: "met", source_id: 7_702, title: "Wrong tradition",
+      tradition: "Rajput Painting", period: "18th century")
+
+    assert_equal [ match ], Painting.scoped_to(tradition: "Mughal Painting", period: "18th century", genre: nil).to_a
+  end
+
+  test "scoped_to with no active facets is the whole table" do
+    assert_equal Painting.count, Painting.scoped_to(tradition: nil, genre: nil, period: nil).count
+  end
+
+  # `index_for` counts each facet within the scope of the OTHER active
+  # facets — switching Mughal to Pahari is a replace, not an AND, so
+  # tradition's own counts must not be filtered by tradition.
+  test "index_for counts a facet within the OTHER active facets' scope, never its own" do
+    create_paintings(Painting::MIN_FACET_WORKS, source_id_start: 7_800,
+      tradition: "Mughal Painting", period: "18th century")
+    create_paintings(Painting::MIN_FACET_WORKS, source_id_start: 7_820,
+      tradition: "Rajput Painting", period: "18th century")
+
+    index = Painting.index_for(tradition: "Mughal Painting", genre: nil, period: nil)
+
+    values = index[:tradition].to_h
+    assert_equal Painting::MIN_FACET_WORKS, values["Mughal Painting"]
+    assert_equal Painting::MIN_FACET_WORKS, values["Rajput Painting"],
+      "the active tradition's own row must list every tradition, not just itself"
+  end
+
+  test "index_for floors every facet, and keeps the active value even if it is under the floor" do
+    create_paintings(Painting::MIN_FACET_WORKS - 1, source_id_start: 7_850, tradition: "Kalighat Painting")
+    create_paintings(Painting::MIN_FACET_WORKS, source_id_start: 7_870, tradition: "Korean Painting")
+
+    unfiltered = Painting.index_for(tradition: nil, genre: nil, period: nil)[:tradition].to_h
+    assert_not_includes unfiltered.keys, "Kalighat Painting", "a value under the floor should not be offered"
+
+    active_but_starved = Painting.index_for(tradition: "Kalighat Painting", genre: nil, period: nil)[:tradition].to_h
+    assert_equal Painting::MIN_FACET_WORKS - 1, active_but_starved["Kalighat Painting"],
+      "the active value stays in its own row even under the floor — it is 'here', not an offer"
+  end
+
+  test "index_for orders period numerically and every other facet by count, heaviest first" do
+    create_paintings(Painting::MIN_FACET_WORKS, source_id_start: 7_900, period: "9th century")
+    create_paintings(Painting::MIN_FACET_WORKS, source_id_start: 7_920, period: "10th century")
+    create_paintings(Painting::MIN_FACET_WORKS + 3, source_id_start: 7_940, genre: "Landscape")
+    create_paintings(Painting::MIN_FACET_WORKS, source_id_start: 7_970, genre: "Portrait")
+
+    index = Painting.index_for(tradition: nil, genre: nil, period: nil)
+
+    assert_equal [ "9th century", "10th century" ], index[:period].map(&:first)
+    assert_equal [ "Landscape", "Portrait" ], index[:genre].map(&:first),
+      "heaviest first — Landscape (#{Painting::MIN_FACET_WORKS + 3}) before Portrait (#{Painting::MIN_FACET_WORKS})"
+  end
+
+  # `plate_for` — story 0027 eng review 2.2: `image.attached?` alone is not
+  # `display_image?`, and every fixture in this suite carries a museum URL,
+  # not an attachment, so this attaches a real blob to prove the whole path.
+  test "plate_for returns the first work in scope with a real picture, skipping one with none" do
+    no_picture = Painting.create!(source: "met", source_id: 8_000, title: "No picture",
+      tradition: "Mughal Painting", feed_order: 1)
+    has_picture = Painting.create!(source: "met", source_id: 8_001, title: "Has picture",
+      tradition: "Mughal Painting", feed_order: 2)
+    has_picture.image.attach(io: StringIO.new("gif89a"), filename: "plate.gif", content_type: "image/gif")
+
+    plate = Painting.plate_for(:tradition, "Mughal Painting", scope: Painting.all)
+
+    assert_equal has_picture, plate
+    assert_not no_picture.display_image?
+  end
+
+  test "plate_for is nil when nothing in scope has a picture, not a raise" do
+    Painting.create!(source: "met", source_id: 8_010, title: "No picture at all", tradition: "Mughal Painting")
+
+    assert_nil Painting.plate_for(:tradition, "Mughal Painting", scope: Painting.where(image_url_800: nil))
+  end
+
+  # Story 0027 design review: the FacetVoice table has to cover every value
+  # the vocabulary can produce, not just the values in the committed pool —
+  # a value with zero works today still needs a voice the day a reseed
+  # gives it one.
+  test "FacetVoice has a short and a sentence form for every canonical tradition and genre value" do
+    canonical = {
+      tradition: Pool::Tradition::VALUES,
+      genre: Pool::GenreTerms::DICTIONARY.values.uniq | Pool::TitleGenre::TABLE.map(&:first)
+    }
+
+    canonical.each do |facet, values|
+      values.each do |value|
+        short = Painting::FacetVoice.short(facet, value)
+        sentence = Painting::FacetVoice.sentence(facet, value)
+
+        assert short.length <= 9 || short.include?(" "),
+          "#{facet} short form #{short.inspect} for #{value.inspect} is over 9 chars with no space to wrap on"
+        assert_not_equal value, sentence, "#{facet} #{value.inspect} has no sentence form of its own"
+      end
+    end
+  end
+
+  test "FacetVoice has a short and a sentence form for every valid century" do
+    (1..21).each do |n|
+      value = "#{n.ordinalize} century"
+      assert_match(/\A\d+(st|nd|rd|th)\z/, Painting::FacetVoice.short(:period, value))
+      assert_match(/ century\z/, Painting::FacetVoice.sentence(:period, value))
+    end
+  end
+
+  test "FacetVoice.label_for composes tradition, subject, then century, capitalised once" do
+    assert_equal "The full gallery", Painting::FacetVoice.label_for(tradition: nil, genre: nil, period: nil)
+    assert_equal "Mughal painting",
+      Painting::FacetVoice.label_for(tradition: "Mughal Painting", genre: nil, period: nil)
+    assert_equal "Mughal painting, portraits, the eighteenth century",
+      Painting::FacetVoice.label_for(tradition: "Mughal Painting", genre: "Portrait", period: "18th century")
+  end
+
+  test "FacetVoice falls back to the canonical value for a form it has never heard, rather than raising" do
+    assert_equal "A Brand New Tradition", Painting::FacetVoice.short(:tradition, "A Brand New Tradition")
+    assert_equal "A Brand New Tradition", Painting::FacetVoice.sentence(:tradition, "A Brand New Tradition")
   end
 
   test "the gallery credits the museums actually in the pool, heaviest first" do

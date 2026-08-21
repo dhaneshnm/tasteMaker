@@ -43,7 +43,23 @@
             }, ", ") %>.
         Metadata CC0.
       </p>
-      <a class="caps-link" href="#top" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">Back to the beginning ↑</a>
+      <div class="coda__doors">
+        <a class="caps-link" href="#top" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">Back to the beginning ↑</a>
+        <%# The end of a filtered walk offered no next step until story 0027
+            — a reader who reached the last work in a wing had nowhere to go
+            but back up. Unfiltered, the coda already IS the map (the whole
+            gallery); a second door to the index would be a door to itself.
+
+            Preserves `filter_params`, same as the rail door (`/code-review`
+            caught this dropping them): the index reopens scoped to the
+            wing the reader just walked — current marked, co-occurring
+            values only — not reset to the whole pool. "Another wing" is
+            the door to what's NEXT from here, the same promise the rail
+            door already keeps everywhere else on this screen. %>
+        <% if filtered %>
+          <%= link_to "Another wing", feed_index_path(**filter_params), class: "caps-link" %>
+        <% end %>
+      </div>
     </footer>
   <% end %>
 <% end %>

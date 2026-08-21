@@ -159,6 +159,22 @@ module ActiveSupport
       )
       DailyPick.create!(painting: painting, scheduled_on: date, blurb: blurb)
     end
+
+    # Facet fixtures for story 0022/0024/0027 — genre and tradition stay out
+    # unless a test asks for them, so a test that only ever sets one facet
+    # proves nothing about the byte-identical-except-active-rows claim.
+    # Moved here from `feed_filter_test.rb` (`/simplify`) once
+    # `painting_test.rb`'s `scoped_to`/`index_for` tests needed the same
+    # shape — one copy for both files, not two.
+    def create_paintings(count, source_id_start:, period: nil, genre: nil, tradition: nil, **attrs)
+      count.times do |i|
+        Painting.create!(
+          source: "met", source_id: source_id_start + i, title: "Work #{source_id_start + i}",
+          image_url_800: paintings(:woodcut).image_url_800,
+          period: period, genre: genre, tradition: tradition, **attrs
+        )
+      end
+    end
   end
 end
 

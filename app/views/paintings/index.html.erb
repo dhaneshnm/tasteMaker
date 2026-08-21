@@ -1,7 +1,13 @@
 <%# `compass: false` — this is the one screen whose compass is not in the
-    masthead. See the rail below. %>
-<%= render "shared/masthead", label: "The full gallery",
-      aside: "#{@total} works · Mia", compass: false %>
+    masthead. See the rail below.
+
+    `label:` speaks the active filter in the editorial voice (story 0027,
+    `Painting::FacetVoice`) — "The full gallery" unfiltered, "Mughal
+    painting, eighteenth century" under one. `aside:` drops its "· Mia"
+    credit under a filter: that line belongs to the whole gallery, and a
+    filtered view is a subset of it, not the thing itself. %>
+<%= render "shared/masthead", label: @label,
+      aside: @filtered ? "#{@total} works" : "#{@total} works · Mia", compass: false %>
 
 <%# The gallery is the only unbounded screen in the product: 110 works of
     infinite scroll, a masthead that is never sticky (DESIGN.md rule 5), and a
@@ -13,20 +19,17 @@
     like every other screen; once you scroll it is 58px of links and nothing
     else. No JavaScript: there is no cross-browser way for CSS to know it has
     become stuck, so nothing here changes shape — the masthead simply scrolls
-    away and the rail does not. %>
-<%= render "shared/compass", here: :gallery, rail: true %>
+    away and the rail does not.
 
-<%# Filter facets (story 0022 Release 1: period, genre; story 0024:
-    tradition) — one row per lit facet, directly under the compass rail,
-    before the first post, in `Painting::FACETS` order. Each row renders
-    nothing when its values are empty (the non-empty rule, `_facet_row`'s
-    caller-only-renders-when-non-empty contract) — a page with none lit is
-    byte-identical to before any of these three stories. %>
-<% Painting::FACETS.each do |facet| %>
-  <%= render "facet_row", facet_label: facet.to_s, param_name: facet,
-        values: @facet_values[facet], active: @active[facet],
-        preserve: @filter_params.except(facet) if @facet_values[facet].present? %>
-<% end %>
+    `door:` (story 0027) puts the gallery index one tap away from wherever the
+    reader has scrolled to — the filter row this rail carried in stories
+    0022/0024 is gone; this is what replaced it. Unconditional (`feed_index_path`
+    always resolves to a real URL, filtered or not), so the door always renders
+    and the index owns its own empty case. %>
+<%= render "shared/compass", here: :gallery, rail: true,
+      door: feed_index_path(**@filter_params),
+      door_filled: @filtered,
+      door_label: @filtered ? "Gallery index — #{@label}" : "Gallery index" %>
 
 <%# The overlay lives here, next to the frames the archive streams into, so every
     work that arrives with infinite scroll is inside the controller. %>
@@ -35,10 +38,23 @@
     <%# Combined filters can AND to zero even when every offered value has
         works of its own (design review pass 2) — genre=portrait has works,
         period=16th-century has works, their intersection may not. An empty
-        state is a feature: warmth, a way out, context. %>
+        state is a feature: warmth, a way out, context.
+
+        Two doors, not one (story 0027): the reader arrived here on a URL —
+        the tap-through path is scoped to never land here (0027's own
+        signal 2) — so the fastest way out and the way to a DIFFERENT wing
+        are both offered. The second preserves `@filter_params` (`/code-
+        review` caught this dropping them): the index reopens scoped to
+        the same facets that just ANDed to zero, so a reader who combined
+        Korean + Nude sees Korean's REAL subjects (scoped by tradition
+        alone) rather than a blank, unscoped index — the same recovery the
+        rail door already offers from a live result page. %>
     <div class="ornament" aria-hidden="true">✦</div>
     <p class="coda__line">Nothing here wears both.</p>
-    <%= link_to "See the full gallery", feed_path, class: "caps-link" %>
+    <div class="coda__doors">
+      <%= link_to "See the full gallery", feed_path, class: "caps-link" %>
+      <%= link_to "Open the index", feed_index_path(**@filter_params), class: "caps-link" %>
+    </div>
   <% else %>
     <%= render "page", paintings: @paintings, page: @page, next_page: @next_page,
           kept_ids: @kept_ids, filtered: @filtered, filter_params: @filter_params %>

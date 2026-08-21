@@ -14,6 +14,21 @@
             reach them yet. `/you` ONLY — see `compass_destinations`. Passing it
             anywhere `Cache-Control: public` is set would put per-visitor markup
             into a shared cache and break story 0007.
+      door:   default nil. `rail: true` only — a resolved PATH STRING renders
+            the gallery index door at the rail's right end, linking exactly
+            there; nil renders nothing. Story 0027: the one control on
+            `/feed` that survives scrolling, so the filter's own screen is
+            reachable from wherever the reader already is, not only from
+            the top of the page. This partial builds no route itself
+            (`/simplify`, altitude) — a caller elsewhere in the app could
+            pass any path here without teaching this file a second one.
+      door_filled: default false. Whether the door's fill state reads "a
+            filter is active" — the keep glyph's rule: fill is the entire
+            state change, no colour shift.
+      door_label: the door's accessible name. This partial has no idea what
+            a "facet" is — it takes the finished string from the caller
+            (`Painting::FacetVoice` lives in the model layer, not here) and
+            falls back to a plain "Gallery index" if the caller passes none.
 
     The current destination stays in the row rather than being dropped from it.
     Rendering only "the other three" was the first draft, and it moves every
@@ -39,6 +54,20 @@
       <span class="caps-link compass__here"><%= destination[:label] %></span>
     <% else %>
       <%= link_to destination[:label], destination[:path], class: "caps-link" %>
+    <% end %>
+  <% end %>
+
+  <%# The index door — `rail: true` only. Unconditional once `door:` is
+      passed at all (story 0027 eng review 1.3): checking whether the index
+      has anything to offer would cost `/feed` the three `GROUP BY`s this
+      story exists to remove, and the pool assertions (`pool_quota_test`)
+      already forbid a production pool with nothing to offer — the empty
+      case is the index's own to render, on the rare path that reaches it
+      (a fresh database, or fixtures). %>
+  <% if local_assigns[:door] %>
+    <%= link_to door, class: "compass__door",
+          aria: { label: local_assigns[:door_label] || "Gallery index" } do %>
+      <%= render "shared/plan_glyph", filled: local_assigns[:door_filled] || false %>
     <% end %>
   <% end %>
 </nav>

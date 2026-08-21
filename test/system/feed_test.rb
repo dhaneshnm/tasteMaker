@@ -78,10 +78,11 @@ class FeedTest < ApplicationSystemTestCase
     assert_operator brand_bottom, :<, 0, "the masthead came along for the ride"
   end
 
-  # Story 0022 Release 1. Same idiom the "Today" test above already proves for
-  # the compass rail: tap a link, land on the narrowed URL, and the tapped
-  # value marks itself the way the compass marks the screen you are on.
-  test "tapping a period filter narrows the gallery and marks itself active" do
+  # Story 0027 replaced the three in-flow facet rows this file used to
+  # click through directly (`.facets`) with a door on the sticky rail that
+  # opens the gallery index. Same idiom throughout: tap the door, tap a
+  # value, land on the narrowed URL with the door itself now filled.
+  test "the door opens the index; a period value there narrows the gallery and fills the door" do
     Painting::MIN_FACET_WORKS.times do |i|
       Painting.create!(source: "mia", source_id: 922_000 + i, title: "Twelfth #{i}",
         artist: "A. Painter", image_url_800: paintings(:woodcut).image_url_800,
@@ -89,24 +90,24 @@ class FeedTest < ApplicationSystemTestCase
     end
 
     visit feed_path
-    within(".facets") { click_on "12th century" }
+    click_on "Gallery index"
+    assert_current_path feed_index_path
 
-    # `text-transform: uppercase` renders "12TH CENTURY" — a case-sensitive
-    # text filter would be asserting the stylesheet (the same trap
-    # handoff_test.rb documents for the compass), so this matches
-    # case-insensitively.
+    within(".wings__row") { click_on "12th" }
+
     assert_current_path feed_path(period: "12th-century")
-    within(".facets") do
-      assert_selector "span.facets__here[aria-current='true']", text: /12th century/i
-      assert_no_selector "a", text: /12th century/i
+    assert_selector ".masthead__label", text: /twelfth century/i
+    assert_selector "a.compass__door[aria-label*='twelfth century']"
 
-      click_on "All"
-    end
+    click_on "Gallery index"
+    assert_current_path feed_index_path(period: "12th-century")
+    click_on "Show everything"
     assert_current_path feed_path
   end
 
-  # Story 0024. Same idiom as the period facet above, on the tradition column.
-  test "tapping a tradition filter narrows the gallery to matching works and marks itself active" do
+  # Story 0024. Same idiom as the period value above, on the tradition
+  # column — a plate this time, not a caps-link row.
+  test "the door opens the index; a tradition plate there narrows the gallery and fills the door" do
     Painting::MIN_FACET_WORKS.times do |i|
       Painting.create!(source: "mia", source_id: 923_000 + i, title: "Mughal #{i}",
         artist: "A. Painter", image_url_800: paintings(:woodcut).image_url_800,
@@ -114,26 +115,23 @@ class FeedTest < ApplicationSystemTestCase
     end
 
     visit feed_path
-    within(".facets") { click_on "Mughal Painting" }
+    click_on "Gallery index"
+    assert_current_path feed_index_path
 
-    # `text-transform: uppercase` renders "MUGHAL PAINTING" — same
-    # case-insensitive trap the period test above documents, for the
-    # rendered-text assertions below (click_on itself matches the
-    # underlying DOM text, not the CSS-rendered case).
+    within(".plates") { click_on "Mughal" }
+
     assert_current_path feed_path(tradition: "mughal-painting")
-    within(".facets") do
-      assert_selector "span.facets__here[aria-current='true']", text: /mughal painting/i
-      assert_no_selector "a", text: /mughal painting/i
+    assert_selector ".masthead__label", text: /mughal painting/i
+    assert_selector "a.compass__door[aria-label*='Mughal painting']"
 
-      click_on "All"
-    end
-    assert_current_path feed_path
+    click_on "Gallery index"
+    within(".plates__cell--here") { assert_text(/mughal/i) }
   end
 
   # Story 0025. Same idiom again, on the genre column's one new value —
   # Flowers is title-route-filled data riding the same machinery, so the
-  # tap-through proves the whole chain: value → chip → filter → active mark.
-  test "tapping the Flowers genre filter narrows the gallery and marks itself active" do
+  # tap-through proves the whole chain: value → plate → filter → active mark.
+  test "the door opens the index; the Flowers plate there narrows the gallery and fills the door" do
     Painting::MIN_FACET_WORKS.times do |i|
       Painting.create!(source: "mia", source_id: 924_000 + i, title: "Peonies #{i}",
         artist: "A. Painter", image_url_800: paintings(:woodcut).image_url_800,
@@ -141,16 +139,12 @@ class FeedTest < ApplicationSystemTestCase
     end
 
     visit feed_path
-    within(".facets") { click_on "Flowers" }
+    click_on "Gallery index"
+    within(".plates") { click_on "Flowers" }
 
     assert_current_path feed_path(genre: "flowers")
-    within(".facets") do
-      assert_selector "span.facets__here[aria-current='true']", text: /flowers/i
-      assert_no_selector "a", text: /^flowers$/i
-
-      click_on "All"
-    end
-    assert_current_path feed_path
+    assert_selector ".masthead__label", text: /flowers/i
+    assert_selector "a.compass__door[aria-label*='Flowers']"
   end
 
   # `.zoom` is z-index 20 and the rail is 1. Reading a work full screen from the

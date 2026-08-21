@@ -424,13 +424,19 @@ curator's desk.
    changes shape as you scroll — there is no cross-browser way for CSS to know
    an element has become stuck, and buying that knowledge with scroll-watching
    JavaScript to hide a wordmark is not a trade this product makes.
+   **The gallery index door (story 0027) joins the rail, not the masthead** —
+   it is the one filter control that survives scrolling, by design: the three
+   in-flow facet rows it replaced were never sticky and cost 44px of fold
+   budget per line. Navigation, same as the four destinations beside it.
 6. **One rule, one ornament.** The hairline under the masthead and the `✦`
    divider are the only decoration. No cards, no shadows, no rounded corners
    beyond the 2px on form controls.
    **Functional glyphs are not ornament.** Line icons that are controls —
    `--gold`, 23px box, 1.4px stroke, 44px target — are allowed wherever the
-   control is: `.rail` under the plate carries Keep and Zoom, and `.masthead__you`
-   carries the corner. They are not decoration, which is what this rule was
+   control is: `.rail` under the plate carries Keep and Zoom, `.masthead__you`
+   carries the corner, and `.compass--rail` carries the gallery index door
+   (story 0027) — a floor plan, fill-only state change, the same idiom Keep
+   already taught. They are not decoration, which is what this rule was
    protecting when it read *"no glyph in the kept state."* Amended 2026-08-14,
    `decisions/0010-actions-become-a-rail.md`; widened 2026-08-17 by story 0017.
    The exception is for controls only; a decorative second mark is still refused.

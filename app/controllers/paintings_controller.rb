@@ -5,28 +5,9 @@ class PaintingsController < ApplicationController
     @page = params.fetch(:page, 1).to_i.clamp(1, 10_000)
     offset = (@page - 1) * PER_PAGE
 
-    # Story 0022 Release 1 (period, genre), extended by 0024 (tradition).
-    # Resolution happens once, here, driven off `Painting::FACETS` rather
-    # than one hand-copied block per facet (0024 eng review + simplify: three
-    # near-identical blocks invited exactly the bug class this story already
-    # fixed once — a facet missing from `@filter_params` silently drops at
-    # lazy page 2, bug `5d90908`). A fourth facet extends the constant; it
-    # cannot omit a step here the way a fourth copy-pasted block could.
-    #
-    # An unknown or absent slug resolves to nil, which is indistinguishable
-    # from "no filter": the graceful-degradation the plan calls out (a stale
-    # bookmark after a facet-value rename just lands on the unfiltered
-    # gallery).
-    # One `facet_counts` query per facet for the whole request (0024 code
-    # review) — `resolve_facet_slug` and `displayed_facet_values` below both
-    # need it; passing it in once avoids two `GROUP BY`s per facet.
-    counts = Painting::FACETS.index_with { |facet| Painting.facet_counts(facet) }
-    @active = Painting::FACETS.index_with { |facet| Painting.resolve_facet_slug(facet, params[facet], counts: counts[facet]) }
-    @filtered = @active.values.any?
+    load_active_filter
 
-    scope = Painting.with_attached_image.feed_ordered
-    @active.each { |facet, value| scope = scope.where(facet => value) if value }
-
+    scope = Painting.scoped_to(@active).with_attached_image.feed_ordered
     @paintings = scope.offset(offset).limit(PER_PAGE)
 
     # One `Painting.count`, not two (story 0020, `/plan-eng-review` P1). The
@@ -38,13 +19,6 @@ class PaintingsController < ApplicationController
     @total = scope.count
     @next_page = @page + 1 if @total > offset + PER_PAGE
 
-    # The facet rows — non-empty values only (Painting.displayed_facet_values
-    # already applies the floor), and the slugs each row's links carry to
-    # preserve the OTHER active facets when a reader switches one. Keyed by
-    # facet so the view can loop `Painting::FACETS` too.
-    @facet_values = Painting::FACETS.index_with { |facet| Painting.displayed_facet_values(facet, counts: counts[facet]) }
-    @filter_params = @active.filter_map { |facet, value| [ facet, Painting.facet_slug(value) ] if value }.to_h
-
     # `/feed` is walled and private (story 0015) — no shared cache to poison,
     # so unlike `/` this page can render the reader's own state inline. One
     # indexed query for the whole page (`kept_ids_for`), not one fetch per
@@ -54,4 +28,59 @@ class PaintingsController < ApplicationController
     # carries the fuller reasoning, since it deletes a manual one).
     @kept_ids = kept_ids_for(@paintings)
   end
+
+  # The wing label (story 0027) — the filter's own screen. Every value the
+  # gallery can be narrowed by, as a plate (tradition, subject) or a caps
+  # row (century), scoped to whatever is already active. A second action on
+  # this controller rather than a controller of its own: it shares the
+  # wall, the params, and the model calls `#index` already makes (eng
+  # review D1) — the only new thing here is the view.
+  def wings
+    load_active_filter
+
+    @index = Painting.index_for(@active)
+    scope = Painting.scoped_to(@active)
+    @total = scope.count
+
+    @plates = Painting::FacetVoice::PLATE_FACETS.index_with do |facet|
+      other_scope = Painting.scoped_to(@active.except(facet))
+      @index[facet].to_h { |value, _count| [ value, Painting.plate_for(facet, value, scope: other_scope) ] }
+    end
+
+    @coverage = coverage_lines(@active, scope: scope, total: @total)
+  end
+
+  private
+    # One resolution per facet, shared by `#index` and `#wings` — the
+    # `@filter_params` bug (`5d90908`) was a facet missing a step in one of
+    # two copies of this; there is only one copy now. Also the one place
+    # `@filtered`, `@filter_params`, and `@label` are set — both actions
+    # need exactly these four, in this order (`/simplify`: they used to be
+    # two copies of the same four lines).
+    def load_active_filter
+      @active = Painting::FACETS.index_with { |facet| Painting.resolve_facet_slug(facet, params[facet]) }
+      @filtered = @active.values.any?
+      @filter_params = @active.filter_map { |facet, value| [ facet, Painting.facet_slug(value) ] if value }.to_h
+      @label = Painting::FacetVoice.label_for(@active)
+    end
+
+    # For each facet NOT already active, how much of the CURRENT scope
+    # carries it — "Subject is known for 24 of 108 works," inside whatever
+    # wing the reader is already standing in, never the facet that is
+    # itself 100% known by construction (design review outside voice #4:
+    # the active facet's own coverage is always 100% and says nothing).
+    # Suppressed at 100% either way — a fully-tagged facet has nothing to
+    # confess. `scope:`/`total:` are the caller's own — `#wings` already
+    # built and counted this scope for `@total`; recomputing both here was
+    # an identical second `COUNT(*)` on every request (`/simplify`).
+    def coverage_lines(active, scope:, total:)
+      Painting::FacetVoice::PLATE_FACETS.filter_map do |facet|
+        next if active[facet]
+
+        known = scope.where.not(facet => nil).count
+        next if total.zero? || known == total
+
+        { facet: facet, label: Painting::FacetVoice::FACET_LABEL.fetch(facet), known: known, total: total }
+      end
+    end
 end

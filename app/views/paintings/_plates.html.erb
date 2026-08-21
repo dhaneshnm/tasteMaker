@@ -1,0 +1,44 @@
+<%# One wing's worth of faces (story 0027). A real work stands for each
+    offered value — the index looks like the gallery it indexes, not a form.
+    `auto-fill` lets the grid run 3 across at 320px and 7 at the desktop
+    measure off one rule (`application.css`).
+
+    The edge hugs the picture, not a square of linen (design review outside
+    voice #10) — the image row is a fixed height and the frame border sits
+    on the `<img>` itself, the same idiom `.days__thumb` already uses for a
+    fixed-height, free-width thumbnail. A value with no stored picture
+    (`plate_for` found none in scope) gets the same `--bg-lift` box with no
+    image in it — the resting idiom, not a broken-image icon.
+
+    Locals: facet:, rows: (array of [value, count]), plates: (value =>
+    Painting or nil), active_value:, other_params: (the OTHER active
+    facets' slugs, for building this facet's own links). %>
+<ul class="plates">
+  <% rows.each_with_index do |(value, count), i| %>
+    <li>
+      <% plate = plates[value] %>
+      <% content = capture do %>
+        <% if plate %>
+          <%= image_tag artwork_src(plate, size: 200), alt: "",
+                width: plate.image_width, height: plate.image_height,
+                loading: (i < 8 ? nil : "lazy"), decoding: "async",
+                class: "plates__img" %>
+        <% else %>
+          <span class="plates__img plates__img--none" aria-hidden="true"></span>
+        <% end %>
+        <span class="plates__name"><%= Painting::FacetVoice.short(facet, value) %></span>
+        <span class="plates__count"><%= count
+              %><span class="visually-hidden"> works</span></span>
+      <% end %>
+
+      <% if value == active_value %>
+        <%= content_tag :span, content, class: "plates__cell plates__cell--here",
+              aria: { current: "true" } %>
+      <% else %>
+        <%= link_to content,
+              feed_path(**other_params, facet => Painting.facet_slug(value)),
+              class: "plates__cell" %>
+      <% end %>
+    </li>
+  <% end %>
+</ul>

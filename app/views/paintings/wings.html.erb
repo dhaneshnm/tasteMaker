@@ -1,0 +1,84 @@
+<%# The wing label (story 0027) — the filter's own screen. The rail glyph
+    on `/feed` opens this; a tap on a plate closes it back onto the filtered
+    feed (`Painting::FacetVoice.label_for` names it there in the masthead).
+
+    "The index" is the screen's own name on every visit — masthead `label:`
+    is always what SCREEN this is, never what it currently shows (design
+    review Pass 7 / outside voice #7). The active filter, if any, is the
+    summary line below instead: the page's own sentence, not a second copy
+    of the masthead.
+
+    `here: :gallery` — the index is inside the gallery, so the compass marks
+    Gallery the way it marks any screen you are standing on: dim, unlinked.
+    A linked Gallery here would be a second way back to `/feed` that
+    silently drops whatever filter is active (outside voice #6); `Done`
+    below is the one way back, and it keeps the filter. %>
+<%= render "shared/masthead", label: "The index", aside: "#{@total} works", here: :gallery %>
+
+<main class="page wings">
+  <div class="wings__summary">
+    <% if @filtered %>
+      <p class="coda__line"><%= @label %> · <%= @total %> works</p>
+    <% end %>
+    <div class="wings__actions">
+      <% if @filtered %>
+        <%= link_to "Show everything", feed_path, class: "caps-link" %>
+      <% end %>
+      <%= link_to "Done", feed_path(**@filter_params), class: "caps-link" %>
+    </div>
+  </div>
+
+  <% Painting::FacetVoice::LABEL_ORDER.each do |facet| %>
+    <% rows = @index[facet] %>
+    <% label = Painting::FacetVoice::FACET_LABEL.fetch(facet) %>
+
+    <% if rows.present? %>
+      <section class="wings__section" aria-labelledby="wings-<%= facet %>-heading">
+        <h2 class="days__month wings__head" id="wings-<%= facet %>-heading">
+          <%= label %>
+          <%# The way out lives on the heading, never as a cell in the grid
+              (design review Pass 1 / outside voice #12) — a value-less
+              plate would break the grid and read as a missing image. %>
+          <% if @active[facet] %>
+            <%= link_to "Every #{label.downcase}",
+                  feed_index_path(**@filter_params.except(facet)), class: "caps-link" %>
+          <% end %>
+        </h2>
+
+        <% if Painting::FacetVoice::PLATE_FACETS.include?(facet) %>
+          <%= render "plates", facet: facet, rows: rows, plates: @plates[facet],
+                active_value: @active[facet], other_params: @filter_params.except(facet) %>
+        <% else %>
+          <ul class="wings__row">
+            <% rows.each do |value, count| %>
+              <li>
+                <% if value == @active[facet] %>
+                  <span class="caps-link wings__here" aria-current="true">
+                    <%= Painting::FacetVoice.short(facet, value)
+                        %><span class="count"><%= count %></span>
+                  </span>
+                <% else %>
+                  <%= link_to feed_path(**@filter_params.except(facet), facet => Painting.facet_slug(value)),
+                        class: "caps-link" do %>
+                    <%= Painting::FacetVoice.short(facet, value)
+                        %><span class="count"><%= count %></span>
+                  <% end %>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+      </section>
+    <% else %>
+      <%# A facet with nothing to offer in the current scope renders no
+          section — the non-empty rule 0022 already taught, extended to
+          intersections — and says so in one line rather than vanishing
+          silently. %>
+      <p class="wings__note">No <%= label.downcase %> has <%= Painting::MIN_FACET_WORKS %> works here yet.</p>
+    <% end %>
+  <% end %>
+
+  <% @coverage.each do |line| %>
+    <p class="wings__note"><%= line[:label] %> is known for <%= line[:known] %> of <%= line[:total] %> works.</p>
+  <% end %>
+</main>
