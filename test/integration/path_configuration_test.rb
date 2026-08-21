@@ -63,6 +63,19 @@ class PathConfigurationTest < ActionDispatch::IntegrationTest
     assert_equal "none", admin["properties"]["presentation"]
   end
 
+  # Story 0027 eng review 1.1: the wing label rises as a sheet rather than
+  # pushing a screen, which is what lets a same-URL `Done` visit collapse
+  # back onto the filtered feed instead of stacking a duplicate. Native
+  # navigation shape belongs here, not in a `data-turbo-action` attribute on
+  # a link — this is the one place the app already decides that per URL.
+  test "the gallery index rises as a modal sheet, not a pushed screen" do
+    index = rules(BUNDLED).find { |r| r["patterns"].include?("^/feed/index$") }
+
+    assert index, "no rule for the gallery index"
+    assert_equal "modal", index["properties"]["context"]
+    assert_equal false, index["properties"]["pull_to_refresh_enabled"]
+  end
+
   private
     def rules(path)
       JSON.parse(path.read).fetch("rules")

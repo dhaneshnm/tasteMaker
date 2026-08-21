@@ -455,34 +455,115 @@ a:hover { color: var(--gold-deep); }
     calc(clamp(1.15rem, 5vw, 2rem) + env(safe-area-inset-left));
 }
 
-/* ---------- Filter facets (story 0022 Release 1) ----------
- * One row per lit facet, `/feed` only, directly under `.compass--rail`.
- * Same idiom as `.compass`: `.caps-link` items, the active one unlinked and
- * dimmed. Never sticky — rule 5's sticky budget on this screen is spent on
- * the compass rail, and this row doesn't earn a second exception.
+/* ---------- The gallery index door ----------
+ * Story 0027. `.compass--rail` only — appended after the four destinations
+ * when the caller passes `door:`. `margin-left: auto` on a `flex-wrap: wrap`
+ * row (`.compass` already sets it) is what lets this sit flush right when
+ * there is room and drop to its own line when there is not — the row wraps
+ * itself; nothing here has to detect the accessibility cap by hand.
  *
- * `overflow-x: auto` instead of wrapping: a wrapped row costs 44px of fold
- * budget per line, exactly what the compass's own gap-clamp discussion
- * above polices. The scroll affordance is the next value clipping at the
- * viewport edge — no fade mask, no indicator, no scrollbar styling
- * (DESIGN.md rule 6: no decoration that isn't a control). */
-.facets {
+ * `--gold` in both states, never `--ink` — the keep glyph's rule (`.rail__act`
+ * below): fill is the entire state change. The filled quadrant IS "you have
+ * a filter active"; a colour step on top of that would be two idioms for one
+ * fact. */
+.compass__door {
+  margin-left: auto;
+  color: var(--gold);
+}
+.compass__door:hover { color: var(--gold-deep); }
+
+/* ---------- The wing label ----------
+ * Story 0027. `/feed/index` — the filter's own screen, replacing the three
+ * in-flow facet rows this section used to hold (below `.compass--rail`,
+ * one per lit facet). That row shape rated 3/11 on the owner's own Chesky
+ * scale: 34 controls before the first work, 176 of 318 two-facet
+ * combinations dead. This is the door instead.
+ */
+
+.wings__summary { margin: 0 0 1.6rem; }
+
+.wings__actions {
   display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  column-gap: clamp(0.7rem, 3.5vw, 1rem);
-  padding:
-    0.35rem
-    calc(clamp(1.15rem, 5vw, 2rem) + env(safe-area-inset-right))
-    0.35rem
-    calc(clamp(1.15rem, 5vw, 2rem) + env(safe-area-inset-left));
+  column-gap: 1.4rem;
 }
 
-.facets + .facets { padding-top: 0; }
+/* `.days__month` is the base class in the markup — this only adds the
+ * heading's second job: the "Every X" unset link at the right end, when
+ * that facet is active. Reusing `.days__month` outright (rather than a new
+ * heading style) is deliberate — it is the product's one "a new section
+ * starts here" idiom, and the index invents nothing next to it. */
+.wings__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  column-gap: 1rem;
+}
 
 /* The value a reader has selected — same treatment `.compass__here` gives
  * the screen you are standing on. */
-.facets__here { color: var(--ink-dim); }
+.wings__here { color: var(--ink-dim); }
+
+.wings__row {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 1.1rem;
+  margin: 0 0 1.6rem;
+  padding: 0;
+  list-style: none;
+}
+
+.wings__note {
+  margin: 0 0 0.6rem;
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--ink-faint);
+  line-height: 1.45;
+}
+
+/* ---------- The plates ----------
+ * A real work stands for every offered tradition or subject — the index
+ * looks like the gallery it indexes. `auto-fill` runs 3 across at 320px,
+ * 4 at 375-430, and wider at the desktop measure, off one rule.
+ *
+ * The edge hugs the picture, not a square of linen (design review outside
+ * voice #10): `.plates__img` is a fixed-height, free-width row — the same
+ * idiom `.days__thumb` already uses — so a landscape plate and a hanging
+ * scroll both keep their own shape and the frame border sits on the image
+ * itself, never on an empty margin around it. */
+.plates {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  column-gap: 10px;
+  row-gap: 14px;
+  margin: 0 0 1.6rem;
+  padding: 0;
+  list-style: none;
+}
+
+.plates__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: inherit;
+  row-gap: 0.3rem;
+}
+
+
+.plates__name {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+}
+
+.plates__cell--here .plates__name { color: var(--ink-dim); }
+
+.plates__count {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
 
 /* ---------- Page column ---------- */
 
@@ -546,7 +627,8 @@ a:hover { color: var(--gold-deep); }
  * the cap leaves the opening of the note above the fold on a small phone.
  */
 .plate__img,
-.days__thumb img {
+.days__thumb img,
+.plates__img {
   display: block;
   margin-inline: auto;
   max-width: 100%;
@@ -557,6 +639,30 @@ a:hover { color: var(--gold-deep); }
   background: var(--bg-lift);
   border: 1px solid var(--frame-edge);
 }
+
+/* Fixed height, free width — `.days__thumb`'s own idiom below, here on the
+ * shared `.plate__img` selector (`/simplify`: `.plates__img` used to restate
+ * `object-fit`/`background`/`border` instead of joining that rule above).
+ * Placed AFTER the shared rule on purpose, same as `.days__thumb img`'s own
+ * override two rules down — two selectors of equal specificity, so cascade
+ * ORDER decides, and the shared rule's `max-height: min(55vh, 55dvh)` must
+ * lose here: a plate grid cell has no viewport-relative fold to answer to. */
+.plates__img {
+  height: 80px;
+  max-height: none;
+  width: auto;
+}
+
+/* The resting idiom — a value whose face has no stored picture stays a real,
+ * tappable wing; it just has no likeness to show for it yet. AFTER
+ * `.plates__img` above, for the identical reason: this element carries
+ * BOTH classes (`_plates.html.erb`), so `.plates__img--none` and
+ * `.plates__img` are equal-specificity selectors on the same node, and
+ * whichever is later in the file wins the `width` property. Caught by hand
+ * (own re-check after the `/code-review` fix above) — a synthetic element
+ * with both classes measured 1920px wide, the shared rule's `width: auto`
+ * silently winning over this one, before this rule moved down here. */
+.plates__img--none { width: 60px; }
 
 /*
  * The third term, added by story 0012: the cap also yields to the text.
@@ -852,9 +958,10 @@ a.label__artist-name {
  * the bar is one number rather than one number and three copies of it. */
 .coda .caps-link,
 .compass .caps-link,
-.facets .caps-link,
+.wings .caps-link,
 .legal .caps-link,
 .masthead__you,
+.compass__door,
 .walk__step,
 .walk__today,
 .rail__act,
@@ -1127,14 +1234,17 @@ a.label__artist-name {
 /* The wordless controls. Height and the bare-button reset come from the blocks
  * above; width is stated here, because rule 9 has always got width for free
  * from the words inside a caps-link and these have none (`decisions/0010`).
- * Once, for both the rail's glyphs and the masthead's corner. */
+ * Once, for the rail's glyphs, the masthead's corner, and the gallery index
+ * door (story 0027) — the same fact a fourth control does not get to restate. */
 .masthead__you,
-.rail__act {
+.rail__act,
+.compass__door {
   justify-content: center;
   min-width: var(--tap);
 }
 .rail__act svg,
-.masthead__you svg { display: block; width: 23px; height: 23px; }
+.masthead__you svg,
+.compass__door svg { display: block; width: 23px; height: 23px; }
 
 /* The mark holding its own place until the private frame lands. Same box, same
  * colour, no cursor and no hover — it is a drawing, not a control, and the real

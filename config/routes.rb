@@ -90,6 +90,14 @@ Rails.application.routes.draw do
   # The infinite-scroll gallery, moved off the root (decisions/0002).
   get "feed" => "paintings#index", as: :feed
 
+  # The wing label (story 0027) — the filter's own screen, one glyph away
+  # from the sticky rail rather than a row of controls in front of the art.
+  # A second action on `PaintingsController`, not a new controller: it shares
+  # the wall, the params, and the model calls `#index` already has (eng
+  # review D1). `ios/Tondo/path-configuration.json` gives this route its own
+  # rule — a modal sheet, not a pushed screen.
+  get "feed/index" => "paintings#wings", as: :feed_index
+
   # The days behind you. The constraint keeps obvious junk out of the controller;
   # a well-formed date that is not a real one (2026-02-31) still reaches #show
   # and 404s there.

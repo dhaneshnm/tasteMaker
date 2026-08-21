@@ -137,27 +137,45 @@ class Painting < ApplicationRecord
   # Each is a nullable string column carrying the canonical DISPLAY value
   # ("19th century", "Portrait", "Mughal Painting") — never a slug. `genre`
   # has no data source until Release 2; `period` and `tradition` are written
-  # at seed time by `Pool::PeriodBucket` and `Pool::Tradition`. Order here IS
-  # the `/feed` display order (`PaintingsController#index` and the view both
-  # iterate this array), not just an allowlist.
+  # at seed time by `Pool::PeriodBucket` and `Pool::Tradition`. This is the
+  # canonical URL/query-param order — `resolve_active` and every `feed_path`
+  # call read it — not a display order any more: story 0027 moved the filter
+  # off `/feed` onto `/feed/index`, whose own section order is
+  # `Painting::FacetVoice::LABEL_ORDER` (tradition, subject, century), a
+  # deliberately different array answering a different question.
   FACETS = %i[period genre tradition].freeze
 
-  # A value with fewer works than this renders no filter control — the
+  # A value with fewer works than this renders no wing at all — the
   # story's own rule ("a facet with 1 work behind it is a dead end dressed
-  # as a feature") applied to Release 1's real numbers: the period facet
-  # would otherwise light singleton centuries immediately. Provisional;
-  # Release 2's measurement re-decides the number (plan D3).
-  MIN_FACET_WORKS = 5
+  # as a feature") applied to real numbers, twice: 0022 shipped 5 as a
+  # placeholder ("provisional; Release 2 re-decides") and never re-decided
+  # it; six values with 6-15 works rendered as wings under it (story 0027,
+  # `decisions/0017`). 16 is a measured threshold, not a round number — it
+  # is the smallest floor that both drops every one of those six AND keeps
+  # Persian & Islamic Painting (19 works, the pool's second-most-searched
+  # tradition, `user-research/0008`); 20 would have dropped it by accident.
+  # `pool_quota_test.rb` pins the exact set of canonical values this leaves
+  # below the floor, by name — a value that starves or recovers without
+  # that list changing is exactly the drift this constant existing as a
+  # provisional guess for two stories let happen once already.
+  MIN_FACET_WORKS = 16
 
-  # Every distinct value a facet carries in the committed pool, with its
-  # work count. Resolution (`resolve_facet_slug`) works against every value
-  # here, not just the ones that clear the display floor — a deep link a
-  # reader already has (or a value that later drops below the floor) never
-  # silently 500s, it just stops being offered as a button.
-  def self.facet_counts(facet)
+  # Every distinct value a facet carries, with its work count. Resolution
+  # (`resolve_facet_slug`) works against every value here, not just the ones
+  # that clear the display floor — a deep link a reader already has (or a
+  # value that later drops below the floor) never silently 500s, it just
+  # stops being offered as a button.
+  #
+  # `scope:` (story 0027) — a passed relation to count within, instead of the
+  # whole table. Existing callers (`lib/pool/report.rb`, `lib/pool/
+  # title_genre.rb`) pass nothing and get today's pool-wide behaviour; the
+  # index's `index_for` below is the only caller that passes one, and it is
+  # what lets a facet be counted "within the scope of the OTHER active
+  # facets" without a second query method.
+  def self.facet_counts(facet, scope: all)
     raise ArgumentError, "unknown facet: #{facet}" unless FACETS.include?(facet)
 
-    where.not(facet => nil).group(facet).count
+    scope.where.not(facet => nil).group(facet).count
   end
 
   # The subset of `facet_counts` that clears `MIN_FACET_WORKS`, ordered for
@@ -182,12 +200,69 @@ class Painting < ApplicationRecord
   end
 
   # A URL slug back to the canonical value it names, or nil for a blank,
-  # unknown, or stale slug — never a 500, and never a guess. `counts:` — see
-  # `displayed_facet_values` above.
-  def self.resolve_facet_slug(facet, slug, counts: facet_counts(facet))
+  # unknown, or stale slug — never a 500, and never a guess. Reads distinct
+  # values directly rather than through `facet_counts` (story 0027 eng
+  # review): resolution needs every value that exists, floor or no floor,
+  # and a plain `SELECT DISTINCT` is one query cheaper per facet than a
+  # `GROUP BY … COUNT` when nothing downstream wants the count.
+  def self.resolve_facet_slug(facet, slug)
     return nil if slug.blank?
 
-    counts.each_key.find { |value| facet_slug(value) == slug }
+    where.not(facet => nil).distinct.pluck(facet).find { |value| facet_slug(value) == slug }
+  end
+
+  # The AND-scope for a hash of `facet => value-or-nil` (story 0027). One
+  # builder, used by `PaintingsController#index`, `index_for`, and
+  # `plate_for` below — three independent copies of `active.each { |f, v|
+  # scope = scope.where(f => v) if v }` is exactly the kind of drift 0022's
+  # own `@filter_params` bug (`5d90908`) came from.
+  def self.scoped_to(active)
+    where(active.compact)
+  end
+
+  # The index's own facet listing (story 0027): for every facet, every value
+  # that co-occurs with the OTHER active facets, counted within THAT scope —
+  # switching Mughal to Pahari is a replace, not an AND, so tradition's own
+  # counts are never filtered by tradition. Floored at `MIN_FACET_WORKS`,
+  # except the active value itself, which stays in its own row even if a
+  # stale deep link left it under the floor — down to and including zero
+  # (a two-facet URL that itself ANDs to no matches, e.g. `?tradition=
+  # korean-painting&genre=nude`): `counts[active[facet]]` is simply absent
+  # from that facet's own GROUP BY then, and `.to_i` on nil is 0. Left as a
+  # real "here, 0 works" row rather than special-cased into `/feed`'s
+  # `.page--empty` treatment (`/code-review`, considered) — the index
+  # degrades gracefully around it: sections for facets that are NOT the
+  # zero-count one stay populated (scoped by the working facets only), and
+  # `wings.html.erb`'s summary line already prints the true "· 0 works"
+  # count at the top of the page before a reader reaches any section, so
+  # nothing is hidden and nothing needs a second empty-state idiom. Ordered
+  # for display: numeric for period, heaviest wing first for everything
+  # else — the index is a map, not an alphabet.
+  def self.index_for(active)
+    FACETS.index_with do |facet|
+      counts = facet_counts(facet, scope: scoped_to(active.except(facet)))
+      rows = counts.select { |_, count| count >= MIN_FACET_WORKS }
+      rows = rows.merge(active[facet] => counts[active[facet]].to_i) if active[facet] && !rows.key?(active[facet])
+
+      facet == :period ? rows.sort_by { |value, _| value[/\d+/].to_i } : rows.sort_by { |_, count| -count }
+    end
+  end
+
+  # The work whose picture stands for one value of the index (story 0027) —
+  # the first work, AMONG THE FIRST FIVE in curation order (not an unbounded
+  # scan — `/code-review` flagged the doc claiming otherwise), within the
+  # SAME scope `index_for` counted that value in (the other active facets),
+  # that actually has a picture to show. `display_image?`, not `image.
+  # attached?` alone (eng review 2.2): every test-created and fixture
+  # painting in this suite carries `image_url_800` and no attachment, so
+  # the narrower predicate made every plate in the test suite the "no face"
+  # case. `with_attached_image` avoids a second query per candidate for the
+  # attachment check `display_image?` and `artwork_src` both make. Five
+  # candidates without a picture in a row is not observed in the committed
+  # pool (measured 2026-08-21); if a reseed ever makes it common, the fix is
+  # a wider limit, not a redesign.
+  def self.plate_for(facet, value, scope:)
+    scope.where(facet => value).with_attached_image.feed_ordered.limit(5).find(&:display_image?)
   end
 
   # The museums actually in the pool, heaviest first. The gallery's closing line

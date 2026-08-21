@@ -359,12 +359,14 @@ class DynamicTypeTest < ApplicationSystemTestCase
     end
   end
 
-  # Story 0022 Release 1, design review pass 5. `.caps-link` sets size and
-  # tracking, never height — assuming otherwise is ISSUE-002 (commit
-  # 866bbc2), and the facet row states the bar itself with `min-height:
-  # var(--tap)`. Asserted at the accessibility cap, where the type is
-  # largest and a control built the wrong way is most likely to fall short.
-  test "the facet row's items clear the tap bar at the accessibility cap" do
+  # Story 0027 replaced the three in-flow facet rows with a door on the
+  # sticky rail. `.caps-link` sets size and tracking, never height —
+  # assuming otherwise is ISSUE-002 (commit 866bbc2) — and the wing label's
+  # own rows (`.wings__row`, the century values) state the bar the same way
+  # the old facet row did. Asserted at the accessibility cap, where the type
+  # is largest and a control built the wrong way is most likely to fall
+  # short.
+  test "the wing label's century row clears the tap bar at the accessibility cap" do
     Painting::MIN_FACET_WORKS.times do |i|
       Painting.create!(source: "mia", source_id: 923_000 + i, title: "Nineteenth #{i}",
         artist: "A. Painter", image_url_800: paintings(:woodcut).image_url_800,
@@ -372,18 +374,74 @@ class DynamicTypeTest < ApplicationSystemTestCase
     end
 
     with_viewport(375, 667) do
-      visit feed_path
+      visit feed_index_path
       scale_to CAPPED_ACCESSIBILITY_ROOT
 
       heights = page.evaluate_script(<<~JS)
-        [...document.querySelectorAll(".facets .caps-link")]
+        [...document.querySelectorAll(".wings__row .caps-link")]
           .map(el => Math.round(el.getBoundingClientRect().height))
       JS
 
-      assert heights.any?, "expected at least one facet control to measure"
+      assert heights.any?, "expected at least one century control to measure"
       heights.each_with_index do |height, i|
-        assert_operator height, :>=, 44, "facet item #{i} was #{height}px tall at the accessibility cap"
+        assert_operator height, :>=, 44, "century item #{i} was #{height}px tall at the accessibility cap"
       end
+    end
+  end
+
+  # Story 0027 success signal 1: the whole reason the three facet rows moved
+  # off `/feed` onto their own screen. At the default root, the first plate
+  # must be inside the viewport at first paint — measured at the story's own
+  # named viewport (390×844), not this file's narrower 375×667 default.
+  test "the first plate in the gallery is above the fold at first paint, unfiltered" do
+    with_viewport(390, 844) do
+      visit feed_path
+
+      top = page.evaluate_script(
+        "Math.round(document.querySelector('.plate__img').getBoundingClientRect().top)")
+      assert_operator top, :<, 844, "the first plate was below the fold at 390×844"
+      assert_operator top, :>=, 0
+    end
+  end
+
+  # The rail's arithmetic (`shared/_masthead.html.erb`): four one-word
+  # destinations plus a 44px door do not fit one row at 375px at the
+  # accessibility cap (312.23 of 329.0px already spent by the four words).
+  # `.compass` already wraps (`flex-wrap: wrap`), so the accepted fallback
+  # is the door alone on a second line — asserted here so a future change
+  # that quietly makes the rail wrap at the DEFAULT root, where it must
+  # not, is caught the same way.
+  test "the rail's four destinations stay on one row; only the door drops to a second at the accessibility cap" do
+    with_viewport(375, 667) do
+      visit feed_path
+
+      rows_at = ->(root) {
+        scale_to(root)
+        page.evaluate_script(<<~JS)
+          (() => {
+            const tops = [...document.querySelectorAll(".compass--rail .caps-link")]
+              .map(el => Math.round(el.getBoundingClientRect().top));
+            const door = document.querySelector(".compass--rail .compass__door");
+            return { words: new Set(tops).size,
+                     doorSameRow: door ? Math.round(door.getBoundingClientRect().top) === tops[0] : null };
+          })()
+        JS
+      }
+
+      default_root = rows_at.call(DEFAULT_ROOT)
+      assert_equal 1, default_root["words"], "the four destinations wrapped at the default root"
+      assert default_root["doorSameRow"], "the door left the destinations' row at the default root"
+
+      # Measured 2026-08-21: 312.23 of 329.0px already spent by the four
+      # words at the cap (`shared/_masthead.html.erb`'s own numbers); a
+      # 44px door needs 58px against ~17px of spare. It cannot fit, and the
+      # accepted fallback — `.compass`'s own `flex-wrap: wrap` — drops it to
+      # a second line rather than shrinking a target below 44px or hiding
+      # the one control that survives scrolling.
+      capped = rows_at.call(CAPPED_ACCESSIBILITY_ROOT)
+      assert_equal 1, capped["words"], "the four destinations themselves wrapped at the accessibility cap"
+      assert_not capped["doorSameRow"],
+        "the door stayed on the destinations' row at the accessibility cap — re-measure the rail's width budget"
     end
   end
 end

@@ -764,7 +764,157 @@ split and gate. Owner decided: whole. Everything else: agreement or a fold.
 
 ## Deviations
 
-(none yet — filled at implementation)
+Implemented 2026-08-21, step order as planned (2 → 3 → 1-floor). `bin/ci` green
+throughout (610 unit/integration + 66 system tests, rubocop, brakeman, bundler-audit,
+importmap audit). `/simplify` ran a 4-agent pass (reuse, simplification, efficiency,
+altitude) against the full diff before commit; findings and dispositions below.
+
+**Verified, not implemented — the canonical-param-order fix (eng review 1.1/outside
+voice #5) turned out to be unnecessary.** `Hash#to_query` (what `feed_path(**hash)`
+uses to build a query string) sorts keys alphabetically regardless of the hash's own
+insertion order — confirmed empirically (`bin/rails runner`, both
+`feed_path(tradition:, period:)` and `feed_path(period:, tradition:)` produced the
+byte-identical `?period=…&tradition=…`). Every link in this app is built through a
+route helper, never a hand-assembled string, so two links to the "same" filtered feed
+are already always byte-equal — the `Done` same-URL check Hotwire Native's Navigator
+needs was never actually at risk. `Painting.scoped_to`/the shared `resolve_active` path
+still landed (worth having on their own merits), but the `.slice(*FACETS)` ordering
+step named in the plan was dropped as solving a problem Rails already solves.
+
+**`/simplify` (4 agents, applied before commit):**
+- **Reuse:** `.plates__img` now joins the shared `.plate__img, .days__thumb img`
+  selector (`application.css`) instead of restating `object-fit`/`background`/`border`
+  — the exact duplication class `.plate__img` exists to prevent. `Painting.scoped_to`
+  simplified from a hand-rolled `reduce` to `where(active.compact)` — Rails already
+  ANDs a multi-key hash in one call.
+- **Altitude:** `_compass.html.erb`'s `door:` local changed from a hash of filter
+  params (with the partial building `feed_index_path(**door)` itself) to a caller-
+  resolved path string, plus an explicit `door_filled:` boolean — the partial is
+  rendered from non-gallery pages too and had no business knowing the gallery index's
+  route. `FACET_LABEL` and the plate-vs-row facet split (`PLATE_FACETS`) moved off
+  `PaintingsController` onto `Painting::FacetVoice` — a view reaching into a
+  controller constant (`wings.html.erb` read `PaintingsController::FACET_LABEL`) was
+  an inverted layer, and the facet vocabulary belongs beside the rest of it
+  (`LABEL_ORDER`, `SHORT`, `SENTENCE`).
+- **Simplification + efficiency (same finding, two angles):** `#wings` recomputed
+  `Painting.scoped_to(@active).count` a second time inside `coverage_lines` — an
+  identical `COUNT(*)` twice per request. `coverage_lines` now takes the already-built
+  scope and count as keyword args. `#index`/`#wings` also duplicated the same four
+  lines of filter setup; both now call one private `load_active_filter`.
+- **Simplification:** `create_paintings` existed only in `feed_filter_test.rb`, and
+  four new `painting_test.rb` tests hand-rolled the identical shape inline. Moved to
+  `test_helper.rb`'s `ActiveSupport::TestCase` block (alongside `publish_day`), shared
+  by both files.
+- **Skipped, named rather than silently dropped:**
+  - Efficiency flagged the N+1 in `plate_for` (one query set per offered tradition/
+    subject value, ~3 queries × ≤16 values). Not fixed — the reviewer's own read
+    confirmed this is deliberate and already measured: the plan's step 6 and the
+    `feed_filter_test.rb` "bounded number of queries" test (≤ 30) name this exact
+    shape and accept it (eng review 4.2: "explicit over clever at 2,300 rows;
+    revisit if the count assertion ever moves").
+  - Simplification's soft note (wings.html.erb's period row could use the same
+    `capture`-then-branch pattern `_plates.html.erb` uses) — explicitly flagged as
+    not a hard finding by the reviewer (the two rows render different markup
+    shapes). Left as two small, readable branches.
+  - The `@plates` block in `#wings` rebuilds `Painting.scoped_to(@active.except(
+    facet))`, which `index_for` also builds internally per facet for its own
+    `GROUP BY`. This is relation-object construction in Ruby, not a duplicated
+    database round trip — merging it would mean changing `index_for`'s return shape
+    (rows *and* scopes) for a negligible win. Left alone.
+
+**Browser-verified, not just test-verified.** Signed in via `/dev/sign_in` against the
+real seeded dev database (2,302 works) and drove the full golden path in Chrome:
+unfiltered `/feed` → door (outline, unfilled) → `/feed/index` → tap Mughal → filtered
+`/feed` (label "Mughal painting", aside "108 WORKS", door filled — quadrant solid gold)
+→ reopen index (Mughal marked current/dim/unlinked, Subject scoped to Portraits alone,
+Century scoped to 16th/17th/18th, coverage line "Subject is known for 24 of 108 works.",
+no Tradition coverage line) → `Done` → same filtered feed → scrolled to the last page →
+coda "Every match, end to end." + "Another wing" → back to the index. Also drove
+`tradition=korean-painting&genre=nude` (a real AND-to-zero) → the empty state, ornament,
+"Nothing here wears both.", both doors ("See the full gallery", "Open the index"), and
+confirmed the rail door still reads filled with the correct aria-label even on the
+empty page. Every number matched the manual DB queries taken before implementation
+(1,055 / 2,302 tradition coverage; 879 / 2,302 subject; Mughal 108; Persian 19).
+
+**Observed, not chased further — a screenshot-tool rendering artifact.** In the browser
+session, several `.plates__img` thumbnails (small, cross-origin museum CDN images in a
+tight grid) rendered blank in Chrome DevTools Protocol screenshots on first paint, even
+though direct DOM/JS inspection confirmed each was fully loaded (`naturalWidth`/
+`naturalHeight` nonzero, `complete: true`, `opacity: 1`, correctly positioned, no
+overlapping element via `elementFromPoint`). The same cross-origin images rendered
+correctly in screenshots elsewhere on the same page (row 1 of the grid) and on the
+unmodified `/feed` page's large plates. Reproduced across reloads; resolved on its own
+within a few seconds each time. Read as a CDP screenshot/compositing timing quirk with
+many small concurrent cross-origin loads, not a real defect — but not independently
+confirmed against a second tool, so worth a glance on a real device before ship (the
+existing `plate_for`/`with_attached_image` tests and the manual click-through both
+prove the underlying data and links are correct regardless of this).
+
+**Not performed — iOS simulator.** No Xcode/simulator access in this environment. The
+`context: "modal"` path-configuration change (eng review 1.1) is unverified on-device:
+the JSON is correct and both copies are pinned byte-identical by
+`path_configuration_test.rb`, but whether Hotwire Native actually presents `/feed/index`
+as a sheet, and whether `Done`'s same-URL visit collapses rather than stacks, needs a
+real run in the simulator or on a device before this ships to the App Store build.
+Flagged as a TODO, not silently assumed.
+
+**`/code-review` (10-angle pass, plus a live browser verification of its own top
+finding): 7 findings, all fixed.**
+
+- **[Critical] A CSS cascade bug the `/simplify` fix itself introduced.** Joining
+  `.plates__img` to the shared `.plate__img, .days__thumb img` selector (the
+  `/simplify` reuse fix, above) put the override block for `.plates__img`'s fixed
+  80px height BEFORE that shared rule in the file. Two selectors of equal
+  specificity: the LATER one wins the cascade, so the shared rule's `max-height:
+  min(55vh, 55dvh)` and `width: auto` silently won, and every plate rendered at its
+  natural aspect-ratio height (**measured live: 131.78px**, not 80px) — worse for
+  `.plates__img--none` (the no-picture resting box, an empty `<span>`), which
+  collapsed to a 2px sliver with no content to give it height. Fixed by moving the
+  override block to AFTER the shared rule, the same placement `.days__thumb img {
+  max-height: 100% }` already uses two rules down for the identical reason. Caught
+  in the same pass: `.plates__img--none`'s own `width: 60px` had the identical bug
+  one level down (it lost to `.plates__img { width: auto }`, also later in the
+  file) — found by re-checking with a synthetic element after fixing the first
+  instance, not by the reviewer; fixed the same way. Both re-verified live in the
+  browser post-fix: 80×82 for a real plate, 80×60 for a synthetic
+  `.plates__img.plates__img--none` element.
+- **Two links dropped the active filter, inconsistent with the rail door's own
+  behaviour on the same screens.** `_page.html.erb`'s "Another wing" (end of a
+  filtered walk) and `index.html.erb`'s "Open the index" (the AND-to-zero empty
+  state) both called bare `feed_index_path` instead of `feed_index_path(**
+  filter_params)` / `feed_index_path(**@filter_params)` — a `filter_params` local
+  already threaded through the same partial one call earlier for the pagination
+  frame `src`. Fixed both. Reasoned through, not just patched: preserving the
+  filter on "Open the index" from an AND-to-zero URL (e.g. `?tradition=korean-
+  painting&genre=nude`) is actually the MORE useful behaviour — the reopened index
+  shows Korean's real subjects (scoped by tradition alone) instead of a blank,
+  unscoped page. Both re-verified live: `Another wing` on the last page of a
+  Mughal-filtered walk links to `/feed/index?tradition=mughal-painting`; `Open the
+  index` from the Korean+Nude empty state carries both `tradition=` and `genre=`.
+- **`plate_for`'s doc comment overstated its own search depth.** It reads "the
+  first work in curation order... that actually has a picture" without naming the
+  five-candidate cap the code enforces (`.limit(5)`) — accurate as "the first
+  among the first five," not "the first, full stop." Tightened the comment; also
+  measured directly (not asserted) that this is not currently a live gap: swept
+  every tradition and genre value in the committed pool for five consecutive
+  picture-less works at the front of `feed_order` — zero found.
+- **`index_for`'s active-value backfill can show a "0 works" current wing on a
+  direct AND-to-zero URL** (two facets in the query string whose combination has
+  no matches — distinct from a stale single-value deep link, which the design
+  already names). Considered a full `.page--empty`-style treatment for `/feed/
+  index` to match `/feed`'s; declined — the index degrades gracefully around it
+  already (facets that are NOT the zero-count one stay populated, scoped only by
+  the working facets), and `wings.html.erb`'s summary line already prints the true
+  "· 0 works" count above every section, so nothing is hidden. Documented the
+  reasoning directly on `index_for` rather than changing behaviour.
+- **Re-flagged, already accepted: the N+1-shaped `plate_for` loop in `#wings`**
+  (one query set per offered value). Same finding `/simplify`'s efficiency angle
+  raised and the plan's own step 6/eng review 4.2 already named and bounded
+  (≤ 30 queries, tested). Not changed a second time.
+
+`bin/ci` green after every round: 611 unit/integration (up 1 for the new genre
+floor-vocabulary test) + 66 system tests, 0 rubocop/brakeman/bundler-audit/
+importmap warnings, throughout.
 
 ## Implementation Tasks
 

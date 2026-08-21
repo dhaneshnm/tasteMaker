@@ -1,0 +1,15 @@
+<%# The gallery index door (story 0027). Locals: filled:
+
+    The product's third functional glyph, same box as Keep and the oculus —
+    23px, 1.4px stroke, DESIGN.md rule 6's amended exception for controls.
+    A floor plan: four rooms, the reader's own wing (bottom right) filled in
+    when any facet is active. Fill is the entire state change — no colour
+    shift, no second mark — the same rule `favorites/_keep_glyph.html.erb`
+    states for Keep. Unfilled, the fourth room's rect is invisible and the
+    plan reads as four equal, empty rooms. %>
+<svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"
+     fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">
+  <rect x="4" y="4" width="16" height="16"/>
+  <path d="M12 4v16M4 12h16"/>
+  <rect x="12" y="12" width="8" height="8" fill="<%= filled ? "currentColor" : "none" %>" stroke="none"/>
+</svg>
