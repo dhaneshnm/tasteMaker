@@ -850,13 +850,40 @@ confirmed against a second tool, so worth a glance on a real device before ship 
 existing `plate_for`/`with_attached_image` tests and the manual click-through both
 prove the underlying data and links are correct regardless of this).
 
-**Not performed — iOS simulator.** No Xcode/simulator access in this environment. The
-`context: "modal"` path-configuration change (eng review 1.1) is unverified on-device:
-the JSON is correct and both copies are pinned byte-identical by
-`path_configuration_test.rb`, but whether Hotwire Native actually presents `/feed/index`
-as a sheet, and whether `Done`'s same-URL visit collapses rather than stacks, needs a
-real run in the simulator or on a device before this ships to the App Store build.
-Flagged as a TODO, not silently assumed.
+**Performed — iOS simulator (2026-08-21).** Xcode 26.5 was present the whole time; an
+earlier pass in this session wrongly reported no access without checking. Built the
+`Tondo` scheme Debug config for iPhone 17 (`xcodebuild ... -destination 'platform=iOS
+Simulator,name=iPhone 17'`, ad-hoc "Sign to Run Locally"), installed, and drove it by
+screenshotting the Simulator window and clicking through `System Events`.
+
+First launch's device registration came back `401 Unauthorized` in the Rails log — a
+real, pre-existing wiring bug, not a fixture problem: `DeviceRegistrationsController
+.expected_app_secret` prefers Rails credentials `tondo.app_secret` (a long generated
+value) over `ENV["TONDO_APP_SECRET"]`, but `Debug.xcconfig` never included
+`Secrets.xcconfig` the way `Release.xcconfig` does — only Release ever picked up the
+credentials-matching secret, so no Debug simulator build could ever register. Fixed by
+adding `#include? "Secrets.xcconfig"` as the last line of `Debug.xcconfig`, mirroring
+Release's pattern (comment updated to explain the credentials-over-ENV precedence).
+Rebuilt, reinstalled, relaunched: registration succeeded (`Device` row created, no more
+401), confirming the fix. Out of scope for story 0027 itself — a standing app/server
+secret-wiring gap from story 0015 that happened to block this story's own verification
+step — so fixed directly rather than worked around.
+
+With a registered device, drove `/feed` → tap the rail door → `/feed/index` → `Done`:
+
+- **`context: "modal"` renders correctly.** `/feed/index` came up with rounded top
+  corners on the content card and a dimmed/grayed status-bar area above it — the
+  standard iOS sheet-presentation signature — confirming Hotwire Native is reading the
+  `^/feed/index$` → `context: "modal"` rule from `path-configuration.json` and
+  presenting it as a sheet, not a pushed full-screen view.
+- **`Done` collapses, does not stack.** Tapping `Done` (same-URL Turbo visit back to
+  the unfiltered `/feed`) dismissed the sheet cleanly back to the exact prior scroll
+  position (same painting, same scroll offset) with no flash of a duplicate screen and
+  no back-stack artifact.
+
+Both eng-review-1.1 open questions are now confirmed on-device, not just by JSON
+byte-equality. Plate thumbnails loaded correctly once fetched (a mid-load screenshot
+briefly showed placeholder boxes before images arrived — expected, not a defect).
 
 **`/code-review` (10-angle pass, plus a live browser verification of its own top
 finding): 7 findings, all fixed.**
