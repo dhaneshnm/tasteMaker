@@ -52,6 +52,13 @@ gem "csv", "~> 3.3"
 # this unit of work; not added before there was a job that needed it.
 gem "solid_queue"
 
+# Error tracking — session gate 6, before the first external user
+# (decisions/0018). `test/integration/privacy_claims_test.rb` expects exactly
+# this: the gem lands the same commit as the privacy-page disclosure and the
+# policy date bump.
+gem "sentry-ruby"
+gem "sentry-rails"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

@@ -57,5 +57,5 @@ class PagesController < ActionController::Base
   # fails the build when the policy's "nothing is watching you" claim stops
   # being true, which is the day this date needs bumping and the App Store
   # privacy labels need refiling.
-  POLICY_UPDATED_ON = Date.new(2026, 8, 16)
+  POLICY_UPDATED_ON = Date.new(2026, 8, 21)
 end

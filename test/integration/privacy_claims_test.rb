@@ -29,6 +29,15 @@ class PrivacyClaimsTest < ActionDispatch::IntegrationTest
     rack-tracker fullstory heap logrocket
   ].freeze
 
+  # Reviewed and disclosed, not exempt from scrutiny — just already paid for.
+  # Sentry is error tracking, not analytics: it fires only on an actual crash,
+  # carries no behavioral data, and is named on its own in
+  # app/views/pages/privacy.html.erb ("If the app crashes or hits an error").
+  # `decisions/0018` is the fingerprint. Landing here without editing the
+  # privacy page and this comment in the same commit is the failure mode this
+  # allowlist exists to make loud rather than silent.
+  DISCLOSED = %w[sentry-ruby sentry-rails].freeze
+
   CLAIM = "No third-party analytics".freeze
 
   setup do
@@ -47,7 +56,7 @@ class PrivacyClaimsTest < ActionDispatch::IntegrationTest
   end
 
   test "no tracking or analytics dependency while the policy denies one" do
-    present = TRACKING_GEMS.select { |gem| @lockfile.match?(/^\s+#{Regexp.escape(gem)}\s/) }
+    present = TRACKING_GEMS.select { |gem| @lockfile.match?(/^\s+#{Regexp.escape(gem)}\s/) } - DISCLOSED
 
     assert_empty present, <<~MESSAGE
       Gemfile.lock now carries #{present.join(", ")}, and /privacy still says

@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Session gate 6: a real offsite SQLite backup, pulled to this machine and
+# verified here — not a GCP disk snapshot, which can capture a torn WAL
+# mid-write and is not a restorable backup (decisions/0012).
+#
+# Three steps, each one a thing that could silently lie: `.backup` inside the
+# running container (a live copy, not a `cp` of a file that might be
+# mid-write), scp off the box to a disk failure domain that isn't GCP, then
+# open the pulled file locally and count rows against it — the "restore
+# actually performed" half of the gate, not just "a file exists somewhere".
+#
+# Requires: `gcloud` authenticated against the tondo-prod project, and Kamal's
+# usual deploy secrets (KAMAL_REGISTRY_PASSWORD, RAILS_MASTER_KEY) exported —
+# see config/deploy.yml's header. Not runnable from an agent shell; the
+# operator runs this by hand.
+#
+# Usage: script/backup-db
+
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+ZONE="us-central1-a"
+INSTANCE="tondo"
+STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+REMOTE_FILE="backup-${STAMP}.sqlite3"
+OUT_DIR="tmp/backups"
+OUT_FILE="${OUT_DIR}/${REMOTE_FILE}"
+
+mkdir -p "$OUT_DIR"
+
+echo "==> Taking a live .backup inside the container (not a raw file copy)"
+kamal app exec "sqlite3 /rails/storage/production.sqlite3 \".backup '/rails/storage/${REMOTE_FILE}'\""
+
+echo "==> Finding the Docker volume's host path"
+MOUNTPOINT="$(gcloud compute ssh "$INSTANCE" --zone "$ZONE" \
+  --command "docker volume inspect tondo_storage --format '{{ .Mountpoint }}'" 2>/dev/null | tail -1)"
+
+if [ -z "$MOUNTPOINT" ]; then
+  echo "Could not resolve the tondo_storage volume mountpoint." >&2
+  exit 1
+fi
+
+echo "==> Pulling the backup off the box (offsite: this machine, not the GCP disk)"
+gcloud compute scp "${INSTANCE}:${MOUNTPOINT}/${REMOTE_FILE}" "$OUT_FILE" --zone "$ZONE"
+
+echo "==> Removing the remote copy — the pulled file is the backup now"
+kamal app exec "rm /rails/storage/${REMOTE_FILE}"
+
+echo "==> Restore verification: opening the pulled file, not trusting that it exists"
+sqlite3 "$OUT_FILE" "PRAGMA integrity_check;"
+PAINTINGS="$(sqlite3 "$OUT_FILE" "SELECT COUNT(*) FROM paintings;")"
+PICKS="$(sqlite3 "$OUT_FILE" "SELECT COUNT(*) FROM daily_picks;")"
+USERS="$(sqlite3 "$OUT_FILE" "SELECT COUNT(*) FROM users;")"
+
+echo ""
+echo "==> Verified restorable backup: ${OUT_FILE}"
+echo "    paintings=${PAINTINGS} daily_picks=${PICKS} users=${USERS}"
+echo "    Log this line (date, counts, file) in SHIPLOG.md — it's the receipt."
