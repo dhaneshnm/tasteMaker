@@ -1,0 +1,242 @@
+{
+ "generated_on": "2026-08-20",
+ "mirror_total": 11339,
+ "outside_pool": 9339,
+ "themes": {
+  "ukiyo-e / Edo painting": {
+   "outside_pool_hits": 280,
+   "with_image": 280,
+   "with_image_and_description": 179,
+   "by_source": {
+    "aic": 3,
+    "cma": 274,
+    "mia": 3
+   },
+   "sample_titles": [
+    "Beauty Turning Her Head \u2014 Hishikawa Moronobu (aic)",
+    "Sh\u00f4ki the Demon Queller, from an album of paintings of Sh\u00f4ki, Edo peri \u2014 Kan\u00f4 Yasunobu, School of (aic)",
+    "Women's Bathhouse and Laundry \u2014 Kitao Shigemasa (aic)",
+    "Seventy-Two Peaks Under the Blue Sky with Mount Furong \u2014 Matsumura Goshun (cma)",
+    "Bamboo and Rocks in Clearing Skies \u2014 Ike Taiga (cma)"
+   ]
+  },
+  "Madhubani": {
+   "outside_pool_hits": 9,
+   "with_image": 9,
+   "with_image_and_description": 0,
+   "by_source": {
+    "cma": 9
+   },
+   "sample_titles": [
+    "Rider and four-legged bovine creature in mauve, chartreuse and black p \u2014  (cma)",
+    "Large, multi-armed figure facing left \u2014  (cma)",
+    "Three Figures: woman with two children playing ball \u2014  (cma)",
+    "Woman in profile facing left  (by woman painter) \u2014  (cma)",
+    "Devotional painting (female figure) \u2014  (cma)"
+   ]
+  },
+  "Still life / flowers": {
+   "outside_pool_hits": 528,
+   "with_image": 338,
+   "with_image_and_description": 220,
+   "by_source": {
+    "aic": 77,
+    "cma": 205,
+    "mia": 56
+   },
+   "sample_titles": [
+    "Trompe-l'Oeil Still Life with a Flower Garland and a Curtain \u2014 Adriaen van der Spelt (aic)",
+    "Still Life \u2014 Pieter Claesz (aic)",
+    "Kitchen Still Life \u2014 Paolo Antonio Barbieri (aic)",
+    "Still Life with Monkey, Fruits, and Flowers \u2014 Jean-Baptiste Oudry (aic)",
+    "Flowers and Fruit in a Porcelain Bowl \u2014 Juan de Zurbar\u00e1n (aic)"
+   ]
+  },
+  "Marine / seascape": {
+   "outside_pool_hits": 66,
+   "with_image": 56,
+   "with_image_and_description": 38,
+   "by_source": {
+    "aic": 26,
+    "cma": 26,
+    "mia": 4
+   },
+   "sample_titles": [
+    "Rinaldo and the Magus of Ascalon \u2014 Giovanni Battista Tiepolo (aic)",
+    "Coast Scene \u2014 Reinier Nooms, called Zeeman (aic)",
+    "Italian Landscape with Travelers \u2014 Jan Both (aic)",
+    "The Dutch Whaling Fleet \u2014 Abraham Storck (aic)",
+    "Seascape \u2014 Pierre-Auguste Renoir (aic)"
+   ]
+  },
+  "Cityscape / veduta": {
+   "outside_pool_hits": 36,
+   "with_image": 25,
+   "with_image_and_description": 22,
+   "by_source": {
+    "aic": 5,
+    "cma": 11,
+    "mia": 9
+   },
+   "sample_titles": [
+    "The Grand Canal, Venice \u2014 Francesco Guardi (aic)",
+    "Festival in Piazza Navona \u2014 Giovanni Paolo Panini (aic)",
+    "The Movings \u2014 Louis-L\u00e9opold Boilly (aic)",
+    "Canal in Venice \u2014 Martin Rico y Ortega (aic)",
+    "French Street Scene \u2014 Edouard B\u00e9liard (aic)"
+   ]
+  },
+  "Mythological": {
+   "outside_pool_hits": 109,
+   "with_image": 71,
+   "with_image_and_description": 55,
+   "by_source": {
+    "aic": 30,
+    "cma": 27,
+    "mia": 14
+   },
+   "sample_titles": [
+    "Are They Thinking about the Grape? (Pensent-ils au raisin?) \u2014 Fran\u00e7ois Boucher (aic)",
+    "Jupiter Rebuked by Venus \u2014 Abraham Janssens (aic)",
+    "Venus and Cupid \u2014 Luca Cambiaso (aic)",
+    "The Wedding of Peleus and Thetis \u2014 Peter Paul Rubens (aic)",
+    "Christ Washing the Feet of His Disciples \u2014 Nicolas Bertin (aic)"
+   ]
+  },
+  "Vanitas / trompe-l'oeil": {
+   "outside_pool_hits": 10,
+   "with_image": 6,
+   "with_image_and_description": 6,
+   "by_source": {
+    "aic": 4,
+    "mia": 2
+   },
+   "sample_titles": [
+    "Trompe-l'Oeil Still Life with a Flower Garland and a Curtain \u2014 Adriaen van der Spelt (aic)",
+    "A Vanitas Still Life with a Flag, Candlestick, Musical Instruments, Bo \u2014 Edwaert Collier (aic)",
+    "For Sunday's Dinner \u2014 William Michael Harnett (aic)",
+    "Civil War Regalia of Major Levi Gheen McCauley \u2014 George Cope (aic)",
+    "Mary Magdalen \u2014 Pasquale Ottino (mia)"
+   ]
+  },
+  "Persian / Islamic miniature": {
+   "outside_pool_hits": 771,
+   "with_image": 760,
+   "with_image_and_description": 268,
+   "by_source": {
+    "aic": 24,
+    "cma": 721,
+    "mia": 15
+   },
+   "sample_titles": [
+    "Emperor Heraclius Denied Entry into Jerusalem \u2014 Netherlandish (aic)",
+    "Emperor Heraclius Slays the King of Persia \u2014 Netherlandish (aic)",
+    "Alexander Comforts the Dying Darius, page from a copy of the Shahnama  \u2014 Islamic (aic)",
+    "Zal and Rudaba in a Palace, page from a copy of the Shahnama of Firdau \u2014 Islamic (aic)",
+    "Qur'an Manuscript in Muhaqqaq \u2014 Islamic (aic)"
+   ]
+  },
+  "Thangka / Tibetan-Nepalese": {
+   "outside_pool_hits": 493,
+   "with_image": 473,
+   "with_image_and_description": 55,
+   "by_source": {
+    "aic": 44,
+    "cma": 421,
+    "mia": 8
+   },
+   "sample_titles": [
+    "Kasuga Deer Mandala \u2014 Mandara Shika (aic)",
+    "Painted Banner (Thangka) with the Medicine Buddha (Bhaishajyaguru) \u2014  (aic)",
+    "Painted Banner (Thangka) of Vajrasattva Mandala \u2014  (aic)",
+    "Armor Shirt, from a Set of Initiation Cards (Tsakali) \u2014  (aic)",
+    "Lady Offering Food to a Monk, From a Set of Initiation Cards (Tsakali) \u2014  (aic)"
+   ]
+  },
+  "Icon (religious panel)": {
+   "outside_pool_hits": 17,
+   "with_image": 14,
+   "with_image_and_description": 13,
+   "by_source": {
+    "aic": 2,
+    "cma": 11,
+    "mia": 1
+   },
+   "sample_titles": [
+    "Trompe-l'Oeil Still Life with a Flower Garland and a Curtain \u2014 Adriaen van der Spelt (aic)",
+    "Icon with the Virgin and Child \u2014 Cretan (aic)",
+    "Icon of the New Testament Trinity \u2014  (cma)",
+    "Icon of the Mother of God and Infant Christ (Virgin Eleousa) \u2014 Angelos Akotantos (cma)",
+    "The Orange Christ \u2014 Maurice Denis (cma)"
+   ]
+  },
+  "Portrait": {
+   "outside_pool_hits": 601,
+   "with_image": 357,
+   "with_image_and_description": 216,
+   "by_source": {
+    "aic": 157,
+    "cma": 138,
+    "mia": 62
+   },
+   "sample_titles": [
+    "Virgin and Child \u2014 Hans Memling (aic)",
+    "Portrait of a Donor (recto); Saint Anthony of Padua (verso) \u2014 Hans Memling (aic)",
+    "Portrait of Kobo Daishi (Kukai) \u2014  (aic)",
+    "Portrait of a Man in a Red Cap \u2014 German (aic)",
+    "Madame de Pastoret and Her Son \u2014 Jacques Louis David (aic)"
+   ]
+  },
+  "Landscape": {
+   "outside_pool_hits": 703,
+   "with_image": 482,
+   "with_image_and_description": 285,
+   "by_source": {
+    "aic": 146,
+    "cma": 245,
+    "mia": 91
+   },
+   "sample_titles": [
+    "Holy Family \u2014 German (aic)",
+    "Water Pavilion by Twin Pines \u2014 Guo Xi (aic)",
+    "Two Scholar-Musicians in a Landscape \u2014  (aic)",
+    "Scholar in Landscape \u2014 Gao Kekong (aic)",
+    "Landscape \u2014 Oguri Sotan (aic)"
+   ]
+  },
+  "Baroque-era European (1600-1750)": {
+   "outside_pool_hits": 1042,
+   "with_image": 493,
+   "with_image_and_description": 332,
+   "by_source": {
+    "aic": 232,
+    "cma": 159,
+    "mia": 102
+   },
+   "sample_titles": [
+    "Pastoral Landscape with Ruins \u2014 Adriaen van de Velde (aic)",
+    "Portrait of an Artist \u2014 Follower of Frans Hals (aic)",
+    "Young Woman at an Open Half-Door \u2014 Workshop of Rembrandt van Rijn (aic)",
+    "A Mother Feeding her Child (The Happy Mother) \u2014 Willem van Mieris (aic)",
+    "The Resurrection \u2014 Cecco del Caravaggio (aic)"
+   ]
+  },
+  "Romantic-era European (1780-1850)": {
+   "outside_pool_hits": 622,
+   "with_image": 294,
+   "with_image_and_description": 138,
+   "by_source": {
+    "aic": 130,
+    "cma": 126,
+    "mia": 38
+   },
+   "sample_titles": [
+    "Madame de Pastoret and Her Son \u2014 Jacques Louis David (aic)",
+    "The Old Temple \u2014 Hubert Robert (aic)",
+    "Lady Reading the Letters of Heloise and Abelard \u2014 Bernard d'Agescy (aic)",
+    "Virgil Reading the \"Aeneid\" to Augustus, Octavia, and Livia \u2014 Jean Baptiste Joseph Wicar (aic)",
+    "The Landing Place \u2014 Hubert Robert (aic)"
+   ]
+  }
+ }
+}

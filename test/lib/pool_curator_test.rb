@@ -8,10 +8,12 @@ class PoolCuratorTest < ActiveSupport::TestCase
   # `plate: false` reproduces the Met, whose CSV carries no image URL and no
   # dimensions — both are only knowable per work, through the resolver.
   def candidate(source:, id:, artist: "Painter #{id}", region: "europe", year: 1850,
-                text: true, edge: 3000, highlight: false, title: "Work #{source}#{id}", plate: true)
+                text: true, edge: 3000, highlight: false, title: "Work #{source}#{id}", plate: true,
+                medium: nil, culture: nil, country: nil, department: nil)
     Pool::Candidate.new(
       source: source, source_id: id, title: title, artist: artist, region: region,
-      year: year, culture: region, dated: year.to_s, highlight: highlight,
+      year: year, culture: culture || region, country: country, department: department,
+      dated: year.to_s, highlight: highlight, medium: medium,
       description: text ? "x" * (Pool::MIN_TEXT + 10) : nil,
       image_url_full: plate ? "https://example.test/#{source}/#{id}.jpg" : nil,
       image_width: plate ? edge : 0, image_height: plate ? edge : 0
@@ -47,8 +49,8 @@ class PoolCuratorTest < ActiveSupport::TestCase
     end
   end
 
-  def curate(candidates, target: 200, resolver: met_resolver)
-    curator = Pool::Curator.new(candidates, target: target, resolver: resolver)
+  def curate(candidates, target: 200, resolver: met_resolver, pinned: [])
+    curator = Pool::Curator.new(candidates, target: target, resolver: resolver, pinned: pinned)
     curator.curate!
     curator
   end
@@ -260,5 +262,154 @@ class PoolCuratorTest < ActiveSupport::TestCase
       assert_empty curator.recognizable
       curator.bars.each { |name, (have, want, ok)| assert ok, "#{name}: have #{have}, want #{want}" }
     end
+  end
+
+  # --- pinning (story 0026) -----------------------------------------------
+  #
+  # Jordan's contract: every work in the previous committed manifest is taken
+  # first, verbatim. These pin the mechanism against the ways it could break —
+  # a resolver call that should never fire, a duplicate that should lose to
+  # the pin, a cap collision that must raise rather than silently drop.
+
+  def pin(id, artist: "Pinned Painter #{id}", region: "europe")
+    candidate(source: "cma", id: id, artist: artist, region: region)
+  end
+
+  test "every pinned work is taken, resolver never called for any of them" do
+    pins = 5.times.map { |i| pin(100 + i) }
+    resolver_calls = []
+    tracking_resolver = ->(c) { resolver_calls << c.identity; met_resolver.call(c) }
+
+    curator = curate(wide_pool, target: 200, pinned: pins, resolver: tracking_resolver)
+
+    pins.each { |p| assert_includes curator.selected.map(&:identity), p.identity }
+    assert_empty resolver_calls & pins.map(&:identity), "the resolver must never be asked about a pin"
+  end
+
+  test "a pinned work's plate stays even when the resolver would have rejected it" do
+    dead = pin(200)
+    resolver = ->(_c) { false } # every non-pinned candidate is unresolvable
+
+    error = assert_raises(Pool::Curator::Unmeetable) do
+      Pool::Curator.new(wide_pool, target: 200, pinned: [ dead ], resolver: resolver).curate!
+    end
+    # It fails on the fill stages starving (resolver refuses everything else),
+    # not on the pin itself — the pin is never even offered to the resolver.
+    assert_no_match(/pinned work\(s\) could not be placed/, error.message)
+  end
+
+  test "the pinned copy wins a cross-museum duplicate, not the larger or text-bearing one" do
+    pinned_work = candidate(source: "cma", id: 300, artist: "Rembrandt", title: "The Night Watch",
+      text: false, edge: 1800)
+    mirror_duplicate = candidate(source: "aic", id: 301, artist: "Rembrandt", title: "The night watch!",
+      text: true, edge: 5000)
+
+    curator = curate(wide_pool + [ mirror_duplicate ], target: 200, pinned: [ pinned_work ])
+
+    kept = curator.selected.select { |c| c.artist == "Rembrandt" }
+    assert_equal 1, kept.size, "one painting, once, even split across two identities"
+    assert_equal "cma", kept.first.source, "the pin wins even though the mirror copy has text and a bigger plate"
+  end
+
+  test "a pin that cannot be placed raises, naming the pair, not a silent shortfall" do
+    # Five pins by the same artist already exhaust MAX_PER_ARTIST; the sixth
+    # cannot be taken by `room_for?` and must be fatal, not dropped.
+    artist = "One Prolific Painter"
+    pins = 6.times.map { |i| pin(400 + i, artist: artist) }
+
+    error = assert_raises(Pool::Curator::Unmeetable) do
+      Pool::Curator.new(wide_pool, target: 200, pinned: pins).curate!
+    end
+    assert_match(/pinned work\(s\) could not be placed/, error.message)
+    assert_match(/cma\/40[45]/, error.message)
+  end
+
+  test "pinning is additive: the previous pool plus new fill both survive" do
+    pins = 20.times.map { |i| pin(500 + i, region: "south_asia") }
+
+    curator = curate(wide_pool, target: 200, pinned: pins)
+
+    assert_equal 200, curator.selected.size
+    pins.each { |p| assert_includes curator.selected.map(&:identity), p.identity }
+    curator.bars.each { |name, (have, want, ok)| assert ok, "#{name}: have #{have}, want #{want}" }
+  end
+
+  test "fill_recognizable's receipt counts an already-pinned work, not just what it newly took" do
+    pinned_vermeer = pin(600, artist: "Johannes Vermeer")
+
+    with_recognizable_names(NAMES) do
+      curator = curate(wide_pool, target: 200, pinned: [ pinned_vermeer ])
+
+      assert_operator curator.recognizable["Johannes Vermeer"][:taken], :>=, 1,
+        "a pinned recognizable work must count toward the coverage receipt, not read as 0"
+    end
+  end
+
+  # --- fill_themes, the demand stage (story 0026) -------------------------
+
+  def themed(id, tradition_culture: nil, title: "Untitled #{id}", text: true, region: "west_asia_islamic")
+    candidate(source: "cma", id: id, title: title, region: region, text: text, culture: tradition_culture)
+  end
+
+  test "a theme quota is met from stock, want/took/shortfall reported correctly" do
+    persian = 30.times.map { |i| themed(700 + i, tradition_culture: "Persia, Safavid period") }
+
+    curator = curate(wide_pool + persian, target: 200)
+
+    row = curator.themes["Persian miniature"]
+    assert_equal 25, row[:want]
+    assert_equal 25, row[:took]
+    assert_equal 0, row[:shortfall]
+    is_persian = Pool::ThemeTargets.tradition_matcher("Persian & Islamic Painting")
+    assert_operator curator.selected.count { |c| is_persian.call(c) }, :>=, 25
+  end
+
+  test "a theme short of stock reports the shortfall instead of raising" do
+    persian = 3.times.map { |i| themed(800 + i, tradition_culture: "Persia, Safavid period") }
+
+    curator = curate(wide_pool + persian, target: 200) # must not raise — an incomplete theme fill is supply, not a broken bar
+
+    row = curator.themes["Persian miniature"]
+    assert_equal 3, row[:took]
+    assert_equal 22, row[:shortfall]
+  end
+
+  test "within a theme, description-bearing candidates are taken before blurbless ones" do
+    blurbless = 30.times.map { |i| themed(900 + i, tradition_culture: "Persia, Safavid period", text: false) }
+    with_text = 5.times.map { |i| themed(950 + i, tradition_culture: "Persia, Safavid period", text: true) }
+
+    curator = curate(wide_pool + blurbless + with_text, target: 200)
+
+    is_persian = Pool::ThemeTargets.tradition_matcher("Persian & Islamic Painting")
+    persian_selected = curator.selected.select { |c| is_persian.call(c) }
+    assert_equal 5, persian_selected.count(&:text?), "all 5 text-bearing Persian works should be taken"
+  end
+
+  test "a candidate counted toward a theme's quota stamps the same tradition value the seeder would" do
+    work = themed(1000, tradition_culture: "Tibet, 18th century")
+
+    curator = curate(wide_pool + [ work ], target: 200)
+
+    assert_includes curator.selected.map(&:identity), work.identity
+    stamped = Pool::Tradition.from_strings(culture: work.culture, country: work.country,
+      department: work.department, artist: work.artist, medium: work.medium)
+    assert_equal "Tibetan & Nepalese Painting", stamped,
+      "the matcher that counted this candidate must agree with the function that stamps the facet at seed time"
+  end
+
+  test "fill_themes cannot break a bar — every take still goes through room_for?" do
+    # Target 40 puts the region cap at 10 (MAX_REGION_SHARE 0.25), below the
+    # Still life/flowers want of 40 — a theme candidate is refused by a quota
+    # bar rather than by supply, the case that proves the fill cannot break one.
+    flowers = 40.times.map { |i|
+      candidate(source: "cma", id: 2_000 + i, region: "east_asia", title: "Peonies #{i}")
+    }
+
+    curator = Pool::Curator.new(flowers, target: 40)
+    curator.fill_themes(flowers)
+
+    assert_equal 10, curator.selected.size, "the region cap refused the rest"
+    assert_equal 10, curator.themes["Still life / flowers"][:took]
+    assert_equal 30, curator.themes["Still life / flowers"][:shortfall]
   end
 end

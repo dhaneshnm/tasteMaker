@@ -51,11 +51,20 @@ paintings.each do |attrs|
     feed_order: attrs["feed_order"],
     # Story 0022 Release 1. `period` is derived from `dated`, which the
     # manifest already carries — recomputed on every seed, reseed-safe by
-    # construction, no backfill task to forget. `genre` has no source until
-    # Release 2 adds it to the manifest; nil until then is the honest state,
-    # not a placeholder to fill in later.
+    # construction, no backfill task to forget.
     period: Pool::PeriodBucket.from_dated(attrs["dated"]),
-    genre: attrs["genre"]
+    # Story 0025: the genre provenance ladder, stated once (plan D1).
+    # Museum tag (manifest, 0022) > title inference > nil — a tag is the
+    # museum saying what the work IS; a title match is us reading what the
+    # museum CALLED it. `TitleGenre.backfill!` recomputes this same ladder.
+    genre: attrs["genre"] || Pool::TitleGenre.infer(attrs["title"]),
+    # Story 0024. Same reseed-safe pattern: derived from culture/country/
+    # department (plus artist, when it's a placeholder) on every seed.
+    # Story 0026: `medium` added for the Ukiyo-e Painting allowlist check.
+    tradition: Pool::Tradition.from_strings(
+      culture: attrs["culture"], country: attrs["country"],
+      department: attrs["department"], artist: attrs["artist"], medium: attrs["medium"]
+    )
   )
   painting.save!
 end

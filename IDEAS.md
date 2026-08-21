@@ -21,6 +21,9 @@ feed BET.md's conversation threshold — track in `user-research/`, never as que
 
 ## Inbox
 
+- 2026-08-20 — Facet-usage receipt: instrument/query whether readers tap ?genre= / ?tradition= before the expansion story starts (0025 eng review F12, outside voice — every facet success signal so far is an input metric)
+- 2026-08-20 — A pinned work whose plate download previously failed (image_url_full present, `image.attached?` false — `db/seeds.rb`'s fetch failure path warns and moves on) has no path back to detection: `pool:curate`'s pins skip the plate resolver by design (0026, plates "already cached"), so a work that was NEVER actually cached ships silently forever. Not built now — the deliberate skip is what removed ~2,000 HEAD requests/run, and no such row is confirmed to exist today (0026 code review, latent not observed). If a blank-plate report ever surfaces a pinned work, this is the first place to look; a fix would be a LOCAL (no-network) `image.attached?` check against the live DB before skipping, not a full re-verify.
+
 ### Canonicalise the artist string so one artist is one page — Better (range)
 
 Source: `specs/0019-the-coverage-fill/plan.md` C4b, 2026-08-19. Deferred there on purpose.
@@ -53,6 +56,14 @@ CMA/MIA invariant that accounts for it), build the SPARQL client as a first-clas
 `lib/pool/` module reusing `Pool::Sources.get_json`'s retry/backoff idiom, and batch the
 QID lookup in one `VALUES` clause — the dry-run already proved that query shape works
 live against Wikidata's public endpoint.
+
+**Re-sized by `user-research/0008`, 2026-08-20:** the 6.2% (124-work) figure was the
+floor from the 200-name QID list alone. A top-80-artist sample puts P135 reach at
+≥70% of works by attributed top artists, and movements are the highest-demand theme
+vocabulary readers look up (Impressionism 466K annual pageviews vs portrait 57K). The
+payoff is a movement facet, not a genre patch — and the hard part (artist
+reconciliation) is the same work the canonicalisation entry above needs. The two
+entries plus 0008's evidence are probably one story.
 
 ### Rejected-memory for machine picks — — (untriaged)
 
@@ -90,6 +101,15 @@ later.
 
 ## Promoted
 
+- 2026-08-20 — Tradition facet from culture strings → `specs/0024-the-named-traditions`.
+  First of the three-story decisions/0016 sequence (findability → findability →
+  expansion).
+- 2026-08-20 — Genre fill v2: title/description keywords → `specs/0025-what-the-title-says`.
+  Second of the sequence; rewrites the CMA/MIA-never-genre invariant on purpose.
+- 2026-08-20 — Theme-gap re-curation → `specs/0026-the-wider-pool`. **Mechanism
+  inverted on promotion by owner decision (decisions/0016):** the Inbox entry
+  proposed swap-within-2,000; the owner chose additive expansion to TARGET 3,000
+  with swaps as the recorded fallback. Evidence carried over; mechanism did not.
 - 2026-08-18 — Artist page + recognizable-artist coverage fill →
   `specs/0018-the-names-you-know` (Release 1 only; Release 2 split out by eng review E5)
 - 2026-08-19 — The coverage fill — recognizable names → `specs/0019-the-coverage-fill`.

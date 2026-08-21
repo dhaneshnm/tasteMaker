@@ -1,0 +1,2493 @@
+{
+ "generated_on": "2026-08-20",
+ "axes": {
+  "movement": {
+   "measured": 104,
+   "kept": 31,
+   "rejected": 10,
+   "unadjudicated_tail": 63,
+   "themes": [
+    {
+     "label": "Renaissance",
+     "qid": "Q4692",
+     "pageviews_12mo": 1104748,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "era+movement; pageviews include non-painting interest \u2014 flagged umbrella",
+     "pool_works": 242,
+     "pool_route": "period facet proxy: 15th+16th century works"
+    },
+    {
+     "label": "Romanticism",
+     "qid": "Q37068",
+     "pageviews_12mo": 712161,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "umbrella (lit+music+art) \u2014 flagged; painting sense is core",
+     "pool_works": 19,
+     "pool_route": "artist P135 (sample)"
+    },
+    {
+     "label": "Art Deco",
+     "qid": "Q173782",
+     "pageviews_12mo": 647929,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "design/architecture-heavy; few easel paintings"
+    },
+    {
+     "label": "Bauhaus",
+     "qid": "Q124354",
+     "pageviews_12mo": 494850,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "school; design/architecture lookup, not a painting browse term"
+    },
+    {
+     "label": "Art Nouveau",
+     "qid": "Q34636",
+     "pageviews_12mo": 490642,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "poster/design-heavy; some painting (Klimt-adjacent)"
+    },
+    {
+     "label": "Dada",
+     "qid": "Q6034",
+     "pageviews_12mo": 486295,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "visual-art movement"
+    },
+    {
+     "label": "Impressionism",
+     "qid": "Q40415",
+     "pageviews_12mo": 466439,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "the canonical painting-browse movement",
+     "pool_works": 83,
+     "pool_route": "artist P135 (top-80-artist sample)"
+    },
+    {
+     "label": "surrealism",
+     "qid": "Q39427",
+     "pageviews_12mo": 445586,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core movement"
+    },
+    {
+     "label": "Baroque",
+     "qid": "Q37853",
+     "pageviews_12mo": 443183,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core era/movement",
+     "pool_works": 9,
+     "pool_route": "artist P135 (sample)"
+    },
+    {
+     "label": "bohemianism",
+     "qid": "Q207175",
+     "pageviews_12mo": 431635,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "lifestyle, not an art style"
+    },
+    {
+     "label": "avant-garde",
+     "qid": "Q102932",
+     "pageviews_12mo": 414373,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "meta-category, not browsable"
+    },
+    {
+     "label": "kitsch",
+     "qid": "Q131711",
+     "pageviews_12mo": 397875,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "aesthetic judgment, not a browse category"
+    },
+    {
+     "label": "Postmodernism",
+     "qid": "Q47783",
+     "pageviews_12mo": 382399,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "philosophy umbrella; not a painting browse term"
+    },
+    {
+     "label": "Rococo",
+     "qid": "Q122960",
+     "pageviews_12mo": 349311,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "painting-core movement (force-added: class query missed it)",
+     "pool_works": 11,
+     "pool_route": "artist P135 (sample)"
+    },
+    {
+     "label": "satire",
+     "qid": "Q128758",
+     "pageviews_12mo": 342033,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "literary genre in this usage"
+    },
+    {
+     "label": "Orientalism",
+     "qid": "Q42865",
+     "pageviews_12mo": 309887,
+     "force_added": true,
+     "verdict": "keep-flag",
+     "verdict_reason": "painting genre-movement; term also names the critique"
+    },
+    {
+     "label": "rapping",
+     "qid": "Q6010",
+     "pageviews_12mo": 309749,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "music"
+    },
+    {
+     "label": "ukiyo-e",
+     "qid": "Q185905",
+     "pageviews_12mo": 305789,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "cross-listed with genre axis; Japanese tradition",
+     "pool_works": 18,
+     "pool_route": "culture strings (Edo period)"
+    },
+    {
+     "label": "modernism",
+     "qid": "Q878985",
+     "pageviews_12mo": 303050,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "umbrella; 'modernist painting' is a real browse intent"
+    },
+    {
+     "label": "cubism",
+     "qid": "Q42934",
+     "pageviews_12mo": 301547,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core"
+    },
+    {
+     "label": "Pre-Raphaelite Brotherhood",
+     "qid": "Q184814",
+     "pageviews_12mo": 294731,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core"
+    },
+    {
+     "label": "Harlem Renaissance",
+     "qid": "Q829895",
+     "pageviews_12mo": 273847,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "cultural movement; painting side is real (walled 20th c.)"
+    },
+    {
+     "label": "Futurism",
+     "qid": "Q131221",
+     "pageviews_12mo": 269871,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core"
+    },
+    {
+     "label": "magic realism",
+     "qid": "Q147516",
+     "pageviews_12mo": 256118,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "lit-dominant; painting sense exists"
+    },
+    {
+     "label": "Britpop",
+     "qid": "Q189045",
+     "pageviews_12mo": 244786,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "music"
+    },
+    {
+     "label": "epic poem",
+     "qid": "Q37484",
+     "pageviews_12mo": 241547,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "literature"
+    },
+    {
+     "label": "Expressionism",
+     "qid": "Q80113",
+     "pageviews_12mo": 228657,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core",
+     "pool_works": 18,
+     "pool_route": "artist P135 (sample)"
+    },
+    {
+     "label": "Fauvism",
+     "qid": "Q166593",
+     "pageviews_12mo": 224307,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core"
+    },
+    {
+     "label": "Arts and Crafts movement",
+     "qid": "Q330369",
+     "pageviews_12mo": 216465,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Neoclassicism",
+     "qid": "Q14378",
+     "pageviews_12mo": 216172,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core",
+     "pool_works": 21,
+     "pool_route": "artist P135 (sample)"
+    },
+    {
+     "label": "pop art",
+     "qid": "Q134147",
+     "pageviews_12mo": 204921,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core (walled 20th c.)"
+    },
+    {
+     "label": "Mannerism",
+     "qid": "Q131808",
+     "pageviews_12mo": 196610,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core"
+    },
+    {
+     "label": "outsider art",
+     "qid": "Q594150",
+     "pageviews_12mo": 181438,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Bloomsbury Group",
+     "qid": "Q603529",
+     "pageviews_12mo": 153862,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Fluxus",
+     "qid": "Q108908",
+     "pageviews_12mo": 152308,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Aestheticism",
+     "qid": "Q256922",
+     "pageviews_12mo": 151846,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "socialist realism",
+     "qid": "Q180902",
+     "pageviews_12mo": 146961,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Minimalism",
+     "qid": "Q173436",
+     "pageviews_12mo": 143506,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "umbrella"
+    },
+    {
+     "label": "degenerate art",
+     "qid": "Q156460",
+     "pageviews_12mo": 138765,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "New Romantic",
+     "qid": "Q597240",
+     "pageviews_12mo": 138447,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "abstract art",
+     "qid": "Q128115",
+     "pageviews_12mo": 138082,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "style umbrella readers browse by"
+    },
+    {
+     "label": "Decadent movement",
+     "qid": "Q846094",
+     "pageviews_12mo": 134682,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "realism",
+     "qid": "Q10857409",
+     "pageviews_12mo": 132900,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core style",
+     "pool_works": 36,
+     "pool_route": "artist P135 (sample)"
+    },
+    {
+     "label": "Post-impressionism",
+     "qid": "Q166713",
+     "pageviews_12mo": 132514,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core",
+     "pool_works": 33,
+     "pool_route": "artist P135 (sample)"
+    },
+    {
+     "label": "modern art",
+     "qid": "Q38166",
+     "pageviews_12mo": 129688,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "abstract expressionism",
+     "qid": "Q177725",
+     "pageviews_12mo": 128934,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Symbolism",
+     "qid": "Q164800",
+     "pageviews_12mo": 128114,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core",
+     "pool_works": 19,
+     "pool_route": "artist P135 (sample)"
+    },
+    {
+     "label": "Hudson River school",
+     "qid": "Q943853",
+     "pageviews_12mo": 116453,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Constructivism",
+     "qid": "Q207103",
+     "pageviews_12mo": 112061,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Vienna Secession",
+     "qid": "Q208208",
+     "pageviews_12mo": 108834,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "contemporary art",
+     "qid": "Q186030",
+     "pageviews_12mo": 106714,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "De Stijl",
+     "qid": "Q207445",
+     "pageviews_12mo": 100843,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "agitprop",
+     "qid": "Q374278",
+     "pageviews_12mo": 99680,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "humour",
+     "qid": "Q35874",
+     "pageviews_12mo": 95870,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "not an art movement"
+    },
+    {
+     "label": "Gothic art",
+     "qid": "Q46825",
+     "pageviews_12mo": 92516,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting+architecture era"
+    },
+    {
+     "label": "na\u00efve art",
+     "qid": "Q281108",
+     "pageviews_12mo": 89395,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "conceptual art",
+     "qid": "Q203209",
+     "pageviews_12mo": 88528,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Classicism",
+     "qid": "Q170292",
+     "pageviews_12mo": 88002,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "umbrella"
+    },
+    {
+     "label": "Suprematism",
+     "qid": "Q191970",
+     "pageviews_12mo": 79785,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Japonisme",
+     "qid": "Q751880",
+     "pageviews_12mo": 78717,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "academic art",
+     "qid": "Q189458",
+     "pageviews_12mo": 78429,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "eclecticism",
+     "qid": "Q192068",
+     "pageviews_12mo": 78149,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "en plein air",
+     "qid": "Q829298",
+     "pageviews_12mo": 75608,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "psychedelia",
+     "qid": "Q666011",
+     "pageviews_12mo": 73811,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "ink wash painting",
+     "qid": "Q756712",
+     "pageviews_12mo": 68856,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null,
+     "pool_works": 761,
+     "pool_route": "medium strings"
+    },
+    {
+     "label": "Biedermeier",
+     "qid": "Q154432",
+     "pageviews_12mo": 68447,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "hip hop culture",
+     "qid": "Q1132127",
+     "pageviews_12mo": 67573,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Der Blaue Reiter",
+     "qid": "Q117035",
+     "pageviews_12mo": 65322,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "painting-core (force-added)"
+    },
+    {
+     "label": "social realism",
+     "qid": "Q837024",
+     "pageviews_12mo": 63927,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "neo-expressionism",
+     "qid": "Q589655",
+     "pageviews_12mo": 62497,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "street art",
+     "qid": "Q17516",
+     "pageviews_12mo": 62110,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Carolingian Renaissance",
+     "qid": "Q157123",
+     "pageviews_12mo": 61710,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "op art",
+     "qid": "Q182331",
+     "pageviews_12mo": 61546,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Early Netherlandish painting",
+     "qid": "Q443153",
+     "pageviews_12mo": 60903,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "primitivism",
+     "qid": "Q848365",
+     "pageviews_12mo": 55339,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Romanesque art",
+     "qid": "Q46805",
+     "pageviews_12mo": 53884,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "photorealism",
+     "qid": "Q939559",
+     "pageviews_12mo": 52145,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Folk art",
+     "qid": "Q1153484",
+     "pageviews_12mo": 51853,
+     "force_added": true,
+     "verdict": "keep-flag",
+     "verdict_reason": "broad craft umbrella (force-added)"
+    },
+    {
+     "label": "New Objectivity",
+     "qid": "Q160218",
+     "pageviews_12mo": 51436,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Northern Renaissance",
+     "qid": "Q610877",
+     "pageviews_12mo": 48987,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "vorticism",
+     "qid": "Q915841",
+     "pageviews_12mo": 44509,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Renaissance of the 12th century",
+     "qid": "Q755709",
+     "pageviews_12mo": 43557,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "pictorialism",
+     "qid": "Q851869",
+     "pageviews_12mo": 39805,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Nazarene movement",
+     "qid": "Q422681",
+     "pageviews_12mo": 38042,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "land art",
+     "qid": "Q326478",
+     "pageviews_12mo": 37622,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Quattrocento",
+     "qid": "Q213523",
+     "pageviews_12mo": 37590,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Neo-impressionism",
+     "qid": "Q150091",
+     "pageviews_12mo": 35695,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Die Br\u00fccke",
+     "qid": "Q152778",
+     "pageviews_12mo": 34451,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Orphism",
+     "qid": "Q519443",
+     "pageviews_12mo": 33398,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Barbizon school",
+     "qid": "Q143357",
+     "pageviews_12mo": 31449,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Les Nabis",
+     "qid": "Q503708",
+     "pageviews_12mo": 31400,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Arte Povera",
+     "qid": "Q576913",
+     "pageviews_12mo": 26100,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Neo-romanticism",
+     "qid": "Q397469",
+     "pageviews_12mo": 24426,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Venetian school",
+     "qid": "Q610687",
+     "pageviews_12mo": 24206,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "new media art",
+     "qid": "Q378604",
+     "pageviews_12mo": 22318,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "COBRA",
+     "qid": "Q212611",
+     "pageviews_12mo": 21894,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "pre-Romanesque art",
+     "qid": "Q708807",
+     "pageviews_12mo": 18270,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Caravaggisti",
+     "qid": "Q62506",
+     "pageviews_12mo": 17790,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Carolingian art",
+     "qid": "Q614082",
+     "pageviews_12mo": 17437,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "purism",
+     "qid": "Q478774",
+     "pageviews_12mo": 15540,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "metaphysical painting",
+     "qid": "Q753683",
+     "pageviews_12mo": 15250,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "cloisonnism",
+     "qid": "Q889525",
+     "pageviews_12mo": 13761,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Sienese school",
+     "qid": "Q1332178",
+     "pageviews_12mo": 8146,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Naturalism",
+     "qid": "Q55995",
+     "pageviews_12mo": 4335,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    }
+   ]
+  },
+  "genre": {
+   "measured": 125,
+   "kept": 39,
+   "rejected": 15,
+   "unadjudicated_tail": 71,
+   "themes": [
+    {
+     "label": "Impressionism",
+     "qid": "Q40415",
+     "pageviews_12mo": 466439,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "movement \u2014 counted on the movement axis",
+     "pool_works": 83,
+     "pool_route": "artist P135 (top-80-artist sample)"
+    },
+    {
+     "label": "erotica",
+     "qid": "Q181001",
+     "pageviews_12mo": 463874,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "media umbrella; 'erotic art' carries the visual sense"
+    },
+    {
+     "label": "satire",
+     "qid": "Q128758",
+     "pageviews_12mo": 342033,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "literary"
+    },
+    {
+     "label": "ukiyo-e",
+     "qid": "Q185905",
+     "pageviews_12mo": 305789,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "tradition-genre; real browse term",
+     "pool_works": 18,
+     "pool_route": "culture strings (Edo period)"
+    },
+    {
+     "label": "vaporwave",
+     "qid": "Q15733887",
+     "pageviews_12mo": 260125,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "music/net aesthetic"
+    },
+    {
+     "label": "Allegory",
+     "qid": "Q18535",
+     "pageviews_12mo": 239685,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "painting genre (force-added)"
+    },
+    {
+     "label": "visual arts",
+     "qid": "Q36649",
+     "pageviews_12mo": 225618,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "umbrella"
+    },
+    {
+     "label": "solarpunk",
+     "qid": "Q72206346",
+     "pageviews_12mo": 222748,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "net aesthetic"
+    },
+    {
+     "label": "apotheosis",
+     "qid": "Q580995",
+     "pageviews_12mo": 219767,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "concept, not a browse genre"
+    },
+    {
+     "label": "erotic art",
+     "qid": "Q1168168",
+     "pageviews_12mo": 213921,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "real genre; pool cannot serve it"
+    },
+    {
+     "label": "graffiti",
+     "qid": "Q17514",
+     "pageviews_12mo": 212113,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "not paintings in this product's sense"
+    },
+    {
+     "label": "shunga",
+     "qid": "Q1048478",
+     "pageviews_12mo": 207710,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "real genre; pool cannot serve it"
+    },
+    {
+     "label": "ASCII art",
+     "qid": "Q193097",
+     "pageviews_12mo": 197833,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "not paintings"
+    },
+    {
+     "label": "pastiche",
+     "qid": "Q1128018",
+     "pageviews_12mo": 196792,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "meta-term"
+    },
+    {
+     "label": "Trompe-l'\u0153il",
+     "qid": "Q468930",
+     "pageviews_12mo": 196422,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "painting genre (force-added)"
+    },
+    {
+     "label": "retrofuturism",
+     "qid": "Q919036",
+     "pageviews_12mo": 194171,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "net aesthetic"
+    },
+    {
+     "label": "nude",
+     "qid": "Q40446",
+     "pageviews_12mo": 190660,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting genre; pool value exists",
+     "pool_works": 3,
+     "pool_route": "shipped genre; +11 title-probe"
+    },
+    {
+     "label": "calligraphy",
+     "qid": "Q12681",
+     "pageviews_12mo": 183762,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "adjacent art; pool holds calligraphic works in Asian holdings"
+    },
+    {
+     "label": "outsider art",
+     "qid": "Q594150",
+     "pageviews_12mo": 181438,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "real category; pool coverage unknown"
+    },
+    {
+     "label": "Illuminated manuscript",
+     "qid": "Q48498",
+     "pageviews_12mo": 154730,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "format-genre; pool's Indic manuscript works are close kin (force-added)",
+     "pool_works": 52,
+     "pool_route": "culture strings (Jain/Gujarat) \u2014 kin, not equal"
+    },
+    {
+     "label": "fiction",
+     "qid": "Q8253",
+     "pageviews_12mo": 150603,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "literature"
+    },
+    {
+     "label": "art of sculpture",
+     "qid": "Q11634",
+     "pageviews_12mo": 142162,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "different medium entirely"
+    },
+    {
+     "label": "abstract art",
+     "qid": "Q128115",
+     "pageviews_12mo": 138082,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "cross-listed with movement axis"
+    },
+    {
+     "label": "slice of life",
+     "qid": "Q2561438",
+     "pageviews_12mo": 134752,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "media term; painting sense is 'genre painting'"
+    },
+    {
+     "label": "azulejo",
+     "qid": "Q3179385",
+     "pageviews_12mo": 122694,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "tiles"
+    },
+    {
+     "label": "Icon",
+     "qid": "Q132137",
+     "pageviews_12mo": 120277,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "religious panel genre; pageviews include software-icon noise \u2014 flagged",
+     "pool_works": 25,
+     "pool_route": "kin of Religious Art value"
+    },
+    {
+     "label": "still life",
+     "qid": "Q170571",
+     "pageviews_12mo": 118754,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core genre",
+     "pool_works": 15,
+     "pool_route": "shipped genre; +27 title-probe"
+    },
+    {
+     "label": "vanitas",
+     "qid": "Q733095",
+     "pageviews_12mo": 117882,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core sub-genre"
+    },
+    {
+     "label": "caricature",
+     "qid": "Q482919",
+     "pageviews_12mo": 117567,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Constructivism",
+     "qid": "Q207103",
+     "pageviews_12mo": 112061,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "contemporary art",
+     "qid": "Q186030",
+     "pageviews_12mo": 106714,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Gesamtkunstwerk",
+     "qid": "Q858403",
+     "pageviews_12mo": 105714,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "silhouette",
+     "qid": "Q898700",
+     "pageviews_12mo": 105351,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "text-to-image model",
+     "qid": "Q113940039",
+     "pageviews_12mo": 105303,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "performance art",
+     "qid": "Q213156",
+     "pageviews_12mo": 102388,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "pastoral",
+     "qid": "Q390001",
+     "pageviews_12mo": 89512,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "conceptual art",
+     "qid": "Q203209",
+     "pageviews_12mo": 88528,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "pixel art",
+     "qid": "Q811179",
+     "pageviews_12mo": 87331,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "ens\u014d",
+     "qid": "Q1344426",
+     "pageviews_12mo": 85504,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "stick figure",
+     "qid": "Q177600",
+     "pageviews_12mo": 81921,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Madhubani art",
+     "qid": "Q2547125",
+     "pageviews_12mo": 71927,
+     "force_added": true,
+     "verdict": "keep-flag",
+     "verdict_reason": "high demand; POOL HAS NONE (Kalighat \u2260 Madhubani) (force-added)",
+     "pool_works": 0,
+     "pool_route": "POOL HAS NONE"
+    },
+    {
+     "label": "Bhavacakra",
+     "qid": "Q1340222",
+     "pageviews_12mo": 71394,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "blazonry",
+     "qid": "Q494452",
+     "pageviews_12mo": 70687,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "artificial intelligence visual art",
+     "qid": "Q65066631",
+     "pageviews_12mo": 69815,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Ink wash painting",
+     "qid": "Q756712",
+     "pageviews_12mo": 68856,
+     "force_added": true,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Mughal painting",
+     "qid": "Q1049336",
+     "pageviews_12mo": 67575,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "pool strength, 102 works (force-added)",
+     "pool_works": 102,
+     "pool_route": "culture strings"
+    },
+    {
+     "label": "culture jamming",
+     "qid": "Q1143564",
+     "pageviews_12mo": 63932,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "street art",
+     "qid": "Q17516",
+     "pageviews_12mo": 62110,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "historicism",
+     "qid": "Q460501",
+     "pageviews_12mo": 60692,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "self-portrait",
+     "qid": "Q192110",
+     "pageviews_12mo": 60609,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting genre"
+    },
+    {
+     "label": "digital art",
+     "qid": "Q860372",
+     "pageviews_12mo": 59127,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "portrait",
+     "qid": "Q134307",
+     "pageviews_12mo": 56814,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core genre",
+     "pool_works": 113,
+     "pool_route": "shipped genre"
+    },
+    {
+     "label": "Chinese painting",
+     "qid": "Q919348",
+     "pageviews_12mo": 54601,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "tradition; pool strength (force-added)",
+     "pool_works": 180,
+     "pool_route": "culture strings"
+    },
+    {
+     "label": "folk art",
+     "qid": "Q1153484",
+     "pageviews_12mo": 51853,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Landscape painting",
+     "qid": "Q191163",
+     "pageviews_12mo": 51492,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "painting-core genre (force-added)",
+     "pool_works": 76,
+     "pool_route": "shipped genre; +210 title-probe"
+    },
+    {
+     "label": "Chinese calligraphy",
+     "qid": "Q6498317",
+     "pageviews_12mo": 51287,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Persian miniature",
+     "qid": "Q678664",
+     "pageviews_12mo": 51170,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "tradition; pool holds ~19 Persian/Islamic (force-added)",
+     "pool_works": 19,
+     "pool_route": "culture strings"
+    },
+    {
+     "label": "political cartoon",
+     "qid": "Q2916094",
+     "pageviews_12mo": 50875,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "rock art",
+     "qid": "Q1211146",
+     "pageviews_12mo": 49858,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "paleoart",
+     "qid": "Q4342543",
+     "pageviews_12mo": 49364,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Thangka",
+     "qid": "Q916651",
+     "pageviews_12mo": 49234,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "tradition; ~24 Tibetan/Nepalese works (force-added)",
+     "pool_works": 24,
+     "pool_route": "culture strings"
+    },
+    {
+     "label": "Portrait painting",
+     "qid": "Q1400853",
+     "pageviews_12mo": 46730,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "painting-core genre (force-added)",
+     "pool_works": 113,
+     "pool_route": "shipped genre; +163 title-probe"
+    },
+    {
+     "label": "fan art",
+     "qid": "Q1053619",
+     "pageviews_12mo": 45365,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "happening",
+     "qid": "Q108874",
+     "pageviews_12mo": 43427,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "assemblage",
+     "qid": "Q262343",
+     "pageviews_12mo": 42664,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "ceramic art",
+     "qid": "Q13464614",
+     "pageviews_12mo": 41064,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "figurative art",
+     "qid": "Q1622217",
+     "pageviews_12mo": 40386,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "emblem",
+     "qid": "Q112110",
+     "pageviews_12mo": 39438,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "land art",
+     "qid": "Q326478",
+     "pageviews_12mo": 37622,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "lament",
+     "qid": "Q1471717",
+     "pageviews_12mo": 37216,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "History painting",
+     "qid": "Q742333",
+     "pageviews_12mo": 36766,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "painting-core genre (force-added)"
+    },
+    {
+     "label": "tronie",
+     "qid": "Q1433099",
+     "pageviews_12mo": 36703,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "escapology",
+     "qid": "Q2293082",
+     "pageviews_12mo": 36001,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "panorama",
+     "qid": "Q41363",
+     "pageviews_12mo": 35064,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "found object",
+     "qid": "Q572916",
+     "pageviews_12mo": 33876,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Buddhist art",
+     "qid": "Q1001041",
+     "pageviews_12mo": 32927,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "subject-tradition; pool strength (force-added)",
+     "pool_works": null,
+     "pool_route": "subset of +302 religious title-probe; not separately measured"
+    },
+    {
+     "label": "generative art",
+     "qid": "Q1502032",
+     "pageviews_12mo": 32625,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "wood carving",
+     "qid": "Q337907",
+     "pageviews_12mo": 32232,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "concept art",
+     "qid": "Q1123841",
+     "pageviews_12mo": 31386,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Panel painting",
+     "qid": "Q55439",
+     "pageviews_12mo": 30229,
+     "force_added": true,
+     "verdict": "keep-flag",
+     "verdict_reason": "format term (force-added)"
+    },
+    {
+     "label": "decorative art",
+     "qid": "Q631931",
+     "pageviews_12mo": 29714,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "suspense",
+     "qid": "Q9503",
+     "pageviews_12mo": 28748,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "funerary art",
+     "qid": "Q2083647",
+     "pageviews_12mo": 28483,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "kinetic art",
+     "qid": "Q466521",
+     "pageviews_12mo": 28327,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "textile art",
+     "qid": "Q10988986",
+     "pageviews_12mo": 28144,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "penjing",
+     "qid": "Q3058669",
+     "pageviews_12mo": 27806,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Kalighat painting",
+     "qid": "Q6352595",
+     "pageviews_12mo": 27733,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "pool strength, 44 works (force-added)",
+     "pool_works": 44,
+     "pool_route": "culture strings"
+    },
+    {
+     "label": "Japanese painting",
+     "qid": "Q1683295",
+     "pageviews_12mo": 27690,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "tradition; pool strength 276 works (force-added)",
+     "pool_works": 276,
+     "pool_route": "culture strings"
+    },
+    {
+     "label": "video art",
+     "qid": "Q682010",
+     "pageviews_12mo": 25310,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Genre painting",
+     "qid": "Q214127",
+     "pageviews_12mo": 24829,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "painting-core genre (force-added)"
+    },
+    {
+     "label": "Christian art",
+     "qid": "Q645717",
+     "pageviews_12mo": 24310,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "artist's book",
+     "qid": "Q1062404",
+     "pageviews_12mo": 24242,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Pahari painting",
+     "qid": "Q3631050",
+     "pageviews_12mo": 24013,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "pool strength, 84 works (force-added)",
+     "pool_works": 84,
+     "pool_route": "culture strings"
+    },
+    {
+     "label": "Shan shui",
+     "qid": "Q516583",
+     "pageviews_12mo": 23790,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "Chinese landscape tradition (force-added)"
+    },
+    {
+     "label": "immersion",
+     "qid": "Q1660060",
+     "pageviews_12mo": 22678,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "emakimono",
+     "qid": "Q1190781",
+     "pageviews_12mo": 22369,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "new media art",
+     "qid": "Q378604",
+     "pageviews_12mo": 22318,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "internet art",
+     "qid": "Q1569950",
+     "pageviews_12mo": 20521,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "religious art",
+     "qid": "Q2864737",
+     "pageviews_12mo": 20391,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting-core genre; pool value exists",
+     "pool_works": 25,
+     "pool_route": "shipped genre; +302 title-probe"
+    },
+    {
+     "label": "marine art",
+     "qid": "Q158607",
+     "pageviews_12mo": 20314,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "painting genre; pool value exists",
+     "pool_works": 1,
+     "pool_route": "shipped genre; +12 title-probe"
+    },
+    {
+     "label": "public art",
+     "qid": "Q557141",
+     "pageviews_12mo": 19788,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "sound art",
+     "qid": "Q1744327",
+     "pageviews_12mo": 19365,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "idyll",
+     "qid": "Q742530",
+     "pageviews_12mo": 18716,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Rajput painting",
+     "qid": "Q2988788",
+     "pageviews_12mo": 18611,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "pool strength, 102 works (force-added)",
+     "pool_works": 102,
+     "pool_route": "culture strings"
+    },
+    {
+     "label": "ancient art",
+     "qid": "Q2277510",
+     "pageviews_12mo": 18524,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Indigenismo",
+     "qid": "Q5602008",
+     "pageviews_12mo": 18281,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Coptic art",
+     "qid": "Q577622",
+     "pageviews_12mo": 16375,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "lubok",
+     "qid": "Q982897",
+     "pageviews_12mo": 15967,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "geometric abstraction",
+     "qid": "Q2316866",
+     "pageviews_12mo": 15884,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Kangra painting",
+     "qid": "Q6362867",
+     "pageviews_12mo": 15309,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "Pahari school (force-added)",
+     "pool_works": 84,
+     "pool_route": "culture strings (Pahari umbrella)"
+    },
+    {
+     "label": "interactive art",
+     "qid": "Q2394336",
+     "pageviews_12mo": 13855,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "graphic arts",
+     "qid": "Q911059",
+     "pageviews_12mo": 13805,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "carving",
+     "qid": "Q13039303",
+     "pageviews_12mo": 13471,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "environmental art",
+     "qid": "Q473743",
+     "pageviews_12mo": 13341,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Veduta",
+     "qid": "Q166030",
+     "pageviews_12mo": 12852,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "cityscape kin"
+    },
+    {
+     "label": "bijin-ga",
+     "qid": "Q284521",
+     "pageviews_12mo": 12581,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "military art",
+     "qid": "Q383898",
+     "pageviews_12mo": 11996,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "battle painting kin (force-added)"
+    },
+    {
+     "label": "Bird-and-flower painting",
+     "qid": "Q2566458",
+     "pageviews_12mo": 11669,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "East Asian genre; pool kin works exist (force-added)"
+    },
+    {
+     "label": "Hindu art",
+     "qid": "Q4200893",
+     "pageviews_12mo": 11241,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "subject-tradition (force-added)",
+     "pool_works": null,
+     "pool_route": "subset of +302 religious title-probe; not separately measured"
+    },
+    {
+     "label": "site-specific art",
+     "qid": "Q2740415",
+     "pageviews_12mo": 10897,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "feminist art",
+     "qid": "Q1246516",
+     "pageviews_12mo": 10046,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "child art",
+     "qid": "Q1430886",
+     "pageviews_12mo": 9045,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Figure painting",
+     "qid": "Q5448026",
+     "pageviews_12mo": 9038,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "painting genre (force-added)"
+    },
+    {
+     "label": "Animal painter",
+     "qid": "Q16875701",
+     "pageviews_12mo": 5350,
+     "force_added": true,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "surimono",
+     "qid": "Q2094039",
+     "pageviews_12mo": 4294,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    }
+   ]
+  },
+  "medium": {
+   "measured": 67,
+   "kept": 24,
+   "rejected": 6,
+   "unadjudicated_tail": 37,
+   "themes": [
+    {
+     "label": "chiaroscuro",
+     "qid": "Q219540",
+     "pageviews_12mo": 336779,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "study/technique term, not a browse medium"
+    },
+    {
+     "label": "shellac",
+     "qid": "Q429659",
+     "pageviews_12mo": 223952,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "materials-trade lookup"
+    },
+    {
+     "label": "fresco painting",
+     "qid": "Q134194",
+     "pageviews_12mo": 196776,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "viewer-meaningful medium; pool has ~2",
+     "pool_works": 2,
+     "pool_route": "medium strings"
+    },
+    {
+     "label": "gouache paint",
+     "qid": "Q204330",
+     "pageviews_12mo": 159094,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "medium; pool has 8",
+     "pool_works": 8,
+     "pool_route": "medium strings"
+    },
+    {
+     "label": "pointillism",
+     "qid": "Q200034",
+     "pageviews_12mo": 153964,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "technique bordering movement (Neo-impressionism)"
+    },
+    {
+     "label": "oil painting",
+     "qid": "Q174705",
+     "pageviews_12mo": 126413,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "the canonical medium; pool 922",
+     "pool_works": 922,
+     "pool_route": "medium strings"
+    },
+    {
+     "label": "Mural",
+     "qid": "Q219423",
+     "pageviews_12mo": 90281,
+     "force_added": true,
+     "verdict": "keep-flag",
+     "verdict_reason": "format; pool ~0 (force-added)"
+    },
+    {
+     "label": "acrylic paint",
+     "qid": "Q207849",
+     "pageviews_12mo": 86688,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "medium; pool has 1 \u2014 modern medium, CC0 wall",
+     "pool_works": 1,
+     "pool_route": "medium strings"
+    },
+    {
+     "label": "watercolor",
+     "qid": "Q50030",
+     "pageviews_12mo": 86509,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "medium; pool 56",
+     "pool_works": 56,
+     "pool_route": "medium strings"
+    },
+    {
+     "label": "en plein air",
+     "qid": "Q829298",
+     "pageviews_12mo": 75608,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "practice term"
+    },
+    {
+     "label": "Gold leaf",
+     "qid": "Q929186",
+     "pageviews_12mo": 71584,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "material; pool 484 gold-bearing works (force-added)",
+     "pool_works": 484,
+     "pool_route": "medium strings"
+    },
+    {
+     "label": "tenebrism",
+     "qid": "Q1464842",
+     "pageviews_12mo": 71320,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "study term"
+    },
+    {
+     "label": "cephalopod ink",
+     "qid": "Q927860",
+     "pageviews_12mo": 70405,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "biology lookup"
+    },
+    {
+     "label": "ink wash painting",
+     "qid": "Q756712",
+     "pageviews_12mo": 68856,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "viewer-meaningful; pool 761 ink works",
+     "pool_works": 761,
+     "pool_route": "medium strings"
+    },
+    {
+     "label": "dragon's blood",
+     "qid": "Q421877",
+     "pageviews_12mo": 64753,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "materials-trade"
+    },
+    {
+     "label": "monochrome",
+     "qid": "Q10770146",
+     "pageviews_12mo": 63579,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "broad"
+    },
+    {
+     "label": "grisaille",
+     "qid": "Q750197",
+     "pageviews_12mo": 61728,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "study term"
+    },
+    {
+     "label": "Pastel",
+     "qid": "Q189085",
+     "pageviews_12mo": 61432,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "medium; pool 0 (force-added)",
+     "pool_works": 0,
+     "pool_route": "medium strings"
+    },
+    {
+     "label": "gesso",
+     "qid": "Q1514256",
+     "pageviews_12mo": 59362,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "materials-trade"
+    },
+    {
+     "label": "sfumato",
+     "qid": "Q210788",
+     "pageviews_12mo": 57413,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "study term"
+    },
+    {
+     "label": "encaustic painting",
+     "qid": "Q308968",
+     "pageviews_12mo": 56335,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "medium; pool 0"
+    },
+    {
+     "label": "impasto",
+     "qid": "Q1545200",
+     "pageviews_12mo": 51831,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "study term"
+    },
+    {
+     "label": "silverpoint",
+     "qid": "Q1569360",
+     "pageviews_12mo": 41700,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "drawing tool"
+    },
+    {
+     "label": "sgraffito",
+     "qid": "Q471835",
+     "pageviews_12mo": 35522,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "wet-on-wet",
+     "qid": "Q1856046",
+     "pageviews_12mo": 31447,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "rose madder",
+     "qid": "Q2609895",
+     "pageviews_12mo": 28711,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "inkstick",
+     "qid": "Q11240146",
+     "pageviews_12mo": 24871,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "kneaded eraser",
+     "qid": "Q1475424",
+     "pageviews_12mo": 21024,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "alkyd",
+     "qid": "Q1456571",
+     "pageviews_12mo": 20573,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "wood glue",
+     "qid": "Q971298",
+     "pageviews_12mo": 20303,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "action painting",
+     "qid": "Q217213",
+     "pageviews_12mo": 19824,
+     "force_added": false,
+     "verdict": "keep-flag",
+     "verdict_reason": "movement-technique (walled 20th c.)"
+    },
+    {
+     "label": "By\u014dbu",
+     "qid": "Q741226",
+     "pageviews_12mo": 19810,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "format; pool 83 folding screens (force-added)",
+     "pool_works": 83,
+     "pool_route": "medium strings (format)"
+    },
+    {
+     "label": "spray painting",
+     "qid": "Q2066608",
+     "pageviews_12mo": 18421,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "stipple patterning",
+     "qid": "Q1640859",
+     "pageviews_12mo": 18240,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "illusionism",
+     "qid": "Q744154",
+     "pageviews_12mo": 15847,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "drip painting",
+     "qid": "Q1259130",
+     "pageviews_12mo": 15402,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "drapery",
+     "qid": "Q3039121",
+     "pageviews_12mo": 14642,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Gongbi",
+     "qid": "Q5581733",
+     "pageviews_12mo": 14168,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "walnut oil",
+     "qid": "Q1434098",
+     "pageviews_12mo": 13268,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Hanging scroll",
+     "qid": "Q2188827",
+     "pageviews_12mo": 13200,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "format; pool 193 (force-added)",
+     "pool_works": 193,
+     "pool_route": "medium strings (format)"
+    },
+    {
+     "label": "Rayonism",
+     "qid": "Q941875",
+     "pageviews_12mo": 12453,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Dancheong",
+     "qid": "Q1073148",
+     "pageviews_12mo": 11448,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Four Treasures of the Study",
+     "qid": "Q494402",
+     "pageviews_12mo": 11306,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Reverse glass painting",
+     "qid": "Q1316673",
+     "pageviews_12mo": 10850,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Quadratura",
+     "qid": "Q2121876",
+     "pageviews_12mo": 10589,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "glaze",
+     "qid": "Q1431523",
+     "pageviews_12mo": 10358,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "poppyseed oil",
+     "qid": "Q1757003",
+     "pageviews_12mo": 10302,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Canada balsam",
+     "qid": "Q767912",
+     "pageviews_12mo": 10001,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "fresco-secco",
+     "qid": "Q2263612",
+     "pageviews_12mo": 9825,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Luminism",
+     "qid": "Q1159870",
+     "pageviews_12mo": 9671,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Fudepen",
+     "qid": "Q3083148",
+     "pageviews_12mo": 9448,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "wash technique",
+     "qid": "Q1469362",
+     "pageviews_12mo": 9044,
+     "force_added": false,
+     "verdict": "reject",
+     "verdict_reason": "technique jargon"
+    },
+    {
+     "label": "grattage",
+     "qid": "Q1543649",
+     "pageviews_12mo": 8105,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "acrylic painting technique",
+     "qid": "Q2812894",
+     "pageviews_12mo": 7630,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Handscroll",
+     "qid": "Q5647631",
+     "pageviews_12mo": 7478,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "format; pool 19 (force-added)",
+     "pool_works": 19,
+     "pool_route": "medium strings (format)"
+    },
+    {
+     "label": "ox gall",
+     "qid": "Q1786320",
+     "pageviews_12mo": 7191,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "repoussoir",
+     "qid": "Q1753840",
+     "pageviews_12mo": 6860,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "drybrush",
+     "qid": "Q633315",
+     "pageviews_12mo": 6756,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "perspective",
+     "qid": "Q188968",
+     "pageviews_12mo": 6325,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "watercolor paper",
+     "qid": "Q623102",
+     "pageviews_12mo": 6106,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "stretcher",
+     "qid": "Q1737943",
+     "pageviews_12mo": 4941,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "Silk painting",
+     "qid": "Q10827799",
+     "pageviews_12mo": 4883,
+     "force_added": true,
+     "verdict": "keep",
+     "verdict_reason": "support; pool 180 on silk (force-added)",
+     "pool_works": 180,
+     "pool_route": "medium strings (support)"
+    },
+    {
+     "label": "oil drying agent",
+     "qid": "Q649586",
+     "pageviews_12mo": 4286,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "camaieu technique",
+     "qid": "Q1027977",
+     "pageviews_12mo": 4209,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "shaped canvas",
+     "qid": "Q1287518",
+     "pageviews_12mo": 3232,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "fixative",
+     "qid": "Q1421953",
+     "pageviews_12mo": 2297,
+     "force_added": false,
+     "verdict": "unadjudicated-tail",
+     "verdict_reason": null
+    },
+    {
+     "label": "tempera painting",
+     "qid": "Q28951616",
+     "pageviews_12mo": 1487,
+     "force_added": false,
+     "verdict": "keep",
+     "verdict_reason": "medium; pool 457 tempera works",
+     "pool_works": 457,
+     "pool_route": "medium strings"
+    }
+   ]
+  }
+ }
+}

@@ -5,18 +5,27 @@ class PaintingsController < ApplicationController
     @page = params.fetch(:page, 1).to_i.clamp(1, 10_000)
     offset = (@page - 1) * PER_PAGE
 
-    # Story 0022 Release 1. Resolution happens once, here — the controller
-    # never touches a raw slug again after this. An unknown or absent slug
-    # resolves to nil, which is indistinguishable from "no filter": the
-    # graceful-degradation the plan calls out (a stale bookmark after a
-    # Release 2 value rename just lands on the unfiltered gallery).
-    @period = Painting.resolve_facet_slug(:period, params[:period])
-    @genre = Painting.resolve_facet_slug(:genre, params[:genre])
-    @filtered = @period.present? || @genre.present?
+    # Story 0022 Release 1 (period, genre), extended by 0024 (tradition).
+    # Resolution happens once, here, driven off `Painting::FACETS` rather
+    # than one hand-copied block per facet (0024 eng review + simplify: three
+    # near-identical blocks invited exactly the bug class this story already
+    # fixed once — a facet missing from `@filter_params` silently drops at
+    # lazy page 2, bug `5d90908`). A fourth facet extends the constant; it
+    # cannot omit a step here the way a fourth copy-pasted block could.
+    #
+    # An unknown or absent slug resolves to nil, which is indistinguishable
+    # from "no filter": the graceful-degradation the plan calls out (a stale
+    # bookmark after a facet-value rename just lands on the unfiltered
+    # gallery).
+    # One `facet_counts` query per facet for the whole request (0024 code
+    # review) — `resolve_facet_slug` and `displayed_facet_values` below both
+    # need it; passing it in once avoids two `GROUP BY`s per facet.
+    counts = Painting::FACETS.index_with { |facet| Painting.facet_counts(facet) }
+    @active = Painting::FACETS.index_with { |facet| Painting.resolve_facet_slug(facet, params[facet], counts: counts[facet]) }
+    @filtered = @active.values.any?
 
     scope = Painting.with_attached_image.feed_ordered
-    scope = scope.where(period: @period) if @period
-    scope = scope.where(genre: @genre) if @genre
+    @active.each { |facet, value| scope = scope.where(facet => value) if value }
 
     @paintings = scope.offset(offset).limit(PER_PAGE)
 
@@ -29,15 +38,12 @@ class PaintingsController < ApplicationController
     @total = scope.count
     @next_page = @page + 1 if @total > offset + PER_PAGE
 
-    # The two facet rows — non-empty values only (Painting.displayed_facet_values
+    # The facet rows — non-empty values only (Painting.displayed_facet_values
     # already applies the floor), and the slugs each row's links carry to
-    # preserve the OTHER active facet when a reader switches one.
-    @period_values = Painting.displayed_facet_values(:period)
-    @genre_values = Painting.displayed_facet_values(:genre)
-    @filter_params = {
-      period: (Painting.facet_slug(@period) if @period),
-      genre: (Painting.facet_slug(@genre) if @genre)
-    }.compact
+    # preserve the OTHER active facets when a reader switches one. Keyed by
+    # facet so the view can loop `Painting::FACETS` too.
+    @facet_values = Painting::FACETS.index_with { |facet| Painting.displayed_facet_values(facet, counts: counts[facet]) }
+    @filter_params = @active.filter_map { |facet, value| [ facet, Painting.facet_slug(value) ] if value }.to_h
 
     # `/feed` is walled and private (story 0015) — no shared cache to poison,
     # so unlike `/` this page can render the reader's own state inline. One

@@ -30,6 +30,55 @@ class PoolQuotaTest < ActiveSupport::TestCase
 
   def share(count) = count.to_f / POOL.size
 
+  # Story 0026, Jordan's contract. A snapshot of the manifest as committed
+  # BEFORE this story's expansion — (source, source_id, feed_order, genre)
+  # only, not the full 13 MB manifest (plan step 2). Regenerated deliberately
+  # at any future expansion, never silently.
+  PRIOR_MANIFEST = JSON.parse(Rails.root.join("test/fixtures/files/0026-prior-manifest-snapshot.json").read).freeze
+  # Shared by all three pin/regression tests below — one index over POOL,
+  # not one rebuilt per test.
+  POOL_BY_ID = POOL.index_by { |w| [ w["source"], w["source_id"] ] }.freeze
+
+  test "every work in the prior committed manifest is still in the pool (the pin)" do
+    missing = PRIOR_MANIFEST.reject { |w| POOL_BY_ID.key?([ w["source"], w["source_id"] ]) }
+
+    assert_empty missing.map { |w| "#{w['source']}/#{w['source_id']}" },
+      "a work from the prior manifest vanished from the pool — Jordan's contract is broken"
+  end
+
+  # MANDATORY regression (review rule): pinned rows keep their exact
+  # `feed_order` — a bookmarked `/feed` offset must never reshuffle.
+  test "REGRESSION: pinned feed_order is preserved byte-for-byte across the expansion" do
+    wrong = PRIOR_MANIFEST.filter_map do |prior|
+      current = POOL_BY_ID[[ prior["source"], prior["source_id"] ]]
+      next if current.nil? # covered by the pin test above
+
+      "#{prior['source']}/#{prior['source_id']}: was #{prior['feed_order']}, now #{current['feed_order']}" \
+        unless current["feed_order"] == prior["feed_order"]
+    end
+
+    assert_empty wrong, "pinned feed_order values must never change — every reader's bookmarked page depends on it"
+  end
+
+  # MANDATORY regression (review rule): every pre-existing `genre` value
+  # (248 at expansion time, museum-tag route, story 0022) survives the
+  # manifest rewrite — the bug the eng review's critical finding caught: a
+  # `Candidate#to_manifest` round-trip would silently drop this field.
+  test "REGRESSION: every pre-existing genre value survives the manifest rewrite" do
+    had_genre = PRIOR_MANIFEST.select { |w| w["genre"].present? }
+    assert_operator had_genre.size, :>=, 200, "fixture sanity: expected ~248 pre-tagged rows"
+
+    wrong = had_genre.filter_map do |prior|
+      current = POOL_BY_ID[[ prior["source"], prior["source_id"] ]]
+      next if current.nil? # covered by the pin test above
+
+      "#{prior['source']}/#{prior['source_id']}: was #{prior['genre'].inspect}, now #{current['genre'].inspect}" \
+        unless current["genre"] == prior["genre"]
+    end
+
+    assert_empty wrong, "a pre-existing genre value was dropped or changed by re-curation"
+  end
+
   test "the manifest is the pool the story asked for" do
     assert_operator POOL.size, :>=, Pool::Curator::TARGET,
       "pool has shrunk below the target"
@@ -209,5 +258,123 @@ class PoolQuotaTest < ActiveSupport::TestCase
     assert_empty stray.map { |w| "#{w['source']}:#{w['source_id']}" },
       "CMA/MIA has no native genre field — a non-nil genre here means something matched " \
       "on a field that was never populated for these sources"
+  end
+
+  # Story 0024. `tradition` is a seed-time derivation, not a manifest field
+  # (same shape as `period`), so this recomputes it directly from each row's
+  # own culture/country/department/artist strings — the manifest's own
+  # invariant, not a live-DB proxy for it. One pass over `POOL` feeds both
+  # assertions below (simplify: the vocabulary check and the floor check
+  # were two independent loops over the same derivation).
+  POOL_TRADITIONS = POOL.filter_map do |w|
+    value = Pool::Tradition.from_strings(
+      culture: w["culture"], country: w["country"], department: w["department"],
+      artist: w["artist"], medium: w["medium"]
+    )
+    [ w, value ] if value
+  end.freeze
+
+  # No free-text ever leaks into the facet: every non-nil output must be one
+  # of `Pool::Tradition::VALUES`' canonical values (TABLE's rows plus
+  # "Ukiyo-e Painting", matched outside TABLE — story 0026).
+  test "every derived tradition value is in the canonical vocabulary" do
+    canonical = Pool::Tradition::VALUES
+
+    stray = POOL_TRADITIONS.filter_map do |w, value|
+      "#{w['source']}:#{w['source_id']} => #{value.inspect}" unless canonical.include?(value)
+    end
+
+    assert_empty stray, "every stamped tradition must be a canonical value, never free text"
+  end
+
+  # Every canonical value clears the display floor on the committed pool —
+  # a value that never renders is a facet in name only (the Jain-bucket
+  # regression this story's eng review caught at plan time, before the
+  # `gujarat` pattern was restored).
+  test "every canonical tradition value clears MIN_FACET_WORKS on the committed pool" do
+    counts = POOL_TRADITIONS.each_with_object(Hash.new(0)) { |(_, value), h| h[value] += 1 }
+    starved = Pool::Tradition::VALUES.select { |value| counts[value].to_i < Painting::MIN_FACET_WORKS }
+
+    assert_empty starved,
+      "these tradition values are in the table but never clear the display floor: #{starved}"
+  end
+
+  # Story 0025. Genre's SECOND route: `TitleGenre.infer(title)` fills what
+  # museum tags left nil, at seed time — it never writes the manifest, which
+  # is why the CMA/MIA invariant above stays true and stays load-bearing.
+  # This recomputes the full ladder (manifest tag || title inference) per
+  # manifest row, one pass feeding every assertion below — the same shape
+  # as POOL_TRADITIONS.
+  POOL_GENRES = POOL.filter_map do |w|
+    value = w["genre"].presence || Pool::TitleGenre.infer(w["title"])
+    [ w, value ] if value
+  end.freeze
+
+  # No free-text ever leaks into the facet: both routes map into one
+  # canonical vocabulary (plan risk: double-labeling drift — one vocabulary,
+  # two routes, so tag "portraits" and title "Portrait of" cannot diverge).
+  test "every derived genre value is in the canonical vocabulary, whichever route produced it" do
+    canonical = Pool::GenreTerms::DICTIONARY.values | Pool::TitleGenre::TABLE.map(&:first)
+
+    stray = POOL_GENRES.filter_map do |w, value|
+      "#{w['source']}:#{w['source_id']} => #{value.inspect}" unless canonical.include?(value)
+    end
+
+    assert_empty stray, "every derived genre must be a dictionary value, never free text"
+  end
+
+  # The story's coverage claim, pinned so a reseed or a dictionary edit
+  # cannot silently regress it. Measured 730 at ship time; pinned at 600 —
+  # headroom for audit-driven narrowing, still comfortably above the
+  # story's 500 success signal. A red here means the title route lost
+  # meaningful reach: re-measure, then either fix the regression or move
+  # this pin WITH a Deviations note (0022's falsification idiom).
+  test "the genre facet's derived coverage holds the story 0025 floor" do
+    assert_operator POOL_GENRES.size, :>=, 600,
+      "derived genre coverage fell below the 0025 pin (measured 730 at ship)"
+  end
+
+  # Success signal 3 as a test: the one vocabulary addition demand made
+  # (0008 N5) actually renders — a value under the display floor is a facet
+  # in name only (the Jain-bucket lesson, genre edition).
+  test "Flowers clears MIN_FACET_WORKS on the committed pool" do
+    flowers = POOL_GENRES.count { |_, value| value == "Flowers" }
+
+    assert_operator flowers, :>=, Painting::MIN_FACET_WORKS,
+      "Flowers ships #{flowers} works — below the display floor, it never renders"
+  end
+
+  # Story 0026 success signal 3: each new theme value the expansion targeted
+  # actually lights on /feed, pinned as data assertions so a future
+  # re-curation can't silently unlight a facet (plan step 6).
+  #
+  # Vanitas and Icon are excluded from the hard assertion — both thin
+  # enough that a single event drops them under the floor:
+  #   - Vanitas: only 5 usable candidates in all four museums combined
+  #     (2 of the raw 7 exceed MAX_TITLE), zero margin for one dead plate.
+  #   - Icon: 5 usable candidates, and the real 2026-08-20 curation run
+  #     lost one to a legitimate tag-route override — `met/319625` ("Icon
+  #     Triptych: Ewostatewos and Eight of His Disciples") carries the
+  #     museum's own native tag "Religious Art", which correctly outranks
+  #     the title-inferred "Icon" in the seed ladder (tag > title). The
+  #     ladder did its job; the theme still landed at 4.
+  # Both are the plan's own named, accepted outcome ("stock fails
+  # adjudication... logged in the pool report, not papered over"), not a
+  # bug to gate `bin/ci` on.
+  NEW_GENRE_VALUES = %w[Cityscape].freeze
+  NEW_TRADITION_VALUES = [ "Ukiyo-e Painting", "Madhubani Painting" ].freeze
+
+  test "every story 0026 genre value clears MIN_FACET_WORKS on the committed pool" do
+    counts = POOL_GENRES.each_with_object(Hash.new(0)) { |(_, value), h| h[value] += 1 }
+    starved = NEW_GENRE_VALUES.select { |value| counts[value].to_i < Painting::MIN_FACET_WORKS }
+
+    assert_empty starved, "these story 0026 genre values never clear the display floor: #{starved} (#{counts})"
+  end
+
+  test "every story 0026 tradition value clears MIN_FACET_WORKS on the committed pool" do
+    counts = POOL_TRADITIONS.each_with_object(Hash.new(0)) { |(_, value), h| h[value] += 1 }
+    starved = NEW_TRADITION_VALUES.select { |value| counts[value].to_i < Painting::MIN_FACET_WORKS }
+
+    assert_empty starved, "these story 0026 tradition values never clear the display floor: #{starved} (#{counts})"
   end
 end

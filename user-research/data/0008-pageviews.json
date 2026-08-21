@@ -1,0 +1,2677 @@
+{
+ "generated_on": "2026-08-20",
+ "window": "2025-08-01..2026-08-01 monthly, en.wikipedia, agent=user",
+ "not_found": [],
+ "themes": {
+  "movement": [
+   {
+    "qid": "Q4692",
+    "label": "Renaissance",
+    "description": "cultural movement that spanned the period roughly from the 14th to the 17th century",
+    "sitelinks": 188,
+    "wikipedia_title": "Renaissance",
+    "force_added": false,
+    "pageviews_12mo": 1104748
+   },
+   {
+    "qid": "Q37068",
+    "label": "Romanticism",
+    "description": "artistic, literary, musical, and intellectual movement",
+    "sitelinks": 144,
+    "wikipedia_title": "Romanticism",
+    "force_added": false,
+    "pageviews_12mo": 712161
+   },
+   {
+    "qid": "Q173782",
+    "label": "Art Deco",
+    "description": "influential visual arts design style which first appeared in France during the 1920s",
+    "sitelinks": 72,
+    "wikipedia_title": "Art_Deco",
+    "force_added": false,
+    "pageviews_12mo": 647929
+   },
+   {
+    "qid": "Q124354",
+    "label": "Bauhaus",
+    "description": "school in Germany that combined crafts and the fine arts",
+    "sitelinks": 87,
+    "wikipedia_title": "Bauhaus",
+    "force_added": false,
+    "pageviews_12mo": 494850
+   },
+   {
+    "qid": "Q34636",
+    "label": "Art Nouveau",
+    "description": "international philosophy and style of art, architecture and applied art",
+    "sitelinks": 88,
+    "wikipedia_title": "Art_Nouveau",
+    "force_added": false,
+    "pageviews_12mo": 490642
+   },
+   {
+    "qid": "Q6034",
+    "label": "Dada",
+    "description": "avant-garde art movement in the early 20th century",
+    "sitelinks": 99,
+    "wikipedia_title": "Dada",
+    "force_added": false,
+    "pageviews_12mo": 486295
+   },
+   {
+    "qid": "Q40415",
+    "label": "Impressionism",
+    "description": "19th-century art movement",
+    "sitelinks": 115,
+    "wikipedia_title": "Impressionism",
+    "force_added": false,
+    "pageviews_12mo": 466439
+   },
+   {
+    "qid": "Q39427",
+    "label": "surrealism",
+    "description": "international cultural movement that began in the early 1920s",
+    "sitelinks": 118,
+    "wikipedia_title": "Surrealism",
+    "force_added": false,
+    "pageviews_12mo": 445586
+   },
+   {
+    "qid": "Q37853",
+    "label": "Baroque",
+    "description": "cultural movement, starting around 1600",
+    "sitelinks": 128,
+    "wikipedia_title": "Baroque",
+    "force_added": false,
+    "pageviews_12mo": 443183
+   },
+   {
+    "qid": "Q207175",
+    "label": "bohemianism",
+    "description": "practice of an unconventional lifestyle",
+    "sitelinks": 55,
+    "wikipedia_title": "Bohemianism",
+    "force_added": false,
+    "pageviews_12mo": 431635
+   },
+   {
+    "qid": "Q102932",
+    "label": "avant-garde",
+    "description": "works that are experimental or innovative",
+    "sitelinks": 85,
+    "wikipedia_title": "Avant-garde",
+    "force_added": false,
+    "pageviews_12mo": 414373
+   },
+   {
+    "qid": "Q131711",
+    "label": "kitsch",
+    "description": "art or other objects that appeal to popular rather than high art tastes",
+    "sitelinks": 62,
+    "wikipedia_title": "Kitsch",
+    "force_added": false,
+    "pageviews_12mo": 397875
+   },
+   {
+    "qid": "Q47783",
+    "label": "Postmodernism",
+    "description": "philosophical and artistic movement",
+    "sitelinks": 103,
+    "wikipedia_title": "Postmodernism",
+    "force_added": false,
+    "pageviews_12mo": 382399
+   },
+   {
+    "qid": "Q122960",
+    "label": "Rococo",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Rococo",
+    "force_added": true,
+    "pageviews_12mo": 349311
+   },
+   {
+    "qid": "Q128758",
+    "label": "satire",
+    "description": "literary and art genre with a style of humor based on parody",
+    "sitelinks": 111,
+    "wikipedia_title": "Satire",
+    "force_added": false,
+    "pageviews_12mo": 342033
+   },
+   {
+    "qid": "Q42865",
+    "label": "Orientalism",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Orientalism",
+    "force_added": true,
+    "pageviews_12mo": 309887
+   },
+   {
+    "qid": "Q6010",
+    "label": "rapping",
+    "description": "artistic form of vocal delivery and emotive expression that incorporates \"rhyme, rhythmic speech, and [commonly] street vernacular\"",
+    "sitelinks": 107,
+    "wikipedia_title": "Rapping",
+    "force_added": false,
+    "pageviews_12mo": 309749
+   },
+   {
+    "qid": "Q185905",
+    "label": "ukiyo-e",
+    "description": "Japanese art genre, fl. 17th\u201319th c., consisting of woodblock prints and paintings of such subjects as female beauties, kabuki actors, sumo wrestlers, scenes from history and folk tales, travel scenes, landscapes, flora, fauna, and erotica",
+    "sitelinks": 68,
+    "wikipedia_title": "Ukiyo-e",
+    "force_added": false,
+    "pageviews_12mo": 305789
+   },
+   {
+    "qid": "Q878985",
+    "label": "modernism",
+    "description": "movement of art, culture, philosophy and architecture",
+    "sitelinks": 105,
+    "wikipedia_title": "Modernism",
+    "force_added": false,
+    "pageviews_12mo": 303050
+   },
+   {
+    "qid": "Q42934",
+    "label": "cubism",
+    "description": "early-20th-century avant-garde art movement",
+    "sitelinks": 106,
+    "wikipedia_title": "Cubism",
+    "force_added": false,
+    "pageviews_12mo": 301547
+   },
+   {
+    "qid": "Q184814",
+    "label": "Pre-Raphaelite Brotherhood",
+    "description": "group of English painters, poets, and critics, founded in 1848",
+    "sitelinks": 62,
+    "wikipedia_title": "Pre-Raphaelite_Brotherhood",
+    "force_added": false,
+    "pageviews_12mo": 294731
+   },
+   {
+    "qid": "Q829895",
+    "label": "Harlem Renaissance",
+    "description": "African-American cultural movement in New York City in the 1920s",
+    "sitelinks": 37,
+    "wikipedia_title": "Harlem_Renaissance",
+    "force_added": false,
+    "pageviews_12mo": 273847
+   },
+   {
+    "qid": "Q131221",
+    "label": "Futurism",
+    "description": "artistic and social movement",
+    "sitelinks": 89,
+    "wikipedia_title": "Futurism",
+    "force_added": false,
+    "pageviews_12mo": 269871
+   },
+   {
+    "qid": "Q147516",
+    "label": "magic realism",
+    "description": "style of literary fiction and art",
+    "sitelinks": 68,
+    "wikipedia_title": "Magical_realism",
+    "force_added": false,
+    "pageviews_12mo": 256118
+   },
+   {
+    "qid": "Q189045",
+    "label": "Britpop",
+    "description": "music genre; 1990s UK pop culture movement",
+    "sitelinks": 47,
+    "wikipedia_title": "Britpop",
+    "force_added": false,
+    "pageviews_12mo": 244786
+   },
+   {
+    "qid": "Q37484",
+    "label": "epic poem",
+    "description": "lengthy narrative poem, ordinarily detailing heroic deeds",
+    "sitelinks": 111,
+    "wikipedia_title": "Epic_poetry",
+    "force_added": false,
+    "pageviews_12mo": 241547
+   },
+   {
+    "qid": "Q80113",
+    "label": "Expressionism",
+    "description": "modernist art movement",
+    "sitelinks": 91,
+    "wikipedia_title": "Expressionism",
+    "force_added": false,
+    "pageviews_12mo": 228657
+   },
+   {
+    "qid": "Q166593",
+    "label": "Fauvism",
+    "description": "artistic style that emphasized painterly qualities and strong color over the representational or realistic values retained by Impressionism",
+    "sitelinks": 70,
+    "wikipedia_title": "Fauvism",
+    "force_added": false,
+    "pageviews_12mo": 224307
+   },
+   {
+    "qid": "Q330369",
+    "label": "Arts and Crafts movement",
+    "description": "international design movement",
+    "sitelinks": 48,
+    "wikipedia_title": "Arts_and_Crafts_movement",
+    "force_added": false,
+    "pageviews_12mo": 216465
+   },
+   {
+    "qid": "Q14378",
+    "label": "Neoclassicism",
+    "description": "Western cultural movement inspired by ancient Greece and Rome",
+    "sitelinks": 78,
+    "wikipedia_title": "Neoclassicism",
+    "force_added": false,
+    "pageviews_12mo": 216172
+   },
+   {
+    "qid": "Q134147",
+    "label": "pop art",
+    "description": "art movement",
+    "sitelinks": 79,
+    "wikipedia_title": "Pop_art",
+    "force_added": false,
+    "pageviews_12mo": 204921
+   },
+   {
+    "qid": "Q131808",
+    "label": "Mannerism",
+    "description": "style of European art",
+    "sitelinks": 71,
+    "wikipedia_title": "Mannerism",
+    "force_added": false,
+    "pageviews_12mo": 196610
+   },
+   {
+    "qid": "Q594150",
+    "label": "outsider art",
+    "description": "art created outside the boundaries of official culture by those untrained in the arts",
+    "sitelinks": 42,
+    "wikipedia_title": "Outsider_art",
+    "force_added": false,
+    "pageviews_12mo": 181438
+   },
+   {
+    "qid": "Q603529",
+    "label": "Bloomsbury Group",
+    "description": "influential group of associated English writers, intellectuals, philosophers and artists",
+    "sitelinks": 31,
+    "wikipedia_title": "Bloomsbury_Group",
+    "force_added": false,
+    "pageviews_12mo": 153862
+   },
+   {
+    "qid": "Q108908",
+    "label": "Fluxus",
+    "description": "international network of artists, composers and designers",
+    "sitelinks": 46,
+    "wikipedia_title": "Fluxus",
+    "force_added": false,
+    "pageviews_12mo": 152308
+   },
+   {
+    "qid": "Q256922",
+    "label": "Aestheticism",
+    "description": "art movement emphasizing aesthetic considerations over social values",
+    "sitelinks": 39,
+    "wikipedia_title": "Aestheticism",
+    "force_added": false,
+    "pageviews_12mo": 151846
+   },
+   {
+    "qid": "Q180902",
+    "label": "socialist realism",
+    "description": "art style depicting communist values",
+    "sitelinks": 68,
+    "wikipedia_title": "Socialist_realism",
+    "force_added": false,
+    "pageviews_12mo": 146961
+   },
+   {
+    "qid": "Q173436",
+    "label": "Minimalism",
+    "description": "movements in various forms of art and design",
+    "sitelinks": 72,
+    "wikipedia_title": "Minimalism",
+    "force_added": false,
+    "pageviews_12mo": 143506
+   },
+   {
+    "qid": "Q156460",
+    "label": "degenerate art",
+    "description": "term used by the German Nazi regime to describe modern art",
+    "sitelinks": 45,
+    "wikipedia_title": "Degenerate_art",
+    "force_added": false,
+    "pageviews_12mo": 138765
+   },
+   {
+    "qid": "Q597240",
+    "label": "New Romantic",
+    "description": "1970s British pop culture movement",
+    "sitelinks": 30,
+    "wikipedia_title": "New_Romantic",
+    "force_added": false,
+    "pageviews_12mo": 138447
+   },
+   {
+    "qid": "Q128115",
+    "label": "abstract art",
+    "description": "art with a degree of independence from visual references in the world",
+    "sitelinks": 89,
+    "wikipedia_title": "Abstract_art",
+    "force_added": false,
+    "pageviews_12mo": 138082
+   },
+   {
+    "qid": "Q846094",
+    "label": "Decadent movement",
+    "description": "late-19th-century artistic and literary movement centered in Western Europe",
+    "sitelinks": 41,
+    "wikipedia_title": "Decadent_movement",
+    "force_added": false,
+    "pageviews_12mo": 134682
+   },
+   {
+    "qid": "Q10857409",
+    "label": "realism",
+    "description": "artistic style of representing subjects realistically",
+    "sitelinks": 76,
+    "wikipedia_title": "Realism_(arts)",
+    "force_added": false,
+    "pageviews_12mo": 132900
+   },
+   {
+    "qid": "Q166713",
+    "label": "Post-impressionism",
+    "description": "predominantly French art movement that developed roughly between 1886 and 1905",
+    "sitelinks": 73,
+    "wikipedia_title": "Post-Impressionism",
+    "force_added": false,
+    "pageviews_12mo": 132514
+   },
+   {
+    "qid": "Q38166",
+    "label": "modern art",
+    "description": "artistic works produced during the period extending roughly from the 1860s to the 1970s",
+    "sitelinks": 61,
+    "wikipedia_title": "Modern_art",
+    "force_added": false,
+    "pageviews_12mo": 129688
+   },
+   {
+    "qid": "Q177725",
+    "label": "abstract expressionism",
+    "description": "American post\u2013World War II art movement",
+    "sitelinks": 64,
+    "wikipedia_title": "Abstract_expressionism",
+    "force_added": false,
+    "pageviews_12mo": 128934
+   },
+   {
+    "qid": "Q164800",
+    "label": "Symbolism",
+    "description": "late nineteenth-century art movement of French, Russian and Belgian origin seeking to represent absolute truths symbolically through language and metaphorical images",
+    "sitelinks": 84,
+    "wikipedia_title": "Symbolism_(movement)",
+    "force_added": false,
+    "pageviews_12mo": 128114
+   },
+   {
+    "qid": "Q943853",
+    "label": "Hudson River school",
+    "description": "American art movement",
+    "sitelinks": 39,
+    "wikipedia_title": "Hudson_River_School",
+    "force_added": false,
+    "pageviews_12mo": 116453
+   },
+   {
+    "qid": "Q207103",
+    "label": "Constructivism",
+    "description": "artistic and architectural philosophy",
+    "sitelinks": 60,
+    "wikipedia_title": "Constructivism_(art)",
+    "force_added": false,
+    "pageviews_12mo": 112061
+   },
+   {
+    "qid": "Q208208",
+    "label": "Vienna Secession",
+    "description": "group of Austrian artists and architects",
+    "sitelinks": 50,
+    "wikipedia_title": "Vienna_Secession",
+    "force_added": false,
+    "pageviews_12mo": 108834
+   },
+   {
+    "qid": "Q186030",
+    "label": "contemporary art",
+    "description": "art produced from the 1940s to the present",
+    "sitelinks": 64,
+    "wikipedia_title": "Contemporary_art",
+    "force_added": false,
+    "pageviews_12mo": 106714
+   },
+   {
+    "qid": "Q207445",
+    "label": "De Stijl",
+    "description": "Dutch artistic movement",
+    "sitelinks": 59,
+    "wikipedia_title": "De_Stijl",
+    "force_added": false,
+    "pageviews_12mo": 100843
+   },
+   {
+    "qid": "Q374278",
+    "label": "agitprop",
+    "description": "political art from Soviet Russia",
+    "sitelinks": 31,
+    "wikipedia_title": "Agitprop",
+    "force_added": false,
+    "pageviews_12mo": 99680
+   },
+   {
+    "qid": "Q35874",
+    "label": "humour",
+    "description": "tendency of someone to point out and emphasize the comical nature of something (or the mental state that leads to this tendency)",
+    "sitelinks": 114,
+    "wikipedia_title": "Humour",
+    "force_added": false,
+    "pageviews_12mo": 95870
+   },
+   {
+    "qid": "Q46825",
+    "label": "Gothic art",
+    "description": "style of Medieval art developed in Northern France",
+    "sitelinks": 97,
+    "wikipedia_title": "Gothic_art",
+    "force_added": false,
+    "pageviews_12mo": 92516
+   },
+   {
+    "qid": "Q281108",
+    "label": "na\u00efve art",
+    "description": "art movement",
+    "sitelinks": 47,
+    "wikipedia_title": "Na\u00efve_art",
+    "force_added": false,
+    "pageviews_12mo": 89395
+   },
+   {
+    "qid": "Q203209",
+    "label": "conceptual art",
+    "description": "contemporary art movement",
+    "sitelinks": 57,
+    "wikipedia_title": "Conceptual_art",
+    "force_added": false,
+    "pageviews_12mo": 88528
+   },
+   {
+    "qid": "Q170292",
+    "label": "Classicism",
+    "description": "art movement; architectural style",
+    "sitelinks": 87,
+    "wikipedia_title": "Classicism",
+    "force_added": false,
+    "pageviews_12mo": 88002
+   },
+   {
+    "qid": "Q191970",
+    "label": "Suprematism",
+    "description": "early 20th-century art movement",
+    "sitelinks": 65,
+    "wikipedia_title": "Suprematism",
+    "force_added": false,
+    "pageviews_12mo": 79785
+   },
+   {
+    "qid": "Q751880",
+    "label": "Japonisme",
+    "description": "European imitation of Japanese art during the 19th and 20th centuries",
+    "sitelinks": 41,
+    "wikipedia_title": "Japonisme",
+    "force_added": false,
+    "pageviews_12mo": 78717
+   },
+   {
+    "qid": "Q189458",
+    "label": "academic art",
+    "description": "style of painting and sculpture produced under the influence of European academies of art",
+    "sitelinks": 60,
+    "wikipedia_title": "Academic_art",
+    "force_added": false,
+    "pageviews_12mo": 78429
+   },
+   {
+    "qid": "Q192068",
+    "label": "eclecticism",
+    "description": "conceptual approach",
+    "sitelinks": 51,
+    "wikipedia_title": "Eclecticism",
+    "force_added": false,
+    "pageviews_12mo": 78149
+   },
+   {
+    "qid": "Q829298",
+    "label": "en plein air",
+    "description": "act of painting outdoors",
+    "sitelinks": 47,
+    "wikipedia_title": "En_plein_air",
+    "force_added": false,
+    "pageviews_12mo": 75608
+   },
+   {
+    "qid": "Q666011",
+    "label": "psychedelia",
+    "description": "movement, subculture, style or aesthetic that is resembled in the psychedelic subculture of the 1960s and the psychedelic experience produced by certain psychoactive substances",
+    "sitelinks": 46,
+    "wikipedia_title": "Psychedelia",
+    "force_added": false,
+    "pageviews_12mo": 73811
+   },
+   {
+    "qid": "Q756712",
+    "label": "ink wash painting",
+    "description": "painting technique",
+    "sitelinks": 38,
+    "wikipedia_title": "Ink_wash_painting",
+    "force_added": false,
+    "pageviews_12mo": 68856
+   },
+   {
+    "qid": "Q154432",
+    "label": "Biedermeier",
+    "description": "Era in Central Europe between 1815 and 1848",
+    "sitelinks": 50,
+    "wikipedia_title": "Biedermeier",
+    "force_added": false,
+    "pageviews_12mo": 68447
+   },
+   {
+    "qid": "Q1132127",
+    "label": "hip hop culture",
+    "description": "culture including hip hop music, turntablism, breakdancing and graffiti",
+    "sitelinks": 57,
+    "wikipedia_title": "Hip-hop_culture",
+    "force_added": false,
+    "pageviews_12mo": 67573
+   },
+   {
+    "qid": "Q117035",
+    "label": "Der Blaue Reiter",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Der_Blaue_Reiter",
+    "force_added": true,
+    "pageviews_12mo": 65322
+   },
+   {
+    "qid": "Q837024",
+    "label": "social realism",
+    "description": "art showing conditions of the working class",
+    "sitelinks": 40,
+    "wikipedia_title": "Social_realism",
+    "force_added": false,
+    "pageviews_12mo": 63927
+   },
+   {
+    "qid": "Q589655",
+    "label": "neo-expressionism",
+    "description": "art movement",
+    "sitelinks": 34,
+    "wikipedia_title": "Neo-expressionism",
+    "force_added": false,
+    "pageviews_12mo": 62497
+   },
+   {
+    "qid": "Q17516",
+    "label": "street art",
+    "description": "art that is public and temporary in public spaces",
+    "sitelinks": 50,
+    "wikipedia_title": "Street_art",
+    "force_added": false,
+    "pageviews_12mo": 62110
+   },
+   {
+    "qid": "Q157123",
+    "label": "Carolingian Renaissance",
+    "description": "8th-9th century renaissance within the Carolingian Empire",
+    "sitelinks": 51,
+    "wikipedia_title": "Carolingian_Renaissance",
+    "force_added": false,
+    "pageviews_12mo": 61710
+   },
+   {
+    "qid": "Q182331",
+    "label": "op art",
+    "description": "style of visual art that uses optical illusions",
+    "sitelinks": 54,
+    "wikipedia_title": "Op_art",
+    "force_added": false,
+    "pageviews_12mo": 61546
+   },
+   {
+    "qid": "Q443153",
+    "label": "Early Netherlandish painting",
+    "description": "work of artists active in the Low Countries during the 15th- and 16th-century Northern Renaissance",
+    "sitelinks": 36,
+    "wikipedia_title": "Early_Netherlandish_painting",
+    "force_added": false,
+    "pageviews_12mo": 60903
+   },
+   {
+    "qid": "Q848365",
+    "label": "primitivism",
+    "description": "art movement",
+    "sitelinks": 39,
+    "wikipedia_title": "Primitivism",
+    "force_added": false,
+    "pageviews_12mo": 55339
+   },
+   {
+    "qid": "Q46805",
+    "label": "Romanesque art",
+    "description": "artistic style of Europe from approximately 1000 AD to the 13th century",
+    "sitelinks": 68,
+    "wikipedia_title": "Romanesque_art",
+    "force_added": false,
+    "pageviews_12mo": 53884
+   },
+   {
+    "qid": "Q939559",
+    "label": "photorealism",
+    "description": "art genre and movement",
+    "sitelinks": 41,
+    "wikipedia_title": "Photorealism",
+    "force_added": false,
+    "pageviews_12mo": 52145
+   },
+   {
+    "qid": "Q1153484",
+    "label": "Folk art",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Folk_art",
+    "force_added": true,
+    "pageviews_12mo": 51853
+   },
+   {
+    "qid": "Q160218",
+    "label": "New Objectivity",
+    "description": "attitude of public life in Weimar Germany as well as the art, literature, music, and architecture created to adapt to it",
+    "sitelinks": 39,
+    "wikipedia_title": "New_Objectivity",
+    "force_added": false,
+    "pageviews_12mo": 51436
+   },
+   {
+    "qid": "Q610877",
+    "label": "Northern Renaissance",
+    "description": "Renaissance that occurred in the European countries north of the Alps",
+    "sitelinks": 36,
+    "wikipedia_title": "Northern_Renaissance",
+    "force_added": false,
+    "pageviews_12mo": 48987
+   },
+   {
+    "qid": "Q915841",
+    "label": "vorticism",
+    "description": "short-lived modernist movement in British art and poetry of the early 20th century",
+    "sitelinks": 36,
+    "wikipedia_title": "Vorticism",
+    "force_added": false,
+    "pageviews_12mo": 44509
+   },
+   {
+    "qid": "Q755709",
+    "label": "Renaissance of the 12th century",
+    "description": "period during the High Middle Ages of European history",
+    "sitelinks": 34,
+    "wikipedia_title": "Renaissance_of_the_12th_century",
+    "force_added": false,
+    "pageviews_12mo": 43557
+   },
+   {
+    "qid": "Q851869",
+    "label": "pictorialism",
+    "description": "photography movement",
+    "sitelinks": 35,
+    "wikipedia_title": "Pictorialism",
+    "force_added": false,
+    "pageviews_12mo": 39805
+   },
+   {
+    "qid": "Q422681",
+    "label": "Nazarene movement",
+    "description": "early 19th century German Romantic painters",
+    "sitelinks": 37,
+    "wikipedia_title": "Nazarene_movement",
+    "force_added": false,
+    "pageviews_12mo": 38042
+   },
+   {
+    "qid": "Q326478",
+    "label": "land art",
+    "description": "form of art creation in which landscape and the work of art are inextricably linked",
+    "sitelinks": 52,
+    "wikipedia_title": "Land_art",
+    "force_added": false,
+    "pageviews_12mo": 37622
+   },
+   {
+    "qid": "Q213523",
+    "label": "Quattrocento",
+    "description": "Italian Renaissance",
+    "sitelinks": 44,
+    "wikipedia_title": "Quattrocento",
+    "force_added": false,
+    "pageviews_12mo": 37590
+   },
+   {
+    "qid": "Q150091",
+    "label": "Neo-impressionism",
+    "description": "art movement",
+    "sitelinks": 50,
+    "wikipedia_title": "Neo-Impressionism",
+    "force_added": false,
+    "pageviews_12mo": 35695
+   },
+   {
+    "qid": "Q152778",
+    "label": "Die Br\u00fccke",
+    "description": "German expressionist artist group",
+    "sitelinks": 45,
+    "wikipedia_title": "Die_Br\u00fccke",
+    "force_added": false,
+    "pageviews_12mo": 34451
+   },
+   {
+    "qid": "Q519443",
+    "label": "Orphism",
+    "description": "art movement",
+    "sitelinks": 36,
+    "wikipedia_title": "Orphism_(art)",
+    "force_added": false,
+    "pageviews_12mo": 33398
+   },
+   {
+    "qid": "Q143357",
+    "label": "Barbizon school",
+    "description": "artistic movement of landscape painters of the first part and mid-19th century",
+    "sitelinks": 48,
+    "wikipedia_title": "Barbizon_School",
+    "force_added": false,
+    "pageviews_12mo": 31449
+   },
+   {
+    "qid": "Q503708",
+    "label": "Les Nabis",
+    "description": "artist collective",
+    "sitelinks": 40,
+    "wikipedia_title": "Nabis_(art)",
+    "force_added": false,
+    "pageviews_12mo": 31400
+   },
+   {
+    "qid": "Q576913",
+    "label": "Arte Povera",
+    "description": "Italian art movement",
+    "sitelinks": 33,
+    "wikipedia_title": "Arte_Povera",
+    "force_added": false,
+    "pageviews_12mo": 26100
+   },
+   {
+    "qid": "Q397469",
+    "label": "Neo-romanticism",
+    "description": "movements from the era of Romanticism",
+    "sitelinks": 34,
+    "wikipedia_title": "Neo-romanticism",
+    "force_added": false,
+    "pageviews_12mo": 24426
+   },
+   {
+    "qid": "Q610687",
+    "label": "Venetian school",
+    "description": "Renaissance art movement",
+    "sitelinks": 36,
+    "wikipedia_title": "Venetian_painting",
+    "force_added": false,
+    "pageviews_12mo": 24206
+   },
+   {
+    "qid": "Q378604",
+    "label": "new media art",
+    "description": "artworks designed and produced by means of electronic media technologies",
+    "sitelinks": 31,
+    "wikipedia_title": "New_media_art",
+    "force_added": false,
+    "pageviews_12mo": 22318
+   },
+   {
+    "qid": "Q212611",
+    "label": "COBRA",
+    "description": "artist collective and art movement",
+    "sitelinks": 39,
+    "wikipedia_title": "COBRA_(art_movement)",
+    "force_added": false,
+    "pageviews_12mo": 21894
+   },
+   {
+    "qid": "Q708807",
+    "label": "pre-Romanesque art",
+    "description": "art style of Europe between the fall of Rome and the 11th century",
+    "sitelinks": 32,
+    "wikipedia_title": "Pre-Romanesque_art_and_architecture",
+    "force_added": false,
+    "pageviews_12mo": 18270
+   },
+   {
+    "qid": "Q62506",
+    "label": "Caravaggisti",
+    "description": "followers of the 16th-century Italian Baroque painter Caravaggio",
+    "sitelinks": 32,
+    "wikipedia_title": "Caravaggisti",
+    "force_added": false,
+    "pageviews_12mo": 17790
+   },
+   {
+    "qid": "Q614082",
+    "label": "Carolingian art",
+    "description": "art of the Frankish empire, ca. 780\u2013900",
+    "sitelinks": 38,
+    "wikipedia_title": "Carolingian_art",
+    "force_added": false,
+    "pageviews_12mo": 17437
+   },
+   {
+    "qid": "Q478774",
+    "label": "purism",
+    "description": "French art movement",
+    "sitelinks": 37,
+    "wikipedia_title": "Purism",
+    "force_added": false,
+    "pageviews_12mo": 15540
+   },
+   {
+    "qid": "Q753683",
+    "label": "metaphysical painting",
+    "description": "painting movement",
+    "sitelinks": 32,
+    "wikipedia_title": "Metaphysical_painting",
+    "force_added": false,
+    "pageviews_12mo": 15250
+   },
+   {
+    "qid": "Q889525",
+    "label": "cloisonnism",
+    "description": "style of post-Impressionist painting",
+    "sitelinks": 33,
+    "wikipedia_title": "Cloisonnism",
+    "force_added": false,
+    "pageviews_12mo": 13761
+   },
+   {
+    "qid": "Q1332178",
+    "label": "Sienese school",
+    "description": "painting style developed in 14th-century Siena",
+    "sitelinks": 33,
+    "wikipedia_title": "Sienese_school",
+    "force_added": false,
+    "pageviews_12mo": 8146
+   },
+   {
+    "qid": "Q55995",
+    "label": "Naturalism",
+    "description": "art movement",
+    "sitelinks": 32,
+    "wikipedia_title": "Naturalism_(art)",
+    "force_added": false,
+    "pageviews_12mo": 4335
+   }
+  ],
+  "genre": [
+   {
+    "qid": "Q40415",
+    "label": "Impressionism",
+    "description": "19th-century art movement",
+    "sitelinks": 115,
+    "wikipedia_title": "Impressionism",
+    "force_added": false,
+    "pageviews_12mo": 466439
+   },
+   {
+    "qid": "Q181001",
+    "label": "erotica",
+    "description": "media, literature or art dealing substantively with erotically stimulating or sexually arousing subject matter",
+    "sitelinks": 69,
+    "wikipedia_title": "Erotica",
+    "force_added": false,
+    "pageviews_12mo": 463874
+   },
+   {
+    "qid": "Q128758",
+    "label": "satire",
+    "description": "literary and art genre with a style of humor based on parody",
+    "sitelinks": 111,
+    "wikipedia_title": "Satire",
+    "force_added": false,
+    "pageviews_12mo": 342033
+   },
+   {
+    "qid": "Q185905",
+    "label": "ukiyo-e",
+    "description": "Japanese art genre, fl. 17th\u201319th c., consisting of woodblock prints and paintings of such subjects as female beauties, kabuki actors, sumo wrestlers, scenes from history and folk tales, travel scenes, landscapes, flora, fauna, and erotica",
+    "sitelinks": 68,
+    "wikipedia_title": "Ukiyo-e",
+    "force_added": false,
+    "pageviews_12mo": 305789
+   },
+   {
+    "qid": "Q15733887",
+    "label": "vaporwave",
+    "description": "online musical genre and visual aesthetic",
+    "sitelinks": 38,
+    "wikipedia_title": "Vaporwave",
+    "force_added": false,
+    "pageviews_12mo": 260125
+   },
+   {
+    "qid": "Q18535",
+    "label": "Allegory",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Allegory",
+    "force_added": true,
+    "pageviews_12mo": 239685
+   },
+   {
+    "qid": "Q36649",
+    "label": "visual arts",
+    "description": "practice of art which creates works that are primarily visual in nature",
+    "sitelinks": 122,
+    "wikipedia_title": "Visual_arts",
+    "force_added": false,
+    "pageviews_12mo": 225618
+   },
+   {
+    "qid": "Q72206346",
+    "label": "solarpunk",
+    "description": "political and aesthetic movement that advocates for the environment",
+    "sitelinks": 29,
+    "wikipedia_title": "Solarpunk",
+    "force_added": false,
+    "pageviews_12mo": 222748
+   },
+   {
+    "qid": "Q580995",
+    "label": "apotheosis",
+    "description": "glorification of a subject to divine level",
+    "sitelinks": 49,
+    "wikipedia_title": "Apotheosis",
+    "force_added": false,
+    "pageviews_12mo": 219767
+   },
+   {
+    "qid": "Q1168168",
+    "label": "erotic art",
+    "description": "artistic work that deals substantively with erotically stimulating or sexually arousing subject matter",
+    "sitelinks": 27,
+    "wikipedia_title": "Erotic_art",
+    "force_added": false,
+    "pageviews_12mo": 213921
+   },
+   {
+    "qid": "Q17514",
+    "label": "graffiti",
+    "description": "genre of writing or drawing etched, scratched, scribbled, or sprayed (often, but not always illicitly) on a wall or other surface in a public place",
+    "sitelinks": 98,
+    "wikipedia_title": "Graffiti",
+    "force_added": false,
+    "pageviews_12mo": 212113
+   },
+   {
+    "qid": "Q1048478",
+    "label": "shunga",
+    "description": "Japanese erotic art",
+    "sitelinks": 34,
+    "wikipedia_title": "Shunga",
+    "force_added": false,
+    "pageviews_12mo": 207710
+   },
+   {
+    "qid": "Q193097",
+    "label": "ASCII art",
+    "description": "visual art genre using plain-text characters (any character set) to draw pictures",
+    "sitelinks": 44,
+    "wikipedia_title": "ASCII_art",
+    "force_added": false,
+    "pageviews_12mo": 197833
+   },
+   {
+    "qid": "Q1128018",
+    "label": "pastiche",
+    "description": "work of visual art, literature, theatre, music, or architecture that imitates the style or character of the work of one or more other artists",
+    "sitelinks": 34,
+    "wikipedia_title": "Pastiche",
+    "force_added": false,
+    "pageviews_12mo": 196792
+   },
+   {
+    "qid": "Q468930",
+    "label": "Trompe-l'\u0153il",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Trompe-l'\u0153il",
+    "force_added": true,
+    "pageviews_12mo": 196422
+   },
+   {
+    "qid": "Q919036",
+    "label": "retrofuturism",
+    "description": "movement in the creative arts showing the influence of depictions of the future produced in an earlier era",
+    "sitelinks": 30,
+    "wikipedia_title": "Retrofuturism",
+    "force_added": false,
+    "pageviews_12mo": 194171
+   },
+   {
+    "qid": "Q40446",
+    "label": "nude",
+    "description": "art genre for works that have as their primary subject the unclothed human body",
+    "sitelinks": 59,
+    "wikipedia_title": "Nude_(art)",
+    "force_added": false,
+    "pageviews_12mo": 190660
+   },
+   {
+    "qid": "Q12681",
+    "label": "calligraphy",
+    "description": "visual art related to writing",
+    "sitelinks": 122,
+    "wikipedia_title": "Calligraphy",
+    "force_added": false,
+    "pageviews_12mo": 183762
+   },
+   {
+    "qid": "Q594150",
+    "label": "outsider art",
+    "description": "art created outside the boundaries of official culture by those untrained in the arts",
+    "sitelinks": 42,
+    "wikipedia_title": "Outsider_art",
+    "force_added": false,
+    "pageviews_12mo": 181438
+   },
+   {
+    "qid": "Q48498",
+    "label": "Illuminated manuscript",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Illuminated_manuscript",
+    "force_added": true,
+    "pageviews_12mo": 154730
+   },
+   {
+    "qid": "Q8253",
+    "label": "fiction",
+    "description": "genre and narrative form, in any medium, consisting of people, events, or places that are imaginary\u2014in other words, not based strictly on history or fact",
+    "sitelinks": 132,
+    "wikipedia_title": "Fiction",
+    "force_added": false,
+    "pageviews_12mo": 150603
+   },
+   {
+    "qid": "Q11634",
+    "label": "art of sculpture",
+    "description": "branch of the visual arts that operates in three dimensions",
+    "sitelinks": 163,
+    "wikipedia_title": "Sculpture",
+    "force_added": false,
+    "pageviews_12mo": 142162
+   },
+   {
+    "qid": "Q128115",
+    "label": "abstract art",
+    "description": "art with a degree of independence from visual references in the world",
+    "sitelinks": 89,
+    "wikipedia_title": "Abstract_art",
+    "force_added": false,
+    "pageviews_12mo": 138082
+   },
+   {
+    "qid": "Q2561438",
+    "label": "slice of life",
+    "description": "depiction of everyday experience in art and entertainment",
+    "sitelinks": 37,
+    "wikipedia_title": "Slice_of_life",
+    "force_added": false,
+    "pageviews_12mo": 134752
+   },
+   {
+    "qid": "Q3179385",
+    "label": "azulejo",
+    "description": "Spanish and Portuguese painted tiles",
+    "sitelinks": 38,
+    "wikipedia_title": "Azulejo",
+    "force_added": false,
+    "pageviews_12mo": 122694
+   },
+   {
+    "qid": "Q132137",
+    "label": "Icon",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Icon",
+    "force_added": true,
+    "pageviews_12mo": 120277
+   },
+   {
+    "qid": "Q170571",
+    "label": "still life",
+    "description": "art genre mostly showing inanimate objects",
+    "sitelinks": 75,
+    "wikipedia_title": "Still_life",
+    "force_added": false,
+    "pageviews_12mo": 118754
+   },
+   {
+    "qid": "Q733095",
+    "label": "vanitas",
+    "description": "genre of symbolic work of art",
+    "sitelinks": 39,
+    "wikipedia_title": "Vanitas",
+    "force_added": false,
+    "pageviews_12mo": 117882
+   },
+   {
+    "qid": "Q482919",
+    "label": "caricature",
+    "description": "rendered image showing the features of its subject in a simplified or exaggerated way",
+    "sitelinks": 87,
+    "wikipedia_title": "Caricature",
+    "force_added": false,
+    "pageviews_12mo": 117567
+   },
+   {
+    "qid": "Q207103",
+    "label": "Constructivism",
+    "description": "artistic and architectural philosophy",
+    "sitelinks": 60,
+    "wikipedia_title": "Constructivism_(art)",
+    "force_added": false,
+    "pageviews_12mo": 112061
+   },
+   {
+    "qid": "Q186030",
+    "label": "contemporary art",
+    "description": "art produced from the 1940s to the present",
+    "sitelinks": 64,
+    "wikipedia_title": "Contemporary_art",
+    "force_added": false,
+    "pageviews_12mo": 106714
+   },
+   {
+    "qid": "Q858403",
+    "label": "Gesamtkunstwerk",
+    "description": "\"total artwork\" making use of many or all art forms",
+    "sitelinks": 29,
+    "wikipedia_title": "Gesamtkunstwerk",
+    "force_added": false,
+    "pageviews_12mo": 105714
+   },
+   {
+    "qid": "Q898700",
+    "label": "silhouette",
+    "description": "appearance and art form where only the outline of something is visible",
+    "sitelinks": 43,
+    "wikipedia_title": "Silhouette",
+    "force_added": false,
+    "pageviews_12mo": 105351
+   },
+   {
+    "qid": "Q113940039",
+    "label": "text-to-image model",
+    "description": "machine learning model",
+    "sitelinks": 22,
+    "wikipedia_title": "Text-to-image_model",
+    "force_added": false,
+    "pageviews_12mo": 105303
+   },
+   {
+    "qid": "Q213156",
+    "label": "performance art",
+    "description": "art using the actions of an artist or other participants (not to be confused with performing arts)",
+    "sitelinks": 60,
+    "wikipedia_title": "Performance_art",
+    "force_added": false,
+    "pageviews_12mo": 102388
+   },
+   {
+    "qid": "Q390001",
+    "label": "pastoral",
+    "description": "art genre",
+    "sitelinks": 36,
+    "wikipedia_title": "Pastoral",
+    "force_added": false,
+    "pageviews_12mo": 89512
+   },
+   {
+    "qid": "Q203209",
+    "label": "conceptual art",
+    "description": "contemporary art movement",
+    "sitelinks": 57,
+    "wikipedia_title": "Conceptual_art",
+    "force_added": false,
+    "pageviews_12mo": 88528
+   },
+   {
+    "qid": "Q811179",
+    "label": "pixel art",
+    "description": "digital art created using raster graphics edited on the pixel level",
+    "sitelinks": 40,
+    "wikipedia_title": "Pixel_art",
+    "force_added": false,
+    "pageviews_12mo": 87331
+   },
+   {
+    "qid": "Q1344426",
+    "label": "ens\u014d",
+    "description": "circle that is hand-drawn in one or two uninhibited brushstrokes to express a moment when the mind is free to let the body create",
+    "sitelinks": 26,
+    "wikipedia_title": "Ens\u014d",
+    "force_added": false,
+    "pageviews_12mo": 85504
+   },
+   {
+    "qid": "Q177600",
+    "label": "stick figure",
+    "description": "simple drawing of a person or animal",
+    "sitelinks": 23,
+    "wikipedia_title": "Stick_figure",
+    "force_added": false,
+    "pageviews_12mo": 81921
+   },
+   {
+    "qid": "Q2547125",
+    "label": "Madhubani art",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Madhubani_art",
+    "force_added": true,
+    "pageviews_12mo": 71927
+   },
+   {
+    "qid": "Q1340222",
+    "label": "Bhavacakra",
+    "description": "symbolic representation of cyclic existence",
+    "sitelinks": 27,
+    "wikipedia_title": "Bhavacakra",
+    "force_added": false,
+    "pageviews_12mo": 71394
+   },
+   {
+    "qid": "Q494452",
+    "label": "blazonry",
+    "description": "art of describing heraldic arms in proper terms",
+    "sitelinks": 37,
+    "wikipedia_title": "Blazon",
+    "force_added": false,
+    "pageviews_12mo": 70687
+   },
+   {
+    "qid": "Q65066631",
+    "label": "artificial intelligence visual art",
+    "description": "genre of art",
+    "sitelinks": 32,
+    "wikipedia_title": "AI_art",
+    "force_added": false,
+    "pageviews_12mo": 69815
+   },
+   {
+    "qid": "Q756712",
+    "label": "Ink wash painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Ink_wash_painting",
+    "force_added": true,
+    "pageviews_12mo": 68856
+   },
+   {
+    "qid": "Q1049336",
+    "label": "Mughal painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Mughal_painting",
+    "force_added": true,
+    "pageviews_12mo": 67575
+   },
+   {
+    "qid": "Q1143564",
+    "label": "culture jamming",
+    "description": "anti-consumerist social movements tactic to disrupt or subvert media culture",
+    "sitelinks": 23,
+    "wikipedia_title": "Culture_jamming",
+    "force_added": false,
+    "pageviews_12mo": 63932
+   },
+   {
+    "qid": "Q17516",
+    "label": "street art",
+    "description": "art that is public and temporary in public spaces",
+    "sitelinks": 50,
+    "wikipedia_title": "Street_art",
+    "force_added": false,
+    "pageviews_12mo": 62110
+   },
+   {
+    "qid": "Q460501",
+    "label": "historicism",
+    "description": "philosophy",
+    "sitelinks": 40,
+    "wikipedia_title": "Historicism",
+    "force_added": false,
+    "pageviews_12mo": 60692
+   },
+   {
+    "qid": "Q192110",
+    "label": "self-portrait",
+    "description": "representation of an artist, drawn, painted, photographed, or sculpted by the artist",
+    "sitelinks": 61,
+    "wikipedia_title": "Self-portrait",
+    "force_added": false,
+    "pageviews_12mo": 60609
+   },
+   {
+    "qid": "Q860372",
+    "label": "digital art",
+    "description": "collective term for art that is generated digitally with the computer",
+    "sitelinks": 42,
+    "wikipedia_title": "Digital_art",
+    "force_added": false,
+    "pageviews_12mo": 59127
+   },
+   {
+    "qid": "Q134307",
+    "label": "portrait",
+    "description": "artistic representation of one or more persons",
+    "sitelinks": 84,
+    "wikipedia_title": "Portrait",
+    "force_added": false,
+    "pageviews_12mo": 56814
+   },
+   {
+    "qid": "Q919348",
+    "label": "Chinese painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Chinese_painting",
+    "force_added": true,
+    "pageviews_12mo": 54601
+   },
+   {
+    "qid": "Q1153484",
+    "label": "folk art",
+    "description": "visual and applied art made within folk culture traditions by makers trained outside the fine art canon; distinct from ethnographic art of traditional societies; rooted in a 19th-century European concept of pre-industrial collective life",
+    "sitelinks": 37,
+    "wikipedia_title": "Folk_art",
+    "force_added": false,
+    "pageviews_12mo": 51853
+   },
+   {
+    "qid": "Q191163",
+    "label": "Landscape painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Landscape_painting",
+    "force_added": true,
+    "pageviews_12mo": 51492
+   },
+   {
+    "qid": "Q6498317",
+    "label": "Chinese calligraphy",
+    "description": "calligraphy with Chinese script; one of the four arts (music, chess, calligraphy and painting)",
+    "sitelinks": 31,
+    "wikipedia_title": "Chinese_calligraphy",
+    "force_added": false,
+    "pageviews_12mo": 51287
+   },
+   {
+    "qid": "Q678664",
+    "label": "Persian miniature",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Persian_miniature",
+    "force_added": true,
+    "pageviews_12mo": 51170
+   },
+   {
+    "qid": "Q2916094",
+    "label": "political cartoon",
+    "description": "illustration used to comment on current events and personalities",
+    "sitelinks": 27,
+    "wikipedia_title": "Political_cartoon",
+    "force_added": false,
+    "pageviews_12mo": 50875
+   },
+   {
+    "qid": "Q1211146",
+    "label": "rock art",
+    "description": "human-made markings on natural stone",
+    "sitelinks": 35,
+    "wikipedia_title": "Rock_art",
+    "force_added": false,
+    "pageviews_12mo": 49858
+   },
+   {
+    "qid": "Q4342543",
+    "label": "paleoart",
+    "description": "art genre attempting to depict prehistoric life according to scientific evidence",
+    "sitelinks": 20,
+    "wikipedia_title": "Paleoart",
+    "force_added": false,
+    "pageviews_12mo": 49364
+   },
+   {
+    "qid": "Q916651",
+    "label": "Thangka",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Thangka",
+    "force_added": true,
+    "pageviews_12mo": 49234
+   },
+   {
+    "qid": "Q1400853",
+    "label": "Portrait painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Portrait_painting",
+    "force_added": true,
+    "pageviews_12mo": 46730
+   },
+   {
+    "qid": "Q1053619",
+    "label": "fan art",
+    "description": "artwork featuring aspects of a work of fiction created by a fan",
+    "sitelinks": 32,
+    "wikipedia_title": "Fan_art",
+    "force_added": false,
+    "pageviews_12mo": 45365
+   },
+   {
+    "qid": "Q108874",
+    "label": "happening",
+    "description": "type of performance artwork",
+    "sitelinks": 36,
+    "wikipedia_title": "Happening",
+    "force_added": false,
+    "pageviews_12mo": 43427
+   },
+   {
+    "qid": "Q262343",
+    "label": "assemblage",
+    "description": "art form and technique",
+    "sitelinks": 30,
+    "wikipedia_title": "Assemblage_(art)",
+    "force_added": false,
+    "pageviews_12mo": 42664
+   },
+   {
+    "qid": "Q13464614",
+    "label": "ceramic art",
+    "description": "art objects made from clay and other raw materials by the process of pottery",
+    "sitelinks": 23,
+    "wikipedia_title": "Ceramic_art",
+    "force_added": false,
+    "pageviews_12mo": 41064
+   },
+   {
+    "qid": "Q1622217",
+    "label": "figurative art",
+    "description": "art that depicts real object sources",
+    "sitelinks": 34,
+    "wikipedia_title": "Figurative_art",
+    "force_added": false,
+    "pageviews_12mo": 40386
+   },
+   {
+    "qid": "Q112110",
+    "label": "emblem",
+    "description": "abstract or representational pictorial image that represents a concept, like a moral truth, or an allegory, or a person, like a king or saint",
+    "sitelinks": 48,
+    "wikipedia_title": "Emblem",
+    "force_added": false,
+    "pageviews_12mo": 39438
+   },
+   {
+    "qid": "Q326478",
+    "label": "land art",
+    "description": "form of art creation in which landscape and the work of art are inextricably linked",
+    "sitelinks": 52,
+    "wikipedia_title": "Land_art",
+    "force_added": false,
+    "pageviews_12mo": 37622
+   },
+   {
+    "qid": "Q1471717",
+    "label": "lament",
+    "description": "artistic genre",
+    "sitelinks": 26,
+    "wikipedia_title": "Lament",
+    "force_added": false,
+    "pageviews_12mo": 37216
+   },
+   {
+    "qid": "Q742333",
+    "label": "History painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "History_painting",
+    "force_added": true,
+    "pageviews_12mo": 36766
+   },
+   {
+    "qid": "Q1433099",
+    "label": "tronie",
+    "description": "type of artwork showing an exaggerated face or character in costume",
+    "sitelinks": 22,
+    "wikipedia_title": "Tronie",
+    "force_added": false,
+    "pageviews_12mo": 36703
+   },
+   {
+    "qid": "Q2293082",
+    "label": "escapology",
+    "description": "practice of escaping from restraints",
+    "sitelinks": 21,
+    "wikipedia_title": "Escapology",
+    "force_added": false,
+    "pageviews_12mo": 36001
+   },
+   {
+    "qid": "Q41363",
+    "label": "panorama",
+    "description": "wide-angle view or representation of a physical space",
+    "sitelinks": 50,
+    "wikipedia_title": "Panorama",
+    "force_added": false,
+    "pageviews_12mo": 35064
+   },
+   {
+    "qid": "Q572916",
+    "label": "found object",
+    "description": "art created from undisguised, but often modified, objects or products that are not normally considered art",
+    "sitelinks": 33,
+    "wikipedia_title": "Found_object",
+    "force_added": false,
+    "pageviews_12mo": 33876
+   },
+   {
+    "qid": "Q1001041",
+    "label": "Buddhist art",
+    "description": "artistic practices that are influenced by Buddhism",
+    "sitelinks": 32,
+    "wikipedia_title": "Buddhist_art",
+    "force_added": false,
+    "pageviews_12mo": 32927
+   },
+   {
+    "qid": "Q1502032",
+    "label": "generative art",
+    "description": "form of art that is created through the use of autonomous systems, often involving algorithms, random processes, or computational techniques to generate artworks",
+    "sitelinks": 24,
+    "wikipedia_title": "Generative_art",
+    "force_added": false,
+    "pageviews_12mo": 32625
+   },
+   {
+    "qid": "Q337907",
+    "label": "wood carving",
+    "description": "form of working wood by means of a cutting tool",
+    "sitelinks": 49,
+    "wikipedia_title": "Wood_carving",
+    "force_added": false,
+    "pageviews_12mo": 32232
+   },
+   {
+    "qid": "Q1123841",
+    "label": "concept art",
+    "description": "form of illustration used to convey an idea for use in films, video games, animation, comic books or other media",
+    "sitelinks": 25,
+    "wikipedia_title": "Concept_art",
+    "force_added": false,
+    "pageviews_12mo": 31386
+   },
+   {
+    "qid": "Q55439",
+    "label": "Panel painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Panel_painting",
+    "force_added": true,
+    "pageviews_12mo": 30229
+   },
+   {
+    "qid": "Q631931",
+    "label": "decorative art",
+    "description": "arts or crafts concerned with the design and manufacture of functional, beautiful objects",
+    "sitelinks": 42,
+    "wikipedia_title": "Decorative_arts",
+    "force_added": false,
+    "pageviews_12mo": 29714
+   },
+   {
+    "qid": "Q9503",
+    "label": "suspense",
+    "description": "feeling of uncertainty and anxiety about the outcome of certain actions",
+    "sitelinks": 36,
+    "wikipedia_title": "Suspense",
+    "force_added": false,
+    "pageviews_12mo": 28748
+   },
+   {
+    "qid": "Q2083647",
+    "label": "funerary art",
+    "description": "grave art",
+    "sitelinks": 21,
+    "wikipedia_title": "Funerary_art",
+    "force_added": false,
+    "pageviews_12mo": 28483
+   },
+   {
+    "qid": "Q466521",
+    "label": "kinetic art",
+    "description": "art genre of artworks that contains movement",
+    "sitelinks": 46,
+    "wikipedia_title": "Kinetic_art",
+    "force_added": false,
+    "pageviews_12mo": 28327
+   },
+   {
+    "qid": "Q10988986",
+    "label": "textile art",
+    "description": "arts and crafts that use plant, animal, or synthetic fibers and fabrics to construct practical or decorative objects",
+    "sitelinks": 27,
+    "wikipedia_title": "Textile_arts",
+    "force_added": false,
+    "pageviews_12mo": 28144
+   },
+   {
+    "qid": "Q3058669",
+    "label": "penjing",
+    "description": "ancient Chinese art of depicting artistically formed trees, other plants, and landscapes in miniature",
+    "sitelinks": 22,
+    "wikipedia_title": "Penjing",
+    "force_added": false,
+    "pageviews_12mo": 27806
+   },
+   {
+    "qid": "Q6352595",
+    "label": "Kalighat painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Kalighat_painting",
+    "force_added": true,
+    "pageviews_12mo": 27733
+   },
+   {
+    "qid": "Q1683295",
+    "label": "Japanese painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Japanese_painting",
+    "force_added": true,
+    "pageviews_12mo": 27690
+   },
+   {
+    "qid": "Q682010",
+    "label": "video art",
+    "description": "type of art",
+    "sitelinks": 43,
+    "wikipedia_title": "Video_art",
+    "force_added": false,
+    "pageviews_12mo": 25310
+   },
+   {
+    "qid": "Q214127",
+    "label": "Genre painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Genre_painting",
+    "force_added": true,
+    "pageviews_12mo": 24829
+   },
+   {
+    "qid": "Q645717",
+    "label": "Christian art",
+    "description": "art genre",
+    "sitelinks": 32,
+    "wikipedia_title": "Christian_art",
+    "force_added": false,
+    "pageviews_12mo": 24310
+   },
+   {
+    "qid": "Q1062404",
+    "label": "artist's book",
+    "description": "work of art realized in the form of a book",
+    "sitelinks": 21,
+    "wikipedia_title": "Artist's_book",
+    "force_added": false,
+    "pageviews_12mo": 24242
+   },
+   {
+    "qid": "Q3631050",
+    "label": "Pahari painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Pahari_painting",
+    "force_added": true,
+    "pageviews_12mo": 24013
+   },
+   {
+    "qid": "Q516583",
+    "label": "Shan shui",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Shan_shui",
+    "force_added": true,
+    "pageviews_12mo": 23790
+   },
+   {
+    "qid": "Q1660060",
+    "label": "immersion",
+    "description": "perception of being physically present in a non-physical world",
+    "sitelinks": 20,
+    "wikipedia_title": "Immersion_(virtual_reality)",
+    "force_added": false,
+    "pageviews_12mo": 22678
+   },
+   {
+    "qid": "Q1190781",
+    "label": "emakimono",
+    "description": "Japanese narrative handscroll",
+    "sitelinks": 27,
+    "wikipedia_title": "Emakimono",
+    "force_added": false,
+    "pageviews_12mo": 22369
+   },
+   {
+    "qid": "Q378604",
+    "label": "new media art",
+    "description": "artworks designed and produced by means of electronic media technologies",
+    "sitelinks": 31,
+    "wikipedia_title": "New_media_art",
+    "force_added": false,
+    "pageviews_12mo": 22318
+   },
+   {
+    "qid": "Q1569950",
+    "label": "internet art",
+    "description": "art that uses the Internet as a medium or subject",
+    "sitelinks": 23,
+    "wikipedia_title": "Internet_art",
+    "force_added": false,
+    "pageviews_12mo": 20521
+   },
+   {
+    "qid": "Q2864737",
+    "label": "religious art",
+    "description": "genre of art that is religious in theme",
+    "sitelinks": 26,
+    "wikipedia_title": "Religious_art",
+    "force_added": false,
+    "pageviews_12mo": 20391
+   },
+   {
+    "qid": "Q158607",
+    "label": "marine art",
+    "description": "form of figurative art that portrays or draws its main inspiration from the sea",
+    "sitelinks": 28,
+    "wikipedia_title": "Marine_art",
+    "force_added": false,
+    "pageviews_12mo": 20314
+   },
+   {
+    "qid": "Q557141",
+    "label": "public art",
+    "description": "genre of art that is created to be in a public space",
+    "sitelinks": 25,
+    "wikipedia_title": "Public_art",
+    "force_added": false,
+    "pageviews_12mo": 19788
+   },
+   {
+    "qid": "Q1744327",
+    "label": "sound art",
+    "description": "art discipline that uses sound as a medium",
+    "sitelinks": 25,
+    "wikipedia_title": "Sound_art",
+    "force_added": false,
+    "pageviews_12mo": 19365
+   },
+   {
+    "qid": "Q742530",
+    "label": "idyll",
+    "description": "short rustic poem",
+    "sitelinks": 42,
+    "wikipedia_title": "Idyll",
+    "force_added": false,
+    "pageviews_12mo": 18716
+   },
+   {
+    "qid": "Q2988788",
+    "label": "Rajput painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Rajput_painting",
+    "force_added": true,
+    "pageviews_12mo": 18611
+   },
+   {
+    "qid": "Q2277510",
+    "label": "ancient art",
+    "description": "art of the advanced cultures of ancient societies",
+    "sitelinks": 22,
+    "wikipedia_title": "Ancient_art",
+    "force_added": false,
+    "pageviews_12mo": 18524
+   },
+   {
+    "qid": "Q5602008",
+    "label": "Indigenismo",
+    "description": "trend in social and political thought, visual arts, and literature in Latin American countries where Indians make up a significant part of the population, rehabilitating them",
+    "sitelinks": 22,
+    "wikipedia_title": "Indigenismo",
+    "force_added": false,
+    "pageviews_12mo": 18281
+   },
+   {
+    "qid": "Q577622",
+    "label": "Coptic art",
+    "description": "Christian art of the Byzantine-Greco-Roman Egypt and of Coptic Christian Churches",
+    "sitelinks": 28,
+    "wikipedia_title": "Coptic_art",
+    "force_added": false,
+    "pageviews_12mo": 16375
+   },
+   {
+    "qid": "Q982897",
+    "label": "lubok",
+    "description": "Russian popular print",
+    "sitelinks": 30,
+    "wikipedia_title": "Lubok",
+    "force_added": false,
+    "pageviews_12mo": 15967
+   },
+   {
+    "qid": "Q2316866",
+    "label": "geometric abstraction",
+    "description": "form of abstract art involving geometry",
+    "sitelinks": 22,
+    "wikipedia_title": "Geometric_abstraction",
+    "force_added": false,
+    "pageviews_12mo": 15884
+   },
+   {
+    "qid": "Q6362867",
+    "label": "Kangra painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Kangra_painting",
+    "force_added": true,
+    "pageviews_12mo": 15309
+   },
+   {
+    "qid": "Q2394336",
+    "label": "interactive art",
+    "description": "art that involves the spectator",
+    "sitelinks": 22,
+    "wikipedia_title": "Interactive_art",
+    "force_added": false,
+    "pageviews_12mo": 13855
+   },
+   {
+    "qid": "Q911059",
+    "label": "graphic arts",
+    "description": "various forms of visual artistic expression, typically two-dimensional graphics, in particular drawing and printmaking",
+    "sitelinks": 27,
+    "wikipedia_title": "Graphic_arts",
+    "force_added": false,
+    "pageviews_12mo": 13805
+   },
+   {
+    "qid": "Q13039303",
+    "label": "carving",
+    "description": "act of using tools to shape something from a material by scraping away portions of that material",
+    "sitelinks": 33,
+    "wikipedia_title": "Carving",
+    "force_added": false,
+    "pageviews_12mo": 13471
+   },
+   {
+    "qid": "Q473743",
+    "label": "environmental art",
+    "description": "genre of art engaging nature and ecology",
+    "sitelinks": 30,
+    "wikipedia_title": "Environmental_art",
+    "force_added": false,
+    "pageviews_12mo": 13341
+   },
+   {
+    "qid": "Q166030",
+    "label": "Veduta",
+    "description": "genre of large-scale paintings or prints of a cityscape or other vista",
+    "sitelinks": 38,
+    "wikipedia_title": "Veduta",
+    "force_added": false,
+    "pageviews_12mo": 12852
+   },
+   {
+    "qid": "Q284521",
+    "label": "bijin-ga",
+    "description": "Japanese art genre",
+    "sitelinks": 25,
+    "wikipedia_title": "Bijin-ga",
+    "force_added": false,
+    "pageviews_12mo": 12581
+   },
+   {
+    "qid": "Q383898",
+    "label": "military art",
+    "description": "works of art on military themes",
+    "sitelinks": 21,
+    "wikipedia_title": "Military_art",
+    "force_added": false,
+    "pageviews_12mo": 11996
+   },
+   {
+    "qid": "Q2566458",
+    "label": "Bird-and-flower painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Bird-and-flower_painting",
+    "force_added": true,
+    "pageviews_12mo": 11669
+   },
+   {
+    "qid": "Q4200893",
+    "label": "Hindu art",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Hindu_art",
+    "force_added": true,
+    "pageviews_12mo": 11241
+   },
+   {
+    "qid": "Q2740415",
+    "label": "site-specific art",
+    "description": "artwork created for a certain place",
+    "sitelinks": 23,
+    "wikipedia_title": "Site-specific_art",
+    "force_added": false,
+    "pageviews_12mo": 10897
+   },
+   {
+    "qid": "Q1246516",
+    "label": "feminist art",
+    "description": "art that reflects women\u2019s lives and experiences",
+    "sitelinks": 27,
+    "wikipedia_title": "Feminist_art",
+    "force_added": false,
+    "pageviews_12mo": 10046
+   },
+   {
+    "qid": "Q1430886",
+    "label": "child art",
+    "description": "art genre",
+    "sitelinks": 19,
+    "wikipedia_title": "Child_art",
+    "force_added": false,
+    "pageviews_12mo": 9045
+   },
+   {
+    "qid": "Q5448026",
+    "label": "Figure painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Figure_painting",
+    "force_added": true,
+    "pageviews_12mo": 9038
+   },
+   {
+    "qid": "Q16875701",
+    "label": "Animal painter",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Animal_painter",
+    "force_added": true,
+    "pageviews_12mo": 5350
+   },
+   {
+    "qid": "Q2094039",
+    "label": "surimono",
+    "description": "genre of Japanese woodblock print",
+    "sitelinks": 20,
+    "wikipedia_title": "Surimono",
+    "force_added": false,
+    "pageviews_12mo": 4294
+   }
+  ],
+  "medium": [
+   {
+    "qid": "Q219540",
+    "label": "chiaroscuro",
+    "description": "use of strong contrasts between light and dark, usually bold contrasts affecting a whole composition in art",
+    "sitelinks": 51,
+    "wikipedia_title": "Chiaroscuro",
+    "force_added": false,
+    "pageviews_12mo": 336779
+   },
+   {
+    "qid": "Q429659",
+    "label": "shellac",
+    "description": "spirit varnish produced from the resin secreted by lac insects on trees in the forests of India and Thailand",
+    "sitelinks": 51,
+    "wikipedia_title": "Shellac",
+    "force_added": false,
+    "pageviews_12mo": 223952
+   },
+   {
+    "qid": "Q134194",
+    "label": "fresco painting",
+    "description": "technique of mural painting executed upon freshly laid lime plaster",
+    "sitelinks": 83,
+    "wikipedia_title": "Fresco",
+    "force_added": false,
+    "pageviews_12mo": 196776
+   },
+   {
+    "qid": "Q204330",
+    "label": "gouache paint",
+    "description": "type of paint",
+    "sitelinks": 60,
+    "wikipedia_title": "Gouache",
+    "force_added": false,
+    "pageviews_12mo": 159094
+   },
+   {
+    "qid": "Q200034",
+    "label": "pointillism",
+    "description": "technique of painting with small, distinct dots",
+    "sitelinks": 59,
+    "wikipedia_title": "Pointillism",
+    "force_added": false,
+    "pageviews_12mo": 153964
+   },
+   {
+    "qid": "Q174705",
+    "label": "oil painting",
+    "description": "process of painting with pigments that are bound with a medium of drying oil",
+    "sitelinks": 74,
+    "wikipedia_title": "Oil_painting",
+    "force_added": false,
+    "pageviews_12mo": 126413
+   },
+   {
+    "qid": "Q219423",
+    "label": "Mural",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Mural",
+    "force_added": true,
+    "pageviews_12mo": 90281
+   },
+   {
+    "qid": "Q207849",
+    "label": "acrylic paint",
+    "description": "type of fast-drying paint that consists of pigments or dyes bound in an emulsion of acrylic",
+    "sitelinks": 46,
+    "wikipedia_title": "Acrylic_paint",
+    "force_added": false,
+    "pageviews_12mo": 86688
+   },
+   {
+    "qid": "Q50030",
+    "label": "watercolor",
+    "description": "practice of applying watercolor to a surface",
+    "sitelinks": 95,
+    "wikipedia_title": "Watercolor_painting",
+    "force_added": false,
+    "pageviews_12mo": 86509
+   },
+   {
+    "qid": "Q829298",
+    "label": "en plein air",
+    "description": "act of painting outdoors",
+    "sitelinks": 47,
+    "wikipedia_title": "En_plein_air",
+    "force_added": false,
+    "pageviews_12mo": 75608
+   },
+   {
+    "qid": "Q929186",
+    "label": "Gold leaf",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Gold_leaf",
+    "force_added": true,
+    "pageviews_12mo": 71584
+   },
+   {
+    "qid": "Q1464842",
+    "label": "tenebrism",
+    "description": "painting technique",
+    "sitelinks": 29,
+    "wikipedia_title": "Tenebrism",
+    "force_added": false,
+    "pageviews_12mo": 71320
+   },
+   {
+    "qid": "Q927860",
+    "label": "cephalopod ink",
+    "description": "dark pigment release",
+    "sitelinks": 17,
+    "wikipedia_title": "Cephalopod_ink",
+    "force_added": false,
+    "pageviews_12mo": 70405
+   },
+   {
+    "qid": "Q756712",
+    "label": "ink wash painting",
+    "description": "painting technique",
+    "sitelinks": 38,
+    "wikipedia_title": "Ink_wash_painting",
+    "force_added": false,
+    "pageviews_12mo": 68856
+   },
+   {
+    "qid": "Q421877",
+    "label": "dragon's blood",
+    "description": "painting material and natural resin",
+    "sitelinks": 24,
+    "wikipedia_title": "Dragon's_blood",
+    "force_added": false,
+    "pageviews_12mo": 64753
+   },
+   {
+    "qid": "Q10770146",
+    "label": "monochrome",
+    "description": "composed of one color",
+    "sitelinks": 27,
+    "wikipedia_title": "Monochrome",
+    "force_added": false,
+    "pageviews_12mo": 63579
+   },
+   {
+    "qid": "Q750197",
+    "label": "grisaille",
+    "description": "painting technique",
+    "sitelinks": 40,
+    "wikipedia_title": "Grisaille",
+    "force_added": false,
+    "pageviews_12mo": 61728
+   },
+   {
+    "qid": "Q189085",
+    "label": "Pastel",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Pastel",
+    "force_added": true,
+    "pageviews_12mo": 61432
+   },
+   {
+    "qid": "Q1514256",
+    "label": "gesso",
+    "description": "white priming or ground made of chalk, gypsum, burnt gypsum, zinc oxide, or whiting mixed with glue or occasionally casein, used to prepare wooden panels or other supports for painting, gilding, or other decorative processes",
+    "sitelinks": 23,
+    "wikipedia_title": "Gesso",
+    "force_added": false,
+    "pageviews_12mo": 59362
+   },
+   {
+    "qid": "Q210788",
+    "label": "sfumato",
+    "description": "painting technique with uncertain contours",
+    "sitelinks": 48,
+    "wikipedia_title": "Sfumato",
+    "force_added": false,
+    "pageviews_12mo": 57413
+   },
+   {
+    "qid": "Q308968",
+    "label": "encaustic painting",
+    "description": "artistic technique using encaustic paint",
+    "sitelinks": 46,
+    "wikipedia_title": "Encaustic_painting",
+    "force_added": false,
+    "pageviews_12mo": 56335
+   },
+   {
+    "qid": "Q1545200",
+    "label": "impasto",
+    "description": "painting technique",
+    "sitelinks": 34,
+    "wikipedia_title": "Impasto",
+    "force_added": false,
+    "pageviews_12mo": 51831
+   },
+   {
+    "qid": "Q1569360",
+    "label": "silverpoint",
+    "description": "drawing tool",
+    "sitelinks": 17,
+    "wikipedia_title": "Silverpoint",
+    "force_added": false,
+    "pageviews_12mo": 41700
+   },
+   {
+    "qid": "Q471835",
+    "label": "sgraffito",
+    "description": "technique used in plaster, glass, gold ground and ceramic decoration that involves scratching",
+    "sitelinks": 39,
+    "wikipedia_title": "Sgraffito",
+    "force_added": false,
+    "pageviews_12mo": 35522
+   },
+   {
+    "qid": "Q1856046",
+    "label": "wet-on-wet",
+    "description": "painting technique in which layers of wet paint are applied to previously administered layers of wet paint",
+    "sitelinks": 27,
+    "wikipedia_title": "Wet-on-wet",
+    "force_added": false,
+    "pageviews_12mo": 31447
+   },
+   {
+    "qid": "Q2609895",
+    "label": "rose madder",
+    "description": "artist's pigment synthesized from natural madder root extract",
+    "sitelinks": 9,
+    "wikipedia_title": "Rose_madder",
+    "force_added": false,
+    "pageviews_12mo": 28711
+   },
+   {
+    "qid": "Q11240146",
+    "label": "inkstick",
+    "description": "type of solid ink (India ink) used traditionally in several East Asian cultures for calligraphy and brush painting",
+    "sitelinks": 20,
+    "wikipedia_title": "Inkstick",
+    "force_added": false,
+    "pageviews_12mo": 24871
+   },
+   {
+    "qid": "Q1475424",
+    "label": "kneaded eraser",
+    "description": "pliable type of eraser",
+    "sitelinks": 18,
+    "wikipedia_title": "Kneaded_eraser",
+    "force_added": false,
+    "pageviews_12mo": 21024
+   },
+   {
+    "qid": "Q1456571",
+    "label": "alkyd",
+    "description": "painting implement",
+    "sitelinks": 19,
+    "wikipedia_title": "Alkyd",
+    "force_added": false,
+    "pageviews_12mo": 20573
+   },
+   {
+    "qid": "Q971298",
+    "label": "wood glue",
+    "description": "adhesive made of natural or synthetic raw materials for bonding wood and wood-based materials",
+    "sitelinks": 14,
+    "wikipedia_title": "Wood_glue",
+    "force_added": false,
+    "pageviews_12mo": 20303
+   },
+   {
+    "qid": "Q217213",
+    "label": "action painting",
+    "description": "style of painting",
+    "sitelinks": 34,
+    "wikipedia_title": "Action_painting",
+    "force_added": false,
+    "pageviews_12mo": 19824
+   },
+   {
+    "qid": "Q741226",
+    "label": "By\u014dbu",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "By\u014dbu",
+    "force_added": true,
+    "pageviews_12mo": 19810
+   },
+   {
+    "qid": "Q2066608",
+    "label": "spray painting",
+    "description": "painting technique where a device sprays a coating through the air onto a surface",
+    "sitelinks": 10,
+    "wikipedia_title": "Spray_painting",
+    "force_added": false,
+    "pageviews_12mo": 18421
+   },
+   {
+    "qid": "Q1640859",
+    "label": "stipple patterning",
+    "description": "method of creating a pattern; pattern of gunshot residue; patterns on the firearms grip",
+    "sitelinks": 8,
+    "wikipedia_title": "Stippling",
+    "force_added": false,
+    "pageviews_12mo": 18240
+   },
+   {
+    "qid": "Q744154",
+    "label": "illusionism",
+    "description": "art",
+    "sitelinks": 14,
+    "wikipedia_title": "Illusionism_(art)",
+    "force_added": false,
+    "pageviews_12mo": 15847
+   },
+   {
+    "qid": "Q1259130",
+    "label": "drip painting",
+    "description": "abstract art technique in which paint is dripped or poured on to the canvas",
+    "sitelinks": 16,
+    "wikipedia_title": "Drip_painting",
+    "force_added": false,
+    "pageviews_12mo": 15402
+   },
+   {
+    "qid": "Q3039121",
+    "label": "drapery",
+    "description": "depiction of the folds and woven patterns of loose-hanging clothing on the human form",
+    "sitelinks": 19,
+    "wikipedia_title": "Drapery",
+    "force_added": false,
+    "pageviews_12mo": 14642
+   },
+   {
+    "qid": "Q5581733",
+    "label": "Gongbi",
+    "description": "realist technique in Chinese painting",
+    "sitelinks": 8,
+    "wikipedia_title": "Gongbi",
+    "force_added": false,
+    "pageviews_12mo": 14168
+   },
+   {
+    "qid": "Q1434098",
+    "label": "walnut oil",
+    "description": "oil extracted from English walnuts",
+    "sitelinks": 24,
+    "wikipedia_title": "Walnut_oil",
+    "force_added": false,
+    "pageviews_12mo": 13268
+   },
+   {
+    "qid": "Q2188827",
+    "label": "Hanging scroll",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Hanging_scroll",
+    "force_added": true,
+    "pageviews_12mo": 13200
+   },
+   {
+    "qid": "Q941875",
+    "label": "Rayonism",
+    "description": "art movement",
+    "sitelinks": 27,
+    "wikipedia_title": "Rayonism",
+    "force_added": false,
+    "pageviews_12mo": 12453
+   },
+   {
+    "qid": "Q1073148",
+    "label": "Dancheong",
+    "description": "Korean traditional decorative coloring",
+    "sitelinks": 12,
+    "wikipedia_title": "Dancheong",
+    "force_added": false,
+    "pageviews_12mo": 11448
+   },
+   {
+    "qid": "Q494402",
+    "label": "Four Treasures of the Study",
+    "description": "a term used to refer to the ink brush, inkstick, paper and inkstone used in Chinese calligraphy calligraphy traditions",
+    "sitelinks": 19,
+    "wikipedia_title": "Four_Treasures_of_the_Study",
+    "force_added": false,
+    "pageviews_12mo": 11306
+   },
+   {
+    "qid": "Q1316673",
+    "label": "Reverse glass painting",
+    "description": "painting technique",
+    "sitelinks": 11,
+    "wikipedia_title": "Reverse_glass_painting",
+    "force_added": false,
+    "pageviews_12mo": 10850
+   },
+   {
+    "qid": "Q2121876",
+    "label": "Quadratura",
+    "description": "art",
+    "sitelinks": 19,
+    "wikipedia_title": "Illusionistic_ceiling_painting",
+    "force_added": false,
+    "pageviews_12mo": 10589
+   },
+   {
+    "qid": "Q1431523",
+    "label": "glaze",
+    "description": "transparent or semi-transparent coating",
+    "sitelinks": 28,
+    "wikipedia_title": "Glaze_(painting_technique)",
+    "force_added": false,
+    "pageviews_12mo": 10358
+   },
+   {
+    "qid": "Q1757003",
+    "label": "poppyseed oil",
+    "description": "oil from the seeds of Papaver somniferum",
+    "sitelinks": 15,
+    "wikipedia_title": "Poppyseed_oil",
+    "force_added": false,
+    "pageviews_12mo": 10302
+   },
+   {
+    "qid": "Q767912",
+    "label": "Canada balsam",
+    "description": "painting implement",
+    "sitelinks": 21,
+    "wikipedia_title": "Canada_balsam",
+    "force_added": false,
+    "pageviews_12mo": 10001
+   },
+   {
+    "qid": "Q2263612",
+    "label": "fresco-secco",
+    "description": "technique of painting a mural on dried plaster",
+    "sitelinks": 23,
+    "wikipedia_title": "Fresco-secco",
+    "force_added": false,
+    "pageviews_12mo": 9825
+   },
+   {
+    "qid": "Q1159870",
+    "label": "Luminism",
+    "description": "late-impressionist or neo-impressionist style in painting",
+    "sitelinks": 14,
+    "wikipedia_title": "Luminism_(Impressionism)",
+    "force_added": false,
+    "pageviews_12mo": 9671
+   },
+   {
+    "qid": "Q3083148",
+    "label": "Fudepen",
+    "description": "cartridge-based writing instrument geared toward calligraphy",
+    "sitelinks": 11,
+    "wikipedia_title": "Fudepen",
+    "force_added": false,
+    "pageviews_12mo": 9448
+   },
+   {
+    "qid": "Q1469362",
+    "label": "wash technique",
+    "description": "visual arts technique",
+    "sitelinks": 21,
+    "wikipedia_title": "Wash_(visual_arts)",
+    "force_added": false,
+    "pageviews_12mo": 9044
+   },
+   {
+    "qid": "Q1543649",
+    "label": "grattage",
+    "description": "painting technique",
+    "sitelinks": 20,
+    "wikipedia_title": "Grattage",
+    "force_added": false,
+    "pageviews_12mo": 8105
+   },
+   {
+    "qid": "Q2812894",
+    "label": "acrylic painting technique",
+    "description": "techniques used in acrylic painting",
+    "sitelinks": 8,
+    "wikipedia_title": "Acrylic_painting_techniques",
+    "force_added": false,
+    "pageviews_12mo": 7630
+   },
+   {
+    "qid": "Q5647631",
+    "label": "Handscroll",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Handscroll",
+    "force_added": true,
+    "pageviews_12mo": 7478
+   },
+   {
+    "qid": "Q1786320",
+    "label": "ox gall",
+    "description": "bile from the gallbladder of a cow",
+    "sitelinks": 9,
+    "wikipedia_title": "Ox_gall",
+    "force_added": false,
+    "pageviews_12mo": 7191
+   },
+   {
+    "qid": "Q1753840",
+    "label": "repoussoir",
+    "description": "object along the right or left foreground of a painting",
+    "sitelinks": 9,
+    "wikipedia_title": "Repoussoir",
+    "force_added": false,
+    "pageviews_12mo": 6860
+   },
+   {
+    "qid": "Q633315",
+    "label": "drybrush",
+    "description": "painting technique",
+    "sitelinks": 8,
+    "wikipedia_title": "Drybrush",
+    "force_added": false,
+    "pageviews_12mo": 6756
+   },
+   {
+    "qid": "Q188968",
+    "label": "perspective",
+    "description": "approximate representation, on a flat surface (such as paper), of an image as it is seen by the eye",
+    "sitelinks": 17,
+    "wikipedia_title": "Perspective_(visual)",
+    "force_added": false,
+    "pageviews_12mo": 6325
+   },
+   {
+    "qid": "Q623102",
+    "label": "watercolor paper",
+    "description": "special paper for watercolors",
+    "sitelinks": 11,
+    "wikipedia_title": "Watercolor_paper",
+    "force_added": false,
+    "pageviews_12mo": 6106
+   },
+   {
+    "qid": "Q1737943",
+    "label": "stretcher",
+    "description": "wooden frame to hold canvas taut, as for a painting surface",
+    "sitelinks": 11,
+    "wikipedia_title": "Stretcher_bar",
+    "force_added": false,
+    "pageviews_12mo": 4941
+   },
+   {
+    "qid": "Q10827799",
+    "label": "Silk painting",
+    "description": "(force-added)",
+    "sitelinks": null,
+    "wikipedia_title": "Silk_painting",
+    "force_added": true,
+    "pageviews_12mo": 4883
+   },
+   {
+    "qid": "Q649586",
+    "label": "oil drying agent",
+    "description": "painting implement",
+    "sitelinks": 15,
+    "wikipedia_title": "Oil_drying_agent",
+    "force_added": false,
+    "pageviews_12mo": 4286
+   },
+   {
+    "qid": "Q1027977",
+    "label": "camaieu technique",
+    "description": "technique that employs two or three tints of a single color, other than gray, to create a monochromatic image",
+    "sitelinks": 10,
+    "wikipedia_title": "Cama\u00efeu",
+    "force_added": false,
+    "pageviews_12mo": 4209
+   },
+   {
+    "qid": "Q1287518",
+    "label": "shaped canvas",
+    "description": "type of canvas and painting that is shaped differently from the default rectangular form",
+    "sitelinks": 7,
+    "wikipedia_title": "Shaped_canvas",
+    "force_added": false,
+    "pageviews_12mo": 3232
+   },
+   {
+    "qid": "Q1421953",
+    "label": "fixative",
+    "description": "adhesive or consolidant applied to a friable pigment coating in order to fix it to the substrate or prevent crumbling",
+    "sitelinks": 15,
+    "wikipedia_title": "Fixative_(drawing)",
+    "force_added": false,
+    "pageviews_12mo": 2297
+   },
+   {
+    "qid": "Q28951616",
+    "label": "tempera painting",
+    "description": "painting executed with pigment ground in a water-miscible medium",
+    "sitelinks": 12,
+    "wikipedia_title": "Tempera_painting",
+    "force_added": false,
+    "pageviews_12mo": 1487
+   }
+  ]
+ }
+}
