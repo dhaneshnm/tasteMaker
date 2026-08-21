@@ -10,10 +10,23 @@ module Pool
   class Curator
     class Unmeetable < StandardError; end
 
-    TARGET = 2_000
+    # decisions/0016 targeted 2,000 -> 3,000, additive. Measured against the
+    # real mirrors (story 0026 curation run): MAX_REGION_SHARE=0.25 caps
+    # europe/south_asia/east_asia at floor(0.25*TARGET) each, and the CC0
+    # collections these four museums hold have almost no North American
+    # painting stock (531 total, pinned + new, hard ceiling) and little in
+    # the remaining regions combined (~76) — so pool size is bounded by
+    # `0.75*TARGET + min(607, 0.25*TARGET)`, which equals TARGET only up to
+    # ~2,428. 3,000 is mathematically unreachable without loosening the
+    # region cap that exists specifically to prevent monoculture (persona
+    # 3's complaint) — decisions/0016 falsification 1, logged there and in
+    # specs/0026-the-wider-pool/plan.md Deviations. TARGET = 2,300 is the
+    # additive ceiling with margin, not a swap: every 2,000 pinned works
+    # ship unchanged, per Jordan's contract.
+    TARGET = 2_300
     SEED = 1889 # the house shuffle seed, from db/seeds.rb
 
-    MAX_PER_ARTIST   = 5     # 0.25%. Today's ceiling is 3 of 110 = 2.7%.
+    MAX_PER_ARTIST   = 5     # 0.22% at 2,300. Today's ceiling is 3 of 110 = 2.7%.
     MAX_SOURCE_SHARE = 0.50  # no museum owns the pool
     # No tradition owns it either. Without this the range floor is met by
     # draining whichever non-Western collection is deepest — the first run came
@@ -29,14 +42,22 @@ module Pool
     # Story 0019: what the recognizable-name stage actually managed, per name,
     # and any museum slug two names' alias sets both claimed.
     attr_reader :recognizable, :collisions
+    # Story 0026: per-theme want/took/shortfall, keyed by theme label.
+    attr_reader :themes
 
     # `resolver` is called on a candidate the moment it is about to be taken,
     # and may veto it. The Met needs this: its CSV carries no image URL and no
     # dimensions, so whether a plate exists at all is only knowable per work.
     # Resolving lazily means a missing photograph costs one API call and the
     # next candidate takes its place — no backfill pass, no silent shortfall.
-    def initialize(candidates, target: TARGET, resolver: nil)
+    #
+    # `pinned`: story 0026. Candidates built from the PREVIOUS committed
+    # manifest's own rows (verbatim field values, not a mirror re-lookup) —
+    # taken first, unconditionally, never through the resolver. See `pin!`.
+    def initialize(candidates, target: TARGET, resolver: nil, pinned: [])
       @candidates = candidates
+      @pinned = pinned
+      @pinned_identities = Set.new(pinned.map(&:identity))
       @target = target
       @resolver = resolver
       @unresolvable = Set.new
@@ -49,14 +70,17 @@ module Pool
       @rejected = Hash.new(0)
       @recognizable = {}
       @collisions = []
+      @themes = {}
     end
 
     def curate!
-      pool = dedup(reject_unusable(@candidates))
+      pool = dedup(@pinned + reject_unusable(@candidates))
       raise Unmeetable, "only #{pool.size} usable candidates for a target of #{@target}" if pool.size < @target
 
+      pin!(pool)
       queue = ordered(pool)
 
+      fill_themes(queue)
       fill_recognizable(queue)
       fill_scarce_regions(queue)
       fill(queue, floor(MIN_POST_1900)) { |c| c.year.to_i >= 1900 }
@@ -95,15 +119,20 @@ module Pool
 
     # Two museums holding the same painting is one painting. The copy carrying
     # museum text wins, then the larger plate: a mute duplicate is worth less
-    # than one a reader can read.
+    # than one a reader can read. A pinned copy wins outright, before either
+    # tiebreak — otherwise another museum's copy of a pinned painting (a
+    # different `identity`, same `dedup_key`) can win the group and the same
+    # painting ships twice, once under each identity (story 0026 eng review).
     def dedup(candidates)
       candidates.group_by(&:dedup_key).map do |_, group|
         next group.first if group.one?
 
         @rejected[:duplicate] += group.size - 1
-        group.max_by { |c| [ c.text? ? 1 : 0, c.longest_edge ] }
+        group.max_by { |c| [ pinned?(c) ? 1 : 0, c.text? ? 1 : 0, c.longest_edge ] }
       end
     end
+
+    def pinned?(candidate) = @pinned_identities.include?(candidate.identity)
 
     # Text-bearing first, then the bigger plate, over a stable shuffle so the
     # pool is reproducible run to run.
@@ -114,9 +143,18 @@ module Pool
 
     # --- selection ------------------------------------------------------
 
-    def take(candidate)
+    # `resolve: false` (pins only): the plate is already cached in Active
+    # Storage locally and on the prod volume, so an upstream URL dying now is
+    # not evidence the work should drop — skipping the resolver call also
+    # deletes ~2,000 HEAD requests + 167 Met API calls per curate run. This
+    # assumes the plate really was cached; a pin whose ORIGINAL seed silently
+    # failed to attach an image (`db/seeds.rb`'s fetch-failure path warns and
+    # continues rather than raising) has no path back to detection through
+    # this pipeline — named risk, not built, in IDEAS.md Inbox (code review,
+    # story 0026).
+    def take(candidate, resolve: true)
       return false unless room_for?(candidate)
-      return false unless resolved?(candidate)
+      return false if resolve && !resolved?(candidate)
 
       @selected << candidate
       @taken << candidate.identity
@@ -126,6 +164,12 @@ module Pool
       @highlights += 1 if candidate.highlight?
       true
     end
+
+    # Story 0026: a receipt-counting stage (`fill_themes`, `fill_recognizable`)
+    # needs to credit an already-pinned identity toward its own tally without
+    # re-spending a `take` on it — `take` itself already no-ops for a taken
+    # identity via `room_for?`, but returns `false`, which would undercount.
+    def count_or_take(candidate) = @taken.include?(candidate.identity) || take(candidate)
 
     # Asked once per candidate that has already cleared every cap, so the cost
     # is one request per work that actually enters the pool. A well-formed URL
@@ -151,6 +195,53 @@ module Pool
         (!candidate.highlight? || @highlights < highlight_target)
     end
 
+    # Story 0026 step 2 — Jordan's contract: every published day and every
+    # favorite points at one of these, so none may vanish in a re-curation.
+    # Taken first, unconditionally, before any fill stage claims a cap slot —
+    # at any TARGET >= the pinned works' own original 2,000, no cap can bind
+    # against candidates that already lived inside those OLD, smaller caps,
+    # so this should never raise in practice. If it ever does, that is a
+    # structural break in the contract, not a shortfall to report and move
+    # past: this codebase carries no deny-list carve-out for a pinned work,
+    # so every failure here is fatal, named.
+    # `pool` is post-`dedup` — checked so a pinned identity that lost a
+    # dedup collision (which should be structurally impossible: pinned
+    # candidates already survived one dedup pass in the curation that
+    # originally selected them, so two of them cannot share a `dedup_key`
+    # today unless that key's own definition changed — story 0019's C3
+    # already changed it once) is a fatal failure here too, not a silent
+    # `take` on an object dedup already discarded (code review, story 0026).
+    def pin!(pool)
+      survived = pool.map(&:identity).to_set
+      failed = @pinned.reject { |candidate| survived.include?(candidate.identity) && take(candidate, resolve: false) }
+      return if failed.empty?
+
+      raise Unmeetable, "#{failed.size} pinned work(s) could not be placed: " +
+        failed.first(10).map { |c| "#{c.source}/#{c.source_id}" }.join(", ")
+    end
+
+    # Story 0026 step 3 — the demand stage. `queue` is already ordered
+    # description-bearing-first (`ordered`), so iterating it in place gives
+    # each theme the same "text-bearing before blurbless" priority the plan
+    # asks for, with no extra sort. `want` is an absolute floor on the whole
+    # pool (see `Pool::ThemeTargets`), so a pinned identity already matching
+    # the theme counts toward it without spending a `take` — same fix as
+    # `fill_recognizable`'s receipt (eng review), for the same reason.
+    def fill_themes(queue)
+      @themes = {}
+      Pool::ThemeTargets::TABLE.each do |name, kind, values, want|
+        matcher = Pool::ThemeTargets.matcher_for(kind, values)
+        took = 0
+        queue.each do |c|
+          break if took >= want
+          next unless matcher.call(c)
+
+          took += 1 if count_or_take(c)
+        end
+        @themes[name] = { want: want, took: took, shortfall: [ want - took, 0 ].max }
+      end
+    end
+
     # Story 0019. The names a visitor already knows, taken FIRST — before
     # anything else claims a slot.
     #
@@ -167,6 +258,13 @@ module Pool
     # and `pool:coverage` prints by how much. That is also why no TARGET growth
     # is needed: this substitutes recognizable Europeans for arbitrary ones
     # inside Europe's existing 25% budget rather than adding to it.
+    #
+    # Story 0026: `queue` now includes pinned works, so `match.works`/`total`/
+    # `pages` correctly count them. `take(candidate)` no-ops for an
+    # already-pinned identity (room_for? sees it in `@taken`) — counted via
+    # `@taken.include?` instead, so a name's coverage receipt reflects what is
+    # actually in the pool, not just what this stage newly added (eng review:
+    # under pinning, `taken` read ~0 for every name without this).
     def fill_recognizable(queue)
       @recognizable = {}
       @collisions = []
@@ -178,7 +276,7 @@ module Pool
         match.works.each do |candidate|
           break if taken >= Recognizable::DEPTH
 
-          taken += 1 if take(candidate)
+          taken += 1 if count_or_take(candidate)
         end
         @recognizable[match.name] = { taken:, available: match.total, pages: match.pages,
                                       primary_slug: match.primary_slug }

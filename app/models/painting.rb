@@ -66,6 +66,12 @@ class Painting < ApplicationRecord
     # report lists them, a human reads it.
     "China", "Japan", "Islamic", "Tibet", "India", "Korea", "Nepal", "Egypt",
     "Teotihuacan", "Chancay", "Gujarati",
+    # Story 0026 audit: AIC's own convention for many Native American works
+    # is a tribal-nation attribution, not an individual maker — "Cheyenne"
+    # (aic/182617, a painted tipi curtain) and "Lakota" (aic/122887, a Sun
+    # Dance scene) are the nation credited as maker, same shape as "China"
+    # or "Japan" above, not a person named Cheyenne or Lakota.
+    "Cheyenne", "Lakota",
     "Italy", "Ethiopia", "Sweden", "United States", "Mughal",
     "Italian", "French", "German", "Spanish", "Dutch", "Flemish", "British", "English", "Austrian",
     "Ancient Egyptian", "Probably Mexico", "Mewar school", "Painter: Mughal school",
@@ -127,11 +133,14 @@ class Painting < ApplicationRecord
 
   scope :feed_ordered, -> { order(:feed_order, :id) }
 
-  # Story 0022 Release 1. `genre` and `period` are nullable string columns
-  # (plan D1) carrying the canonical DISPLAY value ("19th century",
-  # "Portrait") — never a slug. `genre` has no data source until Release 2;
-  # `period` is written at seed time by `Pool::PeriodBucket`.
-  FACETS = %i[genre period].freeze
+  # Story 0022 Release 1 (genre, period), extended by story 0024 (tradition).
+  # Each is a nullable string column carrying the canonical DISPLAY value
+  # ("19th century", "Portrait", "Mughal Painting") — never a slug. `genre`
+  # has no data source until Release 2; `period` and `tradition` are written
+  # at seed time by `Pool::PeriodBucket` and `Pool::Tradition`. Order here IS
+  # the `/feed` display order (`PaintingsController#index` and the view both
+  # iterate this array), not just an allowlist.
+  FACETS = %i[period genre tradition].freeze
 
   # A value with fewer works than this renders no filter control — the
   # story's own rule ("a facet with 1 work behind it is a dead end dressed
@@ -153,10 +162,15 @@ class Painting < ApplicationRecord
 
   # The subset of `facet_counts` that clears `MIN_FACET_WORKS`, ordered for
   # display: numeric for period ("10th century" must sort before "9th
-  # century", which string order gets backwards), alphabetical for genre
-  # until Release 2 decides its own order (plan design review pass 1).
-  def self.displayed_facet_values(facet)
-    values = facet_counts(facet).select { |_, count| count >= MIN_FACET_WORKS }.keys
+  # century", which string order gets backwards), alphabetical for every
+  # other facet (genre, tradition). `counts:` lets a caller pass an
+  # already-fetched `facet_counts(facet)` result (0024 code review: the
+  # controller resolves a slug AND lists display values for the same facet
+  # in one request — without this, that was two independent `GROUP BY`
+  # queries per facet, the exact duplicate-`COUNT(*)` shape story 0020
+  # already fixed once for `Painting.count`, just not here).
+  def self.displayed_facet_values(facet, counts: facet_counts(facet))
+    values = counts.select { |_, count| count >= MIN_FACET_WORKS }.keys
     facet == :period ? values.sort_by { |value| value[/\d+/].to_i } : values.sort
   end
 
@@ -168,11 +182,12 @@ class Painting < ApplicationRecord
   end
 
   # A URL slug back to the canonical value it names, or nil for a blank,
-  # unknown, or stale slug — never a 500, and never a guess.
-  def self.resolve_facet_slug(facet, slug)
+  # unknown, or stale slug — never a 500, and never a guess. `counts:` — see
+  # `displayed_facet_values` above.
+  def self.resolve_facet_slug(facet, slug, counts: facet_counts(facet))
     return nil if slug.blank?
 
-    facet_counts(facet).each_key.find { |value| facet_slug(value) == slug }
+    counts.each_key.find { |value| facet_slug(value) == slug }
   end
 
   # The museums actually in the pool, heaviest first. The gallery's closing line

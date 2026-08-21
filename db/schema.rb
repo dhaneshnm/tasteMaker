@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_19_210654) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_20_163550) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -96,12 +96,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_19_210654) do
     t.string "source", null: false
     t.integer "source_id"
     t.string "title"
+    t.string "tradition"
     t.datetime "updated_at", null: false
     t.index ["artist_slug"], name: "index_paintings_on_artist_slug"
     t.index ["feed_order"], name: "index_paintings_on_feed_order"
     t.index ["genre"], name: "index_paintings_on_genre"
     t.index ["period"], name: "index_paintings_on_period"
     t.index ["source", "source_id"], name: "index_paintings_on_source_and_source_id", unique: true
+    t.index ["tradition"], name: "index_paintings_on_tradition"
   end
 
   create_table "users", force: :cascade do |t|

@@ -1,20 +1,20 @@
 require "test_helper"
 
-# Story 0022 Release 1 — the filter machinery on /feed. Genre stays out of
-# these fixtures on purpose where a test doesn't need it: no genre data
-# exists in the real pool until Release 2, and a test that only ever sets
-# genre would prove nothing about the byte-identical-except-period-row claim.
+# Story 0022 Release 1 — the filter machinery on /feed, extended by story
+# 0024 (tradition). Genre and tradition stay out of fixtures where a test
+# doesn't need them: a test that only ever sets one facet proves nothing
+# about the byte-identical-except-active-rows claim.
 class FeedFilterTest < ActionDispatch::IntegrationTest
   behind_the_wall!
 
   MIN = Painting::MIN_FACET_WORKS
 
-  def create_paintings(count, source_id_start:, period: nil, genre: nil, **attrs)
+  def create_paintings(count, source_id_start:, period: nil, genre: nil, tradition: nil, **attrs)
     count.times do |i|
       Painting.create!(
         source: "met", source_id: source_id_start + i, title: "Work #{source_id_start + i}",
         image_url_800: paintings(:woodcut).image_url_800,
-        period: period, genre: genre, **attrs
+        period: period, genre: genre, tradition: tradition, **attrs
       )
     end
   end
@@ -104,6 +104,84 @@ class FeedFilterTest < ActionDispatch::IntegrationTest
     register_device
     get feed_path(period: "17th-century")
 
+    assert_response :success
+    assert_select ".masthead__aside", text: "#{MIN} works · Mia"
+  end
+
+  # Story 0024 — the tradition facet.
+
+  test "a tradition facet clearing the floor renders its row and filters" do
+    create_paintings(MIN, source_id_start: 8_900, tradition: "Mughal Painting")
+    create_paintings(3, source_id_start: 8_950, tradition: "Rajput Painting")
+
+    get feed_path
+    assert_select "nav.facets[aria-label='Filter by tradition']" do
+      assert_select "a", text: "Mughal Painting"
+      assert_select "a", text: "Rajput Painting", count: 0
+    end
+
+    get feed_path(tradition: "mughal-painting")
+    assert_response :success
+    assert_select ".masthead__aside", text: "#{MIN} works · Mia"
+  end
+
+  test "unknown tradition slug is unfiltered, not a 500" do
+    get feed_path(tradition: "not-a-real-tradition")
+
+    assert_response :success
+    assert_select ".facets", count: 0
+  end
+
+  test "all three facets combine: tradition AND period AND genre" do
+    create_paintings(MIN, source_id_start: 9_000,
+      tradition: "Chinese Painting", period: "17th century", genre: "Landscape")
+    create_paintings(MIN, source_id_start: 9_050,
+      tradition: "Chinese Painting", period: "17th century", genre: "Portrait")
+
+    get feed_path(tradition: "chinese-painting", period: "17th-century", genre: "landscape")
+    assert_response :success
+    assert_select ".masthead__aside", text: "#{MIN} works · Mia"
+  end
+
+  test "the pagination frame src preserves the tradition filter alongside the others" do
+    create_paintings(Painting::MIN_FACET_WORKS + PaintingsController::PER_PAGE,
+      source_id_start: 9_100, tradition: "Japanese Painting", period: "18th century")
+
+    get feed_path(tradition: "japanese-painting", period: "18th-century")
+
+    assert_response :success
+    frame = css_select("turbo-frame[src]").first
+    assert frame, "expected a lazy-load frame for the next page"
+    assert_match "tradition=japanese-painting", frame["src"]
+    assert_match "period=18th-century", frame["src"]
+  end
+
+  test "AND-to-zero including tradition renders the empty state, not a silent drop" do
+    create_paintings(MIN, source_id_start: 9_200, tradition: "Korean Painting", genre: "Portrait")
+    create_paintings(MIN, source_id_start: 9_250, tradition: "Chinese Painting", genre: "Landscape")
+
+    get feed_path(tradition: "korean-painting", genre: "landscape")
+
+    assert_response :success
+    assert_select ".page--empty" do
+      assert_select "p.coda__line", text: "Nothing here wears both."
+    end
+    assert_select ".post", count: 0
+  end
+
+  # Story 0025's one vocabulary addition. The machinery is value-agnostic —
+  # this pins that the new value rides it end to end: chip when it clears
+  # the floor, filtering when tapped, slug round-trip via `facet_slug`.
+  test "the Flowers value renders its chip and filters, like any other genre" do
+    create_paintings(MIN, source_id_start: 9_300, genre: "Flowers")
+    create_paintings(MIN, source_id_start: 9_350, genre: "Portrait")
+
+    get feed_path
+    assert_select "nav.facets[aria-label='Filter by genre']" do
+      assert_select "a", text: "Flowers"
+    end
+
+    get feed_path(genre: "flowers")
     assert_response :success
     assert_select ".masthead__aside", text: "#{MIN} works · Mia"
   end

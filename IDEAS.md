@@ -21,6 +21,9 @@ feed BET.md's conversation threshold — track in `user-research/`, never as que
 
 ## Inbox
 
+- 2026-08-20 — Facet-usage receipt: instrument/query whether readers tap ?genre= / ?tradition= before the expansion story starts (0025 eng review F12, outside voice — every facet success signal so far is an input metric)
+- 2026-08-20 — A pinned work whose plate download previously failed (image_url_full present, `image.attached?` false — `db/seeds.rb`'s fetch failure path warns and moves on) has no path back to detection: `pool:curate`'s pins skip the plate resolver by design (0026, plates "already cached"), so a work that was NEVER actually cached ships silently forever. Not built now — the deliberate skip is what removed ~2,000 HEAD requests/run, and no such row is confirmed to exist today (0026 code review, latent not observed). If a blank-plate report ever surfaces a pinned work, this is the first place to look; a fix would be a LOCAL (no-network) `image.attached?` check against the live DB before skipping, not a full re-verify.
+
 ### Canonicalise the artist string so one artist is one page — Better (range)
 
 Source: `specs/0019-the-coverage-fill/plan.md` C4b, 2026-08-19. Deferred there on purpose.

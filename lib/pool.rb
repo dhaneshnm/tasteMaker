@@ -148,6 +148,24 @@ module Pool
     "modern and contemporary art" => nil
   }.freeze
 
+  # Whole-word, case-sensitive-by-default match: "Indiana" is not India, an
+  # incantation is not Inca. Used by `region_for`/`place_shaped?` below —
+  # story 0024's simplify found this exact regex idiom copied three times,
+  # here and once in `Pool::Tradition`. Only two calls actually route
+  # through this method: `Pool::Tradition::PATTERNS` deliberately keeps its
+  # OWN, separately-compiled copy of the same `\b`-anchored,
+  # case-insensitive shape rather than calling this per candidate — it
+  # precompiles once at load time instead of rebuilding a Regexp on every
+  # call (eng review: ~15,000 calls per seed/backfill run). A fix to the
+  # matching rule here (escaping, anchoring) does NOT reach
+  # `Pool::Tradition` — that file's `PATTERNS` needs the same fix applied
+  # separately.
+  def self.word_match?(haystack, term, case_insensitive: false)
+    return haystack.match?(/\b#{Regexp.escape(term)}\b/i) if case_insensitive
+
+    haystack.match?(/\b#{Regexp.escape(term)}\b/)
+  end
+
   def self.region_for(country:, culture:, department:, continent: nil)
     haystack = [ country, culture, continent ].compact.join(" ").downcase
     dept = department.to_s.downcase
@@ -161,7 +179,7 @@ module Pool
 
     # Whole words only: "Indiana" is not India, and an incantation is not Inca.
     PLACES.each do |region, terms|
-      return region if terms.any? { |t| haystack.match?(/\b#{Regexp.escape(t)}\b/) }
+      return region if terms.any? { |t| word_match?(haystack, t) }
     end
 
     # An ambiguous department is better than nothing once the place has failed.
@@ -206,7 +224,7 @@ module Pool
     return false if tokens.empty? || tokens.size > 4
 
     tokens.any? { |token| PLACE_WORDS.include?(token) } ||
-      PLACE_WORDS.any? { |place| place.include?(" ") && base.downcase.match?(/\b#{Regexp.escape(place)}\b/) }
+      PLACE_WORDS.any? { |place| place.include?(" ") && word_match?(base.downcase, place) }
   end
 
   # Museum date fields are prose ("c. 1570–75", "Edo period (1615–1868)"). The

@@ -126,6 +126,8 @@ module Pool
 
         #{range_note}
 
+        #{themes_section}
+
         #{recognizable_section}
 
         #{place_as_artist_section}
@@ -137,6 +139,75 @@ module Pool
     end
 
     private
+
+    # Story 0026. The demand stage's want/took/shortfall, per theme — the
+    # 0019 report idiom (below) extended, and the artifact decisions/0016
+    # prediction 2 (Sep 20) is read against. `want` is an absolute floor on
+    # the whole pool, so `took` can exceed the newly-added count when a
+    # theme already had pinned stock.
+    # Curation-time snapshot: what `fill_themes` itself achieved, before
+    # `pool:genre_fill` runs. Accurate for the 4 tradition-route themes
+    # (Persian/Thangka/Ukiyo-e/Madhubani — `Tradition.from_strings` never
+    # depends on a genre_fill-written field), but can overstate the 6
+    # genre-route themes: genre_fill's native museum tags legitimately
+    # outrank a title-inferred value per the seed ladder (story 0025), so a
+    # candidate `fill_themes` counted as e.g. "Vanitas" can ship tagged
+    # "Still Life" instead. `Report.theme_recount_section` (below) is the
+    # authoritative post-pipeline number — code review, story 0026.
+    def themes_section
+      themes = @curator.themes
+      return "" if themes.blank?
+
+      lines = [ "## Theme quotas at curation time (story 0026)", "" ]
+      lines << "| Theme | Want | Took | Shortfall |"
+      lines << "|---|---:|---:|---:|"
+      themes.each do |name, r|
+        lines << "| #{name} | #{r[:want]} | #{r[:took]} | #{r[:shortfall].zero? ? "—" : r[:shortfall]} |"
+      end
+      short = themes.select { |_, r| r[:shortfall].positive? }
+      if short.any?
+        lines << ""
+        lines << "**#{short.size} theme(s) short of their floor** — stock failed adjudication " \
+                 "(bad plates, wrong attribution) rather than the matcher missing candidates; " \
+                 "this is decisions/0016 falsification 2, logged per-theme not papered over."
+      end
+      lines << ""
+      lines << "Genre-route counts above are curation-time only — run `bin/rails pool:genre_fill`, " \
+               "then `bin/rails pool:report` for the authoritative post-pipeline recount."
+      lines.join("\n")
+    end
+
+    # Story 0026, code review finding: `themes_section` above is a
+    # curation-time snapshot and can overstate a genre-route theme once
+    # `pool:genre_fill` reassigns a candidate's genre by native museum tag
+    # (tag > title, the seed ladder). This recomputes every theme from the
+    # COMMITTED MANIFEST through that same ladder — the number a reader
+    # would actually see — same idiom as `genre_section` reading live data
+    # instead of the curator. Class method: called from `pool:genre_fill`
+    # (to correct the report right after the pipeline step that can
+    # invalidate it) and `pool:report` (to print it standalone).
+    def self.theme_recount_section(manifest: Pool::MANIFEST)
+      rows = JSON.parse(manifest.read)
+
+      lines = [ "## Theme quotas, final (story 0026 — post pool:genre_fill)", "" ]
+      lines << "| Theme | Want | Have | Shortfall |"
+      lines << "|---|---:|---:|---:|"
+      short = []
+      Pool::ThemeTargets::TABLE.each do |name, kind, values, want|
+        values = Array(values)
+        have = rows.count { |row| values.include?(Pool::ThemeTargets.ladder_value_for(kind, row)) }
+        shortfall = [ want - have, 0 ].max
+        short << name if shortfall.positive?
+        lines << "| #{name} | #{want} | #{have} | #{shortfall.zero? ? "—" : shortfall} |"
+      end
+      if short.any?
+        lines << ""
+        lines << "**#{short.size} theme(s) short of their floor after the full pipeline** — " \
+                 "decisions/0016 falsification 2, logged here rather than only in the " \
+                 "curation-time table above (which can disagree once `genre_fill` reassigns a tag)."
+      end
+      lines.join("\n")
+    end
 
     # Story 0019. What the recognizable-name stage managed, and where it fell
     # short — a name the mirrors can only supply one work for gets one, and
