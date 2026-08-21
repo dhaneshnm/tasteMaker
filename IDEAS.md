@@ -21,6 +21,9 @@ feed BET.md's conversation threshold — track in `user-research/`, never as que
 
 ## Inbox
 
+- 2026-08-21 — Hand-curated "wings" on `/feed`: named tradition+period combos with a written line ("Mughal miniatures"). The 7-star from 0027's Chesky ladder; borders the New slot, needs evidence (0027 non-goals)
+- 2026-08-21 — Remember the last `/feed` filter per device. 0027 non-goal; no evidence anyone returns to a filter
+- 2026-08-21 — Pinned face per wing on `/feed/index` (admin picks the work that stands for Mughal/Portraits/…). 0027 ships curation-order-first as the face; pin only if a default embarrasses a wing (0027 plan step 1)
 - 2026-08-20 — Facet-usage receipt: instrument/query whether readers tap ?genre= / ?tradition= before the expansion story starts (0025 eng review F12, outside voice — every facet success signal so far is an input metric)
 - 2026-08-20 — A pinned work whose plate download previously failed (image_url_full present, `image.attached?` false — `db/seeds.rb`'s fetch failure path warns and moves on) has no path back to detection: `pool:curate`'s pins skip the plate resolver by design (0026, plates "already cached"), so a work that was NEVER actually cached ships silently forever. Not built now — the deliberate skip is what removed ~2,000 HEAD requests/run, and no such row is confirmed to exist today (0026 code review, latent not observed). If a blank-plate report ever surfaces a pinned work, this is the first place to look; a fix would be a LOCAL (no-network) `image.attached?` check against the live DB before skipping, not a full re-verify.
 
@@ -101,6 +104,10 @@ later.
 
 ## Promoted
 
+- 2026-08-21 — `/feed` filter UI, owner-rated 3/11 → `specs/0027-the-wing-label`.
+  Same-day promotion: WIP slot open after 0025/0026, and the facet stories' three days
+  of work are unusable at 3/11. Target 6/11 — the 5 (one line, counts, scoped values,
+  floor 20, summary + clear) plus the 6 (editorial-voice label, named coverage).
 - 2026-08-20 — Tradition facet from culture strings → `specs/0024-the-named-traditions`.
   First of the three-story decisions/0016 sequence (findability → findability →
   expansion).
