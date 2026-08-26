@@ -102,8 +102,30 @@ class DailyPick < ApplicationRecord
   # `days_ahead` are parameters, not queries, so a caller already holding
   # the data (the admin controller, from its own loaded `@picks`) never
   # pays for a second round trip to ask the question.
-  def self.queue_healthy?(today_scheduled:, days_ahead:)
-    today_scheduled && days_ahead >= LOW_BUFFER_DAYS
+  def self.queue_healthy?(today_scheduled:, days_ahead:, push_ok: true)
+    today_scheduled && days_ahead >= LOW_BUFFER_DAYS && push_ok
+  end
+
+  # The noon knock's own grace window (story 0010, eng review outside voice
+  # #4). `push_ok:` defaults `true` so the admin queue-depth hint — which
+  # calls `queue_healthy?` with just the two original keywords — is
+  # unaffected; only `/queue-health`, the external monitor, passes the real
+  # value.
+  #
+  # Before 12:15 ET the job simply hasn't fired yet — that is not a failure.
+  # After it, a published day with no `notified_at` means the scheduler tick
+  # never ran at all (a Kamal deploy replacing the container across noon,
+  # with no catch-up and no Sentry event, since no job ever started). This
+  # deliberately does NOT also check `push_sent_count`: on a day with zero
+  # opted-in devices — every day so far — a correctly-run job legitimately
+  # sends and stamps zero, and that must read healthy, not alarm.
+  GRACE_WINDOW_END = "12:15"
+
+  def self.push_ok?(today_scheduled:)
+    return true unless today_scheduled
+    return true if Time.current.strftime("%H:%M") < GRACE_WINDOW_END
+
+    current&.notified_at.present?
   end
 
   # Every painting that already has a day, or will once `pick` (if given)

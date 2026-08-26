@@ -221,6 +221,26 @@ class ApplicationController < ActionController::Base
       native_shell_version.present?
     end
 
+    # The push toggle's own version gate (story 0010, eng review finding 5).
+    # The in-review 1.0 binary carries no push code at all, so presence alone
+    # (bridge_capable_shell?) is not enough here — this story bumps
+    # MARKETING_VERSION to 1.1 (Config/Shared.xcconfig) specifically so a
+    # push-capable shell is distinguishable from every 1.0 already installed
+    # or awaiting App Review.
+    #
+    # Gem::Version, not string compare — "1.10" must sort after "1.9". The UA
+    # is attacker-controlled and the regex behind native_shell_version allows
+    # multiple dots ("1..1"), which Gem::Version raises on even though it
+    # matches the pattern — rescued rather than trusted.
+    PUSH_CAPABLE_VERSION = Gem::Version.new("1.1")
+
+    def push_capable_shell?
+      return false unless bridge_capable_shell?
+      Gem::Version.new(native_shell_version) >= PUSH_CAPABLE_VERSION
+    rescue ArgumentError
+      false
+    end
+
     # A gated page that still revalidates: private (Thruster must not hold a
     # gated body — a shared cache entry outlives a sign-out), no-cache (every
     # request revalidates), expressed via `extras` because Rails' no_cache

@@ -131,5 +131,36 @@
     <%= render "sessions/doors" %>
   <% end %>
 
+  <%# ---- the daily knock (story 0010) --------------------------------------
+      Device-scoped, not state-scoped — the same reason `@push_capable` asks
+      `current_device` directly rather than `@state`. Renders for :account and
+      :device alike, whichever one holds a Device row on this phone; nothing
+      for :shell or :signed_out, which have no row to carry a token.
+
+      COPY BELOW IS A PLACEHOLDER (build flow step 7 — owner input, blocks
+      ship, not implementation). It must not read as finished editorial
+      voice; it is deliberately marked so nobody mistakes it for real copy. %>
+  <% if @push_capable %>
+    <% if current_device.apns_token.present? %>
+      <p class="coda__note">[OWNER COPY NEEDED] The daily knock is on.</p>
+      <div class="corner__doors">
+        <%= button_to "[OWNER COPY] Turn off", push_registration_path, method: :delete,
+              class: "caps-link push__disable", form_class: "push__form" %>
+      </div>
+    <% else %>
+      <p class="coda__note">[OWNER COPY NEEDED] One notification, once a day, for today's artwork.</p>
+      <div class="corner__doors">
+        <%# Native only — the shell intercepts this navigation
+            (PushRouteDecisionHandler) before it becomes a request; the
+            `you/push/enable` route itself only ever answers a stray browser
+            hit with a harmless redirect back here. Same `turbo: false` idiom
+            as `sessions/_doors`'s native branch — the shell's route decision
+            handlers hook into Turbo's own navigation, not a plain link. %>
+        <%= link_to "[OWNER COPY] Get the daily knock", push_enable_path,
+              class: "caps-link push__enable", data: { turbo: false } %>
+      </div>
+    <% end %>
+  <% end %>
+
   <%= render "shared/legal" %>
 </main>

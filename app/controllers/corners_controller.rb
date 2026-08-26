@@ -80,6 +80,14 @@ class CornersController < ApplicationController
     # claim into and registration retries on the next foreground; "not ready"
     # is a truer thing to show than a door.
     @doors = @state == :signed_out || (@state == :device && bridge_capable_shell?)
+
+    # The push toggle (story 0010). Device-scoped, not identity-scoped: it
+    # asks current_device directly rather than @state, because a signed-in
+    # reader on this same phone (@state == :account) still owns the Device
+    # row's apns_token if one was ever registered here. Nil current_device —
+    # :shell (registration hasn't landed) or :signed_out (no device cookie at
+    # all) — renders nothing; there is no row to hold a token (finding 2).
+    @push_capable = current_device.present? && push_capable_shell?
   end
 
   private

@@ -81,6 +81,15 @@ Rails.application.routes.draw do
   # launch and receives the signed device cookie every later request rides on.
   post "device/registrations" => "device_registrations#create"
 
+  # The push opt-in (story 0010). POST is the shell's native call (enroll on
+  # tap, refresh on every cold launch); DELETE is the plain web Turbo form on
+  # /you. `you/push/enable` is what the invitation link points at — in a
+  # browser it just bounces back to /you; in the shell PushRouteDecisionHandler
+  # intercepts it before the request ever reaches Rails.
+  post   "device/push_registrations" => "push_registrations#create"
+  delete "device/push_registration"  => "push_registrations#destroy", as: :push_registration
+  get "you/push/enable" => redirect("/you"), as: :push_enable
+
   # The two pages App Store Connect requires by URL (story 0016). Served by a
   # controller that does NOT inherit ApplicationController — see PagesController
   # for why skipping the wall and the browser gate by name was not an option.

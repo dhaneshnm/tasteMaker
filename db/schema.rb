@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_20_163550) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_26_185316) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -43,7 +43,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_20_163550) do
     t.integer "auto_tier"
     t.text "blurb"
     t.datetime "created_at", null: false
+    t.datetime "notified_at"
     t.integer "painting_id", null: false
+    t.integer "push_sent_count"
     t.date "scheduled_on", null: false
     t.datetime "updated_at", null: false
     t.index ["painting_id"], name: "index_daily_picks_on_painting_id", unique: true
@@ -51,6 +53,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_20_163550) do
   end
 
   create_table "devices", force: :cascade do |t|
+    t.string "apns_token"
     t.datetime "claimed_at"
     t.datetime "created_at", null: false
     t.datetime "last_seen_at"

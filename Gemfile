@@ -52,6 +52,11 @@ gem "csv", "~> 3.3"
 # this unit of work; not added before there was a job that needed it.
 gem "solid_queue"
 
+# APNs HTTP/2 client with .p8 token auth built in (story 0010, decisions/0019).
+# The alternative is hand-rolling JWT + net-http2 — more code to review for
+# zero gain.
+gem "apnotic"
+
 # Error tracking — session gate 6, before the first external user
 # (decisions/0018). `test/integration/privacy_claims_test.rb` expects exactly
 # this: the gem lands the same commit as the privacy-page disclosure and the

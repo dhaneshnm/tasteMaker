@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Story 0010. `development` here; Xcode swaps this to `production`
+	     automatically at archive for App Store distribution, the same way
+	     CODE_SIGN_STYLE = Automatic already handles provisioning
+	     (Config/Shared.xcconfig). One key serves both — DailyPushJob picks
+	     the matching APNs host by Rails.env, not by anything in this file. -->
+	<key>aps-environment</key>
+	<string>development</string>
+</dict>
+</plist>
