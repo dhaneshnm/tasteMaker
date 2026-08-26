@@ -45,6 +45,19 @@ class FakeApnsConnection
     end
 end
 
+# /code-review, finding 1: `build_connection` used to run ahead of the
+# begin/rescue, so an incomplete `apns:` credentials block crashed the job
+# UNCAUGHT — before Sentry.capture_exception, before connection&.close, and
+# before push_sent_count ever got stamped. This subclass simulates that by
+# overriding `credentials` rather than stubbing (this codebase's idiom:
+# swap real state, not mock — Minitest 6 ships no minitest/mock).
+class DailyPushJobWithBrokenCredentials < DailyPushJob
+  private
+    def credentials
+      {}
+    end
+end
+
 class DailyPushJobTest < ActiveSupport::TestCase
   teardown { DailyPushJob.connection_override = nil }
 
@@ -132,6 +145,17 @@ class DailyPushJobTest < ActiveSupport::TestCase
     DailyPushJob.perform_now
 
     assert_equal 1, fake.pushed_tokens.size
+  end
+
+  test "a KeyError from incomplete credentials is caught inside the rescue, not raised past it" do
+    opt_in("a")
+    # No connection_override — this deliberately reaches the real
+    # build_connection path via the broken-credentials subclass above.
+
+    assert_nothing_raised { DailyPushJobWithBrokenCredentials.perform_now }
+    assert_equal 0, daily_picks(:today).reload.push_sent_count
+    assert daily_picks(:today).notified_at.present?,
+      "the claim stands, and now push_sent_count actually gets stamped 0 instead of staying nil forever"
   end
 
   test "a connection-level failure is caught, reports to Sentry, and stamps whatever already sent" do

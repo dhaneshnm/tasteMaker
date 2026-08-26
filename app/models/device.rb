@@ -22,11 +22,21 @@ class Device < ApplicationRecord
 
   # Find-or-create by a raw token, racing cold launches absorbed the same
   # way everywhere: two callers used to spell this rescue independently
-  # (device_registrations_controller.rb pre-extraction, push_registrations_controller.rb)
+  # (device_registrations_controller.rb, push_registrations_controller.rb)
   # — one home for it now (/simplify, reuse finding).
+  #
+  # Rescues BOTH races the uniqueness index can produce, not just one
+  # (/code-review, finding 3): a raw INSERT collision raises
+  # RecordNotUnique, but if the second request's own uniqueness-validation
+  # SELECT runs after the first request's row has already committed — a
+  # wider window than the raw-insert race — `create!` raises RecordInvalid
+  # instead, from the model's own `validates ... uniqueness: true`. Only
+  # rescuing the first left `POST /device/registrations` and
+  # `POST /device/push_registrations` with mode=enroll exposed to an
+  # unhandled 500 under that timing.
   def self.find_or_create_by_digest!(token)
     find_or_create_by!(token_digest: digest(token))
-  rescue ActiveRecord::RecordNotUnique
+  rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid
     find_by!(token_digest: digest(token))
   end
 

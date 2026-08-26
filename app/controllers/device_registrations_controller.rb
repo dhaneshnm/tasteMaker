@@ -8,9 +8,10 @@
 # reverse engineering. The named upgrade path is App Attest on this same
 # endpoint; the shape (register → cookie) would not change.
 #
-# The gate itself — secret check, forgery skip, rate limit — moved to
-# NativeEndpoint (story 0010 eng review): PushRegistrationsController answers
-# the same shape of caller and needed the same three lines.
+# The gate itself — secret check, forgery skip, rate limit, the device-token
+# shape guard — moved to NativeEndpoint (story 0010 eng review + /code-review):
+# PushRegistrationsController answers the same shape of caller and needed the
+# exact same lines.
 class DeviceRegistrationsController < ApplicationController
   include NativeEndpoint
 
@@ -18,17 +19,9 @@ class DeviceRegistrationsController < ApplicationController
     head :unauthorized and return unless valid_app_secret?
 
     token = params.require(:device_token)
-    # A UUID is 36 chars; a nested-hash param or a megabyte of junk is neither
-    # (security review F5: `params.require` happily returns a Parameters hash,
-    # and hexdigest raising TypeError on it is a 500 where a 400 belongs).
-    # No length floor — `params.require` already rejects blank.
-    head :bad_request and return unless token.is_a?(String) && token.length <= 64
-    begin
-      Device.find_or_create_by!(token_digest: Device.digest(token))
-    rescue ActiveRecord::RecordNotUnique
-      # Two cold launches racing — same idempotent outcome, same idiom
-      # favorites#create uses.
-    end
+    head :bad_request and return unless valid_device_token?(token)
+
+    Device.find_or_create_by_digest!(token)
 
     cookies.signed.permanent[:device] = {
       value: token, httponly: true, same_site: :lax,

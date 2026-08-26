@@ -34,7 +34,7 @@ class PushRegistrationsController < ApplicationController
     head :unauthorized and return unless valid_app_secret?
 
     device_token = params.require(:device_token)
-    head :bad_request and return unless device_token.is_a?(String) && device_token.length <= 64
+    head :bad_request and return unless valid_device_token?(device_token)
 
     mode = params[:mode]
     head :bad_request and return unless %w[enroll refresh].include?(mode)

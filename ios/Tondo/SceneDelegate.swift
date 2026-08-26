@@ -83,21 +83,41 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     //                    killed notifications in Settings stops being lied
     //                    to by an ON toggle on /you (outside voice #8).
     //
-    // Runs on every foreground, not gated like the device-identity retry
-    // above: `getNotificationSettings` is a local call, and the two branches
-    // it can take are each already idempotent, so there is no state to
-    // protect against calling this more than once.
+    // Acts only when `settings.authorizationStatus` differs from the last
+    // reconcile this process saw (`lastReconciledStatus`), not on every
+    // foreground unconditionally (/code-review, finding 8: an authorized
+    // reader who repeatedly opens/backgrounds/reopens the app was paying a
+    // full network round trip — and a slice of the shared 10/minute
+    // NativeEndpoint rate-limit budget — every single time, for no
+    // behavioral gain over a once-per-change check). The first foreground
+    // each launch always reconciles (`lastReconciledStatus` starts nil).
+    private var lastReconciledStatus: UNAuthorizationStatus?
+
     private func reconcilePushAuthorization() {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            switch settings.authorizationStatus {
-            case .authorized:
-                DispatchQueue.main.async {
+        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+            let status = settings.authorizationStatus
+            guard self?.lastReconciledStatus != status else { return }
+
+            DispatchQueue.main.async {
+                self?.lastReconciledStatus = status
+                switch status {
+                case .authorized:
+                    // Skipped while a deliberate tap's own registration is
+                    // still in flight (/code-review, finding 4): two
+                    // concurrent `registerForRemoteNotifications()` calls
+                    // race to consume `PushRegistration.enrollPending` in
+                    // AppDelegate's single token callback — if this
+                    // reconcile call's token lands first, the real tap's
+                    // callback reads `enrollPending == false`, POSTs
+                    // `mode=refresh` instead of `mode=enroll`, and /you
+                    // never reloads to show the toggle turned on.
+                    guard !PushRegistration.enrollPending else { return }
                     UIApplication.shared.registerForRemoteNotifications()
+                case .denied:
+                    PushRegistration.register(token: nil, mode: .refresh, enabled: false) {}
+                default:
+                    break
                 }
-            case .denied:
-                PushRegistration.register(token: nil, mode: .refresh, enabled: false) {}
-            default:
-                break
             }
         }
     }

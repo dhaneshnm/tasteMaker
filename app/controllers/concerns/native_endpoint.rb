@@ -49,4 +49,14 @@ module NativeEndpoint
         request.headers["X-Tondo-App"].to_s, expected
       )
     end
+
+    # A UUID is 36 chars; a nested-hash param or a megabyte of junk is
+    # neither (security review F5: `params.require` happily returns a
+    # Parameters hash, and hexdigest raising TypeError on it is a 500 where
+    # a 400 belongs). No length floor — `params.require` already rejects
+    # blank. Shared, not copy-pasted (/code-review, finding 7): both
+    # including controllers had this exact guard duplicated verbatim.
+    def valid_device_token?(token)
+      token.is_a?(String) && token.length <= 64
+    end
 end

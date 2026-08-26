@@ -84,9 +84,18 @@ class DailyPushJob < ApplicationJob
       }
 
       sent = 0
-      connection = build_connection
+      connection = nil
 
+      # /code-review, finding 1 (HIGH): `build_connection` used to run
+      # ahead of this block — `credentials.fetch(...)` raising KeyError on
+      # an incomplete `apns:` block would crash uncaught, skip the Sentry
+      # capture below, skip `connection&.close`, and — since `notified_at`
+      # is already claimed — leave `push_sent_count` nil forever, silently
+      # defeating the exact tripwire decisions/0019 exists to be. Now
+      # inside the begin, so any credential or connection-construction
+      # failure is caught the same way a mid-loop failure already was.
       begin
+        connection = build_connection
         tokens.each do |token|
           response = connection.push(build_notification(token, alert), timeout: CONNECTION_TIMEOUT)
           sent += handle_response(response, token)
@@ -100,14 +109,17 @@ class DailyPushJob < ApplicationJob
       sent
     end
 
+    # The exact status→reason pairings APNs defines, not two independent
+    # lists whose cross product would also treat an undefined pairing (e.g.
+    # 400/Unregistered) as a prune signal (/code-review, finding 10).
+    PERMANENT_FAILURES = { "410" => "Unregistered", "400" => "BadDeviceToken" }.freeze
+
     def handle_response(response, token)
       return 0 if response.nil?
       return 1 if response.ok?
 
-      if %w[410 400].include?(response.status) &&
-         %w[Unregistered BadDeviceToken].include?(response.body.is_a?(Hash) ? response.body["reason"] : nil)
-        Device.clear_apns_token!(token)
-      end
+      reason = response.body.is_a?(Hash) ? response.body["reason"] : nil
+      Device.clear_apns_token!(token) if PERMANENT_FAILURES[response.status] == reason
 
       0
     end

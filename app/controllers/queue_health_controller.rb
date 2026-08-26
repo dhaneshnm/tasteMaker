@@ -32,13 +32,21 @@ class QueueHealthController < ActionController::Base
     # `push_ok` is a separate predicate (story 0010) composed here, not
     # folded into queue_healthy? — the admin hint asks a different question
     # ("is content buffered") and never needs to know about the knock.
-    if DailyPick.queue_healthy?(today_scheduled: today_scheduled, days_ahead: days_ahead) && push_ok
+    queue_ok = DailyPick.queue_healthy?(today_scheduled: today_scheduled, days_ahead: days_ahead)
+
+    if queue_ok && push_ok
       render plain: "ok — scheduled through #{scheduled_through} (#{days_ahead} days ahead)"
-    elsif !push_ok
-      render plain: "queue low — the noon knock never fired today", status: :service_unavailable
     else
-      render plain: "queue low — today #{today_scheduled ? "scheduled" : "NOT scheduled"}, " \
-                     "#{days_ahead} day(s) ahead", status: :service_unavailable
+      # Both named when both fail (/code-review, finding 2): an `elsif`
+      # chain let a simultaneous buffer-low incident hide entirely behind
+      # the push-only message — an operator reading "the noon knock never
+      # fired" would never learn the buffer was ALSO critical.
+      reasons = []
+      unless queue_ok
+        reasons << "today #{today_scheduled ? "scheduled" : "NOT scheduled"}, #{days_ahead} day(s) ahead"
+      end
+      reasons << "the noon knock never fired today" unless push_ok
+      render plain: "queue low — #{reasons.join("; ")}", status: :service_unavailable
     end
   end
 end

@@ -111,6 +111,22 @@ class QueueHealthTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # /code-review, finding 2: an `elsif` chain let a simultaneous buffer-low
+  # incident hide entirely behind "the noon knock never fired" — an
+  # operator reading the 503 body would never learn about the second,
+  # independent incident.
+  test "both a low buffer and an unfired knock are named together, not one masking the other" do
+    daily_picks(:tomorrow).destroy!
+
+    travel_to eastern_clock(12, 16) do
+      get queue_health_path
+
+      assert_response :service_unavailable
+      assert_match(/today scheduled, 1 day\(s\) ahead/, response.body)
+      assert_match(/the noon knock never fired today/, response.body)
+    end
+  end
+
   test "the grace window never fires when today has no pick at all" do
     daily_picks(:today).destroy!
 
