@@ -97,13 +97,18 @@ class PushRegistrationsTest < ActionDispatch::IntegrationTest
 
   # ---- DELETE — the web door -----------------------------------------------
 
-  test "delete clears the opted-in device's token" do
+  # Found by /qa: a real browser click through button_to's Turbo-intercepted
+  # form left the stale ON button on screen — `head :no_content` is Turbo
+  # Drive's own "nothing to render" signal, so the page never re-rendered
+  # even though the DELETE had already cleared the token server-side. Pins
+  # the redirect, not just the data change.
+  test "delete clears the opted-in device's token and redirects back to /you" do
     register_device
     register_push(mode: "enroll", apns_token: "a" * 64)
 
     delete "/device/push_registration"
 
-    assert_response :no_content
+    assert_redirected_to corner_path
     assert_nil Device.find_by(token_digest: Device.digest("test-device-uuid")).apns_token
   end
 
@@ -123,7 +128,7 @@ class PushRegistrationsTest < ActionDispatch::IntegrationTest
 
     delete "/device/push_registration"
 
-    assert_response :no_content
+    assert_redirected_to corner_path
     assert Device.where.not(apns_token: nil).none?,
       "the stale row must be cleared too, or the wiped device keeps getting knocked"
   end
@@ -133,6 +138,6 @@ class PushRegistrationsTest < ActionDispatch::IntegrationTest
 
     delete "/device/push_registration"
 
-    assert_response :no_content
+    assert_redirected_to corner_path
   end
 end

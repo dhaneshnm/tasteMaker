@@ -67,12 +67,17 @@ class PushRegistrationsController < ApplicationController
   # UUID and can leave a stale second Device row holding the same
   # apns_token, and row-scoped opt-out would keep knocking that phone
   # (eng review, outside voice #6).
+  #
+  # Redirects rather than `head :no_content` (found by /qa, real bug: a
+  # 204 is Turbo Drive's own "nothing to render" signal, so a Turbo-
+  # intercepted `button_to` submit left the stale ON button on screen even
+  # though the DELETE had already cleared the token server-side). The
+  # DevicesController idiom, not reinvented — see its own `redirect_to`.
   def destroy
     device = current_device
-    head :no_content and return if device&.apns_token.blank?
+    Device.where(apns_token: device.apns_token).update_all(apns_token: nil) if device&.apns_token.present?
 
-    Device.where(apns_token: device.apns_token).update_all(apns_token: nil)
-    head :no_content
+    redirect_to corner_path, status: :see_other
   end
 
   private
