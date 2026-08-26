@@ -46,5 +46,14 @@ and what happens when delivery is uncertain. Recorded under R4 before implementa
 Non-US readers get the knock at their local off-hours until prediction 3 fails —
 accepted while installs are zero and the ASO bet is US-English keywords. A missed
 day under at-most-once is invisible to readers (no "sorry" push — that would be a
-second knock); the `notified_at` gap is the operator's tripwire, same philosophy as
-`/queue-health`.
+second knock).
+
+**Amended 2026-08-26 (eng review, outside voice #3/#4):** the first draft called
+"the `notified_at` gap" the operator's tripwire. Dead by construction — claim-
+before-send stamps the day whether or not any push leaves, so a revoked `.p8`
+would stamp every day gap-free; and a deploy across the noon tick (Solid Queue
+recurring has no catch-up) leaves a gap nothing read. The real tripwire is
+two-part: `daily_picks.push_sent_count` stamped after the send loop (claimed vs
+delivered are different facts), and `/queue-health` returning 503 after a 12:15 ET
+grace window when today is published but unclaimed — the existing external monitor
+watches the knock, same philosophy, now actually wired.
