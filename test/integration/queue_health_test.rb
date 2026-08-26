@@ -9,42 +9,41 @@ class QueueHealthTest < ActionDispatch::IntegrationTest
   # 0010's grace window (push_ok?) genuinely depends on what time it is —
   # a suite run after 12:15pm ET would otherwise see every unrelated test
   # below fail on "the noon knock never fired", which is true but not what
-  # any of them are testing. `eastern_clock` pins the clock to a safe hour so
-  # the suite behaves identically at 6am or midnight.
+  # any of them are testing. Pinned once for the whole file (/simplify,
+  # simplification finding — five identical per-test travel_to wraps
+  # collapsed to one); tests that specifically need noon override it with
+  # their own nested travel_to.
   def eastern_clock(hour, minute)
     Time.zone.local(Date.current.year, Date.current.month, Date.current.day, hour, minute)
   end
 
-  test "reports healthy when today is scheduled and the buffer holds at least two more days" do
-    travel_to eastern_clock(6, 0) do
-      get queue_health_path
+  setup { travel_to eastern_clock(6, 0) }
+  teardown { travel_back }
 
-      assert_response :success
-      assert_match(/^ok — scheduled through #{Regexp.escape(daily_picks(:tomorrow).scheduled_on.to_s)}/, response.body)
-      assert_equal "no-store", response.headers["Cache-Control"]
-    end
+  test "reports healthy when today is scheduled and the buffer holds at least two more days" do
+    get queue_health_path
+
+    assert_response :success
+    assert_match(/^ok — scheduled through #{Regexp.escape(daily_picks(:tomorrow).scheduled_on.to_s)}/, response.body)
+    assert_equal "no-store", response.headers["Cache-Control"]
   end
 
   test "reports unhealthy when today has not been scheduled" do
     daily_picks(:today).destroy!
 
-    travel_to eastern_clock(6, 0) do
-      get queue_health_path
+    get queue_health_path
 
-      assert_response :service_unavailable
-      assert_match(/today NOT scheduled/, response.body)
-    end
+    assert_response :service_unavailable
+    assert_match(/today NOT scheduled/, response.body)
   end
 
   test "reports unhealthy when fewer than two future days are buffered" do
     daily_picks(:tomorrow).destroy!
 
-    travel_to eastern_clock(6, 0) do
-      get queue_health_path
+    get queue_health_path
 
-      assert_response :service_unavailable
-      assert_match(/today scheduled, 1 day\(s\) ahead/, response.body)
-    end
+    assert_response :service_unavailable
+    assert_match(/today scheduled, 1 day\(s\) ahead/, response.body)
   end
 
   # Code review, adversarial finding #1: a depth-only check would read
@@ -57,20 +56,16 @@ class QueueHealthTest < ActionDispatch::IntegrationTest
     publish_day(Date.current + 2)
     publish_day(Date.current + 3)
 
-    travel_to eastern_clock(6, 0) do
-      get queue_health_path
+    get queue_health_path
 
-      assert_response :service_unavailable
-      assert_match(/today NOT scheduled/, response.body)
-    end
+    assert_response :service_unavailable
+    assert_match(/today NOT scheduled/, response.body)
   end
 
   test "is reachable with no reader identity at all — no wall, no basic auth" do
-    travel_to eastern_clock(6, 0) do
-      get queue_health_path
+    get queue_health_path
 
-      assert_response :success
-    end
+    assert_response :success
   end
 
   # Story 0010, eng review outside voice #4: a Kamal deploy replacing the

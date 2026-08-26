@@ -38,22 +38,21 @@ class PushRegistrationsController < ApplicationController
 
     mode = params[:mode]
     head :bad_request and return unless %w[enroll refresh].include?(mode)
+    enrolling = mode == "enroll"
 
-    disabling = mode == "refresh" &&
-      ActiveModel::Type::Boolean.new.cast(params[:enabled]) == false
+    disabling = !enrolling && ActiveModel::Type::Boolean.new.cast(params[:enabled]) == false
 
     apns_token = params[:apns_token]
     unless disabling
       head :bad_request and return unless apns_token.is_a?(String) && apns_token.match?(APNS_TOKEN_FORMAT)
     end
 
-    digest = Device.digest(device_token)
-    device = mode == "enroll" ? find_or_create_device(digest) : Device.find_by(token_digest: digest)
+    device = enrolling ? Device.find_or_create_by_digest!(device_token) : Device.find_by(token_digest: Device.digest(device_token))
     head :no_content and return if device.nil?
 
     if disabling
-      device.update_column(:apns_token, nil)
-    elsif mode == "enroll" || device.apns_token.present?
+      Device.clear_apns_token!(device.apns_token) if device.apns_token.present?
+    elsif (enrolling || device.apns_token.present?) && device.apns_token != apns_token
       device.update_column(:apns_token, apns_token)
     end
     # else: mode == "refresh", no existing token, not disabling — leave nil.
@@ -63,27 +62,14 @@ class PushRegistrationsController < ApplicationController
     head :no_content
   end
 
-  # Clears by TOKEN VALUE, not by row: a device wipe re-mints the Keychain
-  # UUID and can leave a stale second Device row holding the same
-  # apns_token, and row-scoped opt-out would keep knocking that phone
-  # (eng review, outside voice #6).
-  #
   # Redirects rather than `head :no_content` (found by /qa, real bug: a
   # 204 is Turbo Drive's own "nothing to render" signal, so a Turbo-
   # intercepted `button_to` submit left the stale ON button on screen even
   # though the DELETE had already cleared the token server-side). The
   # DevicesController idiom, not reinvented — see its own `redirect_to`.
   def destroy
-    device = current_device
-    Device.where(apns_token: device.apns_token).update_all(apns_token: nil) if device&.apns_token.present?
+    Device.clear_apns_token!(current_device.apns_token) if current_device&.apns_token.present?
 
     redirect_to corner_path, status: :see_other
   end
-
-  private
-    def find_or_create_device(digest)
-      Device.find_or_create_by!(token_digest: digest)
-    rescue ActiveRecord::RecordNotUnique
-      Device.find_by!(token_digest: digest)
-    end
 end

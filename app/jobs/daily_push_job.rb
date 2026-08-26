@@ -76,12 +76,19 @@ class DailyPushJob < ApplicationJob
       tokens = Device.where.not(apns_token: nil).distinct.pluck(:apns_token)
       return 0 if tokens.empty?
 
+      # Identical for every device this run — built once, not per token
+      # (/simplify, efficiency finding).
+      alert = {
+        "title" => PUSH_TITLE,
+        "body" => format(PUSH_BODY_TEMPLATE, title: pick.painting.title, artist: pick.painting.artist_display)
+      }
+
       sent = 0
       connection = build_connection
 
       begin
         tokens.each do |token|
-          response = connection.push(build_notification(pick, token), timeout: CONNECTION_TIMEOUT)
+          response = connection.push(build_notification(token, alert), timeout: CONNECTION_TIMEOUT)
           sent += handle_response(response, token)
         end
       rescue StandardError => e
@@ -99,7 +106,7 @@ class DailyPushJob < ApplicationJob
 
       if %w[410 400].include?(response.status) &&
          %w[Unregistered BadDeviceToken].include?(response.body.is_a?(Hash) ? response.body["reason"] : nil)
-        Device.where(apns_token: token).update_all(apns_token: nil)
+        Device.clear_apns_token!(token)
       end
 
       0
@@ -120,12 +127,9 @@ class DailyPushJob < ApplicationJob
       Rails.application.credentials.dig(:apns) || {}
     end
 
-    def build_notification(pick, token)
+    def build_notification(token, alert)
       notification = Apnotic::Notification.new(token)
-      notification.alert = {
-        "title" => PUSH_TITLE,
-        "body" => format(PUSH_BODY_TEMPLATE, title: pick.painting.title, artist: pick.painting.artist_display)
-      }
+      notification.alert = alert
       notification.topic = APNS_TOPIC
       notification.push_type = "alert"
       notification.priority = 10

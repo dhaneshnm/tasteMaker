@@ -19,4 +19,26 @@ class Device < ApplicationRecord
     return if last_seen_at && last_seen_at > 24.hours.ago
     update_column(:last_seen_at, Time.current)
   end
+
+  # Find-or-create by a raw token, racing cold launches absorbed the same
+  # way everywhere: two callers used to spell this rescue independently
+  # (device_registrations_controller.rb pre-extraction, push_registrations_controller.rb)
+  # — one home for it now (/simplify, reuse finding).
+  def self.find_or_create_by_digest!(token)
+    find_or_create_by!(token_digest: digest(token))
+  rescue ActiveRecord::RecordNotUnique
+    find_by!(token_digest: digest(token))
+  end
+
+  # Story 0010. Clears by TOKEN VALUE, not by row: a device wipe re-mints
+  # the Keychain UUID and can leave a stale second row holding the same
+  # apns_token, and a row-scoped clear would leave that phone still getting
+  # knocked. Three call sites need this (opt-out from the web, the
+  # `.denied` reconcile clearing a token from the app, DailyPushJob pruning
+  # a dead token) — one method so the invariant can't be half-applied
+  # (/simplify, altitude finding: the `.denied` path had drifted to a
+  # row-scoped `update_column` before this).
+  def self.clear_apns_token!(token)
+    where(apns_token: token).update_all(apns_token: nil)
+  end
 end

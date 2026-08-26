@@ -29,21 +29,6 @@ enum DeviceIdentity {
     private static let service = Bundle.main.bundleIdentifier ?? "app.tondo"
     private static let account = "device-token"
 
-    /// One session for the enum's lifetime, ephemeral so the ONLY cookie jar
-    /// that matters is the web view's — a per-call session leaks its queue
-    /// until invalidated, for no isolation gain.
-    ///
-    /// The 5-second timeout is load-bearing: cold launch gates ALL UI on this
-    /// round-trip, and the default 60s would leave a reader on a degraded
-    /// network (captive portal, stalled TLS) staring at the launch screen for
-    /// a minute before the proceed-anyway fallback fired (code review F3).
-    /// Airplane mode already fails fast; this bounds everything slower.
-    private static let session: URLSession = {
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.timeoutIntervalForRequest = 5
-        return URLSession(configuration: configuration)
-    }()
-
     /// Set on the first 204 this process sees. Cold launch always re-registers
     /// (that is the cross-launch healing), but a healthy foreground should not
     /// spend a network round-trip re-proving what this process already proved.
@@ -61,28 +46,21 @@ enum DeviceIdentity {
     /// Registers with the server and bridges the resulting cookie into the
     /// web view's store. Always calls `completion` — on failure the shell
     /// routes anyway, degraded to the public landing page (plan, constraint 3).
+    ///
+    /// The request itself is `NativeRequest`'s (story 0010 /simplify —
+    /// this used to build the secret-gated POST by hand; `PushRegistration`
+    /// needed the identical scaffolding and the two had drifted into
+    /// near-copies of each other).
     static func register(completion: @escaping () -> Void) {
-        guard let secret = Bundle.main.object(forInfoDictionaryKey: "TondoAppSecret") as? String,
-              !secret.isEmpty else {
+        guard let request = NativeRequest.build(path: "device/registrations", body: "device_token=\(token)") else {
             completion()
             return
         }
 
-        var request = URLRequest(url: Endpoint.url.appendingPathComponent("device/registrations"))
-        request.httpMethod = "POST"
-        request.setValue(secret, forHTTPHeaderField: "X-Tondo-App")
-        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        // The server judges user agents (`allow_browser`), and the sign-in
-        // fragment renders empty for this one — an explicit identity, not
-        // whatever CFNetwork writes this year (eng review A4).
-        request.setValue("Tondo iOS/\(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") ?? "1")",
-                         forHTTPHeaderField: "User-Agent")
-        request.httpBody = "device_token=\(token)".data(using: .utf8)
-
         // One hop to main, then one guard: every path calls `completion`
         // plainly. A zero-cookie 204 resolves through the same DispatchGroup —
         // a group with no enters fires `notify` immediately.
-        session.dataTask(with: request) { _, response, _ in
+        NativeRequest.session.dataTask(with: request) { _, response, _ in
             DispatchQueue.main.async {
                 guard let http = response as? HTTPURLResponse,
                       http.statusCode == 204,

@@ -218,7 +218,7 @@ class ActionDispatch::IntegrationTest
     params[:enabled] = enabled unless enabled.nil?
 
     session.post "/device/push_registrations", params: params,
-      headers: { "X-Tondo-App" => DeviceRegistrationsController.expected_app_secret }
+      headers: { "X-Tondo-App" => PushRegistrationsController.expected_app_secret }
   end
 
   # The whole-file form, matching `with_rescued_exceptions!`: a test case whose
