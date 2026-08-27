@@ -87,11 +87,16 @@ namespace :pool do
     old_manifest_rows, pinned = Tasks.pinned_candidates
     puts "#{pinned.size} pinned works from the committed manifest (story 0026, Jordan's contract)" if pinned.any?
 
+    must_include_file = Rails.root.join("user-research/data/0028-must-include.json")
+    must_include = must_include_file.exist? ? JSON.parse(must_include_file.read)["identities"] : []
+    puts "#{must_include.size} must-include identity(ies) requested (story 0028)" if must_include.any?
+
     resolved = 0
     curator = Pool::Curator.new(
       candidates,
       target: (ENV["TARGET"] || Pool::Curator::TARGET).to_i,
       pinned: pinned,
+      must_include: must_include,
       # Every plate is proven to exist before its work can enter the pool.
       # Sampling was not enough: Minneapolis publishes `rights_type: "Public
       # Domain"` and `Rights_Image_Display: "Full"` for works whose image then

@@ -49,8 +49,8 @@ class PoolCuratorTest < ActiveSupport::TestCase
     end
   end
 
-  def curate(candidates, target: 200, resolver: met_resolver, pinned: [])
-    curator = Pool::Curator.new(candidates, target: target, resolver: resolver, pinned: pinned)
+  def curate(candidates, target: 200, resolver: met_resolver, pinned: [], must_include: [])
+    curator = Pool::Curator.new(candidates, target: target, resolver: resolver, pinned: pinned, must_include: must_include)
     curator.curate!
     curator
   end
@@ -309,6 +309,37 @@ class PoolCuratorTest < ActiveSupport::TestCase
     kept = curator.selected.select { |c| c.artist == "Rembrandt" }
     assert_equal 1, kept.size, "one painting, once, even split across two identities"
     assert_equal "cma", kept.first.source, "the pin wins even though the mirror copy has text and a bigger plate"
+  end
+
+  test "a must-include identity is taken and reported true" do
+    wanted = candidate(source: "aic", id: 900, artist: "Named By Hand", region: "europe")
+
+    curator = curate(wide_pool + [ wanted ], must_include: [ wanted.identity ])
+
+    assert_includes curator.selected.map(&:identity), wanted.identity
+    assert_equal({ wanted.identity => true }, curator.must_include)
+  end
+
+  test "a must-include identity blocked by MAX_PER_ARTIST (already spent by pins) is reported false, not forced through" do
+    # Pins are taken unconditionally, before fill_must_include runs, so five
+    # pinned works by one artist genuinely exhaust the cap ahead of it —
+    # unlike ordinary fill candidates, which fill_must_include's own priority
+    # would simply out-race.
+    artist = "Already At Cap"
+    pins = 5.times.map { |i| pin(950 + i, artist: artist) }
+    wanted = candidate(source: "cma", id: 960, artist: artist, region: "europe", title: "The Sixth")
+
+    curator = curate(wide_pool + [ wanted ], pinned: pins, must_include: [ wanted.identity ])
+
+    refute_includes curator.selected.map(&:identity), wanted.identity
+    assert_equal({ wanted.identity => false }, curator.must_include)
+    curator.bars.each { |name, (have, want, ok)| assert ok, "#{name}: have #{have}, want #{want}" }
+  end
+
+  test "a must-include identity absent from the candidate pool is reported false, not raised" do
+    curator = curate(wide_pool, must_include: [ [ "met", 999_999 ] ])
+
+    assert_equal({ [ "met", 999_999 ] => false }, curator.must_include)
   end
 
   test "a pin that cannot be placed raises, naming the pair, not a silent shortfall" do

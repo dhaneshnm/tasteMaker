@@ -20,10 +20,26 @@ module Pool
     # ~2,428. 3,000 is mathematically unreachable without loosening the
     # region cap that exists specifically to prevent monoculture (persona
     # 3's complaint) — decisions/0016 falsification 1, logged there and in
-    # specs/0026-the-wider-pool/plan.md Deviations. TARGET = 2,300 is the
-    # additive ceiling with margin, not a swap: every 2,000 pinned works
-    # ship unchanged, per Jordan's contract.
-    TARGET = 2_300
+    # specs/0026-the-wider-pool/plan.md Deviations. 2,300 was the additive
+    # ceiling with margin, not a swap: every prior pinned work ships
+    # unchanged, per Jordan's contract.
+    #
+    # 2,300 -> 2,340, story 0028 follow-up: every one of the prior 2,300
+    # slots was already pinned, so `room_for?`'s own `@selected.size <
+    # @target` check left zero room for ANY new candidate, cap-compliant or
+    # not — the pool was saturated at TARGET, not merely full. Four specific,
+    # already-verified-CC0 paintings from the owner's own research
+    # (`user-research/data/0028-must-include.json`) needed real room, not a
+    # swap (no swap mechanism exists in code — decisions/0016 named it a
+    # fallback, never built). All four candidates happen to be europe-region,
+    # so the binding constraint was never `MAX_PER_ARTIST` but
+    # `MAX_REGION_SHARE`'s europe cap (`floor(TARGET*0.25)`), which grows
+    # in whole-number steps and got re-saturated by each successive re-curate
+    # run before the next candidate's turn — two smaller tries (+4, +20)
+    # each cleared one more but not all four. +40 gives real margin, still
+    # nowhere near the ~2,428 ceiling above; see decisions/0016's addendum
+    # for the same bars re-verified at 2,340.
+    TARGET = 2_340
     SEED = 1889 # the house shuffle seed, from db/seeds.rb
 
     MAX_PER_ARTIST   = 5     # 0.22% at 2,300. Today's ceiling is 3 of 110 = 2.7%.
@@ -44,6 +60,9 @@ module Pool
     attr_reader :recognizable, :collisions
     # Story 0026: per-theme want/took/shortfall, keyed by theme label.
     attr_reader :themes
+    # Story 0028: `[source, source_id] => true/false` for every requested
+    # must-include identity — false means a cap blocked it, reported not hidden.
+    attr_reader :must_include
 
     # `resolver` is called on a candidate the moment it is about to be taken,
     # and may veto it. The Met needs this: its CSV carries no image URL and no
@@ -54,10 +73,22 @@ module Pool
     # `pinned`: story 0026. Candidates built from the PREVIOUS committed
     # manifest's own rows (verbatim field values, not a mirror re-lookup) —
     # taken first, unconditionally, never through the resolver. See `pin!`.
-    def initialize(candidates, target: TARGET, resolver: nil, pinned: [])
+    #
+    # `must_include`: story 0028 follow-up. Specific `[source, source_id]`
+    # identities named by hand (an owner's own research, not a mirror-wide
+    # stage) — taken with priority right after pins, but through the SAME
+    # `room_for?` gate as everything else. Unlike `pinned`, a request here can
+    # fail: it is reported in `must_include`, never forced past
+    # `MAX_PER_ARTIST` or a region cap. "Add this specific painting" and
+    # "protect the range bars" are both real asks; this stage lets the second
+    # one win when they conflict, and says so, rather than silently doing
+    # one or the other.
+    def initialize(candidates, target: TARGET, resolver: nil, pinned: [], must_include: [])
       @candidates = candidates
       @pinned = pinned
       @pinned_identities = Set.new(pinned.map(&:identity))
+      @must_include_wanted = must_include
+      @must_include = {}
       @target = target
       @resolver = resolver
       @unresolvable = Set.new
@@ -80,6 +111,7 @@ module Pool
       pin!(pool)
       queue = ordered(pool)
 
+      fill_must_include(queue)
       fill_themes(queue)
       fill_recognizable(queue)
       fill_scarce_regions(queue)
@@ -239,6 +271,23 @@ module Pool
           took += 1 if count_or_take(c)
         end
         @themes[name] = { want: want, took: took, shortfall: [ want - took, 0 ].max }
+      end
+    end
+
+    # Story 0028. Specific paintings named by identity, not discovered by a
+    # stage — run before `fill_themes`/`fill_recognizable` so a hand-picked
+    # work gets first claim on its artist's `MAX_PER_ARTIST` slots, same as a
+    # recognizable name would. `count_or_take` so a pin already covering this
+    # identity (pool grew from a prior manifest that already had it) reports
+    # true without spending a redundant take.
+    def fill_must_include(queue)
+      @must_include = {}
+      return if @must_include_wanted.blank?
+
+      by_identity = queue.index_by(&:identity)
+      @must_include_wanted.each do |identity|
+        candidate = by_identity[identity]
+        @must_include[identity] = candidate.present? && count_or_take(candidate)
       end
     end
 
