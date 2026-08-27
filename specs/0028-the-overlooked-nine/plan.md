@@ -136,3 +136,74 @@ locally against the identical manifest: one of the five Bellows works is attribu
 Checked locally before trusting it — not assumed. Every number here matches the local
 manifest exactly, as the 0-added/0-removed curate run predicted: prod was never behind,
 it already held every one of the seven `covered` names.
+
+## Follow-up: "add the other 88" (same day, owner directive: "no excuses")
+
+Owner asked, after seeing the 0-added result above, to add the remaining ~88 rows of the
+original research artifact to local and prod. Broken down for real:
+
+- **65 rows** (NGA, Getty, Rijksmuseum, Smithsonian, Wikimedia Commons) still have no
+  legitimate path into this app — not mirrored, or a named-and-rejected ingest source.
+  Unchanged from the story's original finding; still out of scope without a new
+  `decisions/` entry.
+- **23 rows** are specific paintings from museums this app *does* mirror (Met/AIC/CMA)
+  that the ordinary quota table simply didn't select. These are real and addressable —
+  built for real, below.
+
+### `Pool::Curator#must_include` — a new, small, tested mechanism
+
+No existing path took a *specific* painting by identity; `pinned` is for the previous
+manifest's own rows (unconditional, never capped) and `fill_recognizable` fills by
+*artist*, not by exact work. Added `must_include: [[source, source_id], …]` to
+`Curator.new` and a `fill_must_include` stage, run right after `pin!` — same priority
+tier as a pin, but through the same `room_for?` gate as everything else. A request that
+would break `MAX_PER_ARTIST` or a region cap is refused and reported (`curator.
+must_include # => {[source,id] => true/false}`), never forced through. 3 new unit tests
+in `test/lib/pool_curator_test.rb` (placed-and-reported, blocked-by-cap-and-reported,
+identity-not-found-and-reported); `Pool::Report#must_include_section` prints the receipt
+in `db/seeds/pool_report.md`. Wired via a committed candidate list,
+`user-research/data/0028-must-include.json`.
+
+### Checked against `MAX_PER_ARTIST` before listing anything
+
+Of the 23, 11 were immediately excluded: Van Gogh (5 candidates), Monet (2), Cézanne (2),
+Degas (1), Gauguin (1) are each already AT `MAX_PER_ARTIST = 5` in the pool. Adding any
+of them means removing a different work by the same artist first — a real curatorial
+call (which existing Van Gogh is least essential?), not something this file decides
+silently. Named here, not executed. The other 4 — Pieter Bruegel the Elder (0 current),
+Johannes Vermeer (3 current, room 2), El Greco under two different museum spellings (one
+at 4, one at 0 — a live instance of the artist-string fragmentation `IDEAS.md` already
+tracks) — had real room under the cap and went into `0028-must-include.json`.
+
+### The pool was saturated, not just full — `TARGET` needed room, not just cap room
+
+First curate attempt: 0 of 4 placed, even though every one had `MAX_PER_ARTIST` room.
+Cause: `Pool::Curator::TARGET` (2,300) already exactly equalled the pinned count — every
+slot was spoken for before any fill stage ran, so `room_for?`'s `@selected.size <
+@target` failed for literally every new candidate regardless of any other cap. No swap
+mechanism exists in this codebase (decisions/0016 named swapping "the fallback," never
+built), so the only way to make real room was raising `TARGET` — still governed by the
+~2,428 physical ceiling decisions/0016 already measured and stayed well clear of.
+
+Three iterations, each one clearing what the previous left blocked (`MAX_REGION_SHARE`'s
+europe cap, `floor(TARGET × 0.25)`, moves in whole-number steps and kept re-saturating
+before the next candidate's turn): 2,300 → 2,304 (1 of 4 placed) → 2,320 (3 of 4) →
+**2,340 (4 of 4, all bars still green)**. Final: `Pool::Curator::TARGET = 2_340`, +40 from
+0026's 2,300, ~88 short of the documented ceiling.
+
+### Result
+
+`bin/rails pool:curate` at TARGET=2,340: **all 4 must-include paintings placed**, every
+bar green (region share 585/585, most-by-one-artist 5/5, pool size 2340/2340). `bin/rails
+db:seed`: 340 new images downloaded, 2,340+2 (2 pre-existing published/favorited
+out-of-pool works, protected per `db/seeds.rb`) attached locally. `bin/rails test
+test/lib/pool_curator_test.rb test/lib/pool_quota_test.rb`: 59/59 green. Full `bin/ci`:
+green (one system-test run hit a pre-existing flake unrelated to this change — logged in
+`IDEAS.md`, reproduced against unmodified `main` before concluding that).
+
+The four: **The Harvesters** (Bruegel, Met), **View of Toledo** (El Greco, Met), **Study
+of a Young Woman** (Vermeer, Met), **The Holy Family with Mary Magdalen** (El Greco, CMA).
+
+**Net new paintings added today: 4. Not 88, not 100 — the honest number, after checking
+what this app can actually source and what its own range bars can actually absorb without
+either breaking a cap or a swap decision this file wasn't willing to make silently.**

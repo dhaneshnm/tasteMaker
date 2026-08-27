@@ -128,6 +128,8 @@ module Pool
 
         #{themes_section}
 
+        #{must_include_section}
+
         #{recognizable_section}
 
         #{place_as_artist_section}
@@ -205,6 +207,26 @@ module Pool
         lines << "**#{short.size} theme(s) short of their floor after the full pipeline** — " \
                  "decisions/0016 falsification 2, logged here rather than only in the " \
                  "curation-time table above (which can disagree once `genre_fill` reassigns a tag)."
+      end
+      lines.join("\n")
+    end
+
+    # Story 0028. Specific paintings requested by identity — the receipt for
+    # which ones a cap actually blocked, printed rather than silently dropped.
+    def must_include_section
+      result = @curator.must_include
+      return "" if result.blank?
+
+      got = result.select { |_, ok| ok }
+      blocked = result.reject { |_, ok| ok }
+      lines = [ "## Must-include paintings (story 0028)", "" ]
+      lines << "#{got.size} of #{result.size} specifically-requested painting(s) placed."
+      if blocked.any?
+        lines << ""
+        lines << "**#{blocked.size} blocked** — a cap (`MAX_PER_ARTIST`, region, or source share) already " \
+                 "full, or the identity wasn't found in this run's candidate pool:"
+        lines << ""
+        blocked.each_key { |(source, id)| lines << "- `#{source}/#{id}`" }
       end
       lines.join("\n")
     end

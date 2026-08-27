@@ -1,0 +1,9 @@
+{
+  "note": "Story 0028 follow-up. Specific paintings from the owner's own 100-painting research pass, verified present in the cached Met/AIC/CMA mirrors and checked against MAX_PER_ARTIST before being listed here — see specs/0028-the-overlooked-nine/plan.md 'The other 88'. Not every candidate the research found belongs here: 11 were already blocked by the cap (Van Gogh, Monet, Cezanne, Degas, Gauguin all at 5) and are named there, not here, because adding them means swapping out an existing work, a curatorial call this file does not make silently.",
+  "identities": [
+    ["met", 435809],
+    ["met", 436575],
+    ["met", 437879],
+    ["cma", 108541]
+  ]
+}
