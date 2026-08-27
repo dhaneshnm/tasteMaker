@@ -46,10 +46,11 @@ class DailyPushJob < ApplicationJob
   # day already claimed is a silent missed knock (eng review finding 1).
   CONNECTION_TIMEOUT = 10
 
-  # OWNER COPY NEEDED (build flow step 7) — real notification copy blocks
-  # ship, not implementation. %{title} and %{artist} are the painting's.
-  PUSH_TITLE = "[OWNER COPY] Today's Tondo"
-  PUSH_BODY_TEMPLATE = "[OWNER COPY] %{title}, %{artist}"
+  # Owner copy (build flow step 7). Deliberately bare — the painting's own
+  # title and artist ARE the notification, the way a museum wall label
+  # would read, not a marketing wrapper around them.
+  PUSH_TITLE_TEMPLATE = "%{title}"
+  PUSH_BODY_TEMPLATE = "%{artist}"
 
   # The test seam (plan step 8): a fake recording connection swapped in here
   # need only answer #push and #close. Nil in production, so the real
@@ -79,8 +80,8 @@ class DailyPushJob < ApplicationJob
       # Identical for every device this run — built once, not per token
       # (/simplify, efficiency finding).
       alert = {
-        "title" => PUSH_TITLE,
-        "body" => format(PUSH_BODY_TEMPLATE, title: pick.painting.title, artist: pick.painting.artist_display)
+        "title" => format(PUSH_TITLE_TEMPLATE, title: pick.painting.title),
+        "body" => format(PUSH_BODY_TEMPLATE, artist: pick.painting.artist_display)
       }
 
       sent = 0

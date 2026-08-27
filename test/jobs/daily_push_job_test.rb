@@ -173,17 +173,26 @@ class DailyPushJobTest < ActiveSupport::TestCase
       "the claim must stand even though delivery failed — that gap is what push_sent_count is for"
   end
 
-  test "the payload carries the day's real title and artist, quotes and unicode alike" do
-    daily_picks(:today).painting.update!(title: 'A "Study" — café', artist: "Müller")
+  test "the notification title is the day's real painting title, quotes and unicode alike" do
+    daily_picks(:today).painting.update!(title: 'A "Study" — café')
     opt_in("a")
     fake = FakeApnsConnection.ok
     DailyPushJob.connection_override = fake
 
     DailyPushJob.perform_now
 
-    body = fake.pushed_notifications.first.alert["body"]
-    assert_includes body, 'A "Study" — café'
-    assert_includes body, "Müller"
+    assert_equal 'A "Study" — café', fake.pushed_notifications.first.alert["title"]
+  end
+
+  test "the notification body is the day's real artist" do
+    daily_picks(:today).painting.update!(artist: "Müller")
+    opt_in("a")
+    fake = FakeApnsConnection.ok
+    DailyPushJob.connection_override = fake
+
+    DailyPushJob.perform_now
+
+    assert_equal "Müller", fake.pushed_notifications.first.alert["body"]
   end
 
   test "the payload sets topic, alert push-type and priority" do
