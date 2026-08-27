@@ -199,4 +199,68 @@ class CornersTest < ActionDispatch::IntegrationTest
 
     assert_select ".coda__note", /stop belonging to this\s+phone/
   end
+
+  # ---- the daily knock (story 0010) ----------------------------------------
+  #
+  # A shell WITH a version but below the push threshold — literally the 1.0
+  # binary sitting in App Store review, no push code inside it at all
+  # (eng review finding 5). `NEW_SHELL` above is already exactly 1.1, so it
+  # doubles as the push-capable fixture for the tests below.
+  PRE_PUSH_SHELL = "#{ApplicationController::NATIVE_UA_TOKEN}/1.0; Mozilla/5.0".freeze
+
+  test "a push-capable shell with no token gets the invitation" do
+    register_device
+
+    get corner_path, headers: { "User-Agent" => NEW_SHELL }
+
+    assert_select "a.push__enable[href=?]", push_enable_path
+    assert_select "form[action=?]", push_registration_path, count: 0
+  end
+
+  test "a push-capable shell that already opted in gets the off switch" do
+    register_device
+    register_push(mode: "enroll", apns_token: "a" * 64)
+
+    get corner_path, headers: { "User-Agent" => NEW_SHELL }
+
+    assert_select "form[action=?][method=post]", push_registration_path do
+      assert_select "input[name=_method][value=delete]"
+    end
+    assert_select "a.push__enable", count: 0
+  end
+
+  test "the 1.0 binary in App Store review sees no push section at all" do
+    register_device
+
+    get corner_path, headers: { "User-Agent" => PRE_PUSH_SHELL }
+
+    assert_select "a.push__enable", count: 0
+    assert_select "form[action=?]", push_registration_path, count: 0
+  end
+
+  test "a browser gets no push section regardless of state" do
+    get corner_path
+
+    assert_select "a.push__enable", count: 0
+  end
+
+  test "an unregistered shell gets no push section — there is no row to hold a token" do
+    get corner_path, headers: { "User-Agent" => NEW_SHELL }
+
+    assert_select "a.push__enable", count: 0
+    assert_select "form[action=?]", push_registration_path, count: 0
+  end
+
+  # Device-scoped, not identity-scoped (CornersController's own comment):
+  # a signed-in reader on this same phone still owns whatever the Device
+  # row's apns_token says.
+  test "a signed-in reader on a push-capable phone still sees the toggle" do
+    register_device
+    register_push(mode: "enroll", apns_token: "a" * 64)
+    sign_in
+
+    get corner_path, headers: { "User-Agent" => NEW_SHELL }
+
+    assert_select "form[action=?]", push_registration_path
+  end
 end

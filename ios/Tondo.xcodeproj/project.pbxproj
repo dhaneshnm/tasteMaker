@@ -6,12 +6,26 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A1000000000000000000021 /* HotwireNative in Frameworks */ = {isa = PBXBuildFile; productRef = A1000000000000000000022 /* HotwireNative */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		A1000000000000000000001 /* Tondo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tondo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000000000000000000002 /* Shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Shared.xcconfig; sourceTree = "<group>"; };
 		A1000000000000000000003 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		A1000000000000000000004 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A1000000000000000000011 /* Exceptions for "Tondo" folder in "Tondo" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A1000000000000000000040 /* Tondo */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A1000000000000000000010 /* Tondo */ = {
@@ -24,19 +38,6 @@
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		A1000000000000000000011 /* Exceptions for "Tondo" folder in "Tondo" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			/* The synchronized group sweeps in every file under Tondo/, which
-			   includes the Info.plist that INFOPLIST_FILE already processes — two
-			   commands producing the same output, which is a hard build error. */
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = A1000000000000000000040 /* Tondo */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFrameworksBuildPhase section */
 		A1000000000000000000020 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -47,10 +48,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
-
-/* Begin PBXBuildFile section */
-		A1000000000000000000021 /* HotwireNative in Frameworks */ = {isa = PBXBuildFile; productRef = A1000000000000000000022 /* HotwireNative */; };
-/* End PBXBuildFile section */
 
 /* Begin PBXGroup section */
 		A1000000000000000000030 = {
@@ -195,20 +192,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A1000000000000000000051 /* Build configuration list for PBXProject "Tondo" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				A1000000000000000000070 /* Debug */,
-				A1000000000000000000071 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		A1000000000000000000041 /* Build configuration list for PBXNativeTarget "Tondo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A1000000000000000000072 /* Debug */,
 				A1000000000000000000073 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1000000000000000000051 /* Build configuration list for PBXProject "Tondo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1000000000000000000070 /* Debug */,
+				A1000000000000000000071 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

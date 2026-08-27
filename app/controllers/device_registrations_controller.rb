@@ -7,37 +7,21 @@
 # anonymous access — curl without effort, scrapers, accidental indexing — not
 # reverse engineering. The named upgrade path is App Attest on this same
 # endpoint; the shape (register → cookie) would not change.
+#
+# The gate itself — secret check, forgery skip, rate limit, the device-token
+# shape guard — moved to NativeEndpoint (story 0010 eng review + /code-review):
+# PushRegistrationsController answers the same shape of caller and needed the
+# exact same lines.
 class DeviceRegistrationsController < ApplicationController
-  # This endpoint is how a device GETS past the wall.
-  skip_before_action :require_reader
-
-  # Native URLSession caller: no DOM, no form, no session to carry a token.
-  skip_forgery_protection
-
-  # Explicit store (eng review A1): the limiter is backed by the controller
-  # cache store, which is the default in-process memory store in production
-  # (config/environments/production.rb keeps the "durable alternative" line
-  # commented out) and :null_store in test — so without pinning, the limit is
-  # per-process in prod and a silent no-op in every test. Per-process is
-  # accepted on one box; a no-op test is not.
-  RATE_LIMIT_STORE = ActiveSupport::Cache::MemoryStore.new
-  rate_limit to: 10, within: 1.minute, store: RATE_LIMIT_STORE
+  include NativeEndpoint
 
   def create
     head :unauthorized and return unless valid_app_secret?
 
     token = params.require(:device_token)
-    # A UUID is 36 chars; a nested-hash param or a megabyte of junk is neither
-    # (security review F5: `params.require` happily returns a Parameters hash,
-    # and hexdigest raising TypeError on it is a 500 where a 400 belongs).
-    # No length floor — `params.require` already rejects blank.
-    head :bad_request and return unless token.is_a?(String) && token.length <= 64
-    begin
-      Device.find_or_create_by!(token_digest: Device.digest(token))
-    rescue ActiveRecord::RecordNotUnique
-      # Two cold launches racing — same idempotent outcome, same idiom
-      # favorites#create uses.
-    end
+    head :bad_request and return unless valid_device_token?(token)
+
+    Device.find_or_create_by_digest!(token)
 
     cookies.signed.permanent[:device] = {
       value: token, httponly: true, same_site: :lax,
@@ -45,24 +29,4 @@ class DeviceRegistrationsController < ApplicationController
     }
     head :no_content
   end
-
-  # Credentials first, ENV for local and CI — the curator idiom. Public and on
-  # the class for the same reason `Admin::BaseController.expected_password` is:
-  # the suite must present whatever this machine is configured with, not a
-  # string it hard-codes and hopes still wins the `||` (bug, 2026-08-15).
-  def self.expected_app_secret
-    Rails.application.credentials.dig(:tondo, :app_secret).presence ||
-      ENV["TONDO_APP_SECRET"]
-  end
-
-  private
-    # Blank secret fails closed rather than open.
-    def valid_app_secret?
-      expected = self.class.expected_app_secret
-      return false if expected.blank?
-
-      ActiveSupport::SecurityUtils.secure_compare(
-        request.headers["X-Tondo-App"].to_s, expected
-      )
-    end
 end

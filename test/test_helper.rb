@@ -207,6 +207,20 @@ class ActionDispatch::IntegrationTest
     token
   end
 
+  # The push opt-in's native call (story 0010), same secret-header idiom.
+  # `apns_token` defaults to a fixture-shaped hex string that clears
+  # PushRegistrationsController::APNS_TOKEN_FORMAT; pass `apns_token: nil` for
+  # the one real call that omits it (`mode: "refresh", enabled: false`).
+  def register_push(device_token: "test-device-uuid", mode: "enroll",
+                    apns_token: "a" * 64, enabled: nil, session: self)
+    params = { device_token: device_token, mode: mode }
+    params[:apns_token] = apns_token if apns_token
+    params[:enabled] = enabled unless enabled.nil?
+
+    session.post "/device/push_registrations", params: params,
+      headers: { "X-Tondo-App" => PushRegistrationsController.expected_app_secret }
+  end
+
   # The whole-file form, matching `with_rescued_exceptions!`: a test case whose
   # every test reads gated pages declares it once instead of pasting the same
   # setup. When identity establishment changes (App Attest), one place moves.

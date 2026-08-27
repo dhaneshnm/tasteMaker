@@ -7,7 +7,13 @@
 
 PRODUCT_NAME = Tondo
 PRODUCT_BUNDLE_IDENTIFIER = com.dhaneshnm.tondo
-MARKETING_VERSION = 1.0
+
+// 1.0 is the build in App Review with no push code at all. Story 0010 bumps
+// this specifically so the server can tell the two apart — the version and
+// the push transport ship in the same binary, same reasoning as the auth
+// bridge before it (ApplicationController#push_capable_shell?, the 0017
+// lesson). Whatever vehicle carries push carries 1.1.
+MARKETING_VERSION = 1.1
 CURRENT_PROJECT_VERSION = 1
 
 // iOS 17 still covers iPhone XS and later — 2018 hardware. Persona 2 (Jordan)
@@ -26,6 +32,12 @@ SWIFT_VERSION = 5.0
 
 INFOPLIST_FILE = Tondo/Info.plist
 GENERATE_INFOPLIST_FILE = NO
+
+// Story 0010, the accepted native exception (CLAUDE.md). The Push
+// Notifications capability itself is enabled on the App ID in the Apple
+// Developer portal (step 0, done); this is what tells the linker which
+// entitlements file to sign the binary with.
+CODE_SIGN_ENTITLEMENTS = Tondo/Tondo.entitlements
 ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
 ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = Gold
 

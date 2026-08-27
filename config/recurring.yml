@@ -17,6 +17,13 @@ production:
   fill_daily_pick_queue:
     class: FillQueueJob
     schedule: every day at 5am America/New_York
+  # Story 0010: the daily knock, seven hours after the fill above guarantees
+  # today's day exists. Noon per the corpus ("at noon every day I get my
+  # DailyArt notification"), not per-device local time — one clock, same as
+  # the fill (decisions/0019).
+  daily_push:
+    class: DailyPushJob
+    schedule: every day at 12pm America/New_York
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12

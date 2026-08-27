@@ -1512,19 +1512,27 @@ html.zoom-open body { overflow: hidden; }
 
 .signin__mark { flex: none; }
 
-/* One reset, two quiet controls: a caps-link that happens to be a <button>
+/* One reset, quiet controls: a caps-link that happens to be a <button>
  * (or must state its own 44px). Grouped so the next quiet button joins a
- * selector list instead of pasting a third copy. */
+ * selector list instead of pasting a third copy. `.push__enable` is a link,
+ * not a button (story 0010 — the shell intercepts its navigation, same
+ * reason `.signin__door`'s native branch is a link), so it only needs the
+ * height/layout rule here — the global `a`/`a:hover` rules already give it
+ * gold and the hover shade for free. */
 .signin__out,
-.account__delete {
+.account__delete,
+.push__enable,
+.push__disable {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
 }
 .signin__out-form,
-.account__form { display: inline-flex; }
+.account__form,
+.push__form { display: inline-flex; }
 .signin__out,
-.account__delete {
+.account__delete,
+.push__disable {
   background: none;
   border: none;
   padding: 0;
@@ -1532,7 +1540,8 @@ html.zoom-open body { overflow: hidden; }
   cursor: pointer;
 }
 .signin__out:hover,
-.account__delete:hover { color: var(--gold-deep); }
+.account__delete:hover,
+.push__disable:hover { color: var(--gold-deep); }
 
 /* ---------------------------------------------------------------------------
  * The corner (story 0017) — `/you`, the reader's own room.

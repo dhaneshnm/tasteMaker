@@ -106,6 +106,35 @@ class DailyPick < ApplicationRecord
     today_scheduled && days_ahead >= LOW_BUFFER_DAYS
   end
 
+  # The noon knock's own grace window (story 0010, eng review outside voice
+  # #4) — a SEPARATE predicate from `queue_healthy?` above, composed at the
+  # `/queue-health` call site rather than folded in as a kwarg (/simplify,
+  # altitude finding: a bolted-on default the admin's queue-depth hint would
+  # have had to silently ignore is a sign the two questions — "is content
+  # scheduled far enough ahead" and "did today's notification fire" — don't
+  # belong behind one name).
+  #
+  # `notified_at:` is passed in, not re-queried: the caller already holds
+  # today's row from computing `today_scheduled`, and re-fetching it via
+  # `current` here would be a second query for data the caller already has
+  # (/simplify, efficiency finding).
+  #
+  # Before 12:15 ET the job simply hasn't fired yet — that is not a failure.
+  # After it, a published day with no `notified_at` means the scheduler tick
+  # never ran at all (a Kamal deploy replacing the container across noon,
+  # with no catch-up and no Sentry event, since no job ever started). This
+  # deliberately does NOT also check `push_sent_count`: on a day with zero
+  # opted-in devices — every day so far — a correctly-run job legitimately
+  # sends and stamps zero, and that must read healthy, not alarm.
+  GRACE_WINDOW_END = "12:15"
+
+  def self.push_ok?(today_scheduled:, notified_at:)
+    return true unless today_scheduled
+    return true if Time.current.strftime("%H:%M") < GRACE_WINDOW_END
+
+    notified_at.present?
+  end
+
   # Every painting that already has a day, or will once `pick` (if given)
   # saves. `pick&.id` excludes the pick's own existing row so editing it never
   # makes its own painting disappear from its own dropdown. One home for this

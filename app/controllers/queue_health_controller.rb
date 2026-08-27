@@ -17,18 +17,36 @@ class QueueHealthController < ActionController::Base
   def show
     response.cache_control.replace(no_store: true)
 
-    today_scheduled = DailyPick.exists?(scheduled_on: Date.current)
+    # One row, not an exists? plus a later re-fetch: today's pick (or nil)
+    # supplies both today_scheduled and notified_at (/simplify, efficiency
+    # finding).
+    today_pick = DailyPick.find_by(scheduled_on: Date.current)
+    today_scheduled = today_pick.present?
     days_ahead = DailyPick.days_scheduled_ahead
     scheduled_through = DailyPick.scheduled_through
+    push_ok = DailyPick.push_ok?(today_scheduled: today_scheduled, notified_at: today_pick&.notified_at)
 
     # Same predicate the admin hint reads (DailyPick.queue_healthy?) — a
     # depth-only check here previously agreed with the admin page by
     # coincidence, not by construction (code review, adversarial finding #1).
-    if DailyPick.queue_healthy?(today_scheduled: today_scheduled, days_ahead: days_ahead)
+    # `push_ok` is a separate predicate (story 0010) composed here, not
+    # folded into queue_healthy? — the admin hint asks a different question
+    # ("is content buffered") and never needs to know about the knock.
+    queue_ok = DailyPick.queue_healthy?(today_scheduled: today_scheduled, days_ahead: days_ahead)
+
+    if queue_ok && push_ok
       render plain: "ok — scheduled through #{scheduled_through} (#{days_ahead} days ahead)"
     else
-      render plain: "queue low — today #{today_scheduled ? "scheduled" : "NOT scheduled"}, " \
-                     "#{days_ahead} day(s) ahead", status: :service_unavailable
+      # Both named when both fail (/code-review, finding 2): an `elsif`
+      # chain let a simultaneous buffer-low incident hide entirely behind
+      # the push-only message — an operator reading "the noon knock never
+      # fired" would never learn the buffer was ALSO critical.
+      reasons = []
+      unless queue_ok
+        reasons << "today #{today_scheduled ? "scheduled" : "NOT scheduled"}, #{days_ahead} day(s) ahead"
+      end
+      reasons << "the noon knock never fired today" unless push_ok
+      render plain: "queue low — #{reasons.join("; ")}", status: :service_unavailable
     end
   end
 end
