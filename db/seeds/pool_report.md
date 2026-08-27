@@ -60,7 +60,7 @@ counted from the committed manifest, `db/seeds/paintings.json`.
 
 **573 works carry no museum text** (cma 237, met 202, mia 78, aic 56). Under story 0005 those days cannot be published without a hand-written note, which is what the 70% text bar exists to bound.
 
-## Theme quotas (story 0026)
+## Theme quotas at curation time (story 0026)
 
 | Theme | Want | Took | Shortfall |
 |---|---:|---:|---:|
@@ -77,11 +77,13 @@ counted from the committed manifest, `db/seeds/paintings.json`.
 
 **1 theme(s) short of their floor** — stock failed adjudication (bad plates, wrong attribution) rather than the matcher missing candidates; this is decisions/0016 falsification 2, logged per-theme not papered over.
 
+Genre-route counts above are curation-time only — run `bin/rails pool:genre_fill`, then `bin/rails pool:report` for the authoritative post-pipeline recount.
+
 ## Recognizable names (story 0019)
 
-105 of 200 names on the 0007 list matched a candidate; 269 works taken at a depth target of 3.
+112 of 209 names on the 0007 list matched a candidate; 287 works taken at a depth target of 3.
 
-27 name(s) below the depth target, supply-limited or capped:
+30 name(s) below the depth target, supply-limited or capped:
 
 - Leonardo da Vinci — 1 of 1 available
 - Gustav Klimt — 2 of 2 available
@@ -109,26 +111,27 @@ counted from the committed manifest, `db/seeds/paintings.json`.
 
 Read both lists before seeding. A place or culture string here is `Painting::NOT_AN_ARTIST` missing an entry, and it ships as a live `/artists/:slug` page.
 
-**Single-word slugs** (45) — mostly real one-word painters; scan for a country:
+**Single-word slugs** (43) — mostly real one-word painters; scan for a country:
 
 - `govardhan` — 4
 - `chokha` — 3
 - `fayzullah` — 3
-- `genga` — 3
 - `taketsugu` — 3
 - `basavana` — 3
-- `ganku` — 2
+- `genga` — 3
+- `purkhu` — 2
 - `gantai` — 2
-- `ghasi` — 2
+- `hashim` — 2
+- `kiyokata` — 2
+- `ganku` — 2
 - `fujimaro` — 2
 - `sanju` — 2
-- `kiyokata` — 2
-- `hashim` — 2
-- `purkhu` — 2
+- `ghasi` — 2
 - `mushfiq` — 1
-- `sanwalah` — 1
 - `yeoseol` — 1
 - `jokei` — 1
+- `ruknuddin` — 1
+- `sanwalah` — 1
 - `donatello` — 1
 - `miskin` — 1
 - `kushala` — 1
@@ -137,25 +140,22 @@ Read both lists before seeding. A place or culture string here is `Painting::NOT
 - `bunsei` — 1
 - `puming` — 1
 - `devachandra` — 1
-- `cheyenne` — 1
-- `lakota` — 1
-- `sadiqi` — 1
-- `shafi` — 1
-- `kuncan` — 1
-- `juran` — 1
-- `balchand` — 1
-- `geiai` — 1
-- `mianyi` — 1
-- `manohar` — 1
-- `raphael` — 1
-- `mingzhong` — 1
-- `bishandas` — 1
-- `bichitr` — 1
-- `yong` — 1
-- `eigyo` — 1
-- `bhora` — 1
 - `caravaggio` — 1
-- `ruknuddin` — 1
+- `bhora` — 1
+- `eigyo` — 1
+- `yong` — 1
+- `bichitr` — 1
+- `bishandas` — 1
+- `mingzhong` — 1
+- `raphael` — 1
+- `manohar` — 1
+- `mianyi` — 1
+- `geiai` — 1
+- `balchand` — 1
+- `juran` — 1
+- `kuncan` — 1
+- `shafi` — 1
+- `sadiqi` — 1
 
 **Still-linkable strings containing a place or culture word** (1 strings, 1 works) — already-denied strings are omitted, so everything below is live:
 
@@ -164,26 +164,7 @@ Read both lists before seeding. A place or culture string here is `Painting::NOT
 
 ## Rejected before selection
 
-- **duplicate** — 2982
+- **duplicate** — 3282
 - **title too long** — 843
-- **no plate** — 25
 - **anonymous** — 23
 - **too small** — 11
-
-
-## Theme quotas, final (story 0026 — post pool:genre_fill)
-
-| Theme | Want | Have | Shortfall |
-|---|---:|---:|---:|
-| Persian miniature | 25 | 19 | 6 |
-| Thangka | 15 | 30 | — |
-| Still life / flowers | 40 | 71 | — |
-| Marine | 12 | 11 | 1 |
-| Mythological | 15 | 28 | — |
-| Ukiyo-e (strict) | 5 | 24 | — |
-| Madhubani | 5 | 6 | — |
-| Vanitas / trompe-l'œil | 5 | 2 | 3 |
-| Icon | 5 | 4 | 1 |
-| Cityscape | 10 | 10 | — |
-
-**4 theme(s) short of their floor after the full pipeline** — decisions/0016 falsification 2, logged here rather than only in the curation-time table above (which can disagree once `genre_fill` reassigns a tag).
