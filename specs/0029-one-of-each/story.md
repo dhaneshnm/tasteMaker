@@ -3,7 +3,7 @@
 Date: 2026-08-28
 Lane: **Full (≤ 2-day core).** New ordering module + rake task, no schema change, no new
 UI — `/feed`'s existing `feed_ordered` scope (`app/models/painting.rb:134`) is untouched;
-only the `feed_order` VALUES on 2,344 rows change.
+only the `feed_order` VALUES on 2,340 rows change.
 Status: Draft. WIP slot: 0028 shipped 2026-08-27/28 (`SHIPLOG.md`), slot open (R5).
 
 Promoted same-day from an owner screenshot review (`/feed/index`, the wings screen,

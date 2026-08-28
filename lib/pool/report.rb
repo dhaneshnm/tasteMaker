@@ -211,6 +211,31 @@ module Pool
       lines.join("\n")
     end
 
+    # Story 0029. Class method, not instance: takes the `Pool::FeedInterleave::
+    # Result` `pool:interleave` just produced directly — there is no curator
+    # here either, ordering runs as its own standalone pass, same shape as
+    # `theme_recount_section` above.
+    def self.feed_interleave_section(result)
+      lines = [ "## Feed interleave (story 0029)", "" ]
+      lines << "#{result.rows.size} works reordered across #{result.bucket_sizes.size} buckets."
+      by_lens = result.bucket_sizes.keys.group_by { |key| key == Pool::FeedInterleave::UNTAGGED ? key : key.first }
+
+      (Pool::FeedInterleave::LENS_ORDER + [ Pool::FeedInterleave::UNTAGGED ]).each do |lens|
+        keys = by_lens[lens]
+        next unless keys
+
+        lines << ""
+        lines << "**#{lens}**"
+        lines << ""
+        keys.each do |key|
+          label = key == Pool::FeedInterleave::UNTAGGED ? "untagged" : key.last
+          flag = result.exhausted_early.include?(key) ? " (ran out before the pool did)" : ""
+          lines << "- #{label} — #{result.bucket_sizes[key]}#{flag}"
+        end
+      end
+      lines.join("\n")
+    end
+
     # Story 0028. Specific paintings requested by identity — the receipt for
     # which ones a cap actually blocked, printed rather than silently dropped.
     def must_include_section

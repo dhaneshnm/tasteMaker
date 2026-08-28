@@ -186,6 +186,26 @@ namespace :pool do
     end
   end
 
+  # Story 0029. Reorders the committed manifest's `feed_order` so an
+  # unfiltered `/feed` scroll steps through genre, tradition and period
+  # values instead of a fixed shuffle — see lib/pool/feed_interleave.rb for
+  # the mechanism. Selection is untouched: same 2,340 rows, same content,
+  # only the order they publish in changes. Run after `pool:curate` AND
+  # `pool:genre_fill` (genre tags feed the genre lens; running before
+  # genre_fill would lens-place ~403 rows under a weaker title-inferred
+  # guess a moment before the real museum tag arrives).
+  desc "Reorder feed_order so a scroll steps through genre/tradition/period (story 0029)"
+  task interleave: :environment do
+    rows = JSON.parse(Pool::MANIFEST.read)
+    result = Pool::FeedInterleave.reorder!(rows)
+    Pool::MANIFEST.write(JSON.pretty_generate(result.rows))
+    Pool::REPORT.write("#{Pool::REPORT.read}\n#{Pool::Report.feed_interleave_section(result)}\n")
+
+    puts "#{result.rows.size} works reordered, #{result.bucket_sizes.size} buckets " \
+         "(#{result.exhausted_early.size} ran out before the pool did)"
+    puts "db/seeds/paintings.json and db/seeds/pool_report.md updated"
+  end
+
   # Story 0019. Run it BEFORE re-curating to get the baseline, and after to get
   # the receipt — the story's first success signal is the difference between
   # the two, so both have to be producible on demand from committed files.
