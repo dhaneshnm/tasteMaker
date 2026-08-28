@@ -174,3 +174,46 @@ Read both lists before seeding. A place or culture string here is `Painting::NOT
 - **anonymous** — 23
 - **no plate** — 15
 - **too small** — 11
+
+## Feed interleave (story 0029)
+
+2340 works reordered across 27 buckets.
+
+**genre**
+
+- Flowers — 29 (ran out before the pool did)
+- Landscape — 140 (ran out before the pool did)
+- Mythological Art — 30 (ran out before the pool did)
+- Portrait — 263 (ran out before the pool did)
+- Religious Art — 338 (ran out before the pool did)
+- Still Life — 50 (ran out before the pool did)
+
+**tradition**
+
+- Chinese Painting — 175 (ran out before the pool did)
+- Jain Manuscript Painting — 3 (ran out before the pool did)
+- Japanese Painting — 252 (ran out before the pool did)
+- Kalighat Painting — 27 (ran out before the pool did)
+- Korean Painting — 26 (ran out before the pool did)
+- Mughal Painting — 85 (ran out before the pool did)
+- Pahari Painting — 58 (ran out before the pool did)
+- Persian & Islamic Painting — 19 (ran out before the pool did)
+- Rajput Painting — 65 (ran out before the pool did)
+- Tibetan & Nepalese Painting — 11 (ran out before the pool did)
+- Ukiyo-e Painting — 22 (ran out before the pool did)
+
+**period**
+
+- 12th century — 3 (ran out before the pool did)
+- 13th century — 1 (ran out before the pool did)
+- 14th century — 3 (ran out before the pool did)
+- 15th century — 7 (ran out before the pool did)
+- 16th century — 25 (ran out before the pool did)
+- 17th century — 54 (ran out before the pool did)
+- 18th century — 87 (ran out before the pool did)
+- 19th century — 351
+- 20th century — 197 (ran out before the pool did)
+
+**untagged**
+
+- untagged — 19 (ran out before the pool did)

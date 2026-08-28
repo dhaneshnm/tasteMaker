@@ -60,6 +60,30 @@ class PoolQuotaTest < ActiveSupport::TestCase
     assert_empty wrong, "pinned feed_order values must never change — every reader's bookmarked page depends on it"
   end
 
+  # Story 0029, success signal 2: a reader who scrolls one cycle deep has seen
+  # the whole range `/feed/index` advertises, not just the thickest few
+  # categories. Derives genre/tradition from the manifest's own raw fields via
+  # `Pool::FeedInterleave.derive` (period and tradition are never literal
+  # manifest keys — see `lib/pool/feed_interleave.rb`) rather than trusting
+  # `feed_order` was assigned correctly; recomputes which values are
+  # "displayed" from the manifest's own counts, the same definition
+  # `Painting.displayed_facet_values` uses, not a re-guessed threshold.
+  test "story 0029: a scroll one cycle deep sees every displayed genre and tradition value" do
+    derived = POOL.map { |w| Pool::FeedInterleave.derive(w) }
+
+    tallies = %i[genre tradition].index_with { Hash.new(0) }
+    derived.each { |values| tallies.each_key { |f| tallies[f][values[f]] += 1 if values[f] } }
+
+    first_cycle = POOL.zip(derived).sort_by { |w, _| w["feed_order"] }.first(30).map { |_, values| values }
+
+    %i[genre tradition].each do |facet|
+      seen = first_cycle.filter_map { |values| values[facet] }.to_set
+      missing = Painting.displayed_facet_values(facet, counts: tallies[facet]) - seen.to_a
+
+      assert_empty missing, "#{facet} value(s) #{missing.join(', ')} do not appear in the first 30 feed_order positions"
+    end
+  end
+
   # MANDATORY regression (review rule): every pre-existing `genre` value
   # (248 at expansion time, museum-tag route, story 0022) survives the
   # manifest rewrite — the bug the eng review's critical finding caught: a
