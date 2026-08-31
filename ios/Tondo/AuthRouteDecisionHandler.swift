@@ -87,6 +87,17 @@ final class AuthRouteDecisionHandler: NSObject, RouteDecisionHandler {
             guard let destination = handoff?.url else { return }
 
             Task { @MainActor in
+                // The completion handler fires the instant the callback URL is
+                // intercepted — before the sheet's own dismissal transition has
+                // finished animating off screen (widely reported against
+                // ASWebAuthenticationSession; not fixed by `[weak self]` or by
+                // clearing `self.session` above, both of which already run).
+                // Routing into that transition can silently no-op: the visit
+                // fires but nothing lands on screen, which reads to a reader as
+                // "tapped Sign in with Apple, nothing happened" — the exact
+                // shape of the Aug 31 App Review rejection. A beat lets the
+                // dismissal settle first.
+                try? await Task.sleep(for: .milliseconds(300))
                 navigator.route(destination)
             }
         }
