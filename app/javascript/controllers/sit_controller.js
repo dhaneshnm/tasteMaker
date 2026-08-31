@@ -30,7 +30,12 @@ export default class extends Controller {
     if (this.detailsTarget.open) { this.finalize(); return }
 
     this.beacon(this.shownUrlValue)
-    this.remaining = this.durationValue * 1000
+    // Guard found by live QA: a missing/garbled duration value (a stale
+    // server boot once rendered "{}") multiplies to NaN and setTimeout(NaN)
+    // fires IMMEDIATELY — an instant ready state, the opposite of a sit.
+    // A gate that cannot know its minute sits the full default.
+    const seconds = this.durationValue > 0 ? this.durationValue : 60
+    this.remaining = seconds * 1000
     this.startedAt = Date.now()
     this.arm()
     // A backgrounded tab is not looking: bank the elapsed time on hide,
