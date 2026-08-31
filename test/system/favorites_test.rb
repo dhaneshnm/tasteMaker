@@ -174,6 +174,16 @@ class FavoritesTest < ApplicationSystemTestCase
   # click, unkeep there, and the row is gone back on `/collection` — the same
   # outcome the deleted button used to produce in one step.
   test "unkeeping from a work's own page removes its row back in the collection" do
+    # A stranger's own keep of the SAME painting — carried over from the
+    # deleted row-level Remove test (code review), which proved the delete
+    # scopes to the reader who pressed the button, not to the work. Still
+    # true from the painting page's toggle; still worth a real assertion.
+    # A digest distinct from fixture `favorites(:strangers_sunflowers)`'s —
+    # that fixture is loaded for every test and shares the "different reader"
+    # wording, so reusing it here would make two unrelated rows collide.
+    stranger_favorite = Favorite.create!(
+      collector_digest: Digest::SHA256.hexdigest("a-different-reader-of-woodcut"), painting: woodcut)
+
     keep_a_never_picked_work
 
     visit collection_path
@@ -193,6 +203,9 @@ class FavoritesTest < ApplicationSystemTestCase
     assert_no_selector ".days__day"
     assert_selector ".masthead__aside", text: /0 works/i
     assert_text "The works you keep will gather here."
+
+    assert Favorite.exists?(stranger_favorite.id),
+      "unkeeping deleted more than the acting reader's own favorite"
   end
 
   # The parity guard: the day page still does everything it did before the rail.
@@ -232,15 +245,9 @@ class FavoritesTest < ApplicationSystemTestCase
 
     def keep_a_never_picked_work
       visit feed_path
-      # `reveal_controller.js`: every `.post` opens at `opacity: 0` until its
-      # own IntersectionObserver sees it enter the viewport, and this driver
-      # treats `opacity: 0` as not-visible. Woodcut sorts 5th on a fresh pool
-      # (`test/fixtures/paintings.yml`) — below the fold at 375×667. Same
-      # idiom `test/system/feed_test.rb`'s `reveal` uses.
-      page.execute_script(<<~JS)
-        document.querySelector('[aria-label="#{keep_label(woodcut.title)}"]')
-          ?.closest(".post")?.scrollIntoView({ block: "center" })
-      JS
+      # Woodcut sorts 5th on a fresh pool (`test/fixtures/paintings.yml`) —
+      # below the fold at 375×667. `reveal` is ApplicationSystemTestCase's.
+      reveal keep_label(woodcut.title)
       click_on keep_label(woodcut.title)
       assert_button remove_label(woodcut.title)
     end

@@ -4,13 +4,14 @@ require "test_helper"
 # walled off) is covered generically by `WallTest#gated_paths`, the same way
 # `artist_path` already is — no bespoke copy of that check lives here.
 class PaintingsTest < ActionDispatch::IntegrationTest
+  behind_the_wall!
+
   # The 404 tests below need `show_exceptions` on — see `errors_test.rb` and
   # `artists_test.rb`, whose comments explain why the test environment's
   # default (re-raise instead of rendering) is the opposite of what these assert.
   with_rescued_exceptions!
 
   test "a registered device can open a work's own page" do
-    register_device
     get painting_path(paintings(:woodcut))
 
     assert_response :success
@@ -20,7 +21,6 @@ class PaintingsTest < ActionDispatch::IntegrationTest
   # E1/C1. Junk at the routing layer, not the controller — the constraint
   # 404s before `PaintingsController::NotFound` is ever raised.
   test "a non-numeric id 404s at routing, with the generic message" do
-    register_device
     get "/paintings/wp-login.php"
 
     assert_response :not_found
@@ -31,7 +31,6 @@ class PaintingsTest < ActionDispatch::IntegrationTest
   # C1. A bare `RecordNotFound` would answer with the day-archive message —
   # this is the assertion that would have caught it.
   test "an unknown but well-formed id 404s, and does not say it was about a day" do
-    register_device
     get painting_path(Painting.maximum(:id) + 1)
 
     assert_response :not_found
@@ -43,7 +42,6 @@ class PaintingsTest < ActionDispatch::IntegrationTest
   # decision) — only the /collection row link is fallback-only. Nothing else
   # asserts that a picked work also answers here.
   test "a painting that also has a published Daily Pick still answers here" do
-    register_device
     get painting_path(paintings(:harbour))
 
     assert_response :success
@@ -51,7 +49,6 @@ class PaintingsTest < ActionDispatch::IntegrationTest
   end
 
   test "a resting work with no image still renders, not raises" do
-    register_device
     get painting_path(paintings(:imageless))
 
     assert_response :success
@@ -61,7 +58,6 @@ class PaintingsTest < ActionDispatch::IntegrationTest
   # C2. The masthead label is a <p>; without `heading_tag: :h1` threaded
   # through the reused partial this page has no primary heading at all.
   test "the page has a real h1, unlike the masthead label above it" do
-    register_device
     get painting_path(paintings(:woodcut))
 
     assert_select ".masthead__label", text: "Painting"
@@ -70,7 +66,6 @@ class PaintingsTest < ActionDispatch::IntegrationTest
   end
 
   test "the page mounts its own zoom overlay" do
-    register_device
     get painting_path(paintings(:woodcut))
 
     assert_select "main.page[data-controller=artwork]"
@@ -79,7 +74,6 @@ class PaintingsTest < ActionDispatch::IntegrationTest
   end
 
   test "the tab title carries the work's name" do
-    register_device
     get painting_path(paintings(:woodcut))
 
     assert_select "title", "#{paintings(:woodcut).title} — Tondo"
@@ -88,7 +82,6 @@ class PaintingsTest < ActionDispatch::IntegrationTest
   # Walled-page contract, same as `/artists/:slug` — currently only asserted
   # from the public side (`test/integration/public_cache_headers_test.rb`).
   test "the page revalidates instead of going stale, and is never public" do
-    register_device
     get painting_path(paintings(:woodcut))
 
     assert_response :success
@@ -99,7 +92,6 @@ class PaintingsTest < ActionDispatch::IntegrationTest
   end
 
   test "an unchanged page costs a 304" do
-    register_device
     get painting_path(paintings(:woodcut))
     etag = response.headers["ETag"]
 
@@ -111,7 +103,6 @@ class PaintingsTest < ActionDispatch::IntegrationTest
   # automatic `Rack::ETag` body digest is what keeps a kept mark from coming
   # back stale, since this controller runs no manual `stale?`.
   test "a kept mark never comes back stale on revalidation" do
-    register_device
     get painting_path(paintings(:woodcut))
     etag = response.headers["ETag"]
 

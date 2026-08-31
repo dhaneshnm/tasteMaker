@@ -33,9 +33,11 @@
         every screen rather than one at a time. %>
   <% else %>
     <%# Their order, newest kept first — not ours. No month headings: "the month
-        I kept it" is not a fact anybody wants. A row with no pick is a work whose
-        day the curator removed; it renders unlinked and carries its own Remove,
-        because it is the only row whose owner has no other way to let it go. %>
+        I kept it" is not a fact anybody wants. Every row links (story 0030): a
+        Daily Pick's dated page when it has one, the work's own permanent page
+        when it does not — never a day the curator removed and never a work
+        that was never picked at all; the two are indistinguishable and both
+        get the same fallback. %>
     <ol class="days">
       <% @rows.each_with_index do |(painting, pick), i| %>
         <%= render "days/row", painting: painting, pick: pick,

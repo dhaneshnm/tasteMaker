@@ -454,7 +454,7 @@ curator's desk.
 9. **Anything you can tap is at least `--tap` (44px) in every direction it has.**
    `.caps-link` sets size and tracking, not height, so every control built on it
    states the bar itself — `.walk__step`, `.zoom__close`, `.rail__act`,
-   `.rail__count`, `.days__remove`. ISSUE-002 (commit 866bbc2) shipped 15px
+   `.rail__count`. ISSUE-002 (commit 866bbc2) shipped 15px
    targets once by assuming otherwise.
    **Width counts too, and only bare glyphs have to say so.** A caps-link gets
    width for free from its words; `.rail__act` has none, so it states
