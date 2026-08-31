@@ -130,4 +130,33 @@ module ApplicationHelper
   def resizing_available?
     ActiveStorage.variant_transformer.present?
   end
+
+  # The shell's native share sheet reads this (story 0031). A pure function of
+  # the painting — no day, no controller change — because the link below is
+  # always the same address regardless of which surface shared it.
+  #
+  # `url:` is ALWAYS `root_url`, never a `/days/:date` or `/artists/:slug`
+  # address. Both of those sit behind `require_reader` (`application_
+  # controller.rb`, story 0015) — only `daily#show` skips the wall — so a link
+  # built from either would bounce an anonymous recipient to the sign-in doors
+  # instead of showing them art. `/` is the product's one unwalled page. First
+  # draft here chained a published day's own page; eng review (E1) killed it
+  # for exactly this reason and this comment is the record.
+  #
+  # `image_path:` is `artwork_src` itself (outside voice C1), not a second
+  # copy of its attached/CDN-fallback rule: `display_image?` passes for a
+  # work still served from the museum CDN fallback, and `url_for(painting.
+  # image)` raises on an unattached blob — `artwork_src(painting)` with no
+  # `size:` already resolves exactly that, and its `rescue` only matters on
+  # the sized path share never asks for. Whichever source wins, the shell
+  # resolves the string against the page it is currently showing — relative
+  # and absolute both work, `URL(string:relativeTo:)` on the native side
+  # handles both.
+  def share_payload_for(painting)
+    {
+      text: painting.alt_text,
+      url: root_url(via: "share"),
+      image_path: artwork_src(painting)
+    }
+  end
 end

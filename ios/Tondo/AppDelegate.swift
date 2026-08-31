@@ -70,14 +70,22 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         Hotwire.config.applicationUserAgentPrefix =
             "Tondo iOS/\(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") ?? "1");"
 
-        // The only reason to touch the web view configuration in this story.
         // `Hotwire.config.makeWebView()` calls this and then initialises the
-        // bridge if any components are registered — none are — so returning a
-        // plain web view here loses nothing.
+        // bridge itself, automatically, because `ShareComponent` is now
+        // registered below — nothing here has to call `Bridge.initialize`.
+        // Returning a plain, otherwise-uncustomized web view loses nothing.
         Hotwire.config.makeCustomWebView = { configuration in
             configuration.userContentController.addUserScript(DynamicType.userScript())
             return WKWebView(frame: .zero, configuration: configuration)
         }
+
+        // The shell's first bridge component (story 0031, `decisions/0021`).
+        // Registering it is also what puts `bridge-components: [share]` on
+        // every WKWebView's User-Agent (`HotwireConfig.userAgent`, read from
+        // the vendored SPM source rather than assumed) — the signal both
+        // `share_controller.js` and `layouts/_head.html.erb`'s reveal script
+        // key on, and the reason no separate reveal call belongs here.
+        Hotwire.registerBridgeComponents([ ShareComponent.self ])
 
         // Order matters: first match wins. Ours replaces the library's Safari
         // handler in the same slot, between app navigation and the system's

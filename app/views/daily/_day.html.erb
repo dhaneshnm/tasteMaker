@@ -96,6 +96,12 @@
           <path d="M4 9.2V4h5.2M20 9.2V4h-5.2M4 14.8V20h5.2M20 14.8V20h-5.2"/>
         </svg>
       </button>
+
+      <%# Share (story 0031) — between Zoom and the keep frame, never after
+          it. Keep's frame grows ~60px when its count arrives; Share sits on
+          the side that never shoves. Hidden by default; the shell reveals
+          it. See `shared/_share.html.erb`. %>
+      <%= render "shared/share", painting: painting %>
     <% end %>
 
     <%# The frame's DEFAULT CONTENT: the keep mark, drawn and going nowhere.

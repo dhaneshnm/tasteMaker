@@ -6,9 +6,9 @@ import WebKit
 /// to stop iOS painting anything the page did not ask for.
 ///
 /// Subclassing `HotwireWebViewController` rather than `VisitableViewController`
-/// keeps the bridge lifecycle callbacks intact. No bridge component is
-/// registered in this story — but inheriting the hooks costs nothing, and
-/// re-parenting later would be the kind of change that quietly breaks visits.
+/// keeps the bridge lifecycle callbacks intact — which story 0031's
+/// `ShareComponent` now uses (`delegate.destination` resolves to an
+/// instance of this class, cast back to `UIViewController` to present from).
 final class LinenWebViewController: HotwireWebViewController {
     override func viewDidLoad() {
         super.viewDidLoad()

@@ -1,0 +1,51 @@
+<%# The share control (story 0031). Locals: painting (required).
+    Rendered only when `painting.display_image?` — a resting work has no file
+    to hand off. Sits immediately LEFT of the keep control everywhere it
+    appears: keep and its count share a Turbo frame that grows when the
+    private fragment lands (`favorites/_control.html.erb`), and DESIGN.md's
+    own rule is that nothing may sit to that frame's right for exactly this
+    reason. Left of it, the frame's growth never touches this button.
+
+    Public and unconditional in the markup: unlike the keep frame, this is
+    the SAME button for every visitor, shell or browser, cookieless or not —
+    it carries no form, no CSRF token, no session, nothing a public cache
+    could leak. `/`'s `Cache-Control: public` contract survives this
+    unconditionally, which is why there is no server-side branch here at all.
+
+    Hidden by default (`.rail__share`'s CSS), revealed only inside a shell
+    whose Hotwire Native bridge registered the `"share"` component. That
+    reveal is a plain `<html data-shell-share>` attribute stamped by an
+    inline script in `layouts/_head.html.erb` before this element ever
+    paints — see that file for why the mechanism is a User-Agent read rather
+    than the bridge's own (later-arriving) dataset.
+
+    `data-controller="bridge--share"` extends the Hotwire Native Bridge
+    package's own `BridgeComponent` base class, which independently refuses
+    to CONNECT at all outside a matching shell (`static get shouldLoad`) —
+    belt and braces: a reader who somehow sees this button in a plain browser
+    taps a control with no controller attached, a safe no-op.
+
+    Momentary, not a toggle: no `aria-pressed`, no fill state. Fill is the
+    house's OWN-STATE marker (keep, the wing door) and share does not have
+    one — tapping it does not change anything about the painting. %>
+<% payload = share_payload_for(painting) %>
+<button type="button" class="rail__act rail__share"
+        data-controller="bridge--share"
+        data-action="bridge--share#share"
+        data-bridge--share-text-value="<%= payload[:text] %>"
+        data-bridge--share-url-value="<%= payload[:url] %>"
+        data-bridge--share-image-path-value="<%= payload[:image_path] %>"
+        aria-label="Share <%= painting.title %>">
+  <%# The platform's own square-and-arrow, redrawn in the house hand — 1.4px
+      stroke, 23px drawing, `--gold` via `currentColor`. Not an invented
+      brand mark: the rail is label-less and only `/`'s "N kept" teaches a
+      glyph's meaning, so share's meaning has to arrive already known, and
+      this is the one mark every iOS reader already carries (design review
+      D4, 2026-08-31). %>
+  <svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"
+       fill="none" stroke="currentColor" stroke-width="1.4"
+       stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 15.5V4.5M12 4.5 7.8 8.9M12 4.5l4.2 4.4"/>
+    <path d="M5.5 12.5v6.2c0 .77.63 1.4 1.4 1.4h10.2c.77 0 1.4-.63 1.4-1.4v-6.2"/>
+  </svg>
+</button>

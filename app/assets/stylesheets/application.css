@@ -1246,6 +1246,16 @@ a.label__artist-name {
   font-variant-numeric: tabular-nums;
 }
 
+/* Share (story 0031). Hidden for every reader by default — browser and shell
+ * alike get the identical markup, which is what keeps `/` byte-for-byte
+ * public-cacheable — and revealed only once `layouts/_head.html.erb`'s inline
+ * script has stamped `data-shell-share` on `<html>`, which it does before
+ * this element (or anything else in `<body>`) ever paints. Two classes on the
+ * selector, not source order, beat `.rail__act`'s own `display: inline-flex`
+ * — specificity that does not depend on which rule happens to load last. */
+.rail__act.rail__share { display: none; }
+html[data-shell-share] .rail__act.rail__share { display: inline-flex; }
+
 /* ---------- The walk between days ---------- */
 
 .walk {

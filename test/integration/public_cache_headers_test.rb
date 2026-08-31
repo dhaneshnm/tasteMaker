@@ -98,6 +98,24 @@ class PublicCacheHeadersTest < ActionDispatch::IntegrationTest
       "/ rendered different markup for a cookieless visitor than for a registered device"
   end
 
+  # Story 0031. The share button's reveal is deliberately NOT this kind of
+  # branch — it happens entirely client-side, on `navigator.userAgent`, so
+  # that `/` never has to know who is asking. This test is the server-side
+  # half of that promise: a request carrying the exact User-Agent a 1.2 shell
+  # sends gets the SAME bytes back as a plain browser. A future change that
+  # tried to grow the share button server-side from the request's UA (the
+  # more "obvious" way to build this) would poison the shared cache exactly
+  # like a per-visitor keep frame would, and this is the test that catches it.
+  test "the front door renders byte-identical markup for a shell User-Agent and a plain browser" do
+    get "/"
+    browser_body = response.body
+
+    get "/", headers: { "HTTP_USER_AGENT" => "Tondo iOS/1.2 Hotwire Native iOS; Turbo Native iOS; bridge-components: [share]" }
+
+    assert_equal browser_body, response.body,
+      "/ rendered different markup for a shell User-Agent than for a plain browser"
+  end
+
   # The cookie is the defect; the caching is deliberate and must survive the fix.
   test "the front door stays publicly cacheable and still revalidates" do
     get "/"

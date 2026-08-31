@@ -2,8 +2,8 @@
   <%= render "shared/plate", painting: painting, eager: painting_counter < 2,
         describedby: nil, resting: "This work is resting." %>
 
-  <%# The action rail (story 0020) — Keep alone. Locals: kept_ids (required,
-      not defaulted — see below).
+  <%# The action rail (story 0020, joined by Share in story 0031) — Share,
+      then Keep. Locals: kept_ids (required, not defaulted — see below).
 
       No Zoom: unlike `daily/_day.html.erb`'s rail, the plate above is already
       the zoom trigger here (`shared/_plate.html.erb:7`, and both `/feed` and
@@ -27,6 +27,10 @@
       exist here, so there is no state in which this rail would be empty. A
       resting work (no image) is still a work you can keep. %>
   <div class="rail">
+    <%# Share (story 0031), before Keep, never after — same reason as
+        `daily/_day.html.erb`'s rail: keep grows when its private control
+        lands, and nothing may sit to its right. %>
+    <%= render "shared/share", painting: painting if painting.display_image? %>
     <%= render "favorites/control", painting: painting,
           kept: kept_ids.include?(painting.id), autofocus: false, compact: true %>
   </div>

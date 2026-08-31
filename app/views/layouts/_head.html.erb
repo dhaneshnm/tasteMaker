@@ -12,6 +12,40 @@
     with `data: { turbo_method: :delete }` and Turbo reads it from the meta tag.
     Reader-facing forms do not need it: `form_with` embeds its own hidden token. %>
 <title><%= content_for(:title) || "Tondo — One artwork a day" %></title>
+<%# The share button's reveal (story 0031) — first in `<head>`, before
+    anything in `<body>` can paint.
+
+    Reads `navigator.userAgent`, not a bridge-set dataset attribute. The
+    Hotwire Native Bridge package's own JS only stamps
+    `document.documentElement.dataset.bridgeComponents` once its adapter
+    finishes a handshake — after module evaluation, not guaranteed before
+    first paint. But the STRING it is reading for that handshake,
+    `"bridge-components: [...]"`, is already sitting in the User-Agent the
+    native shell set on the `WKWebViewConfiguration` before the web view was
+    ever created (`hotwire-native-ios`'s `UserAgent.build`, verified against
+    the vendored SPM source, not assumed) — the same field
+    `ApplicationController#native_shell_version` already parses server-side
+    for the auth bridge. `navigator.userAgent` carries that string
+    synchronously, before any script runs, so a plain inline script here is
+    both simpler and more reliably pre-paint than a bespoke native
+    `WKUserScript` would have been (design review D3, corrected by this
+    finding at implement time — the plan's original draft proposed the
+    native script).
+
+    Split-and-match, not a word-boundary regex: the vendored bridge JS's own
+    gate (`BridgeComponent.shouldLoad`) captures the bracketed list and does
+    `.split(" ").includes(component)` — an exact space-delimited token
+    compare. A word-boundary regex is close but not the same rule (`\bshare\b`
+    would also fire inside a future component named e.g. `"photo-share"`,
+    which the real gate correctly rejects — code review, adversarial pass).
+    Mirroring the actual rule keeps this reveal and the real gate from ever
+    disagreeing about which component is registered. %>
+<script>
+  const match = navigator.userAgent.match(/bridge-components:\s*\[([^\]]*)\]/)
+  if (match && match[1].split(" ").includes("share")) {
+    document.documentElement.dataset.shellShare = "1"
+  }
+</script>
 <%# `viewport-fit=cover` — story 0008. Without it WebKit insets the layout
     viewport out of the unsafe strips, so `.zoom`'s `position: fixed; inset: 0`
     stops below the notch and above the home indicator and the surround shows
