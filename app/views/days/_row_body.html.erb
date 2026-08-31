@@ -1,13 +1,19 @@
-<%# The inside of a row, identical whether or not the row is a link. Split out so
-    the linked and unlinked shapes cannot drift apart.
-    Locals: painting, pick (nil = the day is gone), current, eager %>
+<%# The inside of a row, shared by every surface that lists kept or archived
+    works. Locals: painting, pick (nil = no published Daily Pick — never was
+    one, or no longer is; the two are indistinguishable and this renders the
+    same either way), current, eager.
+
+    The date slot renders nothing at all for a nil pick — story 0030 deleted
+    "No longer a day" here, which was true only for the curator-removed case
+    and false for the far more common one since `/feed` became keepable
+    (story 0020): a work kept while scrolling never had a day to lose. An
+    owner-written string covering both cases honestly can go here later; an
+    empty slot is the honest default until one does. %>
 <span class="days__text">
   <% if pick %>
     <time class="days__date <%= "days__date--now" if pick == current %>"
           datetime="<%= pick.scheduled_on.iso8601 %>"><%
       %><% if pick.scheduled_on == Date.current %>Today · <% end %><%= pick.scheduled_on.to_fs(:daily) %></time>
-  <% else %>
-    <span class="days__date days__date--gone">No longer a day</span>
   <% end %>
   <span class="days__title <%= "days__title--long" if painting.long_title? %>"><%= painting.title %></span>
   <span class="days__artist"><%= painting.artist_display %></span>

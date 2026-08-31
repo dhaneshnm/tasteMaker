@@ -32,7 +32,13 @@
   </div>
 
   <div class="label">
-    <h2 class="label__title <%= "label__title--long" if painting.long_title? %>"><%= painting.title %></h2>
+    <%# `heading_tag:` default `:h2` — every existing caller (`/feed`,
+        `/artists/:slug`) renders exactly as before. The permanent-address
+        page (story 0030) passes `:h1`: it is a standalone document and the
+        masthead label above is a `<p>`, so without this override the page
+        has no primary heading at all. %>
+    <%= content_tag local_assigns.fetch(:heading_tag, :h2), painting.title,
+          class: "label__title #{"label__title--long" if painting.long_title?}" %>
     <%# `show_artist:` default true. The artist page passes false — the name
         already carries the h1 there, and rendering it again under every work
         would repeat it once per work (design review D2). %>

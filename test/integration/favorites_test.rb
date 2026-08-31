@@ -291,19 +291,47 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     assert_select "a.days__link[href=?]", root_path
   end
 
-  test "a kept work whose day was removed stays, unlinked, and can still be let go" do
+  # Story 0030. Was "stays, unlinked, and can still be let go" — the row now
+  # links to the work's own permanent page instead, same as any other work
+  # with no published pick. Unkeeping happens there, not from a row-level
+  # button any more (see the system test in test/system/favorites_test.rb for
+  # that full path); this test's job is only the link itself.
+  test "a kept work whose day was removed still links, to its own page" do
     keep(@painting)
     @yesterday.destroy!
 
     get collection_path
 
-    assert_select "a.days__link", count: 0
-    assert_select ".days__link--gone .days__title", text: @painting.title
-    assert_select "form.days__remove-form"
+    assert_select "a.days__link[href=?]", painting_path(@painting)
+    assert_select "form.days__remove-form", count: 0
+    assert_no_match(/No longer a day/, response.body)
+  end
 
-    assert_difference -> { Favorite.count }, -1 do
-      delete favorite_path(@painting)
-    end
+  # The other, far more common source of a nil pick since story 0020 let
+  # `/feed` be kept from: a work that was never a Daily Pick at all. Same
+  # code path, same row shape — asserted separately because the two are
+  # conflated in the data and a fix to one could silently miss the other.
+  test "a favorite that was never a Daily Pick links to its own permanent page" do
+    keep(paintings(:woodcut))
+
+    get collection_path
+
+    assert_select "a.days__link[href=?][aria-label=?]", painting_path(paintings(:woodcut)),
+      "#{paintings(:woodcut).title}, #{paintings(:woodcut).artist_display}"
+    assert_select ".days__date", count: 0
+  end
+
+  # Regression guard (eng review, test review section): this story must not
+  # touch the picked-work path. @yesterday is archived, not the pick the
+  # front door is currently showing, so `day_link_path` cannot fall through
+  # to `root_path` the way the "front door" and "gap day" tests above do —
+  # this is the one case that actually exercises `day_path`.
+  test "a favorite for an archived, non-current day still links to its dated page" do
+    keep(@yesterday.painting)
+
+    get collection_path
+
+    assert_select "a.days__link[href=?]", day_path(@yesterday.scheduled_on.iso8601)
   end
 
   test "an empty collection promises, explains, and offers a way back" do

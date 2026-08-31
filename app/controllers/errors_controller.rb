@@ -16,7 +16,8 @@ class ErrorsController < ApplicationController
   # apart without parsing the path to guess what the reader meant.
   MESSAGES = {
     ActiveRecord::RecordNotFound => "There was no artwork on that day.",
-    ArtistsController::NotFound  => "No artist by that name here."
+    ArtistsController::NotFound  => "No artist by that name here.",
+    PaintingsController::NotFound => "No such work here."
   }.freeze
 
   DEFAULT_MESSAGE = "That page does not exist."

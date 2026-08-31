@@ -4,36 +4,31 @@
 
     Locals:
       painting:  the work
-      pick:      its day, or nil when the curator removed the day out from under
-                 a kept work. A nil pick is the only unlinked row.
+      pick:      its day, or nil when the work has no published Daily Pick —
+                 either it was never one (kept from `/feed`, story 0020) or
+                 the curator removed the day since. The two are
+                 indistinguishable in the data and this row does not try to
+                 tell them apart.
       current:   the pick the front door is showing, so a link never points at a
                  URL that immediately 301s (see ApplicationHelper#day_link_path)
       eager:     load the thumbnail eagerly (the first few rows only)
 
-    A row with no pick is a kept work whose day the curator removed. It renders
-    unlinked and carries its own Remove, because nesting a button inside the
-    row's own <a> would be an accessibility defect and an orphan is the one row
-    whose owner has no other way to let it go. `/days` iterates published picks,
-    so it never reaches that branch.
+    Every row links, and always has since story 0030 gave every painting its
+    own permanent address: `day_path` when a pick exists (richer — hand-
+    written blurb, dated context), `painting_path` when it does not. `/days`
+    iterates published picks, so it never reaches the fallback; `/collection`
+    is the only caller that does. Unkeeping a fallback row happens by opening
+    it, the same way every other row already worked — there is no second,
+    row-level way to let a work go any more.
 
-    The whole row is one link, and its accessible name carries date, title and
-    artist: a list of bare titles is useless to somebody navigating by link.
-    `size: 240` and not the original — ISSUE-001 (commit 2da2f7a) shipped
-    full-size JPEGs into 112px boxes once already. %>
+    The whole row is one link, and its accessible name carries date (when
+    there is one), title and artist: a list of bare titles is useless to
+    somebody navigating by link. `size: 240` and not the original — ISSUE-001
+    (commit 2da2f7a) shipped full-size JPEGs into 112px boxes once already. %>
 <li class="days__day">
-  <% if pick %>
-    <a class="days__link" href="<%= day_link_path(pick, current) %>"
-       aria-label="<%= pick.scheduled_on.to_fs(:daily_long) %>: <%= painting.title %>, <%= painting.artist_display %>">
-      <%= render "days/row_body", painting: painting, pick: pick, current: current, eager: eager %>
-    </a>
-  <% else %>
-    <div class="days__link days__link--gone">
-      <%= render "days/row_body", painting: painting, pick: nil, current: current, eager: eager %>
-    </div>
-
-    <%= button_to "Remove", favorite_path(painting), method: :delete,
-          class: "caps-link days__remove",
-          form: { class: "days__remove-form" },
-          aria: { label: "Remove #{painting.title} from your collection" } %>
-  <% end %>
+  <a class="days__link"
+     href="<%= pick ? day_link_path(pick, current) : painting_path(painting) %>"
+     aria-label="<%= "#{"#{pick.scheduled_on.to_fs(:daily_long)}: " if pick}#{painting.title}, #{painting.artist_display}" %>">
+    <%= render "days/row_body", painting: painting, pick: pick, current: current, eager: eager %>
+  </a>
 </li>

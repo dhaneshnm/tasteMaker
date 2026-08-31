@@ -166,28 +166,33 @@ class FavoritesTest < ApplicationSystemTestCase
     end
   end
 
-  # The orphan row's Remove is the ONLY control a kept work has once the curator
-  # has removed its day — the row is unlinked, so there is no page to open and
-  # unkeep it from. It is also the one control in the product that submits from
-  # OUTSIDE a turbo-frame, which is exactly why it needs a browser test: an
-  # integration DELETE passes while the real thing renders nothing.
-  test "letting go of a work whose day is gone updates the page" do
-    keep_todays_artwork
-    daily_picks(:today).destroy!
+  # Story 0030's CRITICAL regression test (eng review, test review section):
+  # the row-level Remove button this test used to exercise is gone — every
+  # row links now, picked or not, and a work with no page has no page to open
+  # and unkeep from any more. This proves the affordance actually relocated,
+  # not just that the button disappeared: open the fallback page from a real
+  # click, unkeep there, and the row is gone back on `/collection` — the same
+  # outcome the deleted button used to produce in one step.
+  test "unkeeping from a work's own page removes its row back in the collection" do
+    keep_a_never_picked_work
 
     visit collection_path
-    assert_selector ".days__link--gone"
+    assert_selector "a.days__link", text: woodcut.title
     assert_selector ".masthead__aside", text: /1 work/i
 
-    click_on "Remove"
+    click_on woodcut.title
+    assert_current_path painting_path(woodcut)
+    assert_selector ".masthead__label", text: "Painting"
+    assert_button remove_woodcut_label
+
+    click_on remove_woodcut_label
+    assert_button keep_woodcut_label
+
+    visit collection_path
 
     assert_no_selector ".days__day"
     assert_selector ".masthead__aside", text: /0 works/i
     assert_text "The works you keep will gather here."
-
-    # The stranger's row on the very same painting survives — the delete is
-    # scoped to the reader who pressed the button, not to the work.
-    assert_equal [ favorites(:strangers_sunflowers) ], Favorite.all.to_a
   end
 
   # The parity guard: the day page still does everything it did before the rail.
@@ -216,6 +221,29 @@ class FavoritesTest < ApplicationSystemTestCase
       visit root_path
       click_on keep_label
       assert_button remove_label
+    end
+
+    # `woodcut`: the one pool fixture with an image and no `daily_pick` row at
+    # all (see `test/fixtures/paintings.yml`) — the "never a Daily Pick" case
+    # story 0030 is actually about, kept from `/feed` the way a real reader
+    # would rather than by destroying a fixture's pick.
+    def woodcut = paintings(:woodcut)
+    def keep_woodcut_label   = "Keep #{woodcut.title} in your collection"
+    def remove_woodcut_label = "Remove #{woodcut.title} from your collection"
+
+    def keep_a_never_picked_work
+      visit feed_path
+      # `reveal_controller.js`: every `.post` opens at `opacity: 0` until its
+      # own IntersectionObserver sees it enter the viewport, and this driver
+      # treats `opacity: 0` as not-visible. Woodcut sorts 5th on a fresh pool
+      # (`test/fixtures/paintings.yml`) — below the fold at 375×667. Same
+      # idiom `test/system/feed_test.rb`'s `reveal` uses.
+      page.execute_script(<<~JS)
+        document.querySelector('[aria-label="#{keep_woodcut_label}"]')
+          ?.closest(".post")?.scrollIntoView({ block: "center" })
+      JS
+      click_on keep_woodcut_label
+      assert_button remove_woodcut_label
     end
 
     def zoom_left

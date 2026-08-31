@@ -965,8 +965,7 @@ a.label__artist-name {
 .walk__step,
 .walk__today,
 .rail__act,
-.rail__count,
-.days__remove {
+.rail__count {
   display: inline-flex;
   align-items: center;
   min-height: var(--tap);
@@ -983,7 +982,6 @@ a.label__artist-name {
  * belongs here for the same reason `.keep__toggle` used to — it is a button
  * wearing no button, and the reset is the same five declarations. Only the
  * `font-family` differs in effect, and it is inert on a glyph-only control. */
-.days__remove,
 .rail__act {
   padding: 0;
   font-family: var(--serif-body);
@@ -992,7 +990,6 @@ a.label__artist-name {
   border: 0;
   cursor: pointer;
 }
-.days__remove:hover,
 .rail__act:not(.rail__act--waiting):hover { color: var(--gold-deep); }
 
 /* There was a `.coda > .caps-link + .caps-link` rule here until story 0012,
@@ -1168,19 +1165,6 @@ a.label__artist-name {
   .days__link { grid-template-columns: 1fr 7rem; }
   .days__thumb { height: 7rem; }
 }
-
-/* A kept work whose day the curator removed. Same row, no link, and the only
- * row that carries a button — nesting one inside the row's own <a> would be an
- * accessibility defect, and this is the one row whose owner has no other way to
- * let it go. */
-.days__link--gone { cursor: default; }
-.days__date--gone { color: var(--ink-faint); }
-/* Gold is what "this navigates" looks like everywhere in the product, and this
- * row does not. The title steps back to ink so the only gold left on it belongs
- * to the one thing that still acts: Remove. */
-.days__link--gone .days__title { color: var(--ink); }
-
-.days__remove-form { margin: 0 0 1.25rem; }
 
 /* ---------- The action rail ----------
  *
