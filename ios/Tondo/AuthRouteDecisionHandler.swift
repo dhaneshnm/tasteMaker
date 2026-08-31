@@ -59,10 +59,26 @@ final class AuthRouteDecisionHandler: NSObject, RouteDecisionHandler {
                 navigator: Navigating) -> Router.Decision {
         let presenter = navigator.activeNavigationController
 
+        // `ASWebAuthenticationSession`'s completion handler is documented to
+        // fire more than once for a single successful sign-in. Prod logs from
+        // the Aug 31 App Review rejection's on-device retest show exactly
+        // that: two `/session/handoff` requests carrying the BYTE-IDENTICAL
+        // token, ~300ms apart, from one tap. The handoff token is single-use
+        // by design (`SessionsController#handoff`'s `spend_handoff_tokens!`),
+        // so the two calls raced — whichever request the server saw second
+        // found the token already spent and quietly bounced to `corner_path`
+        // instead of the real destination, fighting the first navigation for
+        // the screen. `handled` makes this closure itself single-use, so only
+        // the first firing ever routes anywhere.
+        var handled = false
+
         let session = ASWebAuthenticationSession(
             url: proposal.url,
             callbackURLScheme: Self.callbackScheme
         ) { [weak self] callbackURL, error in
+            guard !handled else { return }
+            handled = true
+
             self?.session = nil
 
             // A cancelled sheet is not an error. The reader tapped Cancel or
@@ -87,17 +103,6 @@ final class AuthRouteDecisionHandler: NSObject, RouteDecisionHandler {
             guard let destination = handoff?.url else { return }
 
             Task { @MainActor in
-                // The completion handler fires the instant the callback URL is
-                // intercepted — before the sheet's own dismissal transition has
-                // finished animating off screen (widely reported against
-                // ASWebAuthenticationSession; not fixed by `[weak self]` or by
-                // clearing `self.session` above, both of which already run).
-                // Routing into that transition can silently no-op: the visit
-                // fires but nothing lands on screen, which reads to a reader as
-                // "tapped Sign in with Apple, nothing happened" — the exact
-                // shape of the Aug 31 App Review rejection. A beat lets the
-                // dismissal settle first.
-                try? await Task.sleep(for: .milliseconds(300))
                 navigator.route(destination)
             }
         }
