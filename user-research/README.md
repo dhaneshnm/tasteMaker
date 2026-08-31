@@ -17,4 +17,6 @@ they trigger get their own `decisions/` entry.
 
 | 0009 | [arthistory-dm-conversations](0009-arthistory-dm-conversations.md) | 2026-08-31 | Four two-way DM exchanges with r/ArtHistory commenters (Aug 18–22): seeing is trainable but practitioners carry no transferable framework; vocabulary works as a seeing tool; schedule + accountability, not content, is what the paying respondent paid for. R7 grading: **3 clean + 1 borderline of BET's 5 conversations** — Secure_Film6786's open notes offer converts the borderline; nilescranenosebleed thread still unanswered |
 
+| 0010 | [slow-looking-protocol-v2](0010-slow-looking-protocol-v2.md) | 2026-08-31 | The owner's 15-painting slow-looking practice — the paper prototype of the guided-sit feature shape. v2 adds the trained-eye delta, describe→interpret split, designated reveal chains. Live data as of 08-31: 5 sits, avg 12 min, saturation endings, delta 5/5. Its prompt ranking, surviving duration, and blind-spot tally are the spec inputs for shapes B/C |
+
 `data/` holds the raw counts and every matched comment/review for re-adjudication.

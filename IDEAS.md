@@ -87,29 +87,17 @@ later.
 
 ## Considering — top = next pick
 
-- 2026-08-31 — **Guided sit / structured slow looking** — owner-confirmed A-first
-  sequencing (explicit choice, 2026-08-31 session). Combine the slow-looking protocol v2
-  (paper prototype, `~/Downloads/slow-looking-protocol-v2.md` — commit to
-  `user-research/` at promotion) with an ikonoTV-style guided zoom pan (theme card →
-  slow pan across curated details, screen recording 08-31).
-  **Ship order:** A = look-first gate (art full-bleed, blurb behind soft 60s sit,
-  optional one-line impression; blurb becomes the reveal; Express-size, zero authoring) →
-  B = guided region pan (4–5 curator rects + hand-written context lines, tap-to-advance,
-  look-then-line, glossary) → C = protocol-in-app (blocked on finishing the 15-sit
-  dogfood; its outputs are C's spec inputs).
-  **Owner directions recorded:** capture end-state = full notes (text AND audio AND
-  upload of screenshots/docs/images; audio favored — eyes stay on painting; no
-  transcription until demanded); notes are account-backed server-side behind the 0015
-  sign-in (favorites stay device-local, decisions/0005 untouched).
-  **Evidence:** r/ArtHistory threads 1vuknft + 1vqubg3; `user-research/0009` (4 DM
-  exchanges: trainable-but-not-teachable gap, vocabulary-as-seeing-tool, structure +
-  schedule = the scarce goods); owner dogfood 5 sits avg 12 min = saturation not
-  fatigue; trained-eye delta survived 5/5; blind-spot category = context — the one gap
-  looking can't close, so region lines carry context.
-  **At promotion:** bucket call A = Better (sequencing) vs New; B/C border the New slot
-  (BET.md, named at Phase 3 gate); supersedes/unblocks Parked "Art coach" — self-logged
-  delta removes its LLM-grading block. Gate-6 note: B/C's user content raises privacy
-  labels + backup burden.
+- 2026-08-31 — **Guided sit, shapes B/C** (region pan + curator context lines +
+  full capture; protocol-in-app). Held back deliberately: B waits for shape A's signal
+  and authoring-cost evidence; C waits for the finished 15-sit dogfood
+  (`user-research/0010`) — its prompt ranking, surviving duration, and blind-spot
+  tally ARE C's spec inputs. Owner directions already locked (2026-08-31 session):
+  capture end-state = text + audio + uploads (audio favored — eyes stay on painting;
+  no transcription until demanded); notes account-backed behind 0015 sign-in;
+  region lines carry context (owner's blind-spot tally: context = the gap looking
+  can't close). B/C border the New slot (BET.md, named at Phase 3 gate); supersede/
+  unblock Parked "Art coach" — self-logged delta removes its LLM-grading block.
+  Gate-6 note: user content raises privacy labels + backup burden.
 
 ## Parked — reason required
 
@@ -133,6 +121,12 @@ later.
 
 ## Promoted
 
+- 2026-08-31 — Guided sit, shape A: the look-first gate → `specs/0032-sit-with-it`.
+  Front door's note starts folded behind a soft 60-second invitation; reveal never
+  locks; signed-in readers get one optional first-impression line (account-backed,
+  turbo-frame idiom). Better-bucket sequencing, no New-slot claim. Evidence:
+  `user-research/0009` (DM exchanges) + `user-research/0010` (protocol dogfood,
+  5 sits avg 12 min saturation). Shapes B/C stay in Considering above.
 - 2026-08-21 — `/feed` filter UI, owner-rated 3/11 → `specs/0027-the-wing-label`.
   Same-day promotion: WIP slot open after 0025/0026, and the facet stories' three days
   of work are unusable at 3/11. Target 6/11 — the 5 (one line, counts, scoped values,
