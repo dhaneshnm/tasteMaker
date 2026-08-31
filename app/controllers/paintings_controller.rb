@@ -64,7 +64,7 @@ class PaintingsController < ApplicationController
   # nothing public linking to it, so this stays `private_revalidate` + the
   # automatic `Rack::ETag` body digest, not a manual `stale?`.
   def show
-    @painting = Painting.find_by(id: params[:id]) or raise NotFound
+    @painting = Painting.with_attached_image.find_by(id: params[:id]) or raise NotFound
 
     private_revalidate
     @kept_ids = kept_ids_for([ @painting ])

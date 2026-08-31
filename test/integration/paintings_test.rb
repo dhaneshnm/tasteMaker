@@ -1,20 +1,13 @@
 require "test_helper"
 
-# The permanent address (story 0030). Not `behind_the_wall!` at the file
-# level — one test here is specifically about what an anonymous reader gets,
-# and the whole-file helper would register a device before it ever runs.
+# The permanent address (story 0030). The anonymous case (signed-out reader
+# walled off) is covered generically by `WallTest#gated_paths`, the same way
+# `artist_path` already is — no bespoke copy of that check lives here.
 class PaintingsTest < ActionDispatch::IntegrationTest
   # The 404 tests below need `show_exceptions` on — see `errors_test.rb` and
   # `artists_test.rb`, whose comments explain why the test environment's
   # default (re-raise instead of rendering) is the opposite of what these assert.
   with_rescued_exceptions!
-
-  test "a signed-out reader is walled off, like every other collection surface" do
-    get painting_path(paintings(:woodcut))
-
-    assert_response :see_other
-    assert_redirected_to corner_path
-  end
 
   test "a registered device can open a work's own page" do
     register_device

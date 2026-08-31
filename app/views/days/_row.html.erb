@@ -25,10 +25,11 @@
     there is one), title and artist: a list of bare titles is useless to
     somebody navigating by link. `size: 240` and not the original — ISSUE-001
     (commit 2da2f7a) shipped full-size JPEGs into 112px boxes once already. %>
+<% date_prefix = "#{pick.scheduled_on.to_fs(:daily_long)}: " if pick %>
 <li class="days__day">
   <a class="days__link"
      href="<%= pick ? day_link_path(pick, current) : painting_path(painting) %>"
-     aria-label="<%= "#{"#{pick.scheduled_on.to_fs(:daily_long)}: " if pick}#{painting.title}, #{painting.artist_display}" %>">
+     aria-label="<%= "#{date_prefix}#{painting.title}, #{painting.artist_display}" %>">
     <%= render "days/row_body", painting: painting, pick: pick, current: current, eager: eager %>
   </a>
 </li>

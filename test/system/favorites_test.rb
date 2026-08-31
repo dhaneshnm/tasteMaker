@@ -183,10 +183,10 @@ class FavoritesTest < ApplicationSystemTestCase
     click_on woodcut.title
     assert_current_path painting_path(woodcut)
     assert_selector ".masthead__label", text: "Painting"
-    assert_button remove_woodcut_label
+    assert_button remove_label(woodcut.title)
 
-    click_on remove_woodcut_label
-    assert_button keep_woodcut_label
+    click_on remove_label(woodcut.title)
+    assert_button keep_label(woodcut.title)
 
     visit collection_path
 
@@ -213,8 +213,9 @@ class FavoritesTest < ApplicationSystemTestCase
     # The glyph has no words, so the accessible name is the only handle a test —
     # or a screen reader — has on it. Derived from the fixture rather than
     # hardcoded, so renaming the painting cannot make these silently unfindable.
-    def keep_label   = "Keep #{todays_title} in your collection"
-    def remove_label = "Remove #{todays_title} from your collection"
+    # `title:` defaults to today's, so every existing zero-arg call keeps working.
+    def keep_label(title = todays_title)   = "Keep #{title} in your collection"
+    def remove_label(title = todays_title) = "Remove #{title} from your collection"
     def todays_title = daily_picks(:today).painting.title
 
     def keep_todays_artwork
@@ -228,8 +229,6 @@ class FavoritesTest < ApplicationSystemTestCase
     # story 0030 is actually about, kept from `/feed` the way a real reader
     # would rather than by destroying a fixture's pick.
     def woodcut = paintings(:woodcut)
-    def keep_woodcut_label   = "Keep #{woodcut.title} in your collection"
-    def remove_woodcut_label = "Remove #{woodcut.title} from your collection"
 
     def keep_a_never_picked_work
       visit feed_path
@@ -239,11 +238,11 @@ class FavoritesTest < ApplicationSystemTestCase
       # (`test/fixtures/paintings.yml`) — below the fold at 375×667. Same
       # idiom `test/system/feed_test.rb`'s `reveal` uses.
       page.execute_script(<<~JS)
-        document.querySelector('[aria-label="#{keep_woodcut_label}"]')
+        document.querySelector('[aria-label="#{keep_label(woodcut.title)}"]')
           ?.closest(".post")?.scrollIntoView({ block: "center" })
       JS
-      click_on keep_woodcut_label
-      assert_button remove_woodcut_label
+      click_on keep_label(woodcut.title)
+      assert_button remove_label(woodcut.title)
     end
 
     def zoom_left
