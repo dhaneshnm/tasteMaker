@@ -126,9 +126,14 @@ class FavoritesTest < ApplicationSystemTestCase
     count = find(".rail__count")
     assert_operator count.native.size.height, :>=, 44, "the count was under 44px tall"
 
+    # `offsetParent !== null` excludes the story 0031 share button: it is
+    # `display: none` in a plain browser (no shell to reveal it), and a raw
+    # `querySelectorAll` — unlike Capybara's own visibility-filtered `all`
+    # two lines up — would otherwise count its 0×0 rect as a second row.
     assert_equal 1, page.evaluate_script(<<~JS), "the rail wrapped onto two lines"
       (() => {
         const tops = new Set([...document.querySelectorAll(".rail__act, .rail__count")]
+          .filter(el => el.offsetParent !== null)
           .map(el => Math.round(el.getBoundingClientRect().top)));
         return tops.size;
       })()

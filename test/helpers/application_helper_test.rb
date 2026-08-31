@@ -63,6 +63,54 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_match @painting.id.to_s, logged
   end
 
+  # Story 0031. The regression this guards against has a name: the first
+  # draft of this helper built the link from a published day's own page,
+  # which sits behind `require_reader` (only `daily#show` skips the wall) —
+  # a shared link would have bounced every recipient to sign-in instead of
+  # showing them art (eng review E1). `root_url`, never anything else, no
+  # matter what the painting's own day situation is.
+  test "the share link is always root, for a painting with a published day" do
+    assert_equal @painting, daily_picks(:today).painting
+
+    assert_equal root_url(via: "share"), share_payload_for(@painting)[:url]
+  end
+
+  test "the share link is always root, for a painting with no day at all" do
+    never_picked = paintings(:woodcut)
+    assert_not DailyPick.exists?(painting_id: never_picked.id)
+
+    assert_equal root_url(via: "share"), share_payload_for(never_picked)[:url]
+  end
+
+  test "the share text is the painting's own title-and-artist string" do
+    assert_equal @painting.alt_text, share_payload_for(@painting)[:text]
+  end
+
+  # `alt_text` already carries story 0018's placeholder-artist fallback
+  # (`artist_display`) — asserted here so a future change to either method
+  # can't drift the share text away from what the page itself says.
+  test "the share text falls back the same way the wall label does, for a placeholder artist" do
+    culture_only = paintings(:bronze)
+
+    assert_equal "Bronze Ritual Vessel — Chinese", share_payload_for(culture_only)[:text]
+  end
+
+  # Outside voice C4/C1: `url_for(painting.image)` raises for a painting
+  # that only has `display_image?` satisfied via the museum CDN fallback —
+  # exactly `@painting` (`sunflowers`), which every other test in this file
+  # already keeps unattached on purpose.
+  test "the share image follows the CDN fallback when there is no local copy" do
+    assert_not @painting.image.attached?
+
+    assert_equal @painting.image_url_800, share_payload_for(@painting)[:image_path]
+  end
+
+  test "the share image is the original attached blob when there is one" do
+    attach
+
+    assert_match @painting.image.filename.to_s, share_payload_for(@painting)[:image_path]
+  end
+
   private
     def attach(bytes: PIXEL, filename: "pixel.png", content_type: "image/png")
       @painting.image.attach(io: StringIO.new(bytes), filename: filename, content_type: content_type)

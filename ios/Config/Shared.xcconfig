@@ -8,12 +8,15 @@
 PRODUCT_NAME = Tondo
 PRODUCT_BUNDLE_IDENTIFIER = com.dhaneshnm.tondo
 
-// 1.0 is the build in App Review with no push code at all. Story 0010 bumps
-// this specifically so the server can tell the two apart — the version and
-// the push transport ship in the same binary, same reasoning as the auth
-// bridge before it (ApplicationController#push_capable_shell?, the 0017
-// lesson). Whatever vehicle carries push carries 1.1.
-MARKETING_VERSION = 1.1
+// 1.0 is the build in App Review with no push code at all. Story 0010 bumped
+// this to 1.1 specifically so the server can tell the two apart — the
+// version and the push transport ship in the same binary, same reasoning as
+// the auth bridge before it (ApplicationController#push_capable_shell?, the
+// 0017 lesson). Story 0031 bumps to 1.2 for the same reason: it is the first
+// binary carrying a registered bridge component, and nothing server-side
+// needs to gate on this one specifically — the bridge handshake (`bridge-
+// components: [share]` in the User-Agent) is its own version signal.
+MARKETING_VERSION = 1.2
 CURRENT_PROJECT_VERSION = 1
 
 // iOS 17 still covers iPhone XS and later — 2018 hardware. Persona 2 (Jordan)
