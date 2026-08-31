@@ -1,6 +1,13 @@
 class PaintingsController < ApplicationController
   PER_PAGE = 10
 
+  # A different class than `ActiveRecord::RecordNotFound`, on purpose — see
+  # `ArtistsController::NotFound`, the pattern this mirrors exactly.
+  # `ErrorsController::MESSAGES` keys off the exact exception class, and a
+  # bare `RecordNotFound` here would answer with "There was no artwork on
+  # that day," which is about the wrong noun entirely.
+  class NotFound < ActiveRecord::RecordNotFound; end
+
   def index
     @page = params.fetch(:page, 1).to_i.clamp(1, 10_000)
     offset = (@page - 1) * PER_PAGE
@@ -48,6 +55,19 @@ class PaintingsController < ApplicationController
     end
 
     @coverage = coverage_lines(@active, scope: scope, total: @total)
+  end
+
+  # The permanent address (story 0030) — every painting gets a page
+  # independent of whether it was ever a Daily Pick. Walled by the default
+  # `require_reader` (no skip), same contract as `/artists/:slug`: private,
+  # no-store is the wrong trade for a page reached from a walled surface with
+  # nothing public linking to it, so this stays `private_revalidate` + the
+  # automatic `Rack::ETag` body digest, not a manual `stale?`.
+  def show
+    @painting = Painting.with_attached_image.find_by(id: params[:id]) or raise NotFound
+
+    private_revalidate
+    @kept_ids = kept_ids_for([ @painting ])
   end
 
   private

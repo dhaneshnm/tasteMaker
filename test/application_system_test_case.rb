@@ -61,6 +61,20 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     fit_viewport
   end
 
+  # `reveal_controller.js`: every `.post` opens at `opacity: 0` and only
+  # reaches `opacity: 1` once its own `IntersectionObserver` sees it enter
+  # the viewport (`application.css` `.post.reveal-init`), and this driver
+  # treats `opacity: 0` as not-visible. Anything below the fold at 375×667
+  # needs this before Capybara's visibility-gated finders can see it at all.
+  # Moved here from `test/system/feed_test.rb` (story 0030) once a second
+  # file needed the identical scroll-into-view idiom.
+  def reveal(aria_label)
+    page.execute_script(<<~JS)
+      document.querySelector('[aria-label="#{aria_label}"]')
+        ?.closest(".post")?.scrollIntoView({ block: "center" })
+    JS
+  end
+
   # The whole-file form for system tests, mirroring the integration macro in
   # test_helper — though the two take different doors on purpose: that one
   # registers a device, this one signs in as a web reader.

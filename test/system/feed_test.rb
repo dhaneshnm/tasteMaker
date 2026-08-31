@@ -222,19 +222,11 @@ class FeedTest < ApplicationSystemTestCase
   # tap could be swallowed by the outer `feed-page-1` frame's `target: "_top"`
   # and become a full-page navigation. These are the regression guard.
   #
-  # `reveal` exists because of `reveal_controller.js`: every `.post` opens at
-  # `opacity: 0` and only reaches `opacity: 1` once its own `IntersectionObserver`
-  # sees it enter the viewport (`application.css` `.post.reveal-init`), and this
-  # driver treats `opacity: 0` as not-visible — the same reason `scrolled_to`
-  # exists above for the compass. Fillers 5+ down the page start below the
-  # fold at 375×667 and need this before Capybara's visibility-gated finders
-  # can see them at all.
-  def reveal(aria_label)
-    page.execute_script(<<~JS)
-      document.querySelector('[aria-label="#{aria_label}"]')
-        ?.closest(".post")?.scrollIntoView({ block: "center" })
-    JS
-  end
+  # `reveal` (below-the-fold scroll-into-view) now lives on
+  # ApplicationSystemTestCase — moved there once test/system/favorites_test.rb
+  # needed the identical idiom (story 0030). Fillers 5+ down the page start
+  # below the fold at 375×667 and need it before Capybara's visibility-gated
+  # finders can see them at all.
 
   test "keeping a work in the gallery fills its mark without touching the rest of the page" do
     visit feed_path

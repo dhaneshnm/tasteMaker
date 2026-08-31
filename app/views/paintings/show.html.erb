@@ -1,0 +1,17 @@
+<%# The permanent address (story 0030). Reached only from a kept-work tap
+    in `/collection` when the work has no published Daily Pick — never from
+    the compass, never self-linking, same reasoning as `/artists/:slug`.
+    Structured to match it: masthead category label, `paintings/_painting`
+    reused verbatim for the body (`heading_tag: :h1` is the one override —
+    see that partial), the zoom overlay mounted once at page level. %>
+<% content_for :title, "#{@painting.title} — Tondo" %>
+<% content_for :description, "#{@painting.title}, #{@painting.artist_display}, on Tondo." %>
+
+<%= render "shared/masthead", label: "Painting", here: nil %>
+
+<main class="page" data-controller="artwork">
+  <%= render partial: "paintings/painting", collection: [ @painting ],
+        locals: { kept_ids: @kept_ids, heading_tag: :h1 } %>
+
+  <%= render "shared/zoom" %>
+</main>

@@ -68,8 +68,13 @@ module Tondo
     # is the reason the subclass exists at all: it keys on the exact class
     # too, so this and that map are the same fact stated twice, on purpose —
     # one decides the status, the other decides the sentence.
+    #
+    # `PaintingsController::NotFound` (story 0030) needs the identical entry —
+    # found by the outside voice before a line of code shipped: adding only
+    # the `MESSAGES` entry without this one would have 500'd every bad id.
     config.action_dispatch.rescue_responses.merge!(
-      "ArtistsController::NotFound" => :not_found
+      "ArtistsController::NotFound" => :not_found,
+      "PaintingsController::NotFound" => :not_found
     )
     # config.eager_load_paths << Rails.root.join("extras")
 

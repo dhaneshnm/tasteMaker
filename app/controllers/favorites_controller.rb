@@ -122,14 +122,15 @@ class FavoritesController < ApplicationController
     # Two callers, two right answers.
     #
     # The day page's toggle submits from inside the keep frame and wants the
-    # fragment back. The collection's orphan Remove is a page-level form — a row
-    # cannot nest a form inside its own <a>, so that button sits outside any
-    # frame — and Turbo Drive refuses a plain 200 for those ("Form responses must
-    # redirect to another location"). Answering both with a fragment left the row
-    # on screen and the count unchanged while the row was already gone from the
-    # table, and a second tap deleted nothing and errored again.
-    #
-    # It is the only control an orphaned work has, so it gets the redirect.
+    # fragment back. The painting page's own toggle (story 0030 — every kept
+    # work opens a page now, so this is the ONLY unkeep path a `/collection`
+    # row without a Daily Pick has) is also inside a keep frame — same
+    # answer. A page-level caller with no frame wrapping it (there is no
+    # such control shipping today, but the branch stays: Turbo Drive refuses
+    # a plain 200 for a page-level form, "Form responses must redirect to
+    # another location," so answering that shape with a fragment leaves the
+    # stale state on screen and a second tap deletes nothing and errors again
+    # — the exact bug this branch exists to prevent, story 0020).
     if turbo_frame_request?
       render_control(kept: false, autofocus: true)
     else

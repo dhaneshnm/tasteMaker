@@ -107,6 +107,16 @@ Rails.application.routes.draw do
   # rule — a modal sheet, not a pushed screen.
   get "feed/index" => "paintings#wings", as: :feed_index
 
+  # The permanent address (story 0030) — every painting gets a page independent
+  # of whether it was ever a Daily Pick. Numeric PK, not a slug: `Painting` has
+  # no per-work slug, and this page is walled with no sharing surface, so a
+  # readable natural key buys nothing (plan's recorded PK-vs-slug boundary —
+  # revisit if this page ever goes public). Constrained like every sibling
+  # `:painting_id` route below, so a junk path 404s at routing with the
+  # generic message, not `PaintingsController::NotFound`'s painting-specific one.
+  get "paintings/:id" => "paintings#show", as: :painting,
+    constraints: { id: /\d+/ }
+
   # The days behind you. The constraint keeps obvious junk out of the controller;
   # a well-formed date that is not a real one (2026-02-31) still reaches #show
   # and 404s there.

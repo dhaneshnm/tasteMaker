@@ -166,28 +166,46 @@ class FavoritesTest < ApplicationSystemTestCase
     end
   end
 
-  # The orphan row's Remove is the ONLY control a kept work has once the curator
-  # has removed its day — the row is unlinked, so there is no page to open and
-  # unkeep it from. It is also the one control in the product that submits from
-  # OUTSIDE a turbo-frame, which is exactly why it needs a browser test: an
-  # integration DELETE passes while the real thing renders nothing.
-  test "letting go of a work whose day is gone updates the page" do
-    keep_todays_artwork
-    daily_picks(:today).destroy!
+  # Story 0030's CRITICAL regression test (eng review, test review section):
+  # the row-level Remove button this test used to exercise is gone — every
+  # row links now, picked or not, and a work with no page has no page to open
+  # and unkeep from any more. This proves the affordance actually relocated,
+  # not just that the button disappeared: open the fallback page from a real
+  # click, unkeep there, and the row is gone back on `/collection` — the same
+  # outcome the deleted button used to produce in one step.
+  test "unkeeping from a work's own page removes its row back in the collection" do
+    # A stranger's own keep of the SAME painting — carried over from the
+    # deleted row-level Remove test (code review), which proved the delete
+    # scopes to the reader who pressed the button, not to the work. Still
+    # true from the painting page's toggle; still worth a real assertion.
+    # A digest distinct from fixture `favorites(:strangers_sunflowers)`'s —
+    # that fixture is loaded for every test and shares the "different reader"
+    # wording, so reusing it here would make two unrelated rows collide.
+    stranger_favorite = Favorite.create!(
+      collector_digest: Digest::SHA256.hexdigest("a-different-reader-of-woodcut"), painting: woodcut)
+
+    keep_a_never_picked_work
 
     visit collection_path
-    assert_selector ".days__link--gone"
+    assert_selector "a.days__link", text: woodcut.title
     assert_selector ".masthead__aside", text: /1 work/i
 
-    click_on "Remove"
+    click_on woodcut.title
+    assert_current_path painting_path(woodcut)
+    assert_selector ".masthead__label", text: "Painting"
+    assert_button remove_label(woodcut.title)
+
+    click_on remove_label(woodcut.title)
+    assert_button keep_label(woodcut.title)
+
+    visit collection_path
 
     assert_no_selector ".days__day"
     assert_selector ".masthead__aside", text: /0 works/i
     assert_text "The works you keep will gather here."
 
-    # The stranger's row on the very same painting survives — the delete is
-    # scoped to the reader who pressed the button, not to the work.
-    assert_equal [ favorites(:strangers_sunflowers) ], Favorite.all.to_a
+    assert Favorite.exists?(stranger_favorite.id),
+      "unkeeping deleted more than the acting reader's own favorite"
   end
 
   # The parity guard: the day page still does everything it did before the rail.
@@ -208,14 +226,30 @@ class FavoritesTest < ApplicationSystemTestCase
     # The glyph has no words, so the accessible name is the only handle a test —
     # or a screen reader — has on it. Derived from the fixture rather than
     # hardcoded, so renaming the painting cannot make these silently unfindable.
-    def keep_label   = "Keep #{todays_title} in your collection"
-    def remove_label = "Remove #{todays_title} from your collection"
+    # `title:` defaults to today's, so every existing zero-arg call keeps working.
+    def keep_label(title = todays_title)   = "Keep #{title} in your collection"
+    def remove_label(title = todays_title) = "Remove #{title} from your collection"
     def todays_title = daily_picks(:today).painting.title
 
     def keep_todays_artwork
       visit root_path
       click_on keep_label
       assert_button remove_label
+    end
+
+    # `woodcut`: the one pool fixture with an image and no `daily_pick` row at
+    # all (see `test/fixtures/paintings.yml`) — the "never a Daily Pick" case
+    # story 0030 is actually about, kept from `/feed` the way a real reader
+    # would rather than by destroying a fixture's pick.
+    def woodcut = paintings(:woodcut)
+
+    def keep_a_never_picked_work
+      visit feed_path
+      # Woodcut sorts 5th on a fresh pool (`test/fixtures/paintings.yml`) —
+      # below the fold at 375×667. `reveal` is ApplicationSystemTestCase's.
+      reveal keep_label(woodcut.title)
+      click_on keep_label(woodcut.title)
+      assert_button remove_label(woodcut.title)
     end
 
     def zoom_left
