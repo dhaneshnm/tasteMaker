@@ -128,4 +128,35 @@ class PublicCacheHeadersTest < ActionDispatch::IntegrationTest
 
     assert_response :not_modified, "/ stopped returning 304 on revalidation"
   end
+
+  # Story 0032. The sit gate lives INSIDE the cached public page, so its
+  # markup must be identical for everyone: a folded details, one inert frame
+  # with no src (no per-visitor fetch is even named until a client-side
+  # minute completes), and none of the personal machinery — the impression
+  # form arrives only through the walled fragment. The byte-identical tests
+  # above hold the "same for every visitor state" half; this holds the shape.
+  test "the front door ships the gate folded, the frame inert, and no field" do
+    get "/"
+
+    assert_includes response.body, '<details class="sit__details"',
+      "the note is not behind the gate"
+    assert_not_includes response.body, "<details open",
+      "the cached page must never ship the note pre-opened"
+    frame = response.body[/<turbo-frame[^>]*id="impression_\d+"[^>]*>/]
+    assert frame.present?, "the impression frame is missing from the gate"
+    assert_not_includes frame, "src=",
+      "the inert frame must not carry a src — sit_controller assigns it (eng E3)"
+    assert_not_includes response.body, "sit__input",
+      "the field belongs to the walled fragment, never the cached page"
+  end
+
+  # The gate's describedby swap (eng OV5): while folded, the artwork is
+  # described by the invitation — never the note, which aria-describedby
+  # would flatten into the accessible name even though it is hidden.
+  test "the folded artwork is described by the invitation, not the note" do
+    get "/"
+
+    img = response.body[/<img[^>]*class="plate__img"[^>]*>/]
+    assert_includes img, 'aria-describedby="sit-invite"'
+  end
 end

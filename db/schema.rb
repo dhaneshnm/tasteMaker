@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_26_185316) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_31_210100) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -74,6 +74,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_26_185316) do
     t.index ["user_id"], name: "index_favorites_on_user_id"
   end
 
+  create_table "impressions", force: :cascade do |t|
+    t.string "body", limit: 280, null: false
+    t.datetime "created_at", null: false
+    t.integer "painting_id", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["painting_id"], name: "index_impressions_on_painting_id"
+    t.index ["user_id", "painting_id"], name: "index_impressions_on_user_id_and_painting_id", unique: true
+    t.index ["user_id"], name: "index_impressions_on_user_id"
+  end
+
   create_table "paintings", force: :cascade do |t|
     t.string "accession_number"
     t.string "artist"
@@ -109,6 +120,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_26_185316) do
     t.index ["tradition"], name: "index_paintings_on_tradition"
   end
 
+  create_table "sit_counters", force: :cascade do |t|
+    t.integer "completed", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.date "date", null: false
+    t.integer "shown", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["date"], name: "index_sit_counters_on_date", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email"
@@ -125,4 +145,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_26_185316) do
   add_foreign_key "daily_picks", "paintings"
   add_foreign_key "favorites", "paintings"
   add_foreign_key "favorites", "users"
+  add_foreign_key "impressions", "paintings"
+  add_foreign_key "impressions", "users"
 end

@@ -9,6 +9,9 @@ class User < ApplicationRecord
   # delete_all skips callbacks on purpose — favorites have none today, and if
   # they ever grow any this line is the tripwire to revisit (eng review, Codex).
   has_many :favorites, dependent: :delete_all
+  # Reader-written lines (story 0032). Same deletion contract as favorites:
+  # the corner's delete-account action must strand no user content (eng A2).
+  has_many :impressions, dependent: :delete_all
 
   validates :provider, presence: true
   validates :uid, presence: true, uniqueness: { scope: :provider }

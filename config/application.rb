@@ -34,6 +34,13 @@ module Tondo
     config.x.revision =
       Rails.root.join("REVISION").then { |f| f.exist? ? f.read.strip.presence : nil } || "dev"
 
+    # The sit gate's minute (story 0032), in seconds. Config rather than a
+    # literal in the view so the test env can run a sub-second minute — the
+    # system suite must never sleep 60 real seconds per assertion. The app
+    # default matches what survived the owner's dogfood, not the literature
+    # (protocol v2 kill condition; `user-research/0010`).
+    config.x.sit_duration_seconds = 60
+
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.

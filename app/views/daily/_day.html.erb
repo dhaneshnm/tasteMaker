@@ -20,7 +20,11 @@
     signal that feature has. %>
 <% painting = pick.painting
    src = artwork_src(painting)
-   archive = chrome == :archive %>
+   archive = chrome == :archive
+   # The sit gate (story 0032) lives on the front door and nowhere else:
+   # the archive is browsing, not practice (design D7 — N gates down a walk
+   # is hostility), and a curator previewing is proofreading, not sitting.
+   gated = chrome == :front_door %>
 
 <% content_for :title, "#{painting.title} — Tondo" %>
 <% content_for :description, "#{painting.title} by #{painting.artist_display}, #{archive ? "from the Tondo archive" : "today's artwork on Tondo"}." %>
@@ -39,8 +43,16 @@
       aside_datetime: pick.scheduled_on.iso8601 %>
 
 <main class="page" data-controller="artwork">
+  <%# While the gate is folded the artwork is described by the invitation,
+      not the note: `aria-describedby` flattens referenced content even when
+      it is hidden inside a closed details, so pointing at `daily-note` here
+      would read the entire note to a screen-reader user before they ever
+      chose to reveal it — the gate would not exist for exactly them (story
+      0032, eng OV5). `sit_controller` hands the description back to
+      `daily-note` at reveal. %>
   <%= render "shared/plate", painting: painting, eager: true,
-        describedby: "daily-note", resting: "This work is resting — read the note." %>
+        describedby: gated ? "sit-invite" : "daily-note",
+        resting: "This work is resting — read the note." %>
 
   <%# The action rail. Under the plate, above the label — the position is the
       whole story: it does not move with the length of the note, so the keep
@@ -157,23 +169,68 @@
       <p class="label__meta"><%= painting.meta_line %></p>
     <% end %>
 
-    <%# The curator's note is shown whole — it is the whole point, and it is
-        written to a 60-180 word target. Museum copy is not: it runs to 324
-        words in this pool, which would push the artwork off a phone screen. So
-        borrowed words get the same clamped treatment they get in the archive,
-        and they say whose they are. %>
-    <% if pick.hand_written? %>
-      <div class="label__note" id="daily-note"><%= simple_format(pick.note) %></div>
-    <% else %>
-      <div class="label__body" id="daily-note" data-controller="expand">
-        <p class="label__text" data-expand-target="text"><%= pick.note %></p>
-        <button type="button" class="label__more" data-expand-target="button"
-                data-action="expand#toggle" hidden>More</button>
-        <p class="label__source">From <%= painting.source_name %></p>
-      </div>
-    <% end %>
+    <%# The note itself lives in `daily/_note` since story 0032 — one text,
+        two entrances. Ungated surfaces render it exactly as before. The
+        front door folds it into the sit gate: look first, then read.
 
-    <%= tag.p(painting.credit_line, class: "label__credit") if painting.credit_line.present? %>
+        Gate anatomy, outside-in (every position is a decision):
+        - The impression frame sits OUTSIDE and ABOVE the details — inside
+          the body it would be invisible until reveal, which kills "write
+          before the note"; outside, a submitted line already sits above the
+          opened note with no reparenting (design F1). It ships with NO
+          `src`: `sit_controller` assigns one only at minute-complete, so
+          the vast majority of opens cost zero extra requests (eng E3).
+        - The summary IS the invitation IS the reveal control — one
+          server-rendered string for every reader (cached page is
+          byte-identical; a JS copy-swap at connect would flash the wrong
+          voice — design D10). The credit line rides inside the gate: dim
+          acquisition metadata is reveal material, and without it the coda's
+          "See you tomorrow." lands two lines under the invitation (D11).
+        - The inline script runs pre-paint, same-parse-pass: a same-day
+          return opens the details BEFORE first paint, because opening it at
+          Stimulus connect would fold-then-open on every revisit — the
+          mirror of the paint-open-then-fold this plan bans (eng A3/OV9;
+          the 0031 share reveal is the inline pre-paint precedent). One
+          fixed localStorage key; the value is the SERVER's date for this
+          pick, never the client clock (eng A4/OV7 — "today" rolls over on
+          America/New_York, not wherever the phone is standing). %>
+    <% if gated %>
+      <div class="sit" data-controller="sit"
+           data-sit-duration-value="<%= Rails.configuration.x.sit_duration_seconds %>"
+           data-sit-date-value="<%= pick.scheduled_on.iso8601 %>"
+           data-sit-control-url-value="<%= impression_control_path(painting) %>"
+           data-sit-shown-url-value="<%= sit_beacon_path(event: "shown") %>"
+           data-sit-completed-url-value="<%= sit_beacon_path(event: "completed") %>"
+           data-sit-ready-copy-value="The note is ready.">
+        <%= turbo_frame_tag "impression_#{painting.id}", class: "sit__slot",
+              data: { sit_target: "slot" } %>
+        <details class="sit__details" data-sit-target="details"
+                 data-action="toggle->sit#toggled">
+          <%# DRAFT COPY — owner reviews before ship (T5). Must not promise
+              "the curator's note": some days the words are a museum's
+              (decisions/0004, design D12). %>
+          <summary class="sit__summary" id="sit-invite" data-sit-target="summary">Sit
+            with the painting a minute — the note will keep.</summary>
+          <div class="sit__body">
+            <%= render "daily/note", pick: pick, painting: painting %>
+          </div>
+        </details>
+        <p class="sit__status" aria-live="polite" data-sit-target="status"></p>
+        <script>
+          (() => {
+            try {
+              const sit = document.currentScript.closest(".sit")
+              if (localStorage.getItem("sit") === sit.dataset.sitDateValue) {
+                sit.querySelector("details").open = true
+                sit.classList.add("sit--revealed")
+              }
+            } catch (e) {}
+          })()
+        </script>
+      </div>
+    <% else %>
+      <%= render "daily/note", pick: pick, painting: painting %>
+    <% end %>
 
     <footer class="coda">
       <div class="ornament" aria-hidden="true">✦</div>

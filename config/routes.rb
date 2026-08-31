@@ -145,6 +145,19 @@ Rails.application.routes.draw do
   # cacheable, and this endpoint — private, no-store — carries the personal part.
   # It is also where the reader's cookie is issued, so every write already has an
   # identity and two cold-start tabs cannot mint two.
+  # The sit (story 0032). The impression frame's two doors mirror Keep's:
+  # `#control` answers everyone (the controller skips the wall — a bounce
+  # would paint "Content missing" into the cached front door, eng A1), the
+  # write stays walled and user-only. The beacon is identity-free by design:
+  # no cookie, no CSRF (nothing to forge — it can only add 1 to a public
+  # tally), constrained to the two event names at the routing layer.
+  get  "impression/:painting_id/control" => "impressions#control", as: :impression_control,
+    constraints: { painting_id: /\d+/ }
+  post "impression/:painting_id" => "impressions#create", as: :impressions,
+    constraints: { painting_id: /\d+/ }
+  post "sit/:event" => "sit_beacons#create", as: :sit_beacon,
+    constraints: { event: /shown|completed/ }
+
   get    "collection" => "favorites#index", as: :collection
   get    "collection/:painting_id/control" => "favorites#control", as: :favorite_control,
     constraints: { painting_id: /\d+/ }

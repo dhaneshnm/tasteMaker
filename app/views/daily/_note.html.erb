@@ -1,0 +1,22 @@
+<%# The words under the artwork, whoever speaks them, plus the credit line —
+    extracted (story 0032) so the front door's sit gate and the ungated
+    archive/preview render the SAME text from one place. Locals: pick,
+    painting.
+
+    The curator's note is shown whole — rule 8, amended by 0032: whole once
+    revealed; only its entrance is gated, and only on `/`. Museum copy keeps
+    the archive's clamp + More treatment; inside the gate the expand
+    controller re-measures on the details toggle (it reads 0×0 in a closed
+    details — see expand_controller.js). %>
+<% if pick.hand_written? %>
+  <div class="label__note" id="daily-note"><%= simple_format(pick.note) %></div>
+<% else %>
+  <div class="label__body" id="daily-note" data-controller="expand">
+    <p class="label__text" data-expand-target="text"><%= pick.note %></p>
+    <button type="button" class="label__more" data-expand-target="button"
+            data-action="expand#toggle" hidden>More</button>
+    <p class="label__source">From <%= painting.source_name %></p>
+  </div>
+<% end %>
+
+<%= tag.p(painting.credit_line, class: "label__credit") if painting.credit_line.present? %>

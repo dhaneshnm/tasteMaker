@@ -8,6 +8,20 @@ class DailyTest < ApplicationSystemTestCase
 
     assert_selector "h1.label__title", text: paintings(:sunflowers).title
 
+    # Bar 2 wears two faces since story 0032. Folded: the invitation is the
+    # written line sharing the screen with the art.
+    invitation_visible = page.evaluate_script(<<~JS)
+      (() => {
+        const s = document.querySelector(".sit__summary");
+        if (!s) return false;
+        const rect = s.getBoundingClientRect();
+        return rect.top + rect.height <= window.innerHeight;
+      })()
+    JS
+    assert invitation_visible, "the invitation was pushed below the fold at 375x667"
+
+    # Revealed: the summary is gone and the old bound holds unchanged.
+    open_the_note
     two_lines_visible = page.evaluate_script(<<~JS)
       (() => {
         const p = document.querySelector(".label__note p");
@@ -79,6 +93,9 @@ class DailyTest < ApplicationSystemTestCase
 
     assert_selector ".plate__resting", text: "This work is resting"
     assert_no_selector ".plate__zoom", visible: true
+    # The resting copy says "read the note" — the reader's route to it is
+    # the gate, same as any other day (story 0032).
+    open_the_note
     assert_selector ".label__note", text: /fortnight/
   end
 end

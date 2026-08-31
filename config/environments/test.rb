@@ -48,4 +48,8 @@ Rails.application.configure do
   # `Rails.application.config.x.dev_sign_in_enabled` for its own duration and
   # restores it; see test/integration/dev_sign_in_routing_test.rb.
   config.x.dev_sign_in_enabled = false
+
+  # A sub-second sit (story 0032): system tests wait the gate's real minute
+  # out — it just isn't a minute here. Never assert around it with sleeps.
+  config.x.sit_duration_seconds = 0.4
 end

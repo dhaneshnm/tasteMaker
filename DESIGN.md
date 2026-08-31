@@ -248,6 +248,21 @@ down), `__artist` + `__artist-name` + `__artist-dates`, `__meta`, then the
 prose (`__note` for the hand-written note, `__text` for museum copy),
 then `__credit`.
 
+`.sit` — the gate the front door's note waits behind (story 0032,
+`decisions/0022`). One server-rendered invitation in the label's own italic
+voice doubles as the reveal control — the summary of a native `<details>`, so
+the no-JS floor is a working disclosure and the note can never paint open and
+then fold. **No visible timer, ever**: the minute's only faces are the copy
+swap and the colour step — summary waits `--ink-dim`, earns `--gold` at the
+ready state (the compass's dim/gold idiom), dims to `--ink-faint` once
+revealed. `/` only; the archive and preview render the note open exactly as
+before. The reader's one line (`.sit__impression`) is a new text idiom:
+Newsreader italic in `--ink-dim`, unquoted, unboxed — the reader's voice sits
+one quiet step above the curator's `--ink` prose and is never confused with
+it. The 44px bar comes from `padding-block` (the `.label__artist-name`
+precedent); the disclosure triangle is suppressed — the chevron is an idiom
+this product has never shown.
+
 `.coda` — the closing beat. Ornament, a line in display italic, sometimes a
 note and a link. Ends the daily ritual, ends the archive, carries the empty
 state.
@@ -450,7 +465,10 @@ curator's desk.
    off under `prefers-reduced-motion`. Nothing slides, bounces, or springs.
 8. **Text is never clamped on the daily page.** The archive clamps museum
    catalogue copy to four lines with a `More` toggle, because there the point is
-   the pictures. The hand-written note is the whole point and is shown whole.
+   the pictures. The hand-written note is the whole point and is shown whole —
+   **whole once revealed** (amended by story 0032): the front door folds the
+   note's *entrance* behind the sit gate, and only there. The words are never
+   cut, only their moment moves; `/days/:date` still shows every note open.
 9. **Anything you can tap is at least `--tap` (44px) in every direction it has.**
    `.caps-link` sets size and tracking, not height, so every control built on it
    states the bar itself — `.walk__step`, `.zoom__close`, `.rail__act`,

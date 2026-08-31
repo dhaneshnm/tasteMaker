@@ -232,6 +232,24 @@ class DynamicTypeTest < ApplicationSystemTestCase
       assert_selector ".plate__img"
 
       scale_to CAPPED_ACCESSIBILITY_ROOT
+
+      # The gated face of the bound first (story 0032): at the cap, the
+      # invitation — the only written line a fresh visit shows — must clear
+      # the fold along with the artwork.
+      gated = page.evaluate_script(<<~JS)
+        (() => {
+          const s = document.querySelector(".sit__summary");
+          if (!s) return null;
+          const r = s.getBoundingClientRect();
+          return { bottom: r.bottom, viewport: window.innerHeight };
+        })()
+      JS
+      assert_operator gated["bottom"], :<=, gated["viewport"],
+        "the invitation is below the fold at the accessibility cap on #{what}"
+
+      # Then the revealed face: the summary is gone (its 44px was exactly
+      # this bound's budget), and the pre-0032 numbers hold unchanged.
+      open_the_note
       f = fold
 
       assert_operator f["plateBottom"], :<, f["viewport"],

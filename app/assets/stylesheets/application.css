@@ -1459,6 +1459,9 @@ html.zoom-open body { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .sentinel__ring { animation: none; }
   .zoom { animation: none; }
+  /* The sit gate's unfold and field arrival (story 0032) go instant. */
+  .sit__details[open] .sit__body { animation: none; }
+  .sit--ready .sit__slot { animation: none; }
 }
 
 /* ---------------------------------------------------------------------------
@@ -1598,4 +1601,96 @@ html.zoom-open body { overflow: hidden; }
 .account {
   margin-top: 2.5rem;
   text-align: center;
+}
+
+/* ---------------------------------------------------------------------------
+ * The sit gate (story 0032, plan D1-D12 + eng E3/OV4/OV5/OV10).
+ *
+ * The note starts folded behind one server-rendered invitation; the summary
+ * IS the invitation IS the reveal control — Newsreader, the label's own
+ * voice, never a third disclosure idiom beside `.label__more` and
+ * `.caps-link` (design F9). No visible timer exists anywhere in this block
+ * on purpose (D2): the only faces of the minute are the copy swap and the
+ * colour step below.
+ *
+ * Colour is state (D3): the summary waits in `--ink-dim` and earns `--gold`
+ * when the minute completes — the compass's own idiom, where dim marks
+ * not-yet and gold marks a live door. After reveal it dims again to a plain
+ * label (OV10): still a real toggle (a summary cannot be removed from an
+ * open details), so re-collapsing a revealed note works and looks like the
+ * quiet control it is.
+ */
+
+/* Rule 9 by `padding-block`, the `.label__artist-name` precedent: the
+ * summary sits in flowing text and must wrap, so it states the 44px bar
+ * with padding, not a block box. */
+.sit__summary {
+  /* flex, not list-item: centres any line count inside the bar AND hides
+   * Safari's disclosure triangle where the marker rules below don't. */
+  display: flex;
+  align-items: center;
+  min-height: var(--tap);
+  list-style: none;
+  cursor: pointer;
+  font-style: italic;
+  color: var(--ink-dim);
+}
+.sit__summary::marker { content: none; }
+.sit__summary::-webkit-details-marker { display: none; }
+
+.sit--ready .sit__summary { color: var(--gold); }
+.sit--ready .sit__summary:hover { color: var(--gold-deep); }
+
+/* Revealed = the old page, exactly. The summary vanishes once the details
+ * is open (implement-time reversal of OV10's dim-label idea, recorded in
+ * the plan): its 44px bar is what pushed the first written line below the
+ * fold at the accessibility cap — dynamic_type_test's measured bound — and
+ * the fold budget is a bar, re-collapse was a nicety. Only the entrance
+ * moves; the destination is the page this product always was. */
+.sit__details[open] > .sit__summary { display: none; }
+
+/* The minute completing and the note unfolding are both fades — rule 7,
+ * nothing slides. */
+.sit__details[open] .sit__body { animation: sit-fade 0.45s ease-out; }
+.sit--ready .sit__slot { animation: sit-fade 0.45s ease-out; }
+@keyframes sit-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* The reader's own voice (design F14): italic, dim, unquoted, unboxed —
+ * distinct from the curator's `--ink` prose and one quiet step above it. */
+.sit__impression {
+  font-style: italic;
+  color: var(--ink-dim);
+  margin-bottom: 1.45em;
+}
+
+/* The one-line field, on lift like every form control in the house. */
+.sit__form { margin-block: 0.6rem 1rem; }
+.sit__label {
+  display: block;
+  font-style: italic;
+  color: var(--ink-faint);
+  margin-bottom: 0.35rem;
+}
+.sit__input {
+  display: block;
+  width: 100%;
+  background: var(--bg-lift);
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  color: var(--ink);
+  font: inherit;
+  padding: 0.55rem 0.7rem;
+  min-height: var(--tap);
+}
+.sit__error { color: var(--warn); margin-top: 0.35rem; }
+.sit__save { margin-top: 0.5rem; min-height: var(--tap); }
+
+/* aria-live vessel: announced, never seen — it carries the ready line for
+ * screen readers because a summary's text swap announces nothing (OV8/D3). */
+.sit__status {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

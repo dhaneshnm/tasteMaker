@@ -141,7 +141,7 @@ was written — no scaffold for a thing that didn't happen) → note → credit 
 |---|---|---|
 | Gate | first open, JS on | note folded; invitation line; dim reveal control |
 | Gate | 60s elapsed | invitation swaps to ready copy; control turns gold; field appears (signed-in) |
-| Gate | revealed | note fades open; localStorage mark written; summary stays (a `<summary>` cannot be removed from an open `<details>`) — it dims to a plain label, remains a live toggle, and re-collapsing a revealed note is allowed, harmless, styled, and tested (OV10) |
+| Gate | revealed | note fades open; localStorage mark written; **the summary disappears** (`details[open] > summary { display: none }`) — implement-time reversal of OV10's dim-label design: its 44px bar broke `dynamic_type_test`'s measured fold bound at the accessibility cap, and the fold budget is a bar where re-collapse was a nicety. Revealed = the pre-0032 page exactly |
 | Gate | revisit, same day | note open from the start, no timer |
 | Gate | no JS | native `<details>`: summary reads as the reveal control, tap opens, no timer |
 | Gate | storage blocked | gate shows again next visit — degradation, never an error |
@@ -419,10 +419,29 @@ Synthesized from this review's findings. Checkbox as you ship.
 - [ ] **T7 (P1)** — `expand_controller.js` re-measure on details `toggle` (OV4)
 - [ ] **T8 (P1)** — `describedby` swap folded↔revealed + assertions (OV5)
 
-## Deviations (implement-time — none yet)
+## Deviations (implement-time)
 
-Design-review-time deviation, recorded: D7 amends the story's "(and
-`/days/:date`)" — the gate ships on `/` only.
+- **OV10 reversed by a failing measured bar.** The dim-label open-state summary
+  pushed the first written line to 710px against a 667px viewport at the
+  accessibility cap (`dynamic_type_test`, the bound story 0013 bled for).
+  Revealed now hides the summary entirely: the destination page is the
+  pre-0032 layout byte for byte, geometry tests keep their numbers, and
+  re-collapse is gone (it was a nicety; the note refolds with tomorrow's
+  date). `sit_controller` lost its close branch and open-copy value with it.
+- **The minute is a config knob, not a literal** (`config.x.sit_duration_seconds`,
+  60 in production, 0.4 in test): the system suite waits the real gate out
+  without ever sleeping a real minute. Testability requirement found at
+  test-writing time.
+- **Seeds prune protection extended** (not in any review): `db/seeds.rb`'s
+  re-curation prune deletes pool-dropped works unless spoken for; a dropped
+  painting carrying an impression was a foreign-key violation in waiting.
+  `Impression` joined `DailyPick`/`Favorite` in the spoken-for union.
+- **Beacon CSRF**: the public page renders no CSRF meta (story 0007's own
+  test bans it), so the beacon controller `skip_forgery_protection` — the
+  endpoint can only add 1 to a public tally; recorded here because removing
+  that skip would silently kill every count.
+- Design-review-time deviation, recorded: D7 amends the story's "(and
+  `/days/:date`)" — the gate ships on `/` only.
 
 ## GSTACK REVIEW REPORT
 

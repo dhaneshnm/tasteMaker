@@ -72,12 +72,16 @@ puts "Metadata done (#{Painting.count} paintings from #{Painting.distinct.count(
 
 # Re-curating the pool drops works the quota table no longer wants. Those rows
 # would otherwise sit in the feed forever with a stale order. A work that has
-# already been published or kept is never deleted — story 0002's archive and
-# persona 2's collection are both promises that outlive a reseed.
+# already been published, kept, or written about is never deleted — story
+# 0002's archive, persona 2's collection, and story 0032's impressions are
+# promises that outlive a reseed (an impression row without its painting is a
+# foreign-key violation waiting in the prune).
 if ENV["LIMIT"].blank?
   wanted = paintings.map { |a| [ a["source"], a["source_id"] ] }.to_set
   orphans = Painting.all.reject { |p| wanted.include?([ p.source, p.source_id ]) }
-  spoken_for = DailyPick.where(painting: orphans).pluck(:painting_id) | Favorite.where(painting: orphans).pluck(:painting_id)
+  spoken_for = DailyPick.where(painting: orphans).pluck(:painting_id) |
+               Favorite.where(painting: orphans).pluck(:painting_id) |
+               Impression.where(painting: orphans).pluck(:painting_id)
   stale = orphans.reject { |p| spoken_for.include?(p.id) }
 
   stale.each(&:destroy)
