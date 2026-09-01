@@ -15,7 +15,11 @@ class SitTest < ApplicationSystemTestCase
   test "the note starts folded and the invitation describes the artwork" do
     visit root_path
 
-    assert_selector ".sit__summary", text: /take a minute to look closer/
+    # No copy assertion here: the test-env minute is sub-second, so the
+    # summary may legitimately read the invitation OR the ready line by the
+    # time the finder looks. The exact server-rendered invitation is held by
+    # public_cache_headers_test, where no timer runs.
+    assert_selector ".sit__summary"
     assert_no_text "standing in for it" # the note's own words stay hidden
     assert_selector ".sit__details .label__credit", visible: :all
     assert_equal "sit-invite", find(".plate__img")["aria-describedby"],
@@ -158,6 +162,20 @@ class SitTest < ApplicationSystemTestCase
     find(".label__more").click
     assert_selector ".label__body.expanded"
     assert_selector ".label__source", text: /from/i
+  end
+
+  test "a wordless day neither gates nor pretends" do
+    daily_picks(:today).update!(blurb: "")
+    paintings(:sunflowers).update!(description: nil)
+
+    visit root_path
+
+    assert_no_selector ".sit"
+    assert_no_selector ".label__body"
+    assert_no_text "From" # no dangling museum attribution
+    assert_selector ".label__credit" # picture + credit, the quiet floor
+    assert_nil find(".plate__img")["aria-describedby"].presence,
+      "nothing to describe the artwork by — the reference must not dangle"
   end
 
   test "the archive is never gated" do

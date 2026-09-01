@@ -24,7 +24,10 @@
    # The sit gate (story 0032) lives on the front door and nowhere else:
    # the archive is browsing, not practice (design D7 — N gates down a walk
    # is hostility), and a curator previewing is proofreading, not sitting.
-   gated = chrome == :front_door %>
+   # And only when there are words to wait for (owner direction, 2026-08-31):
+   # a wordless day gating nothing would make the invitation a lie — it
+   # degrades to picture + credit, the page the product always was.
+   gated = chrome == :front_door && pick.note.present? %>
 
 <% content_for :title, "#{painting.title} — Tondo" %>
 <% content_for :description, "#{painting.title} by #{painting.artist_display}, #{archive ? "from the Tondo archive" : "today's artwork on Tondo"}." %>
@@ -51,7 +54,7 @@
       0032, eng OV5). `sit_controller` hands the description back to
       `daily-note` at reveal. %>
   <%= render "shared/plate", painting: painting, eager: true,
-        describedby: gated ? "sit-invite" : "daily-note",
+        describedby: gated ? "sit-invite" : (pick.note.present? ? "daily-note" : nil),
         resting: "This work is resting — read the note." %>
 
   <%# The action rail. Under the plate, above the label — the position is the

@@ -140,6 +140,8 @@ class PublicCacheHeadersTest < ActionDispatch::IntegrationTest
 
     assert_includes response.body, '<details class="sit__details"',
       "the note is not behind the gate"
+    assert_match(/take a minute to look closer/, response.body,
+      "the owner's invitation is the one server-rendered summary string")
     assert_not_includes response.body, "<details open",
       "the cached page must never ship the note pre-opened"
     frame = response.body[/<turbo-frame[^>]*id="impression_\d+"[^>]*>/]

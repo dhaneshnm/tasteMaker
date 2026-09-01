@@ -10,7 +10,7 @@
     details — see expand_controller.js). %>
 <% if pick.hand_written? %>
   <div class="label__note" id="daily-note"><%= simple_format(pick.note) %></div>
-<% else %>
+<% elsif pick.note.present? %>
   <div class="label__body" id="daily-note" data-controller="expand">
     <p class="label__text" data-expand-target="text"><%= pick.note %></p>
     <button type="button" class="label__more" data-expand-target="button"
@@ -18,5 +18,9 @@
     <p class="label__source">From <%= painting.source_name %></p>
   </div>
 <% end %>
+<%# Neither voice has words (owner direction, 2026-08-31): render NOTHING —
+    an empty shell with a dangling "From <museum>" line read as a broken
+    promise. Auto-filled days can't reach this (0023 requires a description);
+    a hand-picked day can, and it degrades to picture + credit, quietly. %>
 
 <%= tag.p(painting.credit_line, class: "label__credit") if painting.credit_line.present? %>
