@@ -140,8 +140,8 @@ class PublicCacheHeadersTest < ActionDispatch::IntegrationTest
 
     assert_includes response.body, '<details class="sit__details"',
       "the note is not behind the gate"
-    assert_match(/take a minute to look closer/, response.body,
-      "the owner's invitation is the one server-rendered summary string")
+    assert_includes response.body, daily_picks(:today).sit_prompt,
+      "the day's prompt is cached content, identical for every reader"
     assert_not_includes response.body, "<details open",
       "the cached page must never ship the note pre-opened"
     frame = response.body[/<turbo-frame[^>]*id="impression_\d+"[^>]*>/]
@@ -153,12 +153,12 @@ class PublicCacheHeadersTest < ActionDispatch::IntegrationTest
   end
 
   # The gate's describedby swap (eng OV5): while folded, the artwork is
-  # described by the invitation — never the note, which aria-describedby
+  # described by the day's prompt — never the note, which aria-describedby
   # would flatten into the accessible name even though it is hidden.
-  test "the folded artwork is described by the invitation, not the note" do
+  test "the folded artwork is described by the prompt, not the note" do
     get "/"
 
     img = response.body[/<img[^>]*class="plate__img"[^>]*>/]
-    assert_includes img, 'aria-describedby="sit-invite"'
+    assert_includes img, 'aria-describedby="sit-prompt"'
   end
 end

@@ -314,6 +314,29 @@ class DailyPick < ApplicationRecord
     hand_written? ? blurb : painting&.description
   end
 
+  # The day's looking prompt (story 0032, redesigned 2026-09-01): one line
+  # from the owner's slow-looking protocol rotation (`user-research/0010`,
+  # P1/P2/P3/P5 plus the first-impression move — the text-friendly subset;
+  # P4 crop and P6 sketch don't survive as one-line prompts). Keyed off the
+  # scheduled date's Julian day so the rotation is deterministic, cache-safe
+  # (byte-identical for every reader of the cached front door), and cycles
+  # without state. Which prompts produce the most writing is read back from
+  # `impressions.prompt` — the protocol's own seed-order question.
+  #
+  # DRAFT COPY — app-scaled from the protocol's prompts; owner's
+  # field-by-field pass applies (T5 precedent).
+  SIT_PROMPTS = [
+    "Describe what you see to someone who cannot see it.",
+    "Explain this picture to someone from a world without paintings.",
+    "Pick one small detail. Why might it be there?",
+    "Step inside the frame. What do you hear, feel, smell?",
+    "What did your eye go to first? Where did it go next?"
+  ].freeze
+
+  def sit_prompt
+    SIT_PROMPTS[scheduled_on.jd % SIT_PROMPTS.size]
+  end
+
   def hand_written?
     blurb.present?
   end

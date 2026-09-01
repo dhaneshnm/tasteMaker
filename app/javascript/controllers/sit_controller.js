@@ -1,116 +1,63 @@
 import { Controller } from "@hotwired/stimulus"
 
-// The sit gate (story 0032): the note starts folded behind a quiet
-// invitation; a soft minute later the invitation becomes the ready line and
-// the reveal control earns its gold. The reveal is ALWAYS the reader's own
-// tap — this controller never opens the details itself (design D3), and the
-// gate never locks: the summary opens the note at any moment.
+// The sit gate, prompt form (story 0032, redesigned 2026-09-01): the day's
+// looking prompt and the answer field greet the reader at once; the note
+// waits behind one always-live READ THE NOTE control. No timer, no staged
+// states — the prompt is the scaffold, the skip is first-class.
 //
-//   connect (closed) ──> shown beacon ──> timer (visibility-paused)
-//        │                                   │
-//        │ reader taps early                 │ minute completes
-//        ▼                                   ▼
-//   finalize: mark day,                 ready state: copy swap, gold,
-//   no field this visit                 aria-live line, frame gets its src
-//   (foreclosure is intended, D5)       (the ONLY place src is assigned)
+//   connect ──> frame.src = control (the field, or the sign-in hint)
+//      │        shown beacon (folded opens only)
+//      │ reader taps READ THE NOTE — any time
+//      ▼
+//   toggled: revealed beacon (first reveal of the day), localStorage mark,
+//   flush the draft (sit:flush → autosave's keepalive write), then the
+//   frame reloads with after=reveal — the field becomes the answer,
+//   read-only; the draft became ink by being read past (D6 as amended).
 //
-// Already-revealed revisits arrive with the details pre-opened by the
-// inline pre-paint script in the view — connect sees `open`, finalizes, and
-// never arms a timer or fires a beacon. The zoom overlay deliberately does
-// NOT pause the timer: zooming is looking (design F15b).
+// Already-revealed revisits arrive pre-opened by the inline pre-paint
+// script; connect sees `open` and asks the frame for the answer directly.
 export default class extends Controller {
-  static targets = ["details", "summary", "status", "slot"]
-  static values = {
-    duration: Number, date: String, controlUrl: String,
-    shownUrl: String, completedUrl: String, readyCopy: String
-  }
+  static targets = ["details", "slot"]
+  static values = { date: String, controlUrl: String, shownUrl: String, revealedUrl: String }
 
   connect() {
-    this.finished = false
-    if (this.detailsTarget.open) { this.finalize(); return }
-
-    this.beacon(this.shownUrlValue)
-    // Guard found by live QA: a missing/garbled duration value (a stale
-    // server boot once rendered "{}") multiplies to NaN and setTimeout(NaN)
-    // fires IMMEDIATELY — an instant ready state, the opposite of a sit.
-    // A gate that cannot know its minute sits the full default.
-    const seconds = this.durationValue > 0 ? this.durationValue : 60
-    this.remaining = seconds * 1000
-    this.startedAt = Date.now()
-    this.arm()
-    // A backgrounded tab is not looking: bank the elapsed time on hide,
-    // resume the balance on return.
-    this.onVisibility = () => this.visibilityChanged()
-    document.addEventListener("visibilitychange", this.onVisibility)
+    // The frame ships inert — src is assigned here, once, to the variant
+    // this visit needs. One fetch per open, the Keep frame's own cost; a
+    // no-JS visit fetches nothing and the native details still opens.
+    if (this.detailsTarget.open) {
+      this.slotTarget.src = this.afterRevealUrl()
+      this.plateImg()?.setAttribute("aria-describedby", "daily-note")
+    } else {
+      this.slotTarget.src = this.controlUrlValue
+      this.beacon(this.shownUrlValue)
+    }
   }
 
-  disconnect() {
-    clearTimeout(this.timer)
-    document.removeEventListener("visibilitychange", this.onVisibility)
-  }
-
-  // Wired as `toggle->sit#toggled` on the details element. Opening — at any
-  // time, by any reader — cancels the minute silently and marks the day; no
-  // "the minute is up" residue may appear after the reader already chose
-  // (design F15a). There is no close branch: the summary disappears once
-  // the details opens (the revealed page is the old page — see the CSS),
-  // so a revealed note cannot be re-folded except by tomorrow's date.
+  // Wired as `toggle->sit#toggled` on the details element. There is no
+  // close branch: the summary disappears once open (see the CSS) — a
+  // revealed note refolds only with tomorrow's date.
   toggled() {
     if (!this.detailsTarget.open) return
-    clearTimeout(this.timer)
-    try { localStorage.setItem("sit", this.dateValue) } catch {}
-    this.finalize()
-  }
-
-  arm() {
-    this.timer = setTimeout(() => this.complete(), this.remaining)
-  }
-
-  visibilityChanged() {
-    if (this.finished) return
-    if (document.hidden) {
-      clearTimeout(this.timer)
-      this.remaining -= Date.now() - this.startedAt
-    } else if (!this.detailsTarget.open) {
-      this.startedAt = Date.now()
-      this.arm()
+    try {
+      if (localStorage.getItem("sit") !== this.dateValue) {
+        this.beacon(this.revealedUrlValue)
+      }
+      localStorage.setItem("sit", this.dateValue)
+    } catch (e) {
+      this.beacon(this.revealedUrlValue)
     }
-  }
-
-  complete() {
-    if (this.finished || this.detailsTarget.open) return
-    this.finished = true
-    this.beacon(this.completedUrlValue)
-    this.element.classList.add("sit--ready")
-    this.summaryTarget.textContent = this.readyCopyValue
-    // The summary's own text change announces nothing; this line does.
-    this.statusTarget.textContent = this.readyCopyValue
-    // The impression frame ships inert — no src, no request, for anyone who
-    // never reaches this line (eng E3). Assigning src here is what asks the
-    // server whether this reader gets a field at all.
-    this.slotTarget.src = this.controlUrlValue
-  }
-
-  finalize() {
-    this.finished = true
-    clearTimeout(this.timer)
     this.element.classList.add("sit--revealed")
-    this.statusTarget.textContent = ""
-    // A revealed page still shows the reader their own line (code review
-    // C6): without this, the juxtaposition existed only on the visit that
-    // wrote it and a same-day return showed a bare note. `after=reveal`
-    // tells the control this visit already read — the server answers with
-    // the line or nothing, NEVER the field: writing after reading is the
-    // reveal-first order this whole story exists to prevent (D5), and the
-    // field's ~100px above an open note broke the fold bound besides.
-    // Guarded so the ready-state path never reloads a frame it filled.
-    if (!this.slotTarget.src) {
-      this.slotTarget.src = `${this.controlUrlValue}?after=reveal`
-    }
-    // While folded the artwork was described by the invitation, so a
-    // screen reader never hears the note pre-reveal (eng OV5); the reveal
-    // hands the description back to the note itself.
     this.plateImg()?.setAttribute("aria-describedby", "daily-note")
+    // Let the draft land before the frame trades the field for the answer:
+    // sit:flush triggers autosave's keepalive write; 350ms rides under the
+    // unfold fade. A draft that still misses the swap shows on the next
+    // visit — never lost, only late.
+    document.dispatchEvent(new CustomEvent("sit:flush"))
+    setTimeout(() => { this.slotTarget.src = this.afterRevealUrl() }, 350)
+  }
+
+  afterRevealUrl() {
+    return `${this.controlUrlValue}?after=reveal`
   }
 
   plateImg() {
@@ -118,8 +65,8 @@ export default class extends Controller {
   }
 
   beacon(url) {
-    // Identity-free tally (eng OV6); sendBeacon so a tab closing mid-flight
-    // still counts. Failure is silence — the tally is never worth an error.
+    // Identity-free tally: shown = gates displayed, revealed = notes opened
+    // (first of the day). Failure is silence — never worth an error.
     try { navigator.sendBeacon(url) } catch {}
   }
 }

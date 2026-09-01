@@ -1,8 +1,8 @@
 require "application_system_test_case"
 
-# The sit gate, driven like a reader (story 0032). The test env runs a
-# sub-second "minute" (config.x.sit_duration_seconds) — every wait below is
-# Capybara's own retry window, never a sleep against the real clock.
+# The sit gate, prompt form (story 0032, redesigned 2026-09-01), driven like
+# a reader: one looking prompt, an autosaving line to answer on, and READ
+# THE NOTE always one tap away.
 class SitTest < ApplicationSystemTestCase
   setup do
     # localStorage outlives Capybara's cookie reset (same browser process,
@@ -12,112 +12,112 @@ class SitTest < ApplicationSystemTestCase
     page.execute_script("try { localStorage.clear() } catch (e) {}")
   end
 
-  test "the note starts folded and the invitation describes the artwork" do
+  test "the day greets the reader with its prompt and a folded note" do
     visit root_path
 
-    # No copy assertion here: the test-env minute is sub-second, so the
-    # summary may legitimately read the invitation OR the ready line by the
-    # time the finder looks. The exact server-rendered invitation is held by
-    # public_cache_headers_test, where no timer runs.
-    assert_selector ".sit__summary"
+    assert_selector ".sit__prompt", text: daily_picks(:today).sit_prompt
     assert_no_text "standing in for it" # the note's own words stay hidden
+    assert_selector ".sit__summary", text: /read the note/i
     assert_selector ".sit__details .label__credit", visible: :all
-    assert_equal "sit-invite", find(".plate__img")["aria-describedby"],
-      "folded, the artwork must be described by the invitation, never the note"
+    assert_equal "sit-prompt", find(".plate__img")["aria-describedby"],
+      "folded, the artwork must be described by the prompt, never the note"
   end
 
-  test "the reveal never locks: an early tap opens the note and forecloses the field" do
+  test "a stranger gets the prompt as pure looking scaffold, and the quiet hint" do
     visit root_path
+
+    assert_selector ".sit__hint", text: "Sign in to keep your answer."
+    assert_no_selector ".sit__input"
+    assert_no_selector ".sit__hint a", visible: :all
+    assert_no_text "Content missing"
+
+    wait_for("the shown beacon") do
+      SitCounter.find_by(date: Date.current)&.shown.to_i >= 1
+    end
+  end
+
+  test "the skip is first-class: one tap and the note is open, hint gone" do
+    visit root_path
+    assert_selector ".sit__hint" # frame answered before the skip
     find(".sit__summary").click
 
     assert_text "standing in for it"
     assert_equal "daily-note", find(".plate__img")["aria-describedby"]
-
-    # The minute expires in the background — no ready residue may appear
-    # after the reader already chose, and no field ever (D5/F15a).
-    assert_no_selector ".sit--ready", wait: 1.5
-    assert_no_selector ".sit__input"
-    assert_equal "", find('[data-sit-target="status"]', visible: :all).text
-  end
-
-  test "the minute completes into the ready state and counts itself" do
-    visit root_path
-
-    assert_selector ".sit--ready", wait: 3
-    assert_selector ".sit__summary", text: "The note is ready."
-    assert_no_text "standing in for it" # ready ≠ revealed: still the reader's tap
-
-    wait_for("the completed beacon") do
+    assert_no_selector ".sit__hint", wait: 2 # after the reveal, silence — not a nag
+    wait_for("the revealed beacon") do
       SitCounter.find_by(date: Date.current)&.completed.to_i >= 1
     end
-    assert SitCounter.find_by(date: Date.current).shown >= 1
   end
 
-  test "a signed-out minute-completer gets no field and no Content missing" do
-    visit root_path
-
-    assert_selector ".sit--ready", wait: 3
-    assert_no_selector ".sit__input", wait: 1
-    assert_no_text "Content missing"
-  end
-
-  test "a signed-in reader writes the line, keeps sitting, then reveals the juxtaposition" do
+  test "a signed-in reader answers under the prompt, autosaved, then reads" do
     sign_in_as_reader
     visit root_path
     page.execute_script("try { localStorage.clear() } catch (e) {}")
     visit root_path
 
-    assert_selector ".sit--ready", wait: 3
-    assert_selector ".sit__input", wait: 2
+    assert_selector ".sit__input", wait: 3 # the field arrives with the page, no stages
+    find(".sit__input").fill_in(with: "the butterflies arrive before the eye does")
+    find(".sit__input").send_keys(:enter)
 
-    fill_in "Record your reaction. Even one line will do.", with: "the yellows hum"
-    click_button "Save"
+    assert_selector ".sit__saved", text: /saved/i, wait: 3
+    assert_no_text "standing in for it" # saving is not consent to reveal
 
-    # Submitting is not consent to reveal (eng): the line lands, the note waits.
-    assert_selector ".sit__impression", text: "the yellows hum"
-    assert_no_text "standing in for it"
+    impression = Impression.last
+    assert_equal "the butterflies arrive before the eye does", impression.body
+    assert_equal daily_picks(:today).sit_prompt, impression.prompt,
+      "the prompt the reader answered under must ride the row"
 
     find(".sit__summary").click
     assert_text "standing in for it"
-    assert page.evaluate_script(<<~JS), "the reader's line must sit above the note"
+    assert_selector ".sit__impression", text: "the butterflies arrive", wait: 3
+    assert page.evaluate_script(<<~JS), "the answer must sit above the note"
       !!(document.querySelector(".sit__impression").compareDocumentPosition(
            document.querySelector("#daily-note")) & Node.DOCUMENT_POSITION_FOLLOWING)
     JS
   end
 
-  test "a same-day return finds the note open from the first paint" do
-    visit root_path
-    find(".sit__summary").click
-    assert_text "standing in for it"
-
-    visit root_path
-
-    # The pre-paint script opened it before Stimulus ever connected: no
-    # timer, no ready state, note simply present.
-    assert_text "standing in for it"
-    assert_selector ".sit--revealed"
-    assert_no_selector ".sit--ready"
-  end
-
-  test "a same-day return keeps the reader's line above the note" do
+  test "the draft keeps following the reader until the reveal makes it ink" do
     sign_in_as_reader
     visit root_path
     page.execute_script("try { localStorage.clear() } catch (e) {}")
     visit root_path
 
     assert_selector ".sit__input", wait: 3
-    fill_in "Record your reaction. Even one line will do.", with: "kept for the return"
-    click_button "Save"
-    assert_selector ".sit__impression", text: "kept for the return"
+    find(".sit__input").fill_in(with: "first thought")
+    find(".sit__input").send_keys(:enter)
+    assert_selector ".sit__saved", text: /saved/i, wait: 3
+
+    visit root_path # pre-reveal return: still a draft, still editable
+    assert_selector ".sit__input", wait: 3
+    assert_equal "first thought", find(".sit__input").value
+    find(".sit__input").fill_in(with: "second thought, better")
+    find(".sit__input").send_keys(:enter)
+    assert_selector ".sit__saved", text: /saved/i, wait: 3
+
+    assert_equal 1, Impression.count
+    assert_equal "second thought, better", Impression.last.body
+  end
+
+  test "a same-day return finds the note open and the answer standing" do
+    sign_in_as_reader
+    visit root_path
+    page.execute_script("try { localStorage.clear() } catch (e) {}")
+    visit root_path
+
+    assert_selector ".sit__input", wait: 3
+    find(".sit__input").fill_in(with: "kept for the return")
+    find(".sit__input").send_keys(:enter)
+    assert_selector ".sit__saved", text: /saved/i, wait: 3
     find(".sit__summary").click
     assert_text "standing in for it"
 
     visit root_path
 
-    # finalize re-arms the frame on a revealed visit (code review C6):
-    # the juxtaposition is a page property, not a one-visit event.
-    assert_selector ".sit__impression", text: "kept for the return", wait: 2
-    assert_text "standing in for it"
+    assert_text "standing in for it" # pre-paint open, no fold flash
+    assert_no_selector ".sit--ready"
+    assert_selector ".sit__impression", text: "kept for the return", wait: 3
+    # The writing moment does not come back after the reveal.
+    assert_no_selector ".sit__input"
   end
 
   test "the reveal survives leaving and coming back" do
@@ -135,14 +135,12 @@ class SitTest < ApplicationSystemTestCase
     assert_no_selector "details.sit__details:not([open])"
   end
 
-  test "revealing removes the summary — the destination is the old page" do
+  test "revealing removes the control — the destination is the old page" do
     visit root_path
     find(".sit__summary").click
 
     assert_text "standing in for it"
     assert_no_selector ".sit__summary", visible: :visible
-    # No residue between the reader and tomorrow: one note, one credit,
-    # nothing left of the gate but the mark it wrote.
     visit root_path
     assert_text "standing in for it"
     assert_no_selector ".sit__summary", visible: :visible
@@ -164,7 +162,7 @@ class SitTest < ApplicationSystemTestCase
     assert_selector ".label__source", text: /from/i
   end
 
-  test "a wordless day neither gates nor pretends" do
+  test "a wordless day neither gates nor prompts" do
     daily_picks(:today).update!(blurb: "")
     paintings(:sunflowers).update!(description: nil)
 
@@ -186,7 +184,7 @@ class SitTest < ApplicationSystemTestCase
     assert_text "mixed in the open air" # yesterday's note, open as always
   end
 
-  test "the summary states the whole tap bar" do
+  test "the skip control states the whole tap bar" do
     visit root_path
     height = page.evaluate_script('document.querySelector(".sit__summary").getBoundingClientRect().height')
     assert_operator height, :>=, 44, "rule 9: the reveal control is a tap target"

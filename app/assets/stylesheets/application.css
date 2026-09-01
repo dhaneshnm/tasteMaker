@@ -1459,9 +1459,9 @@ html.zoom-open body { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .sentinel__ring { animation: none; }
   .zoom { animation: none; }
-  /* The sit gate's unfold and field arrival (story 0032) go instant. */
+  /* The sit gate's unfold and frame arrivals (story 0032) go instant. */
   .sit__details[open] .sit__body { animation: none; }
-  .sit--ready .sit__slot { animation: none; }
+  .sit__slot > * { animation: none; }
 }
 
 /* ---------------------------------------------------------------------------
@@ -1604,84 +1604,109 @@ html.zoom-open body { overflow: hidden; }
 }
 
 /* ---------------------------------------------------------------------------
- * The sit gate (story 0032, plan D1-D12 + eng E3/OV4/OV5/OV10).
+ * The sit gate, prompt form (story 0032, redesigned 2026-09-01).
  *
- * The note starts folded behind one server-rendered invitation; the summary
- * IS the invitation IS the reveal control — Newsreader, the label's own
- * voice, never a third disclosure idiom beside `.label__more` and
- * `.caps-link` (design F9). No visible timer exists anywhere in this block
- * on purpose (D2): the only faces of the minute are the copy swap and the
- * colour step below.
- *
- * Colour is state (D3): the summary waits in `--ink-dim` and earns `--gold`
- * when the minute completes — the compass's own idiom, where dim marks
- * not-yet and gold marks a live door. After reveal it dims again to a plain
- * label (OV10): still a real toggle (a summary cannot be removed from an
- * open details), so re-collapsing a revealed note works and looks like the
- * quiet control it is.
+ * The day's looking prompt speaks in the curator's own display italic and
+ * carries the whole scaffold; the answer field is a line to write on, not a
+ * box to fill; the skip is one caps control, gold from the first paint —
+ * always a live door, never a lock. No timer exists anywhere in this block:
+ * the prompt replaced the minute (decisions/0022, amended).
  */
 
-/* Rule 9 by `padding-block`, the `.label__artist-name` precedent: the
- * summary sits in flowing text and must wrap, so it states the 44px bar
- * with padding, not a block box. */
+.sit__prompt {
+  font-family: var(--serif-display, Fraunces), Georgia, serif;
+  font-style: italic;
+  font-weight: 460;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  margin: 1.6rem 0 0.2rem 0;
+}
+/* Revealed, the prompt steps back to a caption over the reader's answer —
+ * the pair reads as question and reply above the note. */
+.sit--revealed .sit__prompt {
+  font-size: 0.95rem;
+  color: var(--ink-faint);
+  margin-bottom: 0;
+}
+
+/* The frame's children (field, answer, hint) fade in — rule 7. */
+.sit__slot > * { animation: sit-fade 0.45s ease-out; }
+@keyframes sit-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* The skip: one caps control in gold — the compass's live-door color, from
+ * the first paint, because it answers a tap at any moment. Flex both hides
+ * Safari's disclosure triangle and centres the 44px bar (rule 9). */
 .sit__summary {
-  /* flex, not list-item: centres any line count inside the bar AND hides
-   * Safari's disclosure triangle where the marker rules below don't. */
   display: flex;
   align-items: center;
   min-height: var(--tap);
   list-style: none;
   cursor: pointer;
-  font-style: italic;
-  color: var(--ink-dim);
+  font-size: 0.8rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--gold);
+  margin-top: 0.2rem;
 }
+.sit__summary:hover { color: var(--gold-deep); }
 .sit__summary::marker { content: none; }
 .sit__summary::-webkit-details-marker { display: none; }
 
-.sit--ready .sit__summary { color: var(--gold); }
-.sit--ready .sit__summary:hover { color: var(--gold-deep); }
-
-/* Revealed = the old page, exactly. The summary vanishes once the details
- * is open (implement-time reversal of OV10's dim-label idea, recorded in
- * the plan): its 44px bar is what pushed the first written line below the
- * fold at the accessibility cap — dynamic_type_test's measured bound — and
- * the fold budget is a bar, re-collapse was a nicety. Only the entrance
- * moves; the destination is the page this product always was. */
+/* Revealed = the old page, exactly: the control vanishes once the details
+ * is open (its 44px bar is fold budget — dynamic_type's measured bound). */
 .sit__details[open] > .sit__summary { display: none; }
 
-/* The minute completing and the note unfolding are both fades — rule 7,
- * nothing slides. */
 .sit__details[open] .sit__body { animation: sit-fade 0.45s ease-out; }
-.sit--ready .sit__slot { animation: sit-fade 0.45s ease-out; }
-@keyframes sit-fade { from { opacity: 0; } to { opacity: 1; } }
 
-/* The reader's own voice (design F14): italic, dim, unquoted, unboxed —
- * distinct from the curator's `--ink` prose and one quiet step above it. */
+/* The reader's own voice (design F14, restyled 2026-09-01): the display
+ * face's italic, dim, unquoted, unboxed — a voice apart from the curator's
+ * ink prose and from the museum's borrowed copy. */
 .sit__impression {
+  font-family: var(--serif-display, Fraunces), Georgia, serif;
   font-style: italic;
+  font-weight: 450;
+  font-size: 1.05rem;
   color: var(--ink-dim);
-  margin-bottom: 1.45em;
+  margin: 0.3rem 0 1.2rem 0;
 }
 
-/* The one-line field, on lift like every form control in the house. */
-.sit__form { margin-block: 0.6rem 1rem; }
-.sit__label {
-  display: block;
-  font-style: italic;
-  color: var(--ink-faint);
-  margin-bottom: 0.35rem;
-}
+/* A line to write on: hairline underline on the linen, no box, no chrome.
+ * The prompt above is the label (aria-labelledby). */
+.sit__form { margin: 0.5rem 0 0.2rem 0; }
 .sit__input {
   display: block;
   width: 100%;
-  background: var(--bg-lift);
-  border: 1px solid var(--hairline);
-  border-radius: 2px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
   color: var(--ink);
   font: inherit;
-  padding: 0.55rem 0.7rem;
+  font-style: italic;
+  padding: 0.45rem 2px 0.55rem 2px;
   min-height: var(--tap);
+  box-sizing: border-box;
 }
-.sit__error { color: var(--warn); margin-top: 0.35rem; }
-.sit__save { margin-top: 0.5rem; min-height: var(--tap); }
+.sit__input:focus { outline: none; border-bottom-color: var(--gold); }
+.sit__input::placeholder { color: var(--ink-faint); font-style: italic; opacity: 1; }
 
+/* The autosave whisper — the only acknowledgment the page ever gives. */
+.sit__saved {
+  min-height: 20px;
+  margin: 0.25rem 0 0 0;
+  text-align: right;
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* The signed-out line: plain text, no link, no door — the corner glyph is
+ * the door, and a nag has no place on the calm page. */
+.sit__hint {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--ink-faint);
+  margin: 0.5rem 0 0.2rem 0;
+}

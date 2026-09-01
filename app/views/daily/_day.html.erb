@@ -46,7 +46,7 @@
       aside_datetime: pick.scheduled_on.iso8601 %>
 
 <main class="page" data-controller="artwork">
-  <%# While the gate is folded the artwork is described by the invitation,
+  <%# While the gate is folded the artwork is described by the day's PROMPT,
       not the note: `aria-describedby` flattens referenced content even when
       it is hidden inside a closed details, so pointing at `daily-note` here
       would read the entire note to a screen-reader user before they ever
@@ -54,7 +54,7 @@
       0032, eng OV5). `sit_controller` hands the description back to
       `daily-note` at reveal. %>
   <%= render "shared/plate", painting: painting, eager: true,
-        describedby: gated ? "sit-invite" : (pick.note.present? ? "daily-note" : nil),
+        describedby: gated ? "sit-prompt" : (pick.note.present? ? "daily-note" : nil),
         resting: "This work is resting — read the note." %>
 
   <%# The action rail. Under the plate, above the label — the position is the
@@ -199,28 +199,28 @@
           America/New_York, not wherever the phone is standing). %>
     <% if gated %>
       <div class="sit" data-controller="sit"
-           data-sit-duration-value="<%= Rails.configuration.x.sit_duration_seconds %>"
            data-sit-date-value="<%= pick.scheduled_on.iso8601 %>"
            data-sit-control-url-value="<%= impression_control_path(painting) %>"
            data-sit-shown-url-value="<%= sit_beacon_path(event: "shown") %>"
-           data-sit-completed-url-value="<%= sit_beacon_path(event: "completed") %>"
-           data-sit-ready-copy-value="The note is ready.">
+           data-sit-revealed-url-value="<%= sit_beacon_path(event: "completed") %>">
+        <%# The day's looking prompt (rotation: DailyPick::SIT_PROMPTS, from
+            the owner's protocol, user-research/0010). It is the field's
+            label, the folded artwork's description, and the whole looking
+            scaffold — it works for readers who never type a word. Cached,
+            identical for everyone; only the frame below is personal. %>
+        <p class="sit__prompt" id="sit-prompt"><%= pick.sit_prompt %></p>
         <%= turbo_frame_tag "impression_#{painting.id}", class: "sit__slot",
               data: { sit_target: "slot" } %>
         <details class="sit__details" data-sit-target="details"
                  data-action="toggle->sit#toggled">
-          <%# Owner's words (T5 copy pass, 2026-08-31). Says "the note", never
+          <%# The skip, first-class and never locked. Says "the note", never
               "the curator's note": some days the words are a museum's
               (decisions/0004, design D12). %>
-          <summary class="sit__summary" id="sit-invite" data-sit-target="summary">Please
-            take a minute to look closer. The note is here whenever you are ready.</summary>
+          <summary class="sit__summary">Read the note</summary>
           <div class="sit__body">
             <%= render "daily/note", pick: pick, painting: painting %>
           </div>
         </details>
-        <%# The aria-live vessel: announced, never seen — a summary's own text
-            swap announces nothing. `.visually-hidden` is the house utility. %>
-        <p class="visually-hidden" aria-live="polite" data-sit-target="status"></p>
         <script>
           (() => {
             try {

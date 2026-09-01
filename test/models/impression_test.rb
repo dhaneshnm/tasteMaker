@@ -25,10 +25,22 @@ class ImpressionTest < ActiveSupport::TestCase
     assert @user.impressions.build(painting: @painting, body: "a" * 280).valid?
   end
 
-  test "write-once per painting per reader — ink, not pencil" do
+  test "one row per painting per reader — the index is identity, not immutability" do
     @user.impressions.create!(painting: @painting, body: "first")
+    # The draft moves by UPDATING that row (autosave, 2026-09-01 amendment);
+    # a second row for the same painting stays invalid.
     second = @user.impressions.build(painting: @painting, body: "second thoughts")
     assert_not second.valid?
+  end
+
+  test "the day's prompt rotates deterministically and covers the whole set" do
+    prompts = (0...DailyPick::SIT_PROMPTS.size).map do |offset|
+      DailyPick.new(scheduled_on: Date.new(2026, 9, 1) + offset).sit_prompt
+    end
+    assert_equal DailyPick::SIT_PROMPTS.sort, prompts.sort,
+      "consecutive days must cycle through every prompt exactly once"
+    assert_equal DailyPick.new(scheduled_on: Date.new(2026, 9, 1)).sit_prompt,
+                 DailyPick.new(scheduled_on: Date.new(2026, 9, 1)).sit_prompt
   end
 
   test "two readers may each keep a line on the same painting" do

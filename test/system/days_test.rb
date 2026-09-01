@@ -16,9 +16,9 @@ class DaysSystemTest < ApplicationSystemTestCase
     within(".compass") { click_on "Days" }
     assert_selector "h2.days__month"
 
-    within "ol.days" do
-      all("a.days__link").last.click
-    end
+    # Not scoped to one `ol.days`: month groups each carry their own list,
+    # and the archive spans two of them whenever today is the 1st.
+    all("a.days__link").last.click
 
     assert_selector "h1.label__title", text: paintings(:harbour).title
     assert_selector ".masthead__label", text: "From the archive"
@@ -82,7 +82,10 @@ class DaysSystemTest < ApplicationSystemTestCase
       document.querySelector("li.days__day .days__thumb img").dispatchEvent(new Event("error"))
     JS
 
-    within "li.days__day:first-child" do
+    # `first`, not `:first-child`: month groups each start their own list,
+    # and the archive spans two whenever today is the 1st. The newest row —
+    # today's sunflowers — is the document's first either way.
+    within first("li.days__day") do
       assert_selector ".days__title", text: paintings(:sunflowers).title
       assert_selector "a.days__link"
     end

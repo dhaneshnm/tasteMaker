@@ -249,19 +249,22 @@ prose (`__note` for the hand-written note, `__text` for museum copy),
 then `__credit`.
 
 `.sit` — the gate the front door's note waits behind (story 0032,
-`decisions/0022`). One server-rendered invitation in the label's own italic
-voice doubles as the reveal control — the summary of a native `<details>`, so
-the no-JS floor is a working disclosure and the note can never paint open and
-then fold. **No visible timer, ever**: the minute's only faces are the copy
-swap and the colour step — summary waits `--ink-dim`, earns `--gold` at the
-ready state (the compass's dim/gold idiom), dims to `--ink-faint` once
-revealed. `/` only; the archive and preview render the note open exactly as
-before. The reader's one line (`.sit__impression`) is a new text idiom:
-Newsreader italic in `--ink-dim`, unquoted, unboxed — the reader's voice sits
-one quiet step above the curator's `--ink` prose and is never confused with
-it. The 44px bar comes from `padding-block` (the `.label__artist-name`
-precedent); the disclosure triangle is suppressed — the chevron is an idiom
-this product has never shown.
+`decisions/0022`, redesigned 2026-09-01). The day's **looking prompt**
+(`.sit__prompt`, Fraunces italic, `--ink`) carries the whole scaffold — it
+rotates from the owner's protocol set and works for readers who never type.
+Under it, a signed-in reader gets **a line to write on, not a box**: hairline
+underline on the linen, autosaving, its only acknowledgment the small-caps
+SAVED whisper — no Save button, by decision. The skip is one caps control
+("READ THE NOTE", the summary of a native `<details>`), **gold from the
+first paint** — always a live door, never a lock — and it vanishes once
+open so the revealed page is the old page exactly. No timer exists, visible
+or invisible: the prompt replaced the minute. `/` only; the archive and
+preview render the note open exactly as before. Revealed, the prompt steps
+back to an `--ink-faint` caption over the reader's answer
+(`.sit__impression`, Fraunces italic `--ink-dim`, unquoted, unboxed) — the
+pair reads as question and reply above the curator's `--ink` prose. The
+disclosure triangle is suppressed — the chevron is an idiom this product
+has never shown.
 
 `.coda` — the closing beat. Ornament, a line in display italic, sometimes a
 note and a link. Ends the daily ritual, ends the archive, carries the empty

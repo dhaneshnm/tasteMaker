@@ -472,6 +472,44 @@ metric's consumers are one owner and one decisions entry, and rack-attack
 would be infrastructure for later by name. Recorded so the Sep review reads
 the number knowing it is spoofable.
 
+## Redesign (2026-09-01) — the prompt replaces the minute
+
+Owner-directed, after dogfooding the shipped gate and three mock rounds
+(canvas: "Sit Gate Redesign"). What changed, deltas against the reviewed
+plan above:
+
+- **The minute, the ready state, and the copy-swap machinery are gone**
+  (D2/D3/D10's timer halves; `config.x.sit_duration_seconds` deleted). The
+  day's looking prompt — `DailyPick::SIT_PROMPTS`, rotating by Julian day,
+  app-scaled from the protocol's P1/P2/P3/P5 + first-impression (DRAFT copy,
+  owner pass owed) — is the scaffold. It is cached content, the field's
+  `aria-labelledby`, and the folded artwork's `describedby` (OV5 preserved,
+  target now `sit-prompt`).
+- **The field arrives with the page** for signed-in readers; strangers and
+  devices get one plain-text hint ("Sign in to keep your answer.", no link,
+  no form, no cookie). E3's no-src-frame survives in mechanism —
+  `sit_controller` assigns src on connect, once, to the variant the visit
+  needs — but the no-request-for-most-opens claim is traded for the Keep
+  frame's one-fetch-per-open cost, knowingly.
+- **Autosave, no Save button** (owner decision): debounce + Enter + blur +
+  `sit:flush`/pagehide keepalive; SAVED whisper; failures are silent
+  retries. D6 write-once amended — draft until the reveal makes it ink
+  (decisions/0022 amendment; UI-level enforcement, and the reveal's frame
+  swap to `after=reveal` waits 350ms under the unfold fade for the flush).
+- **`impressions.prompt`** stamped server-side at first save — the
+  protocol's prompt-ranking question becomes a table read.
+- **Beacons re-based:** `shown` unchanged; the `completed` column now counts
+  first-reveals-of-the-day. Answers/day come from impressions directly.
+- **Calendar repairs in the suite, found by Sep 1 itself:** three archive
+  tests hardcoded a one-month fixture world and broke on the month boundary
+  (dynamic month counts / unscoped last-link / `first(...)` now); the
+  compass StaleElementReference flake was fixed per its own IDEAS.md
+  prescription (atomic geometry snapshot), and the keyboard-focus flake now
+  asserts `:focus` through Capybara's retrying matcher. Fold-budget
+  assertions were re-pointed at "the first written line" (the prompt when
+  the gate exists).
+- `bin/ci` green four consecutive runs after the repairs.
+
 ## GSTACK REVIEW REPORT
 
 | Review | Trigger | Why | Runs | Status | Findings |

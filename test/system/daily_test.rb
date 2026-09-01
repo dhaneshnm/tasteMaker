@@ -8,31 +8,33 @@ class DailyTest < ApplicationSystemTestCase
 
     assert_selector "h1.label__title", text: paintings(:sunflowers).title
 
-    # Bar 2 wears two faces since story 0032. Folded: the invitation is the
-    # written line sharing the screen with the art.
-    invitation_visible = page.evaluate_script(<<~JS)
+    # Bar 2 wears two faces since story 0032. Folded: the day's PROMPT is
+    # the written line sharing the screen with the art.
+    prompt_visible = page.evaluate_script(<<~JS)
       (() => {
-        const s = document.querySelector(".sit__summary");
-        if (!s) return false;
-        const rect = s.getBoundingClientRect();
+        const p = document.querySelector(".sit__prompt");
+        if (!p) return false;
+        const rect = p.getBoundingClientRect();
         return rect.top + rect.height <= window.innerHeight;
       })()
     JS
-    assert invitation_visible, "the invitation was pushed below the fold at 375x667"
+    assert prompt_visible, "the prompt was pushed below the fold at 375x667"
 
     # Revealed: the summary is gone and the old bound holds unchanged.
     open_the_note
-    two_lines_visible = page.evaluate_script(<<~JS)
+    # Revealed, the first written material is the prompt caption over the
+    # reader's answer; the note follows. The bound keeps art + words together.
+    assert_selector ".sit--revealed" # the toggle handler has run; layout settled
+    first_line_visible = page.evaluate_script(<<~JS)
       (() => {
-        const p = document.querySelector(".label__note p");
+        const p = document.querySelector(".sit__prompt") ||
+                  document.querySelector(".label__note p");
         if (!p) return false;
-        const rect = p.getBoundingClientRect();
-        const lineHeight = parseFloat(getComputedStyle(p).lineHeight);
-        return rect.top + (2 * lineHeight) <= window.innerHeight;
+        return p.getBoundingClientRect().bottom <= window.innerHeight;
       })()
     JS
 
-    assert two_lines_visible, "the note's opening was pushed below the fold at 375x667"
+    assert first_line_visible, "the revealed page's first written line was pushed below the fold at 375x667"
   end
 
   test "the whole painting is on screen, never cropped" do

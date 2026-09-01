@@ -1,38 +1,38 @@
-<%# Every answer the impression frame can give (story 0032). Locals:
-    painting (required), impression — the reader's saved line, an invalid
-    attempt carrying errors and the reader's text, or nil — and offer_field,
-    false on a revealed-revisit fetch: the line still renders, the writing
-    moment does not come back (D5).
+<%# Every answer the impression frame can give (story 0032, redesigned
+    2026-09-01). Locals: painting (required), impression (the reader's
+    draft/answer or nil), revealed (true on the after=reveal fetch).
 
     The frame id matches the front door's inert frame in every state — an
     unmatched response is Turbo's "Content missing" painted over the calm
-    page (eng A1). Order of the branches is the privacy order: a line only a
-    signed-in author can have, a field only a signed-in reader gets, and
-    nothing at all for a device or a stranger — no link, no form, no text
-    (the wall's 401 frame carries a sign-in link; this must never). %>
+    page (eng A1). Privacy order: the answer only for its author; the field
+    only for a signed-in reader still looking; the sign-in hint (plain text,
+    no link, no form, no cookie — the wall's 401 frame carries a link and
+    must never appear here) for everyone else pre-reveal; and after the
+    reveal, silence for anyone without an answer — a hint under an open
+    note would be a nag. %>
 <%= turbo_frame_tag "impression_#{painting.id}", class: "sit__slot" do %>
-  <% if impression&.persisted? %>
-    <%# The reader's own voice: italic, dim, unquoted, unboxed (design F14).
-        It sits above the note by DOM position — the frame renders before the
-        details element, so the juxtaposition needs no reparenting (F1). %>
-    <p class="sit__impression"><%= impression.body %></p>
-  <% elsif current_user && offer_field %>
-    <%# `map(&:message)`, not full_messages: the attribute prefix ("Body …")
-        is machine vocabulary. Copy is the owner's (T5 pass, 2026-08-31). %>
-    <% error = impression&.errors&.map(&:message)&.first %>
-    <%# No `data-turbo-frame`: a form inside a frame targets that frame by
-        default — naming it again is the redundancy /simplify removes. %>
-    <%= form_with url: impression_path(painting), method: :post,
-          class: "sit__form" do %>
-      <label for="impression_body" class="sit__label">Record your reaction. Even one line will do.</label>
-      <input type="text" id="impression_body" name="body" class="sit__input"
-             maxlength="280" required value="<%= impression&.body %>"
-             <%= tag.attributes("aria-describedby": "impression-error") if error %>>
-      <% if error %>
-        <%# --warn's one sanctioned job; the reader's text stays in the field. %>
-        <p class="sit__error" id="impression-error"><%= error %></p>
-      <% end %>
-      <button type="submit" class="sit__save caps-link">Save</button>
+  <% if revealed %>
+    <% if impression %>
+      <%# The reader's own voice above the curator's (F1: the frame renders
+          before the details, so this sits above the note by DOM order). %>
+      <p class="sit__impression"><%= impression.body %></p>
     <% end %>
+  <% elsif current_user %>
+    <%# No submit button, no Turbo: autosave_controller owns every write.
+        The day's prompt is the field's visible label (aria-labelledby);
+        the placeholder is a hint beside it, never the label itself. %>
+    <%= form_with url: impression_path(painting), method: :post,
+          class: "sit__form", data: { controller: "autosave", turbo: false } do %>
+      <input type="text" name="body" class="sit__input"
+             maxlength="280" value="<%= impression&.body %>"
+             aria-labelledby="sit-prompt"
+             placeholder="Write here — even one line will do."
+             data-autosave-target="input"
+             data-action="input->autosave#changed keydown->autosave#keydown blur->autosave#blurred">
+      <p class="sit__saved" aria-live="polite" data-autosave-target="status"
+         data-saved-copy="Saved"></p>
+    <% end %>
+  <% else %>
+    <p class="sit__hint">Sign in to keep your answer.</p>
   <% end %>
 <% end %>

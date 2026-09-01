@@ -40,7 +40,10 @@ class DynamicTypeTest < ApplicationSystemTestCase
     page.evaluate_script(<<~JS)
       (() => {
         const img = document.querySelector(".plate__img");
-        const p = document.querySelector(".label__note p, .label__text");
+        // The first WRITTEN line the page shows: on a gated front door
+        // (story 0032) that is the day's prompt — folded or revealed —
+        // and on ungated surfaces it is the note itself.
+        const p = document.querySelector(".sit__prompt, .label__note p, .label__text");
         if (!img || !p) return null;
         const imgRect = img.getBoundingClientRect();
         const pRect = p.getBoundingClientRect();
@@ -233,29 +236,19 @@ class DynamicTypeTest < ApplicationSystemTestCase
 
       scale_to CAPPED_ACCESSIBILITY_ROOT
 
-      # The gated face of the bound first (story 0032): at the cap, the
-      # invitation — the only written line a fresh visit shows — must clear
-      # the fold along with the artwork.
-      gated = page.evaluate_script(<<~JS)
-        (() => {
-          const s = document.querySelector(".sit__summary");
-          if (!s) return null;
-          const r = s.getBoundingClientRect();
-          return { bottom: r.bottom, viewport: window.innerHeight };
-        })()
-      JS
-      assert_operator gated["bottom"], :<=, gated["viewport"],
-        "the invitation is below the fold at the accessibility cap on #{what}"
-
-      # Then the revealed face: the summary is gone (its 44px was exactly
-      # this bound's budget), and the pre-0032 numbers hold unchanged.
-      open_the_note
+      # Both faces of the bound (story 0032, redesigned 2026-09-01): the
+      # first WRITTEN line is the day's prompt — full-size while folded, the
+      # caption over the answer once revealed — and `fold` resolves it.
       f = fold
-
       assert_operator f["plateBottom"], :<, f["viewport"],
         "the artwork is below the fold at the accessibility cap on #{what}"
       assert_operator f["noteTop"] + f["lineHeight"], :<=, f["viewport"],
         "the first written line is below the fold at the accessibility cap on #{what}"
+
+      open_the_note
+      f = fold
+      assert_operator f["noteTop"] + f["lineHeight"], :<=, f["viewport"],
+        "revealed, the first written line is below the fold at the accessibility cap on #{what}"
     end
   end
 

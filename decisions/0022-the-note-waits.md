@@ -43,3 +43,31 @@ a visible countdown (a clock on the calmest page); gating the archive
 (hostility down a walk); AI-drafted invitation copy shipped unreviewed
 (editorial voice is the moat — the draft in the view is marked for the
 owner's field-by-field pass, story-0010 precedent).
+
+## Amended 2026-09-01 — the prompt replaces the minute
+
+Owner decision, taken consciously after a day of dogfooding the shipped gate
+and three rounds of mocks: the invisible 60-second minute is gone. In its
+place, **one looking prompt from the protocol's own rotation**
+(`DailyPick::SIT_PROMPTS`, app-scaled from `user-research/0010`'s P1/P2/P3/P5
+plus the first-impression move) greets every reader; a signed-in reader
+answers on an autosaving line (no Save button — the SAVED whisper is the only
+acknowledgment); READ THE NOTE is gold from the first paint and never locks.
+
+Consequences, all deliberate:
+- **Write-once is amended:** the answer is a DRAFT that follows the reader's
+  typing until the reveal makes it ink. Enforcement is UI-level (the field
+  never renders after the reveal); the server permits a reader to rewrite
+  their own 280 characters — the worst a hand-rolled request wins.
+- **The prompt is stamped on the answer** (`impressions.prompt`), so which
+  prompts produce the most writing — the protocol's own seed-order question —
+  reads straight off the table.
+- **The metrics re-base:** `shown` still counts gates displayed; the second
+  counter now records **reveals** (first note-open of the day). Answers per
+  day come from the impressions table directly. Prediction 2 is restated:
+  measured as revealed/shown plus answers/shown once the first 50 opens
+  exist; the timeline honesty note stands unchanged — this resolves after
+  Sep 30 and informs the next bet.
+- Prediction 1 (the 7-day dogfood without reflexive skip) carries over with
+  "reflexive skip" now meaning tapping READ before the prompt has been given
+  a moment at all.

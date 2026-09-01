@@ -56,8 +56,9 @@ class FavoritesTest < ApplicationSystemTestCase
     find_button(keep_label).send_keys(:return)
 
     assert_button remove_label
-    assert_equal "rail__act", focused_class_names.grep(/rail__act/).first,
-      "focus was thrown away by the frame replacement"
+    # :focus via assert_selector, which retries — the one-shot class read
+    # raced the frame replacement's focus restoration and flaked.
+    assert_selector ".rail__act:focus"
   end
 
   # The other half: the fragment arriving must not grab focus, which is also why
@@ -158,16 +159,25 @@ class FavoritesTest < ApplicationSystemTestCase
     # assert_selector waits for the navigation; `all` does not, and reading it
     # straight after a click races the page in.
     assert_selector ".compass .caps-link", count: 4
-    items = all(".compass .caps-link")
 
-    items.each { |item| assert_operator item.native.size.height, :>=, 44 }
+    # One atomic geometry snapshot instead of per-element .native reads: the
+    # captured handles went stale whenever the keep frame re-rendered between
+    # reads (the StaleElementReferenceError flake IDEAS.md logged 2026-08-27,
+    # fixed here per its own prescription once it started blocking CI).
+    geo = page.evaluate_script(<<~JS)
+      Array.from(document.querySelectorAll(".compass .caps-link")).map((el) => {
+        const r = el.getBoundingClientRect();
+        return { top: Math.round(r.top), left: r.left, right: r.right, height: r.height };
+      })
+    JS
 
-    tops = items.map { |item| item.native.location.y }.uniq
-    assert_equal 1, tops.size, "the compass wrapped onto two rows at 375px"
+    geo.each { |g| assert_operator g["height"], :>=, 44 }
 
-    items.each_cons(2) do |left, right|
-      gap = right.native.location.x - (left.native.location.x + left.native.size.width)
-      assert_operator gap, :>=, 10, "two doors ran together"
+    assert_equal 1, geo.map { |g| g["top"] }.uniq.size,
+      "the compass wrapped onto two rows at 375px"
+
+    geo.each_cons(2) do |left, right|
+      assert_operator right["left"] - left["right"], :>=, 10, "two doors ran together"
     end
   end
 

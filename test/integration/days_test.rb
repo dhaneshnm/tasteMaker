@@ -78,14 +78,19 @@ class DaysTest < ActionDispatch::IntegrationTest
   end
 
   test "months are headings, and they are there from the first row" do
+    # Computed, not hardcoded: the today/yesterday fixtures straddle a month
+    # boundary whenever the suite runs on the 1st — a real calendar this
+    # test met on 2026-09-01.
+    months = -> { DailyPick.published.map { |p| p.scheduled_on.beginning_of_month }.uniq.size }
+
     get days_path
-    assert_select "h2.days__month", count: 1
+    assert_select "h2.days__month", count: months.call
 
     DailyPick.create!(painting: paintings(:woodcut), scheduled_on: 45.days.ago.to_date,
       blurb: "A month or so back, which puts this row under its own heading.")
 
     get days_path
-    assert_select "h2.days__month", count: 2
+    assert_select "h2.days__month", count: months.call
   end
 
   # The year lives on the month heading, once, rather than on every row.
