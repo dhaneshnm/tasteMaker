@@ -1,0 +1,11 @@
+<%# The `.cmt` row's shared shell — avatar + column — rendered as a layout
+    so every branch in `impressions/_control.html.erb` supplies only what's
+    actually different about it. Locals: avatar: (default "Y", the reader's
+    monogram — the only value that could ever vary here, since this partial
+    has exactly one caller with exactly one voice). %>
+<div class="cmt">
+  <div class="cmt__avatar" aria-hidden="true"><%= local_assigns.fetch(:avatar, "Y") %></div>
+  <div class="cmt__col">
+    <%= yield %>
+  </div>
+</div>

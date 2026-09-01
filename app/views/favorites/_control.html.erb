@@ -1,5 +1,4 @@
-<%# The keep control's per-visitor half. Locals: painting, kept, autofocus,
-    compact: (default false — see below), count: (required unless compact)
+<%# The keep control's per-visitor half. Locals: painting, kept, autofocus.
 
     It carries its own <turbo-frame> rather than only the contents, because a
     frame-targeted response has to hand back a matching frame id or Turbo reports
@@ -23,17 +22,16 @@
 
     `/feed` and `/artists/:slug` are walled and private — no shared cache to
     poison — so `paintings/_painting.html.erb` renders THIS partial inline, with
-    no `src`, carrying the real button from the first paint. `compact: true`
-    marks that path: it drops the "N kept" link below, because ten copies of it
-    down one scroll is noise the compass's own `Kept` door already covers at
-    zero (`decisions/0010`, narrowed 2026-08-19 — mark-only there deletes one of
-    the two mitigations that decision bought the label-less rail with; the
-    other, the accessible name below, stays whole on every surface).
+    no `src`, carrying the real button from the first paint.
     `test/system/feed_test.rb` and the artist-page tests hold that half.
 
     No visible words on the mark itself, so the `aria-label` is the whole
     announcement — see `decisions/0010-actions-become-a-rail.md`. `aria-pressed`
-    is unchanged; it never depended on the label.
+    is unchanged; it never depended on the label. The "N kept" link that used
+    to stand beside it left the rail with `decisions/0023` (story 0033) — the
+    accessible name is now the only thing on the row teaching a first-time
+    reader what the glyph does, on every surface alike; there is no longer a
+    `compact` surface to distinguish from a non-compact one.
 
     `autofocus` is true ONLY on the write responses. Turbo replaces the whole
     frame on submit, which destroys the focused button and drops focus to <body>;
@@ -46,13 +44,8 @@
     attributes are discarded. The `.rail__slot` class lives on the frame in
     `daily/_day.html.erb`, which is the element that stays. Adding it here too
     looks load-bearing and is not. %>
-<% compact = local_assigns.fetch(:compact, false) %>
 <%= turbo_frame_tag "keep_#{painting.id}" do %>
-  <%# The hidden `compact` field, not header/referer inference: the frame id
-      `keep_<id>` is identical on every surface, and the referer is not a
-      contract. An empty hash when not compact emits no field at all. %>
   <%= button_to favorite_path(painting), method: (kept ? :delete : :post),
-        params: (compact ? { compact: "1" } : {}),
         form: { class: "rail__form" },
         class: "rail__act",
         autofocus: autofocus,
@@ -61,28 +54,4 @@
           label: kept ? "Remove #{painting.title} from your collection"
                       : "Keep #{painting.title} in your collection"
         } do %><%= render "favorites/keep_glyph", filled: kept %><% end %>
-
-  <%# The only word in the rail, and the reason it is a word — on `/` and
-      `/days/:date` only. `3` alone would save nothing and throw away the one
-      thing telling a first-time reader what the glyph beside it does — which
-      matters more since the labels went (0010).
-
-      Only once there is something to see. The compass's `Kept` covers discovery
-      at zero; this one is the count climbing, which is the reward.
-
-      `turbo_frame: "_top"` because a link inside a frame navigates the frame by
-      default — without it, tapping this loads the whole collection page into a
-      44px box and the reader goes nowhere.
-
-      `count` is read ONLY inside this guard, and `compact` skips the guard
-      entirely rather than defaulting `count` to `0`. A caller on the
-      non-compact path that forgot to pass `count` gets a loud NameError; a
-      silent `0` would be a wrong number on screen, which is worse — the exact
-      failure this whole design exists to prevent. %>
-  <% unless compact %>
-    <% if count.positive? %>
-      <%= link_to "#{count} kept", collection_path, class: "rail__count",
-            data: { turbo_frame: "_top" } %>
-    <% end %>
-  <% end %>
 <% end %>

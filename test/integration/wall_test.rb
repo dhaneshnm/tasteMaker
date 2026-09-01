@@ -176,7 +176,6 @@ class WallTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "turbo-frame##{frame} button.rail__act[aria-pressed=false]", count: 1
-    assert_select ".rail__count", count: 0, message: "an anonymous caller has no count to show"
     assert_includes response.headers["Cache-Control"], "no-store"
   end
 

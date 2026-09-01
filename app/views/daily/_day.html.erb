@@ -21,10 +21,32 @@
 <% painting = pick.painting
    src = artwork_src(painting)
    archive = chrome == :archive
-   # The sit gate (story 0032) lives on the front door and nowhere else:
-   # the archive is browsing, not practice (design D7 — N gates down a walk
-   # is hostility), and a curator previewing is proofreading, not sitting.
-   gated = chrome == :front_door %>
+   # The conversation (story 0033, `decisions/0023`, replacing the sit gate)
+   # lives wherever there are words — on every chrome — but only the front
+   # door carries the bubble, the toggle, and the beacons: the archive is
+   # browsing, not practice (0032 D7's spirit, carried), and a curator
+   # previewing is proofreading, not sitting. A wordless day gates nothing
+   # anywhere (owner direction, 2026-08-31, carried unchanged): it degrades
+   # to picture + credit, the page the product always was.
+   has_words = pick.note.present?
+   thread = chrome == :front_door && has_words
+   # Archive/preview's pin is a real, closeable <details> now (visual
+   # consistency with the front door), open by default with no JS wired to
+   # it (archive/preview mount no sit_controller — plan step 0, D-Q2). A
+   # reader who closes it there leaves this describedby pointing at
+   # now-hidden content until the next load — a narrow, accepted edge case
+   # (0032's own eng OV5 concern, re-opened in miniature): the alternative
+   # is either forcing the pin permanently open (losing the fold's visual
+   # consistency) or mounting JS on a surface the plan keeps deliberately
+   # inert. Recorded, not silently traded away.
+   describedby =
+     if !has_words
+       nil
+     elsif thread
+       "sit-prompt"
+     else
+       "daily-note"
+     end %>
 
 <% content_for :title, "#{painting.title} — Tondo" %>
 <% content_for :description, "#{painting.title} by #{painting.artist_display}, #{archive ? "from the Tondo archive" : "today's artwork on Tondo"}." %>
@@ -42,16 +64,29 @@
       aside: pick.scheduled_on.to_fs(:daily),
       aside_datetime: pick.scheduled_on.iso8601 %>
 
-<main class="page" data-controller="artwork">
-  <%# While the gate is folded the artwork is described by the invitation,
-      not the note: `aria-describedby` flattens referenced content even when
-      it is hidden inside a closed details, so pointing at `daily-note` here
-      would read the entire note to a screen-reader user before they ever
-      chose to reveal it — the gate would not exist for exactly them (story
-      0032, eng OV5). `sit_controller` hands the description back to
-      `daily-note` at reveal. %>
+<%# `page--thread` gives the plate's fold-budget CSS (`--pin-reserve`) a
+    STATIC hook — never `.cmt__pin[open]`, which would resize the artwork
+    live every time a reader opens or closes the note. %>
+<main class="page <%= "page--thread" if thread %>"
+      data-controller="<%= ["artwork", ("sit" if thread)].compact.join(" ") %>"
+      <% if thread %>
+        data-sit-date-value="<%= pick.scheduled_on.iso8601 %>"
+        data-sit-control-url-value="<%= impression_control_path(painting) %>"
+        data-sit-shown-url-value="<%= sit_beacon_path(event: "shown") %>"
+        data-sit-completed-url-value="<%= sit_beacon_path(event: "completed") %>"
+      <% end %>>
+  <%# While the thread is closed, or on any surface with no bubble, the
+      artwork is described by whatever stands in for the words: the front
+      door's PROMPT (the pin hasn't been asked for yet, and the pinned body
+      itself is collapsed — `aria-describedby` flattens referenced content
+      even when it is hidden, so pointing at `daily-note` here would read
+      the whole note to a screen-reader user before they ever chose to open
+      it, story 0032 eng OV5); the archive/preview's `daily-note` directly,
+      since the pin is expanded there from first paint; or nothing at all on
+      a wordless day. `sit_controller` hands the description to `daily-note`
+      the moment the pin opens, and back on a re-close. %>
   <%= render "shared/plate", painting: painting, eager: true,
-        describedby: gated ? "sit-invite" : "daily-note",
+        describedby: describedby,
         resting: "This work is resting — read the note." %>
 
   <%# The action rail. Under the plate, above the label — the position is the
@@ -62,16 +97,8 @@
       hand-written one, because rule 8 shows that note whole.
       `decisions/0010-actions-become-a-rail.md`.
 
-      ZOOM FIRST, and not for emphasis. Keep and its count share one Turbo frame,
-      and a frame is one contiguous flex item — when the count arrives the frame
-      grows and shoves everything to its right, about 60pt, on every open, for
-      exactly the reader who already has a collection. Putting the growing item
-      last removes the shift by construction rather than reserving a width nobody
-      can predict. Spreading the row instead is what DESIGN.md already refuses at
-      the 680px measure.
-
-      Everything public lives out here in the cached page; only the keep frame is
-      per-visitor.
+      ZOOM FIRST, and not for emphasis. Everything public lives out here in
+      the cached page; only the keep frame is per-visitor.
 
       The wrapper is conditional because both its children are. A curator
       previewing an unpublished work that has no picture gets neither control,
@@ -109,11 +136,33 @@
         </svg>
       </button>
 
-      <%# Share (story 0031) — between Zoom and the keep frame, never after
-          it. Keep's frame grows ~60px when its count arrives; Share sits on
-          the side that never shoves. Hidden by default; the shell reveals
-          it. See `shared/_share.html.erb`. %>
+      <%# Share (story 0031) — before the bubble and the keep frame, never
+          after. See `shared/_share.html.erb`. %>
       <%= render "shared/share", painting: painting %>
+    <% end %>
+
+    <%# The conversation bubble (story 0033). Front-door only, and only when
+        there are words to talk about — toggling a thread that doesn't exist
+        would be a control with nothing behind it. `--gold` in BOTH states,
+        matching the rail's one constant; the open state is a FILL
+        (`application.css`), the same state grammar Keep already teaches, so
+        the bubble does not invent a second one. Server-rendered to match
+        the thread's own server-rendered default: open. %>
+    <% if thread %>
+      <button type="button" class="rail__act" data-sit-target="bubble"
+              data-action="click->sit#toggleConv"
+              aria-expanded="true" aria-controls="conv"
+              aria-label="Hide the notes">
+        <%# Filled to match the server-rendered default (thread open) —
+            `sit_controller#syncBubble` owns this attribute from connect
+            onward, the same "fill is the state" mechanism Keep's own glyph
+            sets server-side (`favorites/_keep_glyph.html.erb`). %>
+        <svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"
+             fill="currentColor" stroke="currentColor" stroke-width="1.4"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7a2.6 2.6 0 0 1 2.6-2.6h10.8A2.6 2.6 0 0 1 20 7v6a2.6 2.6 0 0 1-2.6 2.6H12l-4.4 3.9v-3.9H6.6A2.6 2.6 0 0 1 4 13z"/>
+        </svg>
+      </button>
     <% end %>
 
     <%# The frame's DEFAULT CONTENT: the keep mark, drawn and going nowhere.
@@ -169,67 +218,74 @@
       <p class="label__meta"><%= painting.meta_line %></p>
     <% end %>
 
-    <%# The note itself lives in `daily/_note` since story 0032 — one text,
-        two entrances. Ungated surfaces render it exactly as before. The
-        front door folds it into the sit gate: look first, then read.
+    <%# The conversation (story 0033). One text, whoever speaks it, pinned;
+        the reader's own line beside it. `daily/_note` renders the pin (or,
+        on a wordless day, just the standalone credit line — see that
+        partial) on every chrome that has words at all; only the front door
+        adds the toggle and the reader's slot.
 
-        Gate anatomy, outside-in (every position is a decision):
-        - The impression frame sits OUTSIDE and ABOVE the details — inside
-          the body it would be invisible until reveal, which kills "write
-          before the note"; outside, a submitted line already sits above the
-          opened note with no reparenting (design F1). It ships with NO
-          `src`: `sit_controller` assigns one only at minute-complete, so
-          the vast majority of opens cost zero extra requests (eng E3).
-        - The summary IS the invitation IS the reveal control — one
-          server-rendered string for every reader (cached page is
-          byte-identical; a JS copy-swap at connect would flash the wrong
-          voice — design D10). The credit line rides inside the gate: dim
-          acquisition metadata is reveal material, and without it the coda's
-          "See you tomorrow." lands two lines under the invitation (D11).
-        - The inline script runs pre-paint, same-parse-pass: a same-day
-          return opens the details BEFORE first paint, because opening it at
-          Stimulus connect would fold-then-open on every revisit — the
-          mirror of the paint-open-then-fold this plan bans (eng A3/OV9;
-          the 0031 share reveal is the inline pre-paint precedent). One
-          fixed localStorage key; the value is the SERVER's date for this
-          pick, never the client clock (eng A4/OV7 — "today" rolls over on
-          America/New_York, not wherever the phone is standing). %>
-    <% if gated %>
-      <div class="sit" data-controller="sit"
-           data-sit-duration-value="<%= Rails.configuration.x.sit_duration_seconds %>"
-           data-sit-date-value="<%= pick.scheduled_on.iso8601 %>"
-           data-sit-control-url-value="<%= impression_control_path(painting) %>"
-           data-sit-shown-url-value="<%= sit_beacon_path(event: "shown") %>"
-           data-sit-completed-url-value="<%= sit_beacon_path(event: "completed") %>"
-           data-sit-ready-copy-value="The note is ready.">
-        <%= turbo_frame_tag "impression_#{painting.id}", class: "sit__slot",
-              data: { sit_target: "slot" } %>
-        <details class="sit__details" data-sit-target="details"
-                 data-action="toggle->sit#toggled">
-          <%# DRAFT COPY — owner reviews before ship (T5). Must not promise
-              "the curator's note": some days the words are a museum's
-              (decisions/0004, design D12). %>
-          <summary class="sit__summary" id="sit-invite" data-sit-target="summary">Sit
-            with the painting a minute — the note will keep.</summary>
-          <div class="sit__body">
-            <%= render "daily/note", pick: pick, painting: painting %>
-          </div>
-        </details>
-        <p class="sit__status" aria-live="polite" data-sit-target="status"></p>
-        <script>
-          (() => {
-            try {
-              const sit = document.currentScript.closest(".sit")
-              if (localStorage.getItem("sit") === sit.dataset.sitDateValue) {
-                sit.querySelector("details").open = true
-                sit.classList.add("sit--revealed")
-              }
-            } catch (e) {}
-          })()
-        </script>
-      </div>
+        Front-door anatomy, outside-in (every position is a decision, carried
+        from 0032 and amended where the reveal event's death changed the
+        argument):
+        - `.conv` is server-rendered OPEN — a no-JS reader sees everything,
+          and the only pre-paint work is folding it back if the reader
+          already closed it today (mirrors 0031/0032's inline-script idiom).
+        - Pin BEFORE the reader's slot (design DR1): the reveal-moment
+          juxtaposition 0032's F1 argued for is gone with the reveal event,
+          and a pinned thing that isn't first isn't pinned — the pin's own
+          fold now carries write-first (it costs a tap the composer never
+          did). Pin-first also makes the CSS-only hint/pin sibling selector
+          possible (`application.css`, DR8).
+        - The impression frame ships with NO `src` on the front door — Turbo
+          Native `sit_controller` assigns one on connect, once (DR10). %>
+    <%# `daily/_note` renders unconditionally — a wordless day still owes
+        the credit line its standalone path (DR5), and that branch lives
+        INSIDE the partial, not at this call site. Only the `.conv` WRAPPER
+        (bubble scaffolding, the reader's slot) is gated on `has_words`:
+        there is nothing to toggle, and no one to answer for, on a day with
+        no words at all. %>
+    <% if has_words %>
+      <% if thread %>
+        <div class="conv" id="conv" data-sit-target="conv">
+          <%= render "daily/note", pick: pick, painting: painting, front_door: true %>
+          <%= turbo_frame_tag "impression_#{painting.id}", class: "cmt-frame",
+                data: { sit_target: "slot", controller: "autosave",
+                        autosave_control_url_value: impression_control_path(painting),
+                        autosave_write_url_value: impression_path(painting) } %>
+          <%# Pre-paint fold only — `sit_controller#connect` runs an instant
+              later and owns the bubble's aria/fill state from there on
+              (`syncBubble`). Setting it a second time here, ahead of
+              Stimulus, was a duplicate of that method kept in sync by hand;
+              this script now touches only what `connect()` cannot fix
+              after the fact — the note's own visibility before first paint. %>
+          <script>
+            (() => {
+              try {
+                const conv = document.currentScript.closest(".conv")
+                if (localStorage.getItem("conv") === "<%= pick.scheduled_on.iso8601 %>") conv.hidden = true
+              } catch (e) {}
+            })()
+          </script>
+        </div>
+      <% else %>
+        <%# Archive/preview: browsing posture (0032 D7, carried) — open, pin
+            expanded, no bubble to close it with. Only the archive also gets
+            the reader's own past line (never a composer; capture stays a
+            front-door ritual) — preview has zero personal machinery, an
+            unpublished day has no reader to answer for. Eager `src` keeps
+            the reader-specific fetch OUT of the archive page's own ETag'd
+            body (eng OV3): `days_controller.rb` keys on the pick and the
+            painting only, never on who is asking. %>
+        <div class="conv">
+          <%= render "daily/note", pick: pick, painting: painting, front_door: false %>
+          <% if archive %>
+            <%= turbo_frame_tag "impression_#{painting.id}", class: "cmt-frame",
+                  src: impression_control_path(painting, view: "answer") %>
+          <% end %>
+        </div>
+      <% end %>
     <% else %>
-      <%= render "daily/note", pick: pick, painting: painting %>
+      <%= render "daily/note", pick: pick, painting: painting, front_door: false %>
     <% end %>
 
     <footer class="coda">

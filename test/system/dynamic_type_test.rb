@@ -40,7 +40,13 @@ class DynamicTypeTest < ApplicationSystemTestCase
     page.evaluate_script(<<~JS)
       (() => {
         const img = document.querySelector(".plate__img");
-        const p = document.querySelector(".label__note p, .label__text");
+        // The first WRITTEN line the page shows (story 0033): the pin's own
+        // "Pinned · <voice>" summary — DR1 put it ahead of the prompt in
+        // DOM order, and `querySelector` returns document order regardless
+        // of how this list is written, so `.cmt__fold` wins whenever it
+        // exists. `.label__note p`/`.label__text` remain the fallback for
+        // any ungated call site with no pin at all.
+        const p = document.querySelector(".cmt__fold, .label__note p, .label__text");
         if (!img || !p) return null;
         const imgRect = img.getBoundingClientRect();
         const pRect = p.getBoundingClientRect();
@@ -103,15 +109,19 @@ class DynamicTypeTest < ApplicationSystemTestCase
   # The fixture plate is 800x1000. The arithmetic, at a 16px root:
   #
   #   402x874  content width 361.8 -> natural height 452
-  #            caps: 55vh 481, 100dvh-19rem-44px 526    -> neither binds, 452
+  #            caps: 55vh 481, 100dvh-19rem-44px-15px 511  -> neither binds, 452
   #   375x667  content width 337.5 -> natural height 422
-  #            caps: 55vh 367, 100dvh-19rem-44px 319    -> the reserve binds, 319
+  #            caps: 55vh 367, 100dvh-19rem-44px-15px 304  -> the reserve binds, 304
   #
   # So on the large phone the picture is width-constrained and the rail is free;
-  # on the small one the reserve term wins and the picture pays 44px of its 363.
-  # If the 402 number ever drops below 452 the reserve grew too greedy to be free
-  # anywhere, which is the direction a bigger rail walks in.
-  test "the rail is free on the large phone and costs the small one 44px" do
+  # on the small one the reserve term wins and the picture pays 59px of its 363
+  # (story 0033 added `--pin-reserve: 15px` alongside the rail's own 44px — the
+  # front door's pin row is one more fixed touch target before the note, and
+  # `dynamic_type_test.rb`'s own 25%-shrink ceiling below is what capped it at
+  # 15 rather than a full `--tap`). If the 402 number ever drops below 452 the
+  # reserve grew too greedy to be free anywhere, which is the direction a
+  # bigger rail (or a second fixed row) walks in.
+  test "the rail is free on the large phone and costs the small one 59px" do
     with_viewport(402, 874) do
       visit root_path
       assert_selector ".plate__img"
@@ -121,7 +131,7 @@ class DynamicTypeTest < ApplicationSystemTestCase
 
     visit root_path
     assert_selector ".plate__img"
-    assert_equal 319, fold["plateHeight"].round,
+    assert_equal 304, fold["plateHeight"].round,
       "the reserve term is no longer what bounds the plate at 375x667"
   end
 
@@ -233,25 +243,12 @@ class DynamicTypeTest < ApplicationSystemTestCase
 
       scale_to CAPPED_ACCESSIBILITY_ROOT
 
-      # The gated face of the bound first (story 0032): at the cap, the
-      # invitation — the only written line a fresh visit shows — must clear
-      # the fold along with the artwork.
-      gated = page.evaluate_script(<<~JS)
-        (() => {
-          const s = document.querySelector(".sit__summary");
-          if (!s) return null;
-          const r = s.getBoundingClientRect();
-          return { bottom: r.bottom, viewport: window.innerHeight };
-        })()
-      JS
-      assert_operator gated["bottom"], :<=, gated["viewport"],
-        "the invitation is below the fold at the accessibility cap on #{what}"
-
-      # Then the revealed face: the summary is gone (its 44px was exactly
-      # this bound's budget), and the pre-0032 numbers hold unchanged.
-      open_the_note
+      # The first WRITTEN line is the pin's own "Pinned · <voice>" summary
+      # (story 0033) — `fold` resolves it. Its position does not move when
+      # the pin opens (a `<summary>`'s own box is invariant to its sibling
+      # content expanding below it), so unlike the pre-0033 reveal caption
+      # this bound needs only one measurement, not a before/after pair.
       f = fold
-
       assert_operator f["plateBottom"], :<, f["viewport"],
         "the artwork is below the fold at the accessibility cap on #{what}"
       assert_operator f["noteTop"] + f["lineHeight"], :<=, f["viewport"],

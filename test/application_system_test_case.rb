@@ -68,14 +68,14 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # needs this before Capybara's visibility-gated finders can see it at all.
   # Moved here from `test/system/feed_test.rb` (story 0030) once a second
   # file needed the identical scroll-into-view idiom.
-  # Story 0032: the front door's note starts folded behind the sit gate.
-  # Tests that assert on the note's own words or geometry walk through the
-  # gate first, the way a reader does; on ungated surfaces (archive,
-  # preview) this is a no-op. The summary disappears once open, so the
-  # revealed page is the pre-0032 layout exactly — geometry assertions
-  # written before the gate keep their numbers.
+  # Story 0033: the front door's note is a pinned comment, folded by
+  # default. Tests that assert on the note's own words or geometry open it
+  # first, the way a reader does; on the archive/preview, where the pin
+  # starts expanded, this is a no-op (the selector never matches a closed
+  # `.cmt__pin`, so nothing is clicked). Unlike 0032's summary, this one
+  # never disappears — it stays a real, re-closable control.
   def open_the_note
-    find(".sit__summary").click if page.has_selector?(".sit__summary", wait: 0)
+    find(".cmt__pin:not([open]) .cmt__fold").click if page.has_selector?(".cmt__pin:not([open])", wait: 0)
   end
 
   def reveal(aria_label)

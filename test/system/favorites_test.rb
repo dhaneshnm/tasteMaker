@@ -24,13 +24,11 @@ class FavoritesTest < ApplicationSystemTestCase
     click_on keep_label
 
     assert_button remove_label
-    assert_link "1 kept"
     assert_equal before, page.current_path, "keeping navigated somewhere"
 
     click_on remove_label
 
     assert_button keep_label
-    assert_no_link "1 kept"
   end
 
   # The state is the fill now, not the words. Nothing else about the glyph moves:
@@ -56,8 +54,9 @@ class FavoritesTest < ApplicationSystemTestCase
     find_button(keep_label).send_keys(:return)
 
     assert_button remove_label
-    assert_equal "rail__act", focused_class_names.grep(/rail__act/).first,
-      "focus was thrown away by the frame replacement"
+    # :focus via assert_selector, which retries — the one-shot class read
+    # raced the frame replacement's focus restoration and flaked.
+    assert_selector ".rail__act:focus"
   end
 
   # The other half: the fragment arriving must not grab focus, which is also why
@@ -72,38 +71,29 @@ class FavoritesTest < ApplicationSystemTestCase
       "the keep frame took focus from the reader"
   end
 
-  # D8, and the reason Zoom is first in the row. Keep and its count share one
-  # frame; a frame is one contiguous flex item; the count only exists after the
-  # fetch. With the frame anywhere but last, Zoom slides ~60px sideways a moment
-  # after open — under the thumb of the returning reader this story is for.
-  #
-  # Measured with a positive count on purpose. A reader who has kept nothing
-  # renders no count, so this passes vacuously against an empty collection.
-  test "zoom does not move when the count arrives" do
-    visit root_path
-    click_on keep_label
-    assert_link "1 kept"
-
+  # D8 named the reason Zoom leads and Keep trails: the count used to arrive
+  # after the fetch and grow the frame, shoving whatever sat to its right.
+  # The count is gone (`decisions/0023`), so Keep is a fixed box in both
+  # states now — this guards that the frame's SWAP (placeholder span to real
+  # button) still costs nothing, which is what would matter if it ever grew
+  # a variable-width child again.
+  test "zoom does not move once the keep frame's private fragment lands" do
     visit root_path
     assert_selector ".rail__act[data-artwork-target='railZoom']"
     before = zoom_left
 
-    assert_link "1 kept"   # waits for the frame, which is what would shift it
+    assert_button keep_label # waits for the frame to land
 
-    assert_equal before, zoom_left, "the count shoved the zoom control sideways"
+    assert_equal before, zoom_left, "the keep frame's own fragment shoved the zoom control sideways"
   end
 
-  test "the collection is reachable from the artwork and from the archive" do
-    keep_todays_artwork
-
-    click_on "1 kept"
-
+  test "the collection is reachable from the compass, from the daily page and from the archive" do
+    visit root_path
+    within(".compass") { click_on "Kept" }
     assert_selector ".masthead__label", text: "Your collection"
-    assert_text daily_picks(:today).painting.title
 
     visit days_path
     within(".compass") { click_on "Kept" }
-
     assert_selector ".masthead__label", text: "Your collection"
   end
 
@@ -123,16 +113,13 @@ class FavoritesTest < ApplicationSystemTestCase
       assert_operator control.native.size.width,  :>=, 44, "a rail glyph was under 44px wide"
     end
 
-    count = find(".rail__count")
-    assert_operator count.native.size.height, :>=, 44, "the count was under 44px tall"
-
     # `offsetParent !== null` excludes the story 0031 share button: it is
     # `display: none` in a plain browser (no shell to reveal it), and a raw
     # `querySelectorAll` — unlike Capybara's own visibility-filtered `all`
     # two lines up — would otherwise count its 0×0 rect as a second row.
     assert_equal 1, page.evaluate_script(<<~JS), "the rail wrapped onto two lines"
       (() => {
-        const tops = new Set([...document.querySelectorAll(".rail__act, .rail__count")]
+        const tops = new Set([...document.querySelectorAll(".rail__act")]
           .filter(el => el.offsetParent !== null)
           .map(el => Math.round(el.getBoundingClientRect().top)));
         return tops.size;
@@ -153,21 +140,30 @@ class FavoritesTest < ApplicationSystemTestCase
   # 375px: four items, one row, is what keeps the fold budget on the front door.
   test "the compass separates its four doors, and every one is a real target" do
     keep_todays_artwork
-    click_on "1 kept"
+    visit collection_path
 
     # assert_selector waits for the navigation; `all` does not, and reading it
     # straight after a click races the page in.
     assert_selector ".compass .caps-link", count: 4
-    items = all(".compass .caps-link")
 
-    items.each { |item| assert_operator item.native.size.height, :>=, 44 }
+    # One atomic geometry snapshot instead of per-element .native reads: the
+    # captured handles went stale whenever the keep frame re-rendered between
+    # reads (the StaleElementReferenceError flake IDEAS.md logged 2026-08-27,
+    # fixed here per its own prescription once it started blocking CI).
+    geo = page.evaluate_script(<<~JS)
+      Array.from(document.querySelectorAll(".compass .caps-link")).map((el) => {
+        const r = el.getBoundingClientRect();
+        return { top: Math.round(r.top), left: r.left, right: r.right, height: r.height };
+      })
+    JS
 
-    tops = items.map { |item| item.native.location.y }.uniq
-    assert_equal 1, tops.size, "the compass wrapped onto two rows at 375px"
+    geo.each { |g| assert_operator g["height"], :>=, 44 }
 
-    items.each_cons(2) do |left, right|
-      gap = right.native.location.x - (left.native.location.x + left.native.size.width)
-      assert_operator gap, :>=, 10, "two doors ran together"
+    assert_equal 1, geo.map { |g| g["top"] }.uniq.size,
+      "the compass wrapped onto two rows at 375px"
+
+    geo.each_cons(2) do |left, right|
+      assert_operator right["left"] - left["right"], :>=, 10, "two doors ran together"
     end
   end
 

@@ -1,0 +1,9 @@
+<%# The reader's own comment's timestamp (DR22). One word, always true: the
+    server's America/New_York day decides "today", never the client clock —
+    the same rule the day itself rolls over on. `Date.current`, not
+    `Time.zone.today` — the same fact `days/_row_body.html.erb` already
+    checks this way; `:daily`, the one date format the masthead, the queue
+    and the flash messages all already read from
+    (`config/initializers/date_formats.rb`). Locals: impression. %>
+<% touched = impression.updated_at.in_time_zone.to_date %>
+<time datetime="<%= impression.updated_at.iso8601 %>"><%= touched == Date.current ? "today" : touched.to_fs(:daily) %></time>

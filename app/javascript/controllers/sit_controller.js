@@ -1,100 +1,84 @@
 import { Controller } from "@hotwired/stimulus"
 
-// The sit gate (story 0032): the note starts folded behind a quiet
-// invitation; a soft minute later the invitation becomes the ready line and
-// the reveal control earns its gold. The reveal is ALWAYS the reader's own
-// tap — this controller never opens the details itself (design D3), and the
-// gate never locks: the summary opens the note at any moment.
+// The conversation thread (story 0033, replacing the sit gate). Front door
+// only — the archive and preview render the same markup permanently open,
+// with a server-assigned frame src and no Stimulus at all (decisions/0023).
 //
-//   connect (closed) ──> shown beacon ──> timer (visibility-paused)
-//        │                                   │
-//        │ reader taps early                 │ minute completes
-//        ▼                                   ▼
-//   finalize: mark day,                 ready state: copy swap, gold,
-//   no field this visit                 aria-live line, frame gets its src
-//   (foreclosure is intended, D5)       (the ONLY place src is assigned)
+//   connect ──> frame.src = control (composer/comment/hint)
+//      │        thread visible? ──> shown beacon (once/day, key `shown`)
+//      │
+//   bubble tap ──> toggle .conv, day-scoped memory (key `conv`),
+//      │           shown beacon fires on an OPEN that hadn't fired yet today
+//      │
+//   pin tap (native <details>, no JS required to open it) ──>
+//      describedby swap (daily-note ↔ sit-prompt), completed beacon on
+//      first open of the day (key `pin`)
 //
-// Already-revealed revisits arrive with the details pre-opened by the
-// inline pre-paint script in the view — connect sees `open`, finalizes, and
-// never arms a timer or fires a beacon. The zoom overlay deliberately does
-// NOT pause the timer: zooming is looking (design F15b).
+// The reader's own comment (composer, edit, commit) is `autosave_controller`'s
+// job entirely — it owns the frame's fetched content start to finish and
+// needs nothing from this controller.
 export default class extends Controller {
-  static targets = ["details", "summary", "status", "slot"]
-  static values = {
-    duration: Number, date: String, controlUrl: String,
-    shownUrl: String, completedUrl: String, readyCopy: String
-  }
+  static targets = ["bubble", "conv", "slot"]
+  static values = { date: String, controlUrl: String, shownUrl: String, completedUrl: String }
 
   connect() {
-    this.finished = false
-    if (this.detailsTarget.open) { this.finalize(); return }
-
-    this.beacon(this.shownUrlValue)
-    this.remaining = this.durationValue * 1000
-    this.startedAt = Date.now()
-    this.arm()
-    // A backgrounded tab is not looking: bank the elapsed time on hide,
-    // resume the balance on return.
-    this.onVisibility = () => this.visibilityChanged()
-    document.addEventListener("visibilitychange", this.onVisibility)
-  }
-
-  disconnect() {
-    clearTimeout(this.timer)
-    document.removeEventListener("visibilitychange", this.onVisibility)
-  }
-
-  // Wired as `toggle->sit#toggled` on the details element. Opening — at any
-  // time, by any reader — cancels the minute silently and marks the day; no
-  // "the minute is up" residue may appear after the reader already chose
-  // (design F15a). There is no close branch: the summary disappears once
-  // the details opens (the revealed page is the old page — see the CSS),
-  // so a revealed note cannot be re-folded except by tomorrow's date.
-  toggled() {
-    if (!this.detailsTarget.open) return
-    clearTimeout(this.timer)
-    try { localStorage.setItem("sit", this.dateValue) } catch {}
-    this.finalize()
-  }
-
-  arm() {
-    this.timer = setTimeout(() => this.complete(), this.remaining)
-  }
-
-  visibilityChanged() {
-    if (this.finished) return
-    if (document.hidden) {
-      clearTimeout(this.timer)
-      this.remaining -= Date.now() - this.startedAt
-    } else if (!this.detailsTarget.open) {
-      this.startedAt = Date.now()
-      this.arm()
-    }
-  }
-
-  complete() {
-    if (this.finished || this.detailsTarget.open) return
-    this.finished = true
-    this.beacon(this.completedUrlValue)
-    this.element.classList.add("sit--ready")
-    this.summaryTarget.textContent = this.readyCopyValue
-    // The summary's own text change announces nothing; this line does.
-    this.statusTarget.textContent = this.readyCopyValue
-    // The impression frame ships inert — no src, no request, for anyone who
-    // never reaches this line (eng E3). Assigning src here is what asks the
-    // server whether this reader gets a field at all.
     this.slotTarget.src = this.controlUrlValue
+    this.syncBubble()
+    if (!this.convTarget.hidden) this.markShown()
   }
 
-  finalize() {
-    this.finished = true
-    clearTimeout(this.timer)
-    this.element.classList.add("sit--revealed")
-    this.statusTarget.textContent = ""
-    // While folded the artwork was described by the invitation, so a
-    // screen reader never hears the note pre-reveal (eng OV5); the reveal
-    // hands the description back to the note itself.
-    this.plateImg()?.setAttribute("aria-describedby", "daily-note")
+  toggleConv() {
+    const opening = this.convTarget.hidden
+    this.convTarget.hidden = !opening
+    this.syncBubble()
+    try {
+      if (this.convTarget.hidden) localStorage.setItem("conv", this.dateValue)
+      else localStorage.removeItem("conv")
+    } catch (e) {}
+    if (opening) this.markShown()
+  }
+
+  // Wired `toggle->sit#pinToggled` directly on `.cmt__pin` — the native
+  // `toggle` event does not bubble, so the action lives on the details
+  // itself rather than delegated from this controller's own element.
+  pinToggled(event) {
+    const details = event.target
+    this.plateImg()?.setAttribute("aria-describedby", details.open ? "daily-note" : "sit-prompt")
+    if (details.open && !this.dedupe("pin")) this.beacon(this.completedUrlValue)
+  }
+
+  // Fill IS the state, the same mechanism Keep's own glyph uses (a `fill`
+  // attribute on the `<svg>` — `favorites/_keep_glyph.html.erb`) rather
+  // than a parallel CSS rule reacting to the aria attribute. Keep sets it
+  // server-side because its state only ever changes on a frame round trip;
+  // the bubble sets it here because its state changes instantly, with no
+  // round trip to render from — same idiom, the only difference the toggle
+  // speed forces.
+  syncBubble() {
+    const open = !this.convTarget.hidden
+    this.bubbleTarget.setAttribute("aria-expanded", String(open))
+    this.bubbleTarget.setAttribute("aria-label", open ? "Hide the notes" : "Read the notes")
+    this.bubbleTarget.querySelector("svg")?.setAttribute("fill", open ? "currentColor" : "none")
+  }
+
+  markShown() {
+    if (this.dedupe("shown")) return
+    this.beacon(this.shownUrlValue)
+  }
+
+  // One fixed key per fact, each valued with today's served date — never
+  // read as a boolean, so a stale entry from a prior date always reads as
+  // "not yet today" rather than needing its own cleanup pass.
+  dedupe(key) {
+    try {
+      if (localStorage.getItem(key) === this.dateValue) return true
+      localStorage.setItem(key, this.dateValue)
+      return false
+    } catch (e) {
+      // Storage blocked: dedupe can't hold, so every open re-fires. Accepted
+      // — the same stance 0032 shipped with for a spoofable, identity-free tally.
+      return false
+    }
   }
 
   plateImg() {
@@ -102,8 +86,6 @@ export default class extends Controller {
   }
 
   beacon(url) {
-    // Identity-free tally (eng OV6); sendBeacon so a tab closing mid-flight
-    // still counts. Failure is silence — the tally is never worth an error.
     try { navigator.sendBeacon(url) } catch {}
   }
 }

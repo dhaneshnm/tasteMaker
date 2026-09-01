@@ -25,4 +25,21 @@ class SitBeaconTest < ActionDispatch::IntegrationTest
     assert_response :not_found
     assert_equal 0, SitCounter.count
   end
+
+  # The suite runs with forgery protection off, which would let a missing
+  # `skip_forgery_protection` ship green and then 422 every real beacon —
+  # the public page renders no CSRF meta by design (story 0007), so the
+  # browser has no token to send. Turn real protection on and prove the
+  # skip carries the request (code review C17; the plan's deviation note
+  # calls this line load-bearing).
+  test "the beacon lands with forgery protection on and no token — as in production" do
+    original = ActionController::Base.allow_forgery_protection
+    ActionController::Base.allow_forgery_protection = true
+
+    post sit_beacon_path(event: "shown")
+    assert_response :no_content
+    assert_equal 1, SitCounter.find_by!(date: Date.current).shown
+  ensure
+    ActionController::Base.allow_forgery_protection = original
+  end
 end

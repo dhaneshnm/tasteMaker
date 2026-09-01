@@ -1,33 +1,73 @@
-<%# Every answer the impression frame can give (story 0032). Locals:
-    painting (required), impression — the reader's saved line, an invalid
-    attempt carrying errors and the reader's text, or nil.
+<%# Every answer the impression frame can give (story 0033, redesigned
+    2026-09-01). Locals: painting, pick (the DailyPick this painting is
+    scheduled on, or nil), impression (the reader's own line, or nil),
+    archived: (the `view=answer` request, front_door's ONE opposite —
+    read-only, never a composer, never a hint), editing: (`?edit=1`, tap
+    own comment for the day), answered: (today, signed in, has a line, not
+    editing — computed once in the controller, not re-derived here).
 
-    The frame id matches the front door's inert frame in every state — an
-    unmatched response is Turbo's "Content missing" painted over the calm
-    page (eng A1). Order of the branches is the privacy order: a line only a
-    signed-in author can have, a field only a signed-in reader gets, and
-    nothing at all for a device or a stranger — no link, no form, no text
-    (the wall's 401 frame carries a sign-in link; this must never). %>
-<%= turbo_frame_tag "impression_#{painting.id}", class: "sit__slot" do %>
-  <% if impression&.persisted? %>
-    <%# The reader's own voice: italic, dim, unquoted, unboxed (design F14).
-        It sits above the note by DOM position — the frame renders before the
-        details element, so the juxtaposition needs no reparenting (F1). %>
-    <p class="sit__impression"><%= impression.body %></p>
-  <% elsif current_user %>
-    <% error = impression&.errors&.full_messages&.first %>
-    <%# DRAFT COPY — owner reviews field by field before ship (T5). %>
-    <%= form_with url: impressions_path(painting), method: :post,
-          class: "sit__form", data: { turbo_frame: "impression_#{painting.id}" } do %>
-      <label for="impression_body" class="sit__label">First impression — one line, before the note</label>
-      <input type="text" id="impression_body" name="body" class="sit__input"
-             maxlength="280" required value="<%= impression&.body %>"
-             <%= tag.attributes("aria-describedby": "impression-error") if error %>>
-      <% if error %>
-        <%# --warn's one sanctioned job; the reader's text stays in the field. %>
-        <p class="sit__error" id="impression-error"><%= error %></p>
+    The frame id matches the caller's inert or eager frame in every state —
+    an unmatched response is Turbo's "Content missing" painted over the
+    calm page (eng A1). Privacy order: the comment only for its author; the
+    composer only for a signed-in reader on today's pick, still looking;
+    the sign-in hint (plain text, no link, no form, no cookie — the wall's
+    401 frame carries a link and must never appear here) for everyone else;
+    and on `archived`, silence for anyone without a line — a hint on a page
+    that never offered writing would be a nag.
+
+    The prompt is the one thing the composer and the hint states share —
+    hoisted into one render site below rather than duplicated across both,
+    since it renders identically either way. %>
+<%= turbo_frame_tag "impression_#{painting.id}" do %>
+  <% if archived %>
+    <% if impression %>
+      <%= render layout: "impressions/row" do %>
+        <p class="cmt__body cmt__body--mine">
+          <span class="cmt__who">You</span>&ensp;<%= impression.body %>
+        </p>
+        <p class="cmt__meta"><%= render "impressions/time", impression: impression %></p>
       <% end %>
-      <button type="submit" class="sit__save caps-link">Set it down</button>
+    <% end %>
+  <% elsif answered %>
+    <%# Today's pick, answered: the comment, tap to edit (eng OV1 — the
+        day-end ink boundary, not a blur or a reveal). No submit button,
+        no Turbo on the composer form below: autosave_controller — mounted
+        once, on the persistent frame in `daily/_day.html.erb` — owns
+        every write and every transition between this state and that
+        one. %>
+    <%= render layout: "impressions/row" do %>
+      <button type="button" class="cmt__body cmt__body--mine cmt__edit"
+              data-action="click->autosave#edit"
+              aria-label="Edit your answer to <%= painting.title %>">
+        <span class="cmt__who">You</span>&ensp;<%= impression.body %>
+      </button>
+      <p class="cmt__meta"><%= render "impressions/time", impression: impression %></p>
+    <% end %>
+  <% else %>
+    <%= render layout: "impressions/row" do %>
+      <p class="sit__prompt" id="sit-prompt"><%= pick&.sit_prompt %></p>
+      <% if current_user %>
+        <%# The composer. The day's prompt above is the field's visible
+            label (aria-labelledby); the placeholder is a hint beside it,
+            never the label itself. %>
+        <%= form_with url: impression_path(painting), method: :post,
+              class: "sit__form", data: { turbo: false } do %>
+          <input type="text" name="body" class="sit__input"
+                 maxlength="280" value="<%= impression&.body %>"
+                 aria-labelledby="sit-prompt"
+                 placeholder="Write here — even one line will do."
+                 data-autosave-target="input"
+                 data-action="input->autosave#changed keydown->autosave#keydown blur->autosave#blurred">
+          <p class="sit__saved" aria-live="polite" data-autosave-target="status"
+             data-saved-copy="Saved"></p>
+        <% end %>
+      <% else %>
+        <%# A stranger or a registered device — the branch is current_user,
+            never identified? (eng OV2/0032's own A1): a device passes the
+            wall, and the field never renders for one, so it gets the same
+            looking scaffold as everyone with no account. %>
+        <p class="sit__hint">Sign in to keep your answer.</p>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>

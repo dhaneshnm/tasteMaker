@@ -443,6 +443,73 @@ Synthesized from this review's findings. Checkbox as you ship.
 - Design-review-time deviation, recorded: D7 amends the story's "(and
   `/days/:date`)" — the gate ships on `/` only.
 
+## /simplify + /code-review (inline, 2026-08-31) — findings applied
+
+Simplify (4 lenses over the diff): `.sit__status` hand-rolled a
+visually-hidden block the house already owns (`.visually-hidden`, css:222) —
+deduped; the impression form's `data-turbo-frame` named the frame it already
+lives in — dropped; the POST route was `as: :impressions` against the house's
+singular member naming (`as: :favorite`) — renamed. No reuse candidate for
+`.sit__input` (first reader-facing text input outside admin — it becomes the
+precedent).
+
+Code review (verified findings): **C6** — the juxtaposition existed only on
+the visit that wrote it; a revealed same-day return showed a bare note.
+`finalize` now arms the frame src when absent, so the line is a page
+property; narrows E3's no-request claim to never-revealed visits (the
+majority), accepted and tested. **C6's own first draft shipped a bug the
+re-run suite caught**: arming the frame with the plain control URL rendered
+the FIELD to a signed-in no-line reader above an open note — writing after
+reading, plus ~100px that re-broke the accessibility-cap fold bound. The
+revisit fetch now carries `after=reveal` and the server answers line-or-
+nothing, never the form; client-claimed and trusted because the worst a
+liar wins is seeing a form. **C17** — the suite disables forgery
+protection, so a missing `skip_forgery_protection` on the beacon would ship
+green and 422 in production; a test now turns real protection on and proves
+the tokenless beacon lands. **Accepted without code:** the beacon has no
+rate limit — a curl loop can inflate `sit_counters`; at pre-launch scale the
+metric's consumers are one owner and one decisions entry, and rack-attack
+would be infrastructure for later by name. Recorded so the Sep review reads
+the number knowing it is spoofable.
+
+## Redesign (2026-09-01) — the prompt replaces the minute
+
+Owner-directed, after dogfooding the shipped gate and three mock rounds
+(canvas: "Sit Gate Redesign"). What changed, deltas against the reviewed
+plan above:
+
+- **The minute, the ready state, and the copy-swap machinery are gone**
+  (D2/D3/D10's timer halves; `config.x.sit_duration_seconds` deleted). The
+  day's looking prompt — `DailyPick::SIT_PROMPTS`, rotating by Julian day,
+  app-scaled from the protocol's P1/P2/P3/P5 + first-impression (DRAFT copy,
+  owner pass owed) — is the scaffold. It is cached content, the field's
+  `aria-labelledby`, and the folded artwork's `describedby` (OV5 preserved,
+  target now `sit-prompt`).
+- **The field arrives with the page** for signed-in readers; strangers and
+  devices get one plain-text hint ("Sign in to keep your answer.", no link,
+  no form, no cookie). E3's no-src-frame survives in mechanism —
+  `sit_controller` assigns src on connect, once, to the variant the visit
+  needs — but the no-request-for-most-opens claim is traded for the Keep
+  frame's one-fetch-per-open cost, knowingly.
+- **Autosave, no Save button** (owner decision): debounce + Enter + blur +
+  `sit:flush`/pagehide keepalive; SAVED whisper; failures are silent
+  retries. D6 write-once amended — draft until the reveal makes it ink
+  (decisions/0022 amendment; UI-level enforcement, and the reveal's frame
+  swap to `after=reveal` waits 350ms under the unfold fade for the flush).
+- **`impressions.prompt`** stamped server-side at first save — the
+  protocol's prompt-ranking question becomes a table read.
+- **Beacons re-based:** `shown` unchanged; the `completed` column now counts
+  first-reveals-of-the-day. Answers/day come from impressions directly.
+- **Calendar repairs in the suite, found by Sep 1 itself:** three archive
+  tests hardcoded a one-month fixture world and broke on the month boundary
+  (dynamic month counts / unscoped last-link / `first(...)` now); the
+  compass StaleElementReference flake was fixed per its own IDEAS.md
+  prescription (atomic geometry snapshot), and the keyboard-focus flake now
+  asserts `:focus` through Capybara's retrying matcher. Fold-budget
+  assertions were re-pointed at "the first written line" (the prompt when
+  the gate exists).
+- `bin/ci` green four consecutive runs after the repairs.
+
 ## GSTACK REVIEW REPORT
 
 | Review | Trigger | Why | Runs | Status | Findings |

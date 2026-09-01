@@ -7,32 +7,36 @@ class DailyTest < ApplicationSystemTestCase
     visit root_path
 
     assert_selector "h1.label__title", text: paintings(:sunflowers).title
+    # The prompt arrives with the impression frame's fetch (DR6) rather than
+    # first paint — wait for it before measuring, or this races the frame.
+    assert_selector ".sit__prompt", wait: 3
 
-    # Bar 2 wears two faces since story 0032. Folded: the invitation is the
-    # written line sharing the screen with the art.
-    invitation_visible = page.evaluate_script(<<~JS)
+    # Bar 2 wears two faces since story 0032, re-shaped by 0033. Folded: the
+    # day's PROMPT is the written line sharing the screen with the art.
+    prompt_visible = page.evaluate_script(<<~JS)
       (() => {
-        const s = document.querySelector(".sit__summary");
-        if (!s) return false;
-        const rect = s.getBoundingClientRect();
+        const p = document.querySelector(".sit__prompt");
+        if (!p) return false;
+        const rect = p.getBoundingClientRect();
         return rect.top + rect.height <= window.innerHeight;
       })()
     JS
-    assert invitation_visible, "the invitation was pushed below the fold at 375x667"
+    assert prompt_visible, "the prompt was pushed below the fold at 375x667"
 
-    # Revealed: the summary is gone and the old bound holds unchanged.
+    # Opened: the pin's summary stays on screen (it never disappears, story
+    # 0033), and the bound keeps art + first words together.
     open_the_note
-    two_lines_visible = page.evaluate_script(<<~JS)
+    assert_selector ".cmt__pin[open]"
+    first_line_visible = page.evaluate_script(<<~JS)
       (() => {
-        const p = document.querySelector(".label__note p");
+        const p = document.querySelector(".cmt__fold") ||
+                  document.querySelector(".label__note p");
         if (!p) return false;
-        const rect = p.getBoundingClientRect();
-        const lineHeight = parseFloat(getComputedStyle(p).lineHeight);
-        return rect.top + (2 * lineHeight) <= window.innerHeight;
+        return p.getBoundingClientRect().bottom <= window.innerHeight;
       })()
     JS
 
-    assert two_lines_visible, "the note's opening was pushed below the fold at 375x667"
+    assert first_line_visible, "the opened pin's first written line was pushed below the fold at 375x667"
   end
 
   test "the whole painting is on screen, never cropped" do

@@ -27,15 +27,17 @@
 #
 #   GET /feed, GET /artists/:slug
 #     private, no-cache (or nothing at all on /feed) — no fetch, no round trip
-#     renders this reader's state directly, `compact: true`
+#     renders this reader's state directly
 #          │
-#          └── <turbo-frame> (no src) ── POST/DELETE reply into the same frame,
-#                                         `compact: true` carried on the form
+#          └── <turbo-frame> (no src) ── POST/DELETE reply into the same frame
 #
 # `#create` and `#destroy` are the ONE shared endpoint both diagrams write
-# through — `render_control` below reads `params[:compact]` off the form's
-# hidden field, not off which diagram the caller came from, so one write path
-# serves both.
+# through — `render_control` below has no idea which diagram a given write
+# came from, and does not need to: both callers want the identical answer,
+# the mark's current state. The `compact:` split that used to divide their
+# response (the "N kept" text link, `/` and `/days/:date` only) left with the
+# count itself — decisions/0023, story 0033 — so there is nothing left for
+# the two diagrams to disagree about.
 class FavoritesController < ApplicationController
   # `#control` answers an unidentified caller too (story 0017), and it has to.
   #
@@ -154,24 +156,16 @@ class FavoritesController < ApplicationController
     # keep frame hits on every single day-page view.
     def render_control(kept: nil, autofocus: false)
       # `Favorite.none` is the null state, and it is why this stayed one render
-      # rather than growing a second one with its own locals hash. Neither
-      # `exists?` nor `count` touches the database on a null relation, so the
-      # unidentified caller pays no query and a fifth local added to the partial
-      # cannot land in one branch and miss the other.
+      # rather than growing a second one with its own locals hash. `exists?`
+      # touches nothing on a null relation, so the unidentified caller pays no
+      # query.
       #
       # Only `#control` reaches the unidentified path — every write still runs
       # behind the wall.
       collection = identified? ? reader_favorites : Favorite.none
 
-      # The one hidden field the compact form carries (`_control.html.erb`),
-      # read here rather than passed by the caller: `#create`/`#destroy` are the
-      # ONE endpoint both architectures write through, and which one a given
-      # request came from is a fact about the SUBMITTED FORM, not about which
-      # action ran. `params[:compact]` is that fact.
-      compact = params[:compact].present?
-
-      locals = {
-        painting: @painting, compact: compact,
+      render partial: "favorites/control", locals: {
+        painting: @painting,
         # An unidentified caller is always the eager frame's initial GET, never
         # a write, and `_control.html.erb` states the rule: a fragment arriving
         # unbidden must not steal focus. Pinned here rather than left to the
@@ -179,14 +173,6 @@ class FavoritesController < ApplicationController
         autofocus: autofocus && collection.present?,
         kept: kept.nil? ? collection.exists?(painting: @painting) : kept
       }
-      # Not computed at all on the compact path, and not defaulted to `0`
-      # either — the partial reads `count` only inside its `unless compact`
-      # guard, so a `0` sitting unused in this hash would be a local the day
-      # that guard is ever removed, silently rendering a wrong count instead of
-      # raising. See `_control.html.erb`.
-      locals[:count] = collection.count unless compact
-
-      render partial: "favorites/control", locals: locals
     end
 
   # `reader_favorites` and `reader_identity_attributes` moved to
