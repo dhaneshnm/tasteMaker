@@ -215,7 +215,9 @@
             <%= render "daily/note", pick: pick, painting: painting %>
           </div>
         </details>
-        <p class="sit__status" aria-live="polite" data-sit-target="status"></p>
+        <%# The aria-live vessel: announced, never seen — a summary's own text
+            swap announces nothing. `.visually-hidden` is the house utility. %>
+        <p class="visually-hidden" aria-live="polite" data-sit-target="status"></p>
         <script>
           (() => {
             try {

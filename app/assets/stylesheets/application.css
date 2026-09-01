@@ -1685,12 +1685,3 @@ html.zoom-open body { overflow: hidden; }
 .sit__error { color: var(--warn); margin-top: 0.35rem; }
 .sit__save { margin-top: 0.5rem; min-height: var(--tap); }
 
-/* aria-live vessel: announced, never seen — it carries the ready line for
- * screen readers because a summary's text swap announces nothing (OV8/D3). */
-.sit__status {
-  position: absolute;
-  width: 1px; height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}

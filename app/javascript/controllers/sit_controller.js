@@ -96,6 +96,17 @@ export default class extends Controller {
     clearTimeout(this.timer)
     this.element.classList.add("sit--revealed")
     this.statusTarget.textContent = ""
+    // A revealed page still shows the reader their own line (code review
+    // C6): without this, the juxtaposition existed only on the visit that
+    // wrote it and a same-day return showed a bare note. `after=reveal`
+    // tells the control this visit already read — the server answers with
+    // the line or nothing, NEVER the field: writing after reading is the
+    // reveal-first order this whole story exists to prevent (D5), and the
+    // field's ~100px above an open note broke the fold bound besides.
+    // Guarded so the ready-state path never reloads a frame it filled.
+    if (!this.slotTarget.src) {
+      this.slotTarget.src = `${this.controlUrlValue}?after=reveal`
+    }
     // While folded the artwork was described by the invitation, so a
     // screen reader never hears the note pre-reveal (eng OV5); the reveal
     // hands the description back to the note itself.

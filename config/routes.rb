@@ -153,7 +153,7 @@ Rails.application.routes.draw do
   # tally), constrained to the two event names at the routing layer.
   get  "impression/:painting_id/control" => "impressions#control", as: :impression_control,
     constraints: { painting_id: /\d+/ }
-  post "impression/:painting_id" => "impressions#create", as: :impressions,
+  post "impression/:painting_id" => "impressions#create", as: :impression,
     constraints: { painting_id: /\d+/ }
   post "sit/:event" => "sit_beacons#create", as: :sit_beacon,
     constraints: { event: /shown|completed/ }

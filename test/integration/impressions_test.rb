@@ -49,11 +49,27 @@ class ImpressionsTest < ActionDispatch::IntegrationTest
     assert_not_includes response.body, "<form"
   end
 
+  test "a revealed-revisit fetch gets the line but never the field" do
+    user = sign_in
+
+    # No line yet: after reveal the writing moment is over — nothing renders.
+    get impression_control_path(@painting, after: "reveal")
+    assert_response :ok
+    assert_not_includes response.body, "<form",
+      "writing after reading is the order this story exists to prevent"
+
+    # With a line: the juxtaposition survives the revisit.
+    user.impressions.create!(painting: @painting, body: "kept line")
+    get impression_control_path(@painting, after: "reveal")
+    assert_includes response.body, "kept line"
+    assert_not_includes response.body, "<form"
+  end
+
   # -- the write: walled, user-only, ink ------------------------------------
 
   test "an anonymous write bounces off the wall" do
     assert_no_difference("Impression.count") do
-      post impressions_path(@painting), params: { body: "drive-by" }
+      post impression_path(@painting), params: { body: "drive-by" }
     end
     assert_response :redirect
   end
@@ -61,7 +77,7 @@ class ImpressionsTest < ActionDispatch::IntegrationTest
   test "a device write is refused — the field never rendered for it" do
     register_device
     assert_no_difference("Impression.count") do
-      post impressions_path(@painting), params: { body: "no account" }
+      post impression_path(@painting), params: { body: "no account" }
     end
     assert_response :forbidden
   end
@@ -69,7 +85,7 @@ class ImpressionsTest < ActionDispatch::IntegrationTest
   test "a signed-in write lands, stripped, and renders the line" do
     sign_in
     assert_difference("Impression.count", 1) do
-      post impressions_path(@painting), params: { body: "  a hum of yellow  " }
+      post impression_path(@painting), params: { body: "  a hum of yellow  " }
     end
     assert_response :ok
     assert_includes response.body, "a hum of yellow"
@@ -79,7 +95,7 @@ class ImpressionsTest < ActionDispatch::IntegrationTest
   test "a blank line is refused with the reader-facing error, and nothing saves" do
     sign_in
     assert_no_difference("Impression.count") do
-      post impressions_path(@painting), params: { body: "   " }
+      post impression_path(@painting), params: { body: "   " }
     end
     assert_response :unprocessable_entity
     assert_includes response.body, "sit__error"
@@ -88,7 +104,7 @@ class ImpressionsTest < ActionDispatch::IntegrationTest
 
   test "281 characters is refused and the reader's text stays in the field" do
     sign_in
-    post impressions_path(@painting), params: { body: "b" * 281 }
+    post impression_path(@painting), params: { body: "b" * 281 }
     assert_response :unprocessable_entity
     assert_includes response.body, "b" * 281
   end
@@ -97,20 +113,20 @@ class ImpressionsTest < ActionDispatch::IntegrationTest
     user = sign_in
     user.impressions.create!(painting: @painting, body: "first and only")
     assert_no_difference("Impression.count") do
-      post impressions_path(@painting), params: { body: "second thoughts" }
+      post impression_path(@painting), params: { body: "second thoughts" }
     end
     assert_response :unprocessable_entity
   end
 
   test "yesterday's painting still accepts a line — the rollover must not eat a sit" do
     sign_in
-    post impressions_path(paintings(:harbour)), params: { body: "wet grey, open air" }
+    post impression_path(paintings(:harbour)), params: { body: "wet grey, open air" }
     assert_response :ok
   end
 
   test "a line is rendered as text, never as markup" do
     sign_in
-    post impressions_path(@painting), params: { body: "<script>alert(1)</script>" }
+    post impression_path(@painting), params: { body: "<script>alert(1)</script>" }
     assert_response :ok
     assert_not_includes response.body, "<script>alert(1)</script>"
     assert_includes response.body, "&lt;script&gt;"

@@ -33,7 +33,7 @@ class SitTest < ApplicationSystemTestCase
     # after the reader already chose, and no field ever (D5/F15a).
     assert_no_selector ".sit--ready", wait: 1.5
     assert_no_selector ".sit__input"
-    assert_equal "", find(".sit__status", visible: :all).text
+    assert_equal "", find('[data-sit-target="status"]', visible: :all).text
   end
 
   test "the minute completes into the ready state and counts itself" do
@@ -93,6 +93,27 @@ class SitTest < ApplicationSystemTestCase
     assert_text "standing in for it"
     assert_selector ".sit--revealed"
     assert_no_selector ".sit--ready"
+  end
+
+  test "a same-day return keeps the reader's line above the note" do
+    sign_in_as_reader
+    visit root_path
+    page.execute_script("try { localStorage.clear() } catch (e) {}")
+    visit root_path
+
+    assert_selector ".sit__input", wait: 3
+    fill_in "First impression — one line, before the note", with: "kept for the return"
+    click_button "Set it down"
+    assert_selector ".sit__impression", text: "kept for the return"
+    find(".sit__summary").click
+    assert_text "standing in for it"
+
+    visit root_path
+
+    # finalize re-arms the frame on a revealed visit (code review C6):
+    # the juxtaposition is a page property, not a one-visit event.
+    assert_selector ".sit__impression", text: "kept for the return", wait: 2
+    assert_text "standing in for it"
   end
 
   test "the reveal survives leaving and coming back" do

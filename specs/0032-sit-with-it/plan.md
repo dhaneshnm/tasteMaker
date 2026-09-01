@@ -443,6 +443,35 @@ Synthesized from this review's findings. Checkbox as you ship.
 - Design-review-time deviation, recorded: D7 amends the story's "(and
   `/days/:date`)" — the gate ships on `/` only.
 
+## /simplify + /code-review (inline, 2026-08-31) — findings applied
+
+Simplify (4 lenses over the diff): `.sit__status` hand-rolled a
+visually-hidden block the house already owns (`.visually-hidden`, css:222) —
+deduped; the impression form's `data-turbo-frame` named the frame it already
+lives in — dropped; the POST route was `as: :impressions` against the house's
+singular member naming (`as: :favorite`) — renamed. No reuse candidate for
+`.sit__input` (first reader-facing text input outside admin — it becomes the
+precedent).
+
+Code review (verified findings): **C6** — the juxtaposition existed only on
+the visit that wrote it; a revealed same-day return showed a bare note.
+`finalize` now arms the frame src when absent, so the line is a page
+property; narrows E3's no-request claim to never-revealed visits (the
+majority), accepted and tested. **C6's own first draft shipped a bug the
+re-run suite caught**: arming the frame with the plain control URL rendered
+the FIELD to a signed-in no-line reader above an open note — writing after
+reading, plus ~100px that re-broke the accessibility-cap fold bound. The
+revisit fetch now carries `after=reveal` and the server answers line-or-
+nothing, never the form; client-claimed and trusted because the worst a
+liar wins is seeing a form. **C17** — the suite disables forgery
+protection, so a missing `skip_forgery_protection` on the beacon would ship
+green and 422 in production; a test now turns real protection on and proves
+the tokenless beacon lands. **Accepted without code:** the beacon has no
+rate limit — a curl loop can inflate `sit_counters`; at pre-launch scale the
+metric's consumers are one owner and one decisions entry, and rack-attack
+would be infrastructure for later by name. Recorded so the Sep review reads
+the number knowing it is spoofable.
+
 ## GSTACK REVIEW REPORT
 
 | Review | Trigger | Why | Runs | Status | Findings |

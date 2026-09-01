@@ -66,10 +66,16 @@ class ImpressionsController < ApplicationController
     # One template for every answer: line, field, error, or nothing. The
     # frame id must always match the front door's inert frame, whatever the
     # state — an unmatched response is the "Content missing" bug.
+    #
+    # `after=reveal` (sit_controller's revealed-revisit fetch) asks for the
+    # line WITHOUT the field: once the note is read, the writing moment is
+    # over (D5 — foreclosure is intended), and the client saying so is
+    # trusted because the worst a liar wins is seeing a form.
     def render_control(status: :ok)
       @impression = current_user&.impressions&.find_by(painting: @painting) if @impression.nil?
       render partial: "impressions/control",
-             locals: { painting: @painting, impression: @impression },
+             locals: { painting: @painting, impression: @impression,
+                       offer_field: params[:after].blank? },
              status: status
     end
 

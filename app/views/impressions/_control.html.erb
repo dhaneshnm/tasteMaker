@@ -1,6 +1,8 @@
 <%# Every answer the impression frame can give (story 0032). Locals:
     painting (required), impression — the reader's saved line, an invalid
-    attempt carrying errors and the reader's text, or nil.
+    attempt carrying errors and the reader's text, or nil — and offer_field,
+    false on a revealed-revisit fetch: the line still renders, the writing
+    moment does not come back (D5).
 
     The frame id matches the front door's inert frame in every state — an
     unmatched response is Turbo's "Content missing" painted over the calm
@@ -14,11 +16,13 @@
         It sits above the note by DOM position — the frame renders before the
         details element, so the juxtaposition needs no reparenting (F1). %>
     <p class="sit__impression"><%= impression.body %></p>
-  <% elsif current_user %>
+  <% elsif current_user && offer_field %>
     <% error = impression&.errors&.full_messages&.first %>
     <%# DRAFT COPY — owner reviews field by field before ship (T5). %>
-    <%= form_with url: impressions_path(painting), method: :post,
-          class: "sit__form", data: { turbo_frame: "impression_#{painting.id}" } do %>
+    <%# No `data-turbo-frame`: a form inside a frame targets that frame by
+        default — naming it again is the redundancy /simplify removes. %>
+    <%= form_with url: impression_path(painting), method: :post,
+          class: "sit__form" do %>
       <label for="impression_body" class="sit__label">First impression — one line, before the note</label>
       <input type="text" id="impression_body" name="body" class="sit__input"
              maxlength="280" required value="<%= impression&.body %>"
