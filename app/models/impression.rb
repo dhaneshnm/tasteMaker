@@ -16,6 +16,11 @@ class Impression < ApplicationRecord
   # newline from a shell client does not count against the 280.
   before_validation { self.body = body&.strip }
 
-  validates :body, presence: true, length: { maximum: 280 }
-  validates :painting_id, uniqueness: { scope: :user_id }
+  # Reader-facing words (owner's copy pass, 2026-08-31) — the partial renders
+  # `errors.map(&:message)`, never full_messages, so no "Body" prefix ever
+  # reaches the page. The uniqueness message is a backstop: the field never
+  # renders once a line exists, so only a race or a hand-rolled POST sees it.
+  validates :body, presence: { message: "Write something first." },
+                   length: { maximum: 280, message: "Keep it under 280 characters." }
+  validates :painting_id, uniqueness: { scope: :user_id, message: "Already saved." }
 end

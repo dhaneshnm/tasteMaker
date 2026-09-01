@@ -15,7 +15,7 @@ class SitTest < ApplicationSystemTestCase
   test "the note starts folded and the invitation describes the artwork" do
     visit root_path
 
-    assert_selector ".sit__summary", text: /Sit with the painting/
+    assert_selector ".sit__summary", text: /take a minute to look closer/
     assert_no_text "standing in for it" # the note's own words stay hidden
     assert_selector ".sit__details .label__credit", visible: :all
     assert_equal "sit-invite", find(".plate__img")["aria-describedby"],
@@ -66,8 +66,8 @@ class SitTest < ApplicationSystemTestCase
     assert_selector ".sit--ready", wait: 3
     assert_selector ".sit__input", wait: 2
 
-    fill_in "First impression — one line, before the note", with: "the yellows hum"
-    click_button "Set it down"
+    fill_in "Record your reaction. Even one line will do.", with: "the yellows hum"
+    click_button "Save"
 
     # Submitting is not consent to reveal (eng): the line lands, the note waits.
     assert_selector ".sit__impression", text: "the yellows hum"
@@ -102,8 +102,8 @@ class SitTest < ApplicationSystemTestCase
     visit root_path
 
     assert_selector ".sit__input", wait: 3
-    fill_in "First impression — one line, before the note", with: "kept for the return"
-    click_button "Set it down"
+    fill_in "Record your reaction. Even one line will do.", with: "kept for the return"
+    click_button "Save"
     assert_selector ".sit__impression", text: "kept for the return"
     find(".sit__summary").click
     assert_text "standing in for it"

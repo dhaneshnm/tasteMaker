@@ -17,7 +17,7 @@ class ImpressionTest < ActiveSupport::TestCase
   test "whitespace alone cannot dodge the presence check" do
     impression = @user.impressions.build(painting: @painting, body: "   \n ")
     assert_not impression.valid?
-    assert_includes impression.errors[:body], "can't be blank"
+    assert_includes impression.errors[:body], "Write something first."
   end
 
   test "281 characters is one too many" do

@@ -17,13 +17,14 @@
         details element, so the juxtaposition needs no reparenting (F1). %>
     <p class="sit__impression"><%= impression.body %></p>
   <% elsif current_user && offer_field %>
-    <% error = impression&.errors&.full_messages&.first %>
-    <%# DRAFT COPY — owner reviews field by field before ship (T5). %>
+    <%# `map(&:message)`, not full_messages: the attribute prefix ("Body …")
+        is machine vocabulary. Copy is the owner's (T5 pass, 2026-08-31). %>
+    <% error = impression&.errors&.map(&:message)&.first %>
     <%# No `data-turbo-frame`: a form inside a frame targets that frame by
         default — naming it again is the redundancy /simplify removes. %>
     <%= form_with url: impression_path(painting), method: :post,
           class: "sit__form" do %>
-      <label for="impression_body" class="sit__label">First impression — one line, before the note</label>
+      <label for="impression_body" class="sit__label">Record your reaction. Even one line will do.</label>
       <input type="text" id="impression_body" name="body" class="sit__input"
              maxlength="280" required value="<%= impression&.body %>"
              <%= tag.attributes("aria-describedby": "impression-error") if error %>>
@@ -31,7 +32,7 @@
         <%# --warn's one sanctioned job; the reader's text stays in the field. %>
         <p class="sit__error" id="impression-error"><%= error %></p>
       <% end %>
-      <button type="submit" class="sit__save caps-link">Set it down</button>
+      <button type="submit" class="sit__save caps-link">Save</button>
     <% end %>
   <% end %>
 <% end %>
