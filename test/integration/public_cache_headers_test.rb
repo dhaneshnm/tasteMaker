@@ -129,32 +129,37 @@ class PublicCacheHeadersTest < ActionDispatch::IntegrationTest
     assert_response :not_modified, "/ stopped returning 304 on revalidation"
   end
 
-  # Story 0032. The sit gate lives INSIDE the cached public page, so its
-  # markup must be identical for everyone: a folded details, one inert frame
-  # with no src (no per-visitor fetch is even named until a client-side
-  # minute completes), and none of the personal machinery — the impression
-  # form arrives only through the walled fragment. The byte-identical tests
-  # above hold the "same for every visitor state" half; this holds the shape.
-  test "the front door ships the gate folded, the frame inert, and no field" do
+  # Story 0033. The conversation thread lives INSIDE the cached public page,
+  # so its markup must be identical for everyone: the thread open, the pin
+  # folded, one inert frame with no src (no per-visitor fetch is even named
+  # until `sit_controller` connects), and none of the personal machinery —
+  # the impression form, AND the prompt that labels it, arrive only through
+  # the walled fragment (DR6: the prompt moved inside the frame precisely so
+  # it could be absent from the answered branch without a client-side
+  # deletion — see `impressions_test.rb` for the prompt actually appearing).
+  # The byte-identical tests above hold the "same for every visitor state"
+  # half; this holds the shape.
+  test "the front door ships the thread open, the pin folded, the frame inert" do
     get "/"
 
-    assert_includes response.body, '<details class="sit__details"',
-      "the note is not behind the gate"
-    assert_includes response.body, daily_picks(:today).sit_prompt,
-      "the day's prompt is cached content, identical for every reader"
-    assert_not_includes response.body, "<details open",
-      "the cached page must never ship the note pre-opened"
+    assert_includes response.body, 'class="conv"',
+      "the thread is not on the cached page"
+    assert_not_includes response.body, '<details class="cmt__pin" open',
+      "the cached page must never ship the pin pre-opened"
     frame = response.body[/<turbo-frame[^>]*id="impression_\d+"[^>]*>/]
-    assert frame.present?, "the impression frame is missing from the gate"
+    assert frame.present?, "the impression frame is missing from the thread"
     assert_not_includes frame, "src=",
-      "the inert frame must not carry a src — sit_controller assigns it (eng E3)"
+      "the inert frame must not carry a src — sit_controller assigns it"
+    assert_not_includes response.body, daily_picks(:today).sit_prompt,
+      "the prompt lives inside the frame now, never the cached page (DR6)"
     assert_not_includes response.body, "sit__input",
       "the field belongs to the walled fragment, never the cached page"
   end
 
-  # The gate's describedby swap (eng OV5): while folded, the artwork is
-  # described by the day's prompt — never the note, which aria-describedby
-  # would flatten into the accessible name even though it is hidden.
+  # The pin's describedby swap (eng OV5, carried from 0032): while folded,
+  # the artwork is described by the day's prompt — never the note, which
+  # aria-describedby would flatten into the accessible name even though it
+  # is hidden.
   test "the folded artwork is described by the prompt, not the note" do
     get "/"
 

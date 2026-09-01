@@ -1,63 +1,84 @@
 import { Controller } from "@hotwired/stimulus"
 
-// The sit gate, prompt form (story 0032, redesigned 2026-09-01): the day's
-// looking prompt and the answer field greet the reader at once; the note
-// waits behind one always-live READ THE NOTE control. No timer, no staged
-// states — the prompt is the scaffold, the skip is first-class.
+// The conversation thread (story 0033, replacing the sit gate). Front door
+// only — the archive and preview render the same markup permanently open,
+// with a server-assigned frame src and no Stimulus at all (decisions/0023).
 //
-//   connect ──> frame.src = control (the field, or the sign-in hint)
-//      │        shown beacon (folded opens only)
-//      │ reader taps READ THE NOTE — any time
-//      ▼
-//   toggled: revealed beacon (first reveal of the day), localStorage mark,
-//   flush the draft (sit:flush → autosave's keepalive write), then the
-//   frame reloads with after=reveal — the field becomes the answer,
-//   read-only; the draft became ink by being read past (D6 as amended).
+//   connect ──> frame.src = control (composer/comment/hint)
+//      │        thread visible? ──> shown beacon (once/day, key `shown`)
+//      │
+//   bubble tap ──> toggle .conv, day-scoped memory (key `conv`),
+//      │           shown beacon fires on an OPEN that hadn't fired yet today
+//      │
+//   pin tap (native <details>, no JS required to open it) ──>
+//      describedby swap (daily-note ↔ sit-prompt), completed beacon on
+//      first open of the day (key `pin`)
 //
-// Already-revealed revisits arrive pre-opened by the inline pre-paint
-// script; connect sees `open` and asks the frame for the answer directly.
+// The reader's own comment (composer, edit, commit) is `autosave_controller`'s
+// job entirely — it owns the frame's fetched content start to finish and
+// needs nothing from this controller.
 export default class extends Controller {
-  static targets = ["details", "slot"]
-  static values = { date: String, controlUrl: String, shownUrl: String, revealedUrl: String }
+  static targets = ["bubble", "conv", "slot"]
+  static values = { date: String, controlUrl: String, shownUrl: String, completedUrl: String }
 
   connect() {
-    // The frame ships inert — src is assigned here, once, to the variant
-    // this visit needs. One fetch per open, the Keep frame's own cost; a
-    // no-JS visit fetches nothing and the native details still opens.
-    if (this.detailsTarget.open) {
-      this.slotTarget.src = this.afterRevealUrl()
-      this.plateImg()?.setAttribute("aria-describedby", "daily-note")
-    } else {
-      this.slotTarget.src = this.controlUrlValue
-      this.beacon(this.shownUrlValue)
-    }
+    this.slotTarget.src = this.controlUrlValue
+    this.syncBubble()
+    if (!this.convTarget.hidden) this.markShown()
   }
 
-  // Wired as `toggle->sit#toggled` on the details element. There is no
-  // close branch: the summary disappears once open (see the CSS) — a
-  // revealed note refolds only with tomorrow's date.
-  toggled() {
-    if (!this.detailsTarget.open) return
+  toggleConv() {
+    const opening = this.convTarget.hidden
+    this.convTarget.hidden = !opening
+    this.syncBubble()
     try {
-      if (localStorage.getItem("sit") !== this.dateValue) {
-        this.beacon(this.revealedUrlValue)
-      }
-      localStorage.setItem("sit", this.dateValue)
-    } catch (e) {
-      this.beacon(this.revealedUrlValue)
-    }
-    this.element.classList.add("sit--revealed")
-    this.plateImg()?.setAttribute("aria-describedby", "daily-note")
-    // Let the draft land before the frame trades the field for the answer:
-    // sit:flush triggers autosave's keepalive write; 350ms rides under the
-    // unfold fade. A draft that still misses the swap shows on the next
-    // visit — never lost, only late.
-    document.dispatchEvent(new CustomEvent("sit:flush"))
-    setTimeout(() => { this.slotTarget.src = this.afterRevealUrl() }, 350)
+      if (this.convTarget.hidden) localStorage.setItem("conv", this.dateValue)
+      else localStorage.removeItem("conv")
+    } catch (e) {}
+    if (opening) this.markShown()
   }
 
-  afterRevealUrl() {
-    return `${this.controlUrlValue}?after=reveal`
+  // Wired `toggle->sit#pinToggled` directly on `.cmt__pin` — the native
+  // `toggle` event does not bubble, so the action lives on the details
+  // itself rather than delegated from this controller's own element.
+  pinToggled(event) {
+    const details = event.target
+    this.plateImg()?.setAttribute("aria-describedby", details.open ? "daily-note" : "sit-prompt")
+    if (details.open && !this.dedupe("pin")) this.beacon(this.completedUrlValue)
+  }
+
+  // Fill IS the state, the same mechanism Keep's own glyph uses (a `fill`
+  // attribute on the `<svg>` — `favorites/_keep_glyph.html.erb`) rather
+  // than a parallel CSS rule reacting to the aria attribute. Keep sets it
+  // server-side because its state only ever changes on a frame round trip;
+  // the bubble sets it here because its state changes instantly, with no
+  // round trip to render from — same idiom, the only difference the toggle
+  // speed forces.
+  syncBubble() {
+    const open = !this.convTarget.hidden
+    this.bubbleTarget.setAttribute("aria-expanded", String(open))
+    this.bubbleTarget.setAttribute("aria-label", open ? "Hide the notes" : "Read the notes")
+    this.bubbleTarget.querySelector("svg")?.setAttribute("fill", open ? "currentColor" : "none")
+  }
+
+  markShown() {
+    if (this.dedupe("shown")) return
+    this.beacon(this.shownUrlValue)
+  }
+
+  // One fixed key per fact, each valued with today's served date — never
+  // read as a boolean, so a stale entry from a prior date always reads as
+  // "not yet today" rather than needing its own cleanup pass.
+  dedupe(key) {
+    try {
+      if (localStorage.getItem(key) === this.dateValue) return true
+      localStorage.setItem(key, this.dateValue)
+      return false
+    } catch (e) {
+      // Storage blocked: dedupe can't hold, so every open re-fires. Accepted
+      // — the same stance 0032 shipped with for a spoofable, identity-free tally.
+      return false
+    }
   }
 
   plateImg() {
@@ -65,8 +86,6 @@ export default class extends Controller {
   }
 
   beacon(url) {
-    // Identity-free tally: shown = gates displayed, revealed = notes opened
-    // (first of the day). Failure is silence — never worth an error.
     try { navigator.sendBeacon(url) } catch {}
   }
 }

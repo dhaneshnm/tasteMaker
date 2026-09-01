@@ -248,23 +248,35 @@ down), `__artist` + `__artist-name` + `__artist-dates`, `__meta`, then the
 prose (`__note` for the hand-written note, `__text` for museum copy),
 then `__credit`.
 
-`.sit` — the gate the front door's note waits behind (story 0032,
-`decisions/0022`, redesigned 2026-09-01). The day's **looking prompt**
-(`.sit__prompt`, Fraunces italic, `--ink`) carries the whole scaffold — it
-rotates from the owner's protocol set and works for readers who never type.
-Under it, a signed-in reader gets **a line to write on, not a box**: hairline
-underline on the linen, autosaving, its only acknowledgment the small-caps
-SAVED whisper — no Save button, by decision. The skip is one caps control
-("READ THE NOTE", the summary of a native `<details>`), **gold from the
-first paint** — always a live door, never a lock — and it vanishes once
-open so the revealed page is the old page exactly. No timer exists, visible
-or invisible: the prompt replaced the minute. `/` only; the archive and
-preview render the note open exactly as before. Revealed, the prompt steps
-back to an `--ink-faint` caption over the reader's answer
-(`.sit__impression`, Fraunces italic `--ink-dim`, unquoted, unboxed) — the
-pair reads as question and reply above the curator's `--ink` prose. The
-disclosure triangle is suppressed — the chevron is an idiom this product
-has never shown.
+`.conv` — the conversation under the picture (story 0033, `decisions/0023`,
+replacing the sit gate). A comment thread in the product's own materials:
+the museum or curator voice is a **pinned comment** (`.cmt__pin`, a native
+`<details>` — opens with no JS), the reader's own line is a comment beside
+it. Both wear a **medallion** — 32px circle, `--bg-lift` fill, hairline
+edge, a Fraunces monogram in `--gold-deep` — **drawn, not filled gold**: a
+gilt disc on the calmest page in the product would be the exact tile rule 6
+already refuses (see that rule's amendment). The pin's summary states its
+own bar (`.cmt__fold`, rule 9) and carries a **chevron**, two static
+orientations swapped instantly on `[open]` — deliberately the idiom this
+file used to say the product never showed; it shows one now, and rule 7's
+"nothing rotates" holds because the flip is a state change, not a motion.
+The reader's own name is a `<span>` at weight 500, **never bold** — a bare
+`<b>` would be the first control in the product to break the 380–560 weight
+range — with the answer keeping the display italic already established for
+the reader's voice (F14, unquoted, unboxed). Relative time reads **"today"**
+or the date, never a lying "this morning," server-rendered inside the
+private frame so no client clock is ever consulted.
+
+Front door only carries the toggle: a rail glyph (`--gold`, filled when
+open — the same fill-for-state grammar Keep already taught, never a colour
+shift) shows or hides the whole `.conv` block, open by default, remembered
+closed for the day only in `localStorage`. The pin itself starts folded
+there — write-first, now carried by the fold rather than by a reveal event
+— and the reader's own slot is a composer (the day's prompt as the field's
+visible label) until answered, after which it is a comment, tap to edit
+while the day is still theirs. The archive and preview render the identical
+markup permanently open, pin expanded by default, no JS mounted at all —
+browsing is not practice.
 
 `.coda` — the closing beat. Ornament, a line in display italic, sometimes a
 note and a link. Ends the daily ritual, ends the archive, carries the empty
@@ -289,8 +301,10 @@ gold in the row belongs to the one part that does not navigate.
 
 `.rail` — the row of actions **directly under the plate**, above the wall label.
 Line icons in `--gold` at a 23px box, `1.4px` stroke, each in its own 44px target
-(rule 9). **On `/` and `/days/:date`: Zoom, then Keep, then the count.** Decided
-2026-08-14, `decisions/0010-actions-become-a-rail.md`.
+(rule 9). **On `/` and `/days/:date`: Zoom, Share (shell-only), the
+conversation bubble, then Keep.** Decided 2026-08-14,
+`decisions/0010-actions-become-a-rail.md`; the bubble joined 2026-09-01,
+`decisions/0023`.
 
 **On `/feed` and `/artists/:slug`: Keep alone** (story 0020). Two differences
 from the rail above, both because the surface is different, not because the
@@ -306,16 +320,25 @@ component is:
 Same tokens, same targets, same glyph — one component, fewer children on the
 walled surfaces.
 
-**Zoom is first for a structural reason, not emphasis.** Keep and its count share
-one Turbo frame, a frame is one contiguous flex item, and the count only exists
-after the fetch — so the frame grows and shoves whatever sits to its right about
-60px, on every open, for exactly the reader who already has a collection. Last
-position means there is nothing to its right to shove.
+**Zoom is first, and Keep is last, as a stable convention now rather than a
+load-bearing one.** Keep used to grow on fetch when its count arrived,
+shoving whatever sat to its right — the reason Zoom led and Keep trailed.
+The count left the frame entirely with the "N kept" text
+(`decisions/0023`), so Keep is a fixed 44px box in both states and nothing
+grows any more. The order stays: it is still where a reader's thumb finds
+it, and re-ordering a control nobody asked to move is its own kind of
+churn.
+
+**The bubble sits between Share and Keep, filled when open.** Same fill-for-
+state grammar as Keep's own kept mark — no colour shift, no second mark —
+so the rail keeps one state language across both its toggles. `--gold` in
+BOTH states: a dim glyph in an otherwise-gold row would read as disabled,
+which it never is.
 
 **The frame ships default content — on `/` and `/days/:date`, and only there.**
 The un-kept outline glyph is identical for every visitor, so it is not personal
-data and belongs in the cached page; only the filled state and the count come
-from the private fragment. Without it the rail paints an empty 44px box where
+data and belongs in the cached page; only the filled state comes from the
+private fragment. Without it the rail paints an empty 44px box where
 the habit mechanic should be for as long as the fetch takes, which is the same
 bug moved from the bottom of the page to the top.
 
@@ -342,18 +365,25 @@ a real `.rail__act` before the fetch resolves, and Zoom sits *before* the frame,
 so a frame that grows has nothing to its right to move. Reserving it a second
 time would be scaffolding for a default that is tested to exist.
 
-**The count keeps its word — on `/` and `/days/:date`.** `3 kept`, never `3`.
-With the labels gone it is the only word in the rail, and it is the one thing
-telling a first-time reader what the glyph beside it does.
+**The count is gone from every surface** (story 0033, `decisions/0023`,
+reversing the narrowing below). `decisions/0010` bought the label-less rail
+with two mitigations: the count as a teacher on `/`, and the accessible
+name on every glyph everywhere. The count's teaching job is confronted, not
+quietly dropped — the accessible name is now the ONLY thing on any rail
+telling a first-time reader what a glyph does, and it is unchanged,
+full-strength, on every screen that carries one. Accepted with eyes open:
+Keep's fill still self-demonstrates on first tap, and the bubble's one
+Instagram misreading ("other people's comments") is bounded by what it
+opens — one tap shows two voices and no crowd. If dogfooding says the
+bubble reads as social chrome anyway, the tripwire is the medallion
+retreat named in `.conv` above, not a label brought back.
 
-**`/feed` and `/artists/:slug` are mark-only — no count at all** (story 0020,
-`/plan-design-review` D1, 2026-08-19). This narrows one of the two mitigations
-`decisions/0010` bought the label-less rail with — see that file for the full
-reasoning and the tripwire. In short: the count is scoped to `/` because that
-is the surface every reader opens every day and the only unwalled one, so
-glyph literacy is taught there, once, before a reader ever reaches a walled
-surface that cannot teach it again. The other mitigation, the accessible name
-on every glyph, is unchanged and full-strength on all four screens.
+**`/feed` and `/artists/:slug` stayed mark-only all along** (story 0020,
+`/plan-design-review` D1, 2026-08-19) — the surfaces that used to differ
+from `/` only by lacking a count now render identically to it in that
+respect. What still marks them apart is structural, not decorative: no
+Zoom (the plate is already the zoom trigger there) and no bubble (no `.conv`
+machinery mounts outside `daily/_day.html.erb` at all).
 
 **It sits next to the artwork because that is what fixes the fold.** Actions used
 to be the last row of the wall label, which put the product's only habit mechanic
@@ -422,12 +452,19 @@ curator's desk.
 2. **Never crop an artwork.** `contain`, letterboxed against the paper. Cropping
    is an editorial decision and we are not making it on the viewer's behalf.
    Making it *smaller* is allowed and sometimes required: `.plate__img` is capped
-   at `min(55vh, 55dvh, calc(100dvh - 19rem - var(--rail-reserve)))`, so at large
-   text sizes the picture yields height to keep the first written line above the
-   fold. At the default root size the third term is within 4px of 55vh and
-   nothing moves. `--rail-reserve` is `0` everywhere except the screens carrying
-   an action rail, where it is one touch target — one rule, one varying term, so
-   the `19rem` is not written down twice. A smaller picture, never a cropped one.
+   at `min(55vh, 55dvh, calc(100dvh - 19rem - var(--rail-reserve) - var(--pin-reserve)))`,
+   so at large text sizes the picture yields height to keep the first written
+   line above the fold. At the default root size the third term is within 4px
+   of 55vh and nothing moves. `--rail-reserve` is `0` everywhere except the
+   screens carrying an action rail, where it is one touch target.
+   `--pin-reserve` is `0` everywhere except the front door's threaded state
+   (`.page--thread`, story 0033), where the pin's own fold row is a second
+   fixed row before the note — 15px, not the full touch target it measures,
+   because a full `--tap` here pushed the accessibility-cap shrink past the
+   25% ceiling `dynamic_type_test.rb` polices; 15 is the largest reserve that
+   still clears it, solved from that test's own inequality. One rule, three
+   varying terms, so the `19rem` is not written down twice. A smaller
+   picture, never a cropped one.
 3. **Never truncate a title.** Long titles step the type down instead.
 4. **Prose is `--ink`. Metadata is dim.** Dates, medium, credit, counts step
    back; the words a person wrote do not.
@@ -464,18 +501,27 @@ curator's desk.
    renders `.rail` and the `✦` on the same page, every day, on `/` and
    `/days/:date`. Removed rather than enforced: a rule nothing has ever obeyed
    is a rule that teaches the next reader to distrust this file.
+
+   **Identity medallions are the one shape exception, and they are drawn, not
+   filled (story 0033, `decisions/0023`).** `.cmt__avatar` is a 32px circle,
+   never a gold one — `--bg-lift` fill, a hairline edge, the same frame every
+   artwork already wears. A filled gold disc there would be the exact gilt
+   tile the wordmark section's own amendment bans at lockup size: "no tile...
+   at any size, on any screen inside the app." The rule stands; medallions are
+   inside it, not an exception to it.
 7. **Motion is a fade.** The archive's scroll-in reveal and the zoom fade, both
    off under `prefers-reduced-motion`. Nothing slides, bounces, or springs.
 8. **Text is never clamped on the daily page.** The archive clamps museum
    catalogue copy to four lines with a `More` toggle, because there the point is
    the pictures. The hand-written note is the whole point and is shown whole —
-   **whole once revealed** (amended by story 0032): the front door folds the
-   note's *entrance* behind the sit gate, and only there. The words are never
-   cut, only their moment moves; `/days/:date` still shows every note open.
+   **whole once the pinned comment is expanded** (amended by story 0032,
+   re-amended by story 0033): the front door folds the note's *entrance*
+   behind one tap on the pin, and only there. The words are never cut, only
+   their moment moves; `/days/:date` still shows the pin expanded by default.
 9. **Anything you can tap is at least `--tap` (44px) in every direction it has.**
    `.caps-link` sets size and tracking, not height, so every control built on it
-   states the bar itself — `.walk__step`, `.zoom__close`, `.rail__act`,
-   `.rail__count`. ISSUE-002 (commit 866bbc2) shipped 15px
+   states the bar itself — `.walk__step`, `.zoom__close`, `.rail__act`.
+   ISSUE-002 (commit 866bbc2) shipped 15px
    targets once by assuming otherwise.
    **Width counts too, and only bare glyphs have to say so.** A caps-link gets
    width for free from its words; `.rail__act` has none, so it states

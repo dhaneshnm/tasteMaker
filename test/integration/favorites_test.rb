@@ -144,8 +144,6 @@ class FavoritesTest < ActionDispatch::IntegrationTest
         message: "the rail had no keep mark until the private fragment landed"
       assert_select "turbo-frame#keep_#{@today.painting_id} button", count: 0,
         message: "a real button in the cached page mints a CSRF token and a cookie"
-      assert_select "a.rail__count", count: 0,
-        message: "a per-visitor count leaked into the publicly cached page"
       assert_nil response.headers["Set-Cookie"]
     end
   end
@@ -369,35 +367,6 @@ class FavoritesTest < ActionDispatch::IntegrationTest
     assert_select ".coda__note", text: "Kept on this device — free, and yours."
     assert_select ".compass a[href=?]", days_path, text: "Days"
     assert_select ".compass a[href=?]", root_path, text: "Today"
-  end
-
-  test "the count link appears only once there is something to count" do
-    get favorite_control_path(@painting)
-
-    assert_select "a.rail__count", count: 0
-
-    post favorite_path(@painting)
-
-    assert_select "a.rail__count", text: "1 kept"
-  end
-
-  # Story 0020, test 6. The walled surfaces carry `compact: "1"` on their
-  # form so the same write endpoint knows to render mark-only — a caller
-  # that forgot the hidden field would leak the count onto `/feed`, one copy
-  # per work down the scroll (D1).
-  test "a compact write renders no count link; the same write from / still does" do
-    post favorite_path(@painting), params: { compact: "1" }
-
-    assert_response :success
-    assert_select "a.rail__count", count: 0,
-      message: "a compact write rendered the count link, the noise D1 refused on /feed"
-
-    unkeep(@painting)
-    post favorite_path(paintings(:woodcut))
-
-    assert_response :success
-    assert_select "a.rail__count", text: "1 kept",
-      message: "a non-compact write lost its count link"
   end
 
   test "collection thumbnails are thumbnails" do

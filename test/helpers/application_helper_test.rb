@@ -111,6 +111,45 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_match @painting.image.filename.to_s, share_payload_for(@painting)[:image_path]
   end
 
+  # Story 0033. The house voice, whoever wrote the day's words.
+  test "the pinned comment speaks as Tondo on a hand-written day" do
+    pick = daily_picks(:today)
+    assert pick.hand_written?
+
+    assert_equal "Tondo", pinned_voice(pick, @painting)
+    assert_equal "T", pinned_voice_initial("Tondo")
+  end
+
+  # Every `Painting::SOURCES` name opens with "the"/"The" — initialing it
+  # raw would put "T" in every museum's medallion too, indistinguishable
+  # from Tondo's own. The initial has to skip past the article.
+  test "the pinned comment speaks as the museum on a fallback day, initialed past the article" do
+    pick = daily_picks(:today)
+    pick.update!(blurb: "")
+    assert_not pick.hand_written?
+    @painting.update!(source: "cma")
+
+    assert_equal "the Cleveland Museum of Art", pinned_voice(pick, @painting)
+    assert_equal "C", pinned_voice_initial("the Cleveland Museum of Art")
+  end
+
+  test "the museum initial still resolves for a source whose article is capitalized" do
+    pick = daily_picks(:today)
+    pick.update!(blurb: "")
+    @painting.update!(source: "met")
+
+    assert_equal "The Metropolitan Museum of Art", pinned_voice(pick, @painting)
+    assert_equal "M", pinned_voice_initial("The Metropolitan Museum of Art")
+  end
+
+  # A blank voice can only reach here by bypassing validation (a stray
+  # `update_column`, a bad import row) — this renders on every front door,
+  # so it must degrade for one bad row, never 500 the whole page.
+  test "the medallion never raises on a blank voice" do
+    assert_equal "?", pinned_voice_initial("")
+    assert_equal "?", pinned_voice_initial(nil)
+  end
+
   private
     def attach(bytes: PIXEL, filename: "pixel.png", content_type: "image/png")
       @painting.image.attach(io: StringIO.new(bytes), filename: filename, content_type: content_type)

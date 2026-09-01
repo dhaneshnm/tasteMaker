@@ -729,8 +729,29 @@ a:hover { color: var(--gold-deep); }
  */
 .plate__img {
   --rail-reserve: 0px;
-  max-height: min(55vh, 55dvh, calc(100dvh - 19rem - var(--rail-reserve)));
+  --pin-reserve: 0px;
+  max-height: min(55vh, 55dvh, calc(100dvh - 19rem - var(--rail-reserve) - var(--pin-reserve)));
 }
+
+/* The front door's pin row (story 0033) is one more fixed touch target
+ * between the label's meta line and the first written line — same shape as
+ * the rail's own reserve, and for the same reason: `--tap` is pixels, not
+ * text, and a `rem` budget must not bill the picture for something that
+ * does not scale with Dynamic Type.
+ *
+ * 15px, not the full 44px `--tap` the row actually measures. A full tap's
+ * worth doubled the rail's own reserve and `dynamic_type_test.rb`'s OWN
+ * calibrated bound caught it: at the accessibility cap the plate gave up
+ * more than the quarter of its height that test polices (28% measured
+ * against a 25% ceiling). 15px is the largest reserve that still clears
+ * that ceiling — solved from the same inequality the test enforces, not
+ * guessed — and it closes the fold-budget gap the pin row's own margins
+ * cannot close alone (`.label__meta:has(+ .conv)` below carries the rest).
+ * `.page--thread` is a server-rendered class (`daily/_day`), not
+ * `.cmt__pin[open]` — the reserve must not depend on the pin's own
+ * open/closed state, or opening the note would resize the artwork under
+ * the reader mid-read. */
+.page--thread .plate__img { --pin-reserve: 15px; }
 
 .plate:has(+ .rail) .plate__img { --rail-reserve: var(--tap); }
 
@@ -861,23 +882,6 @@ a.label__artist-name {
   color: var(--ink-faint);
 }
 
-/* Whose words these are. Only appears on a day the curator did not write, and
- * it is metadata about the prose above it, so it steps back like the rest of
- * the metadata does (rule 4).
- *
- * Scoped under `.label__body` on purpose: a bare `.label__source` loses to
- * `.label__note p` and `.label__text` on specificity and renders as full-size
- * ink prose, which is the opposite of stepping back. */
-.label__body .label__source,
-.label__source {
-  margin: 0.9rem 0 0;
-  font-size: 0.72rem;
-  line-height: 1.4;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--ink-dim);
-}
-
 /* ---------- Artist page ----------
  * The name, the works, the ending — nothing else earns the page (story 0018).
  * The heading reuses `.label__title` / `.label__title--long` verbatim: it is
@@ -948,14 +952,15 @@ a.label__artist-name {
  * rest of its chrome. Two homes, on purpose; adding a third for a caps-link is
  * the mistake.
  *
- * `.rail__act` and `.rail__count` join this list rather than restating 44 a
- * third time. The rail's buttons are not caps-links — they are bare glyphs — but
- * the HEIGHT is the same fact for every control in the product, and one registry
- * is what stops a future change to the bar from half-landing. What they need
- * that nothing else here does is a WIDTH, because this rule has always got width
- * for free from the words inside a caps-link and a glyph has none. That part,
- * being genuinely new, is stated on its own below — and it reads `--tap` too, so
- * the bar is one number rather than one number and three copies of it. */
+ * `.rail__act` joins this list rather than restating 44 a third time. The
+ * rail's buttons are not caps-links — they are bare glyphs — but the HEIGHT
+ * is the same fact for every control in the product, and one registry is
+ * what stops a future change to the bar from half-landing. What it needs
+ * that nothing else here does is a WIDTH, because this rule has always got
+ * width for free from the words inside a caps-link and a glyph has none.
+ * That part, being genuinely new, is stated on its own below — and it reads
+ * `--tap` too, so the bar is one number rather than one number and three
+ * copies of it. */
 .coda .caps-link,
 .compass .caps-link,
 .wings .caps-link,
@@ -964,8 +969,7 @@ a.label__artist-name {
 .compass__door,
 .walk__step,
 .walk__today,
-.rail__act,
-.rail__count {
+.rail__act {
   display: inline-flex;
   align-items: center;
   min-height: var(--tap);
@@ -1183,11 +1187,10 @@ a.label__artist-name {
  * `.walk` nav row further down the same page. Instagram spreads; it can, at
  * 402pt, and this cannot, at 680.
  *
- * Order is Zoom, then the keep frame, and that is structural rather than
- * emphasis. Keep and its count share one frame, a frame is one contiguous flex
- * item, and the count only exists after the fetch — so the frame GROWS and shoves
- * whatever is to its right about 60pt, on every open, for exactly the reader who
- * already has a collection. Last position means there is nothing to its right.
+ * Order is Zoom, Share (shell-only), the comment bubble, then Keep last.
+ * Keep no longer grows on fetch — the count left the frame with the "N kept"
+ * text (decisions/0023) — so nothing here shoves sideways any more; the
+ * order is a stable convention now, not a load-bearing constraint.
  *
  * The gap is small because the 44px targets are mostly air already; it only
  * keeps them from touching. */
@@ -1235,16 +1238,6 @@ a.label__artist-name {
  * button replaces it. Only on screen for the handful of frames the fetch takes,
  * which is exactly how long the alternative would have shown a hole. */
 .rail__act--waiting { cursor: default; }
-
-/* The only word in the rail. It is metadata about the action beside it, so it
- * steps back to dim like every other count in this product (rule 4) — but it
- * keeps the word `kept`, because with the labels gone it is the one thing on the
- * row telling a first-time reader what the glyph does. */
-.rail__count {
-  font-size: 0.8rem;
-  color: var(--ink-dim);
-  font-variant-numeric: tabular-nums;
-}
 
 /* Share (story 0031). Hidden for every reader by default — browser and shell
  * alike get the identical markup, which is what keeps `/` byte-for-byte
@@ -1459,9 +1452,10 @@ html.zoom-open body { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .sentinel__ring { animation: none; }
   .zoom { animation: none; }
-  /* The sit gate's unfold and frame arrivals (story 0032) go instant. */
-  .sit__details[open] .sit__body { animation: none; }
-  .sit__slot > * { animation: none; }
+  /* The pinned comment's unfold goes instant (story 0033). The chevron flip
+   * and the bubble's fill-for-state need no override — neither was ever a
+   * transition (rule 7's other half: nothing rotates either). */
+  .cmt__pin[open] .cmt__pinbody { animation: none; }
 }
 
 /* ---------------------------------------------------------------------------
@@ -1604,76 +1598,177 @@ html.zoom-open body { overflow: hidden; }
 }
 
 /* ---------------------------------------------------------------------------
- * The sit gate, prompt form (story 0032, redesigned 2026-09-01).
+ * The conversation (story 0033, replacing the sit gate). A comment thread in
+ * the product's own materials, not Instagram's: the museum/curator voice is
+ * the pinned comment, the reader's own line is a comment beside it, and the
+ * whole section sits behind one rail glyph. `decisions/0023`.
  *
- * The day's looking prompt speaks in the curator's own display italic and
- * carries the whole scaffold; the answer field is a line to write on, not a
- * box to fill; the skip is one caps control, gold from the first paint —
- * always a live door, never a lock. No timer exists anywhere in this block:
- * the prompt replaced the minute (decisions/0022, amended).
+ * Front door only carries the bubble and the toggle; the archive and preview
+ * render the same markup permanently open, no JS (0032 D7's browsing
+ * posture, carried).
  */
 
-.sit__prompt {
-  font-family: var(--serif-display, Fraunces), Georgia, serif;
-  font-style: italic;
-  font-weight: 460;
-  font-size: 1.1rem;
-  line-height: 1.45;
-  margin: 1.6rem 0 0.2rem 0;
-}
-/* Revealed, the prompt steps back to a caption over the reader's answer —
- * the pair reads as question and reply above the note. */
-.sit--revealed .sit__prompt {
-  font-size: 0.95rem;
-  color: var(--ink-faint);
-  margin-bottom: 0;
-}
+/* The bubble joins the rail's own idiom: --gold in both states (DESIGN.md's
+ * rail constant), a dim glyph in a gold row reads disabled. State is FILL,
+ * never colour — the grammar Keep already taught, so the rail keeps one
+ * state language across both its toggles. No CSS rule for it: `sit_controller`
+ * sets the `fill` attribute directly, the same mechanism Keep's own glyph
+ * uses server-side — one idiom, not a CSS rule shadowing a Ruby one. */
 
-/* The frame's children (field, answer, hint) fade in — rule 7. */
-.sit__slot > * { animation: sit-fade 0.45s ease-out; }
-@keyframes sit-fade { from { opacity: 0; } to { opacity: 1; } }
+.conv { margin-top: 0.5rem; }
+.conv[hidden] { display: none; }
 
-/* The skip: one caps control in gold — the compass's live-door color, from
- * the first paint, because it answers a tap at any moment. Flex both hides
- * Safari's disclosure triangle and centres the 44px bar (rule 9). */
-.sit__summary {
+/* `.label__meta`'s own 1.25rem bottom margin is a block-margin collapse
+ * away from winning this gap outright (20px against `.conv`'s 8px) — fine
+ * everywhere `.label__meta` is the LAST thing in the label (a wordless day,
+ * where it collapses with `.label__credit` instead), wrong here: the pin
+ * row's own 44px is new weight the 0032 gate never carried, and
+ * `dynamic_type_test.rb`'s fold-budget bound is calibrated against the
+ * whole stack, not `.conv` alone. Scoped to the one structural condition
+ * that matters (a `.conv` follows), not to `.cmt__pin[open]` or anything
+ * else that changes on interaction — the gap must not move while the
+ * reader is looking at it. */
+.label__meta:has(+ .conv) { margin-bottom: 0.5rem; }
+
+.cmt { display: flex; gap: 0.7rem; align-items: flex-start; }
+
+/* The reader's slot is a <turbo-frame>, not a bare `.cmt` — a custom
+ * element with no UA stylesheet defaults to `display: inline`, so without
+ * this it neither participates in the block flow the way `.cmt`'s margins
+ * expect nor sits any distance from the pin row above it. Zero extra gap,
+ * deliberately: the two avatars already read as separate comments, and the
+ * fold-budget math (`--pin-reserve` above) has no more room to spend on
+ * one that only helps polish. Revisit at the first design pass if the
+ * thread reads as cramped in practice. */
+.cmt-frame { display: block; }
+
+/* The identity medallion — drawn, never filled gold (rule 6 amendment: a
+ * gilt disc on the calmest page collides with the 0017 amendment's own
+ * tripwire). `--bg-lift` is already the house's second surface (image
+ * placeholders, form fields); a hairline edge is the same frame every
+ * artwork wears. Decorative — the summary/name beside it carries the
+ * accessible name. */
+.cmt__avatar {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
+  justify-content: center;
+  background: var(--bg-lift);
+  border: 1px solid var(--hairline);
+  font-family: var(--serif-display);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gold-deep);
+}
+
+.cmt__col { min-width: 0; flex: 1; }
+
+/* The pinned comment: a native <details>, so it opens with no JS (0032's
+ * floor, relocated). No box, no fill, no radius on the details itself —
+ * rule 6 — the fold is the only chrome. */
+.cmt__pin { margin: 0; }
+
+/* States its own bar (rule 9, ISSUE-002 precedent) rather than inheriting
+ * one — the summary is the whole reveal control. Glyphs inside are
+ * aria-hidden; the words carry the announcement, and native <details>
+ * supplies "collapsed"/"expanded" without a redundant aria-expanded here. */
+.cmt__fold {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   min-height: var(--tap);
   list-style: none;
   cursor: pointer;
-  font-size: 0.8rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  font-family: var(--serif-body);
+  font-size: 0.68rem;
   font-weight: 500;
-  color: var(--gold);
-  margin-top: 0.2rem;
-}
-.sit__summary:hover { color: var(--gold-deep); }
-.sit__summary::marker { content: none; }
-.sit__summary::-webkit-details-marker { display: none; }
-
-/* Revealed = the old page, exactly: the control vanishes once the details
- * is open (its 44px bar is fold budget — dynamic_type's measured bound). */
-.sit__details[open] > .sit__summary { display: none; }
-
-.sit__details[open] .sit__body { animation: sit-fade 0.45s ease-out; }
-
-/* The reader's own voice (design F14, restyled 2026-09-01): the display
- * face's italic, dim, unquoted, unboxed — a voice apart from the curator's
- * ink prose and from the museum's borrowed copy. */
-.sit__impression {
-  font-family: var(--serif-display, Fraunces), Georgia, serif;
-  font-style: italic;
-  font-weight: 450;
-  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
   color: var(--ink-dim);
-  margin: 0.3rem 0 1.2rem 0;
+  /* Explicit, not `normal`: a flex container's computed line-height stays
+   * the literal keyword `normal` in Chrome rather than resolving to a
+   * pixel value the way a block element's does, which `dynamic_type_test`'s
+   * fold-budget math reads with `parseFloat` and needs a real number from. */
+  line-height: 1.5;
+}
+.cmt__fold:hover { color: var(--ink); }
+.cmt__fold::marker { content: none; }
+.cmt__fold::-webkit-details-marker { display: none; }
+.cmt__fold svg { flex: none; }
+
+/* Two static orientations, swapped instantly on the `open` attribute — no
+ * transition. Rule 7 is "nothing rotates" as much as "nothing slides"; the
+ * chevron flip is a state change, not a motion. */
+.cmt__pin[open] .cmt__fold .chev { transform: rotate(180deg); }
+
+/* The body fades in on open (rule 7), instant under reduced motion. The
+ * note text itself reuses `.label__note` / `.label__body` verbatim — no
+ * third prose treatment for the same words. */
+.cmt__pinbody { margin-top: 0.5rem; }
+.cmt__pin[open] .cmt__pinbody { animation: cmt-fade 0.45s ease-out; }
+@keyframes cmt-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Credit, relocated inside the pin as its meta row (wordless days keep a
+ * standalone credit line elsewhere — see `daily/_note.html.erb`). Same
+ * treatment `.label__credit` already carries. */
+.cmt__meta {
+  margin: 0.7rem 0 0;
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--ink-faint);
+}
+.cmt__pinbody .label__note,
+.cmt__pinbody .label__body { margin: 0; }
+
+/* The reader's own comment: run-in name, never bold — DESIGN.md's weight
+ * range stays 380-560, and a bare <b> renders 700 (rule violation). Roman
+ * name against the reader-voice italic answer carries the contrast
+ * instead. */
+.cmt__who { font-weight: 500; letter-spacing: 0.02em; }
+.cmt__body {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.cmt__body--mine {
+  font-style: italic;
+  color: var(--ink-dim);
+  font-family: var(--serif-display);
+}
+.cmt__body--mine .cmt__who { font-style: normal; color: var(--ink); }
+
+/* Tap-to-edit (today's pick only): the rendered comment is a real button
+ * wearing no button chrome — `.rail__act`'s own reset, restated because
+ * this one keeps its text-heavy sizing rather than a glyph's fixed box. */
+.cmt__edit {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
 }
 
 /* A line to write on: hairline underline on the linen, no box, no chrome.
  * The prompt above is the label (aria-labelledby). */
-.sit__form { margin: 0.5rem 0 0.2rem 0; }
+.sit__prompt {
+  font-family: var(--serif-display, Fraunces), Georgia, serif;
+  font-style: italic;
+  font-weight: 460;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--ink-dim);
+  margin: 0 0 0.3rem;
+}
+
+.sit__form { margin: 0; }
 .sit__input {
   display: block;
   width: 100%;
@@ -1703,10 +1798,15 @@ html.zoom-open body { overflow: hidden; }
 }
 
 /* The signed-out line: plain text, no link, no door — the corner glyph is
- * the door, and a nag has no place on the calm page. */
+ * the door, and a nag has no place on the calm page. Hidden while the pin
+ * is open: a hint under an open note is the nag this rule already refused
+ * once, just with a new mechanism now that there is no reveal event to key
+ * it off. Pin-first DOM order is what makes this selector reach the hint at
+ * all. */
 .sit__hint {
   font-style: italic;
   font-size: 0.9rem;
   color: var(--ink-faint);
   margin: 0.5rem 0 0.2rem 0;
 }
+.conv:has(.cmt__pin[open]) .sit__hint { display: none; }

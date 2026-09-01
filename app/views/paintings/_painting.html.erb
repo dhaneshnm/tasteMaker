@@ -10,8 +10,8 @@
       `/artists/:slug` already mount `shared/_zoom`), so a second control for
       the same action would be a duplicate tab stop.
 
-      No count: mark-only on multi-work surfaces (`decisions/0010`, narrowed
-      2026-08-19) — see `favorites/_control.html.erb` for why.
+      No count anywhere any more, on any surface (`decisions/0023`, story
+      0033) — this rail never carried one; see `favorites/_control.html.erb`.
 
       Rendered INLINE, not as a fetching frame with `src`: `/feed` and
       `/artists/:slug` are walled and private
@@ -32,7 +32,7 @@
         lands, and nothing may sit to its right. %>
     <%= render "shared/share", painting: painting if painting.display_image? %>
     <%= render "favorites/control", painting: painting,
-          kept: kept_ids.include?(painting.id), autofocus: false, compact: true %>
+          kept: kept_ids.include?(painting.id), autofocus: false %>
   </div>
 
   <div class="label">

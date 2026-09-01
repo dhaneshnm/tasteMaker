@@ -29,8 +29,6 @@ class ArtistsTest < ApplicationSystemTestCase
 
     assert_button "Remove Harbour at Dawn from your collection"
     assert_selector "h1.label__title", text: "Berthe Morisot"
-    # D1: mark-only here too — no `"N kept"` link, even once something is kept.
-    assert_no_selector ".rail__count"
   end
 
   # Two works, two independent marks — proof the frame swap on one does not

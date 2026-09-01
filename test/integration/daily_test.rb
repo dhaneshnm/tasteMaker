@@ -19,6 +19,9 @@ class DailyTest < ActionDispatch::IntegrationTest
   # the curator did not write runs the museum's text under the museum's name,
   # and clamped — museum copy runs to 324 words in the real pool against a
   # 60-180 target, so shown whole it would push the artwork off a phone.
+  # Story 0033: the museum's name moved from a separate `.label__source`
+  # sentence into the pin's own "Pinned · <voice>" summary — one attribution,
+  # not two.
   test "a day with no note runs the museum's text, marked as theirs and clamped" do
     daily_picks(:today).update!(blurb: nil)
 
@@ -26,10 +29,10 @@ class DailyTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select ".label__note", count: 0
+    assert_select ".cmt__fold", text: /Pinned.*Minneapolis Institute of Art/
     assert_select ".label__body#daily-note[data-controller=expand]" do
       assert_select "p.label__text", /catalogue text/
       assert_select "button.label__more"
-      assert_select "p.label__source", text: "From the Minneapolis Institute of Art"
     end
   end
 
@@ -43,9 +46,9 @@ class DailyTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select ".label__note", count: 0
+    assert_select ".cmt__fold", text: /Pinned.*Minneapolis Institute of Art/
     assert_select ".label__body#daily-note[data-controller=expand]" do
       assert_select "p.label__text", /catalogue text/
-      assert_select "p.label__source", text: "From the Minneapolis Institute of Art"
     end
   end
 

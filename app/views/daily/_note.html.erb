@@ -1,26 +1,54 @@
-<%# The words under the artwork, whoever speaks them, plus the credit line —
-    extracted (story 0032) so the front door's sit gate and the ungated
-    archive/preview render the SAME text from one place. Locals: pick,
-    painting.
+<%# The pinned comment (story 0033, replacing the sit gate's folded note).
+    Locals: pick, painting, front_door: — the only chrome the pin's two
+    varying facts (does it start folded, does the describedby handoff wire
+    up) ever disagree on. Front door: folded, wired (sit_controller mounts
+    nowhere else, eng E2/OV10). Archive/preview: expanded, unwired (D-Q2).
 
-    The curator's note is shown whole — rule 8, amended by 0032: whole once
-    revealed; only its entrance is gated, and only on `/`. Museum copy keeps
-    the archive's clamp + More treatment; inside the gate the expand
-    controller re-measures on the details toggle (it reads 0×0 in a closed
-    details — see expand_controller.js). %>
-<% if pick.hand_written? %>
-  <div class="label__note" id="daily-note"><%= simple_format(pick.note) %></div>
-<% elsif pick.note.present? %>
-  <div class="label__body" id="daily-note" data-controller="expand">
-    <p class="label__text" data-expand-target="text"><%= pick.note %></p>
-    <button type="button" class="label__more" data-expand-target="button"
-            data-action="expand#toggle" hidden>More</button>
-    <p class="label__source">From <%= painting.source_name %></p>
-  </div>
+    Whoever speaks, the note is shown WHOLE once expanded (rule 8): museum
+    copy keeps the archive's clamp + More treatment, the hand-written note
+    never clamps. Credit rides inside as the fold's meta row — EXCEPT a
+    wordless day, where there is no fold to carry it and the line stands on
+    its own (DR5): a dangling "From <museum>" under an empty pin would read
+    as a broken promise, and picture-plus-credit is the quiet floor this
+    product has always shown when neither voice has words. %>
+<% if pick.note.present? %>
+  <% voice = pinned_voice(pick, painting)
+     pin_data = front_door ? { action: "toggle->sit#pinToggled" } : {} %>
+  <%= render layout: "impressions/row", locals: { avatar: pinned_voice_initial(voice) } do %>
+    <%= tag.details class: "cmt__pin", open: !front_door, data: pin_data do %>
+      <summary class="cmt__fold">
+        <%# The pin — a drawing of the corner an actual pinned note wears. %>
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="11" height="11"
+             fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 4h6l-1 6 3 3H7l3-3z M12 13v7"/>
+        </svg>
+        Pinned · <%= voice %>
+        <svg class="chev" aria-hidden="true" viewBox="0 0 24 24" width="11" height="11"
+             fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 9.5l6 6 6-6"/>
+        </svg>
+      </summary>
+      <div class="cmt__pinbody">
+        <% if pick.hand_written? %>
+          <div class="label__note" id="daily-note"><%= simple_format(pick.note) %></div>
+        <% else %>
+          <%# The re-measure on toggle (0032 eng OV4) still applies unchanged
+              — `expand_controller` finds its nearest `<details>` generically,
+              whichever component it lives in (eng E4, verified). %>
+          <div class="label__body" id="daily-note" data-controller="expand">
+            <p class="label__text" data-expand-target="text"><%= pick.note %></p>
+            <button type="button" class="label__more" data-expand-target="button"
+                    data-action="expand#toggle" hidden>More</button>
+          </div>
+        <% end %>
+        <% if painting.credit_line.present? %>
+          <p class="cmt__meta"><%= painting.credit_line %></p>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
 <% end %>
-<%# Neither voice has words (owner direction, 2026-08-31): render NOTHING —
-    an empty shell with a dangling "From <museum>" line read as a broken
-    promise. Auto-filled days can't reach this (0023 requires a description);
-    a hand-picked day can, and it degrades to picture + credit, quietly. %>
 
-<%= tag.p(painting.credit_line, class: "label__credit") if painting.credit_line.present? %>
+<%= tag.p(painting.credit_line, class: "label__credit") if pick.note.blank? && painting.credit_line.present? %>

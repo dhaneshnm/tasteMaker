@@ -56,6 +56,31 @@ module ApplicationHelper
 
   COMPASS_KEYS = COMPASS.map(&:first).freeze
 
+  # The pinned comment's speaker (story 0033, `decisions/0023`). "Tondo" for
+  # a hand-written day; the museum's own name otherwise — D-Q1, resolved at
+  # design review.
+  def pinned_voice(pick, painting)
+    pick.hand_written? ? "Tondo" : painting.source_name
+  end
+
+  # The medallion's monogram, from an already-computed `pinned_voice`
+  # string — the view calls `pinned_voice` once and derives both the
+  # summary text and the avatar from that one value, rather than paying
+  # for the `hand_written?` branch twice. Every `Painting::SOURCES` name
+  # opens with the grammatical article it needs to read in a sentence
+  # ("the Cleveland Museum of Art") — initialing it raw would put "T" in
+  # every museum's medallion, indistinguishable from Tondo's own. Skip
+  # past it first.
+  #
+  # `voice` is only ever nil if `painting.source_name` is — validation
+  # blocks that on every normal write, but this renders on every front
+  # door, so a single row that reached a blank `source` some other way
+  # (an import glitch, a bypassed `update_column`) would otherwise 500
+  # the whole page for every reader, not just that one painting.
+  def pinned_voice_initial(voice)
+    voice.to_s.sub(/\A(?:the|The)\s+/, "")[0]&.upcase || "?"
+  end
+
   # `here` is a tri-state, and the middle state is the interesting one:
   #
   #   nil          four links, nothing marked      /days/:date, /404

@@ -256,17 +256,6 @@ class FeedTest < ApplicationSystemTestCase
     assert_button "Keep Filler 1 in your collection"
   end
 
-  # D1 (`/plan-design-review`): mark-only on `/feed` and `/artists/:slug` —
-  # no `"N kept"` link, on purpose, even once something is kept.
-  test "the gallery never renders the count link, even once something is kept" do
-    visit feed_path
-    reveal "Keep Filler 0 in your collection"
-
-    click_on "Keep Filler 0 in your collection"
-
-    assert_button "Remove Filler 0 from your collection"
-    assert_no_selector ".rail__count"
-  end
 
   # Rule 9, both axes — the same bar `favorites_test.rb` holds for `/`,
   # measured on the surface that renders this control inline instead of
