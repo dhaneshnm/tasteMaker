@@ -1503,13 +1503,12 @@ html.zoom-open body { overflow: hidden; }
 
 .signin__mark { flex: none; }
 
-/* One reset, quiet controls: a caps-link that happens to be a <button>
- * (or must state its own 44px). Grouped so the next quiet button joins a
- * selector list instead of pasting a third copy. `.push__enable` is a link,
- * not a button (story 0010 — the shell intercepts its navigation, same
- * reason `.signin__door`'s native branch is a link), so it only needs the
- * height/layout rule here — the global `a`/`a:hover` rules already give it
- * gold and the hover shade for free. */
+/* Chip anatomy borrowed from .signin__door (decisions/0024): a safe variant
+ * (gold on hairline, matching .signin__door exactly) and a destructive one
+ * (--warn tint). `.push__enable` joins the styled group here for the first
+ * time — it's an <a>, not a <button>, so it used to get color free from the
+ * global `a` rule and nothing else: no box at all, the same gap as the two
+ * buttons this reverses. */
 .signin__out,
 .account__delete,
 .push__enable,
@@ -1517,22 +1516,42 @@ html.zoom-open body { overflow: hidden; }
   min-height: 44px;
   display: inline-flex;
   align-items: center;
+  padding: 0 1.15rem;
+  border-radius: 2px;
+  cursor: pointer;
 }
 .signin__out-form,
 .account__form,
 .push__form { display: inline-flex; }
+
 .signin__out,
-.account__delete,
+.push__enable,
 .push__disable {
-  background: none;
-  border: none;
-  padding: 0;
+  border: 1px solid var(--hairline);
+  background: var(--bg-lift);
   color: var(--gold);
-  cursor: pointer;
 }
 .signin__out:hover,
-.account__delete:hover,
-.push__disable:hover { color: var(--gold-deep); }
+.push__enable:hover,
+.push__disable:hover { border-color: var(--gold-deep); color: var(--gold-deep); }
+.signin__out:active,
+.push__enable:active,
+.push__disable:active {
+  background: rgba(125, 95, 24, 0.14);
+  border-color: var(--gold-deep);
+  color: var(--gold-deep);
+}
+
+/* Delete this device's data (`DevicesController#destroy`) shares this class
+ * with Delete account on purpose — same irreversible-action weight, same
+ * chip. */
+.account__delete {
+  border: 1px solid rgba(163, 63, 40, 0.4);
+  background: rgba(163, 63, 40, 0.055);
+  color: var(--warn);
+}
+.account__delete:hover { border-color: var(--warn); background: rgba(163, 63, 40, 0.09); }
+.account__delete:active { background: rgba(163, 63, 40, 0.14); border-color: var(--warn); }
 
 /* ---------------------------------------------------------------------------
  * The corner (story 0017) — `/you`, the reader's own room.

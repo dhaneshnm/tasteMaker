@@ -509,6 +509,11 @@ curator's desk.
    tile the wordmark section's own amendment bans at lockup size: "no tile...
    at any size, on any screen inside the app." The rule stands; medallions are
    inside it, not an exception to it.
+
+   **Two chip weights, not one.** `.signin__door`'s anatomy (hairline
+   border, `--bg-lift` fill, 2px radius) now has a destructive sibling —
+   `--warn`-tinted border and fill, same shape — for actions that cannot be
+   undone. Story 0034, `decisions/0024-the-doors-get-a-frame.md`.
 7. **Motion is a fade.** The archive's scroll-in reveal and the zoom fade, both
    off under `prefers-reduced-motion`. Nothing slides, bounces, or springs.
 8. **Text is never clamped on the daily page.** The archive clamps museum
