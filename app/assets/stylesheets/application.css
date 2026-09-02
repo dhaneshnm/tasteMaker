@@ -1505,8 +1505,11 @@ html.zoom-open body { overflow: hidden; }
 .signin__mark { flex: none; }
 
 /* Chip anatomy borrowed from .signin__door (decisions/0024): a safe variant
- * (gold on hairline, matching .signin__door exactly) and a destructive one
- * (--warn tint). `.push__enable` joins the styled group here for the first
+ * (gold on hairline, same border/background as .signin__door — padding is
+ * its own 1.15rem rather than .signin__door's 1.1rem, kept separate on
+ * purpose rather than merging selector lists across two conceptually
+ * distinct control families) and a destructive one (--warn tint).
+ * `.push__enable` joins the styled group here for the first
  * time — it's an <a>, not a <button>, so it used to get color free from the
  * global `a` rule and nothing else: no box at all, the same gap as the two
  * buttons this reverses. */
@@ -1552,7 +1555,11 @@ html.zoom-open body { overflow: hidden; }
   color: var(--warn);
 }
 .account__delete:hover { border-color: var(--warn); background: rgba(var(--warn-rgb), 0.09); }
-.account__delete:active { background: rgba(var(--warn-rgb), 0.14); border-color: var(--warn); }
+/* 0.10, not 0.14: the darker fill computed to 4.54:1 against --warn text —
+ * technically AA (4.5:1) but with no real margin, on the state a reader is
+ * looking at while deciding whether to release a tap on an irreversible
+ * action. 0.10 restores a 4.82:1 margin (/code-review, computed WCAG). */
+.account__delete:active { background: rgba(var(--warn-rgb), 0.1); border-color: var(--warn); }
 
 /* ---------------------------------------------------------------------------
  * The corner (story 0017) — `/you`, the reader's own room.
@@ -1605,9 +1612,11 @@ html.zoom-open body { overflow: hidden; }
  * which reads as a menu of three navigation choices rather than one door you
  * cannot walk back through.
  *
- * The gold caps-link treatment for a destructive control is house style and
- * stays (story 0015 chose it; `.account__delete` has shipped that way since).
- * What was new here is the adjacency, so distance is what changes. */
+ * The gold caps-link treatment for a destructive control WAS house style
+ * (story 0015 chose it) — reversed by story 0034 / `decisions/0024`:
+ * `.account__delete` is now a `--warn`-tinted bordered chip, not flat text.
+ * What was new HERE, at the time, was the adjacency; the margin below still
+ * does its job regardless of which treatment the button itself carries. */
 .corner__doors { margin: 2rem 0 3.5rem; }
 
 /* The account row at the foot of the collection — the reader's own room is

@@ -194,10 +194,13 @@ pair this diff introduces:
 |---|---|---|
 | `--gold` on `--bg-lift` (safe chip, resting) | 4.76:1 | pass |
 | `--gold` on `--bg` (existing `.signin__door`, unchanged) | 5.21:1 | pass |
-| `--warn` on the warm tint (destructive chip, `--warn` at 5.5% opacity actually composited onto `--bg`, not eyeballed) | 5.14:1 | pass |
+| `--warn` on the destructive tint, resting (5.5% opacity) | 5.14:1 | pass |
+| `--warn` on the destructive tint, `:hover` (9% opacity) | 4.89:1 | pass |
+| `--warn` on the destructive tint, `:active` (originally 14%) | 4.54:1 | **fail margin** — technically ≥4.5 but with none to spare, on the state a reader sees while deciding whether to release the tap. `/code-review` caught it: the plan's first draft only computed the resting fill. Fixed by dropping active to 10% opacity — 4.82:1, real margin restored, still visibly the darkest of the three states. |
 
-All three clear AA with margin; none is a new color, both tokens already
-ship elsewhere in the product. 44px tap target carried over unchanged from
+All three (now four, hover included) clear AA with real margin after the
+fix; none is a new color, both tokens already ship elsewhere in the
+product. 44px tap target carried over unchanged from
 the current rule (DESIGN.md rule 9). Keyboard/focus: unchanged global
 `:focus-visible` outline, native `<button>`/`<a>` tab order — nothing new to
 specify. Screen reader: button text is already descriptive ("Sign out",
@@ -248,19 +251,73 @@ reader:
 
 ## Implementation tasks
 
-- [ ] **T1** — Replace the flat-reset block with the two-variant chip CSS
-  above (`application.css:1506-1535`).
-- [ ] **T2** — Add the one-line Rule 6 amendment to `DESIGN.md`.
-- [ ] **T3** — Live-browser QA against the approved mock, both `/you`
-  states (plan's Test plan section).
-- [ ] **T4** — `bin/ci` green (no test changes expected; this is the
-  regression guard).
+- [x] **T1** — Replace the flat-reset block with the two-variant chip CSS
+  above (`application.css`, commit `3e23ead`; `--warn-rgb` cleanup and the
+  `:active` contrast fix landed in `ef2d24c` and the `/code-review` follow-up).
+- [x] **T2** — Add the one-line Rule 6 amendment to `DESIGN.md` (`3e23ead`).
+- [x] **T3 (desktop only)** — Live-browser QA via Chrome DevTools automation
+  against the approved mock, both `/you` states (`:account` via dev sign-in,
+  `:device` via a real `/device/registrations` call), plus a 390×844 mobile
+  viewport pass. Matched the mock exactly; `:active`/`:hover` CSS rules
+  confirmed parsed via CSSOM; zero console errors; Sign Out click verified
+  functional. **NOT done: the on-device iOS check this same plan named** —
+  whether `.push__enable`'s `:active` actually fires on real WebKit (the
+  documented, unconfirmed quirk two sections up). No physical device driven
+  from this session. Owner-gated, named rather than silently skipped, same
+  as every other story in this project's SHIPLOG that couldn't reach a real
+  phone.
+- [x] **T4** — `bin/ci` green throughout (`bin/rails test
+  test/integration/corners_test.rb`: 22/22 clean before and after every
+  change in this story; full `bin/ci` run confirmed only the pre-existing,
+  unrelated `sit_test.rb` flake, verified flaky independent of this diff).
 
 ## Unresolved decisions
 
 None. The one open item from the first draft (destructive-tint opacity) is
 resolved above rather than deferred — owner delegated review decisions this
 session.
+
+## /code-review (post-implementation, post-/simplify)
+
+Ran against commits `3e23ead` + `ef2d24c`. 7 findings; 5 fixed, 2 skipped.
+
+**Fixed:**
+1. Stale `ISSUE-002` comment (`application.css`) still asserted flat-gold
+   destructive treatment as settled house style — this diff reverses that.
+   Updated in place, points at `decisions/0024`.
+2. **`:active` contrast, the one finding with real teeth:** the destructive
+   chip's darkest fill (14% opacity) computed to 4.54:1 — technically AA,
+   with essentially zero margin, on the exact state a reader sees mid-tap on
+   an irreversible action. The plan's own accessibility table had only
+   checked the resting fill. Dropped to 10% opacity → 4.82:1, real margin.
+   Full three-state table now in the Accessibility section above.
+3. A code comment claimed the safe chip matches `.signin__door` "exactly" —
+   padding actually differs (1.15rem vs 1.1rem, confirmed real during
+   `/simplify`). Comment corrected.
+4. Implementation task checkboxes (T1-T4) were all unchecked despite being
+   done — plan didn't reflect its own completion state. Checked off with
+   evidence, T3 honestly marked desktop-only (see below).
+5. On-device iOS verification for `.push__enable`'s `:active` state was
+   never actually run this session (no physical device driven) — the plan
+   previously implied T3 covered it. Corrected to say so plainly rather than
+   leave an implied claim standing.
+
+**Skipped, with reasons:**
+- A reusable `.chip--warn`-style variant class instead of hard-wiring
+  `.account__delete` to one name. The finding itself named this as likely
+  premature — no second destructive control exists yet to generalize for.
+  Matches CLAUDE.md's explicit "infrastructure for later" warning.
+- CSS relative-color syntax (`rgb(from var(--warn) r g b / a)`) instead of
+  the `--warn-rgb` custom property, for a true single source of truth with
+  zero channel duplication. Well-supported at this app's iOS 17+ floor, but
+  it would be a first use of that syntax in `application.css` — the same
+  "first-use-of-a-new-technique" reasoning eng review already applied once
+  (rejecting `color-mix()`) and `/simplify` implicitly applied again
+  (choosing a plain custom property over it). Not worth litigating a third
+  time for a diff already several review rounds deep on a CSS-only story.
+
+`bin/rails test test/integration/corners_test.rb`: 22/22 clean after every
+fix above.
 
 ## GSTACK REVIEW REPORT
 
