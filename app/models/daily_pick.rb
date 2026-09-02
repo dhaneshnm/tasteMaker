@@ -326,7 +326,7 @@ class DailyPick < ApplicationRecord
   # DRAFT COPY — app-scaled from the protocol's prompts; owner's
   # field-by-field pass applies (T5 precedent).
   SIT_PROMPTS = [
-    "Describe what you see to someone who cannot see it.",
+    "Say what you see, as if for someone on the phone.",
     "Explain this picture to someone from a world without paintings.",
     "Pick one small detail. Why might it be there?",
     "Step inside the frame. What do you hear, feel, smell?",
