@@ -3,6 +3,20 @@
 Story: `story.md`. Decision: `decisions/0024-the-doors-get-a-frame.md`.
 Mocks (approved): https://claude.ai/code/artifact/828cce6a-ed95-4ec3-a204-8d006fdfe241
 
+**Deviation, noted during `/simplify` (post-implementation):** two independent
+review agents (reuse + simplification angles) both flagged the same thing the
+eng review below considered and set aside — `rgba(163, 63, 40, …)` repeating
+`--warn`'s channels by hand, 4 times after `:active` was added. The eng
+review's call to keep it literal (avoiding `color-mix()` as a first-use
+technique) still stands, but a `--warn-rgb: 163, 63, 40;` custom property
+next to `--warn` in `:root`, referenced as `rgba(var(--warn-rgb), N)`, closes
+the actual duplication without introducing anything new to the file (plain
+CSS custom properties, not a novel feature) — applied. The CSS snippets
+below still show the pre-simplify literals; the shipped code uses the
+token. `--gold`'s equivalent duplication (the new `:active` line joining
+3 pre-existing hand-rolled instances at lines 161/192/209) was left alone —
+those 3 sites predate this diff and are out of scope for a targeted change.
+
 ## Scope check, stated plainly
 
 This is CSS-only. Zero view/ERB changes, zero new classes on any element,
@@ -285,7 +299,7 @@ straight to the 4 sections.
 | Section | Findings | Notes |
 |---|---|---|
 | 1. Architecture | 0 | No new codepath, dependency, or security surface — pure selector restyle on 4 pre-existing classes. No ASCII diagram warranted (zero branches). |
-| 2. Code quality | 0 (1 considered, kept as-is) | `rgba(163, 63, 40, …)` repeats `--warn`'s channels 3× rather than a single derived token. Considered `color-mix()` (safe for this app's iOS 17+ floor) but rejected — it would be the first use of that technique anywhere in `application.css`, and the file's own existing convention (`--hairline` is already a hand-written low-alpha duplicate of `--gold`'s channels) is exactly what this diff follows. Explicit-over-clever wins; 3 adjacent literals in one small block is a contained, low-drift duplication, not the DRY violation the preference guards against. |
+| 2. Code quality | 1 (fixed in `/simplify`) | `rgba(163, 63, 40, …)` repeated `--warn`'s channels by hand 4×. Eng review considered `color-mix()` and rejected it as a first-use technique; `/simplify`'s reuse + simplification agents independently re-flagged the same spot and proposed a plain `--warn-rgb` custom property instead — no new CSS feature, closes the duplication. Applied. |
 | 3. Tests | 0 new codepaths → 0 new tests | Zero branches/conditionals added; the four classes' semantic behavior (which element, which href, which form action) is unchanged and already covered by `corners_test.rb`'s 20 tests, which is the actual regression surface. Visual/CSS coverage isn't Minitest's job in this codebase by existing convention (confirmed against ISSUE-002's precedent) — `/qa` (T3) is the real gate. IRON RULE doesn't trigger: the changed surface (rendering) has no prior Minitest coverage to regress. |
 | 4. Performance | 0 | Static asset, zero queries, zero memory concern. |
 

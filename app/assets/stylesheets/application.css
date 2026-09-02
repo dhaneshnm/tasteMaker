@@ -158,6 +158,7 @@
   --gold: #7d5f18;      /*  5.3:1 */
   --gold-deep: #5f4711;
   --warn: #a33f28;
+  --warn-rgb: 163, 63, 40; /* channel triple of --warn, for the destructive chip's alpha steps (story 0034) */
   --hairline: rgba(125, 95, 24, 0.3);
   --frame-edge: rgba(42, 36, 28, 0.18);
   --mount-bg: #100e0b;  /* the one dark surface — see DESIGN.md, accepted exceptions */
@@ -1546,12 +1547,12 @@ html.zoom-open body { overflow: hidden; }
  * with Delete account on purpose — same irreversible-action weight, same
  * chip. */
 .account__delete {
-  border: 1px solid rgba(163, 63, 40, 0.4);
-  background: rgba(163, 63, 40, 0.055);
+  border: 1px solid rgba(var(--warn-rgb), 0.4);
+  background: rgba(var(--warn-rgb), 0.055);
   color: var(--warn);
 }
-.account__delete:hover { border-color: var(--warn); background: rgba(163, 63, 40, 0.09); }
-.account__delete:active { background: rgba(163, 63, 40, 0.14); border-color: var(--warn); }
+.account__delete:hover { border-color: var(--warn); background: rgba(var(--warn-rgb), 0.09); }
+.account__delete:active { background: rgba(var(--warn-rgb), 0.14); border-color: var(--warn); }
 
 /* ---------------------------------------------------------------------------
  * The corner (story 0017) — `/you`, the reader's own room.
