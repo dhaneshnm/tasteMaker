@@ -21,6 +21,7 @@ feed BET.md's conversation threshold — track in `user-research/`, never as que
 
 ## Inbox
 
+- 2026-09-03 — `/you`, `:device` state, kept_count == 0 on a bridge-capable shell: "Nothing is kept on this phone yet." gives no lead-in before the Google/Apple sign-in doors appear right below — unlike the kept_count > 0 + doors branch, which now says "Sign in to save your kept work(s) to your account" (decisions/0025). Pre-existing, not introduced by today's changes; surfaced by a `/simplify` review pass. Untested.
 - 2026-08-31 — Link work titles on `/artists/:slug` and `/feed` to `/paintings/:id` once story 0030 ships the page. Titles are dead text today; after 0030 every work has an address, so the link is a one-line `link_to` per surface. Named out-of-scope in `specs/0030` to keep the bug-fix lane Express; carries the story-0018 caution (never from `/`, which is public — see the root-is-public rule). (0030 eng review)
 - 2026-08-21 — Hand-curated "wings" on `/feed`: named tradition+period combos with a written line ("Mughal miniatures"). The 7-star from 0027's Chesky ladder; borders the New slot, needs evidence (0027 non-goals)
 - 2026-08-21 — Remember the last `/feed` filter per device. 0027 non-goal; no evidence anyone returns to a filter
