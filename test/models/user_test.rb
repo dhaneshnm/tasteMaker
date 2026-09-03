@@ -55,4 +55,15 @@ class UserTest < ActiveSupport::TestCase
     assert_equal "Google", user.signed_in_summary,
       "a blank address is not an address"
   end
+
+  # Hide My Email hands over a real, working forwarding address rather than
+  # withholding one — so it is present, not blank, and the blank check above
+  # does not catch it. Printing it back reads as a bug, not a confirmation.
+  test "a Hide My Email relay address is not shown back to the reader" do
+    user = User.from_omniauth(auth(provider: "apple", email: "9jv9z2p25m@privaterelay.appleid.com"))
+    assert_equal "Apple", user.signed_in_summary
+
+    user.update!(email: "maya@privaterelay.appleid.com")
+    assert_equal "Apple", user.signed_in_summary
+  end
 end

@@ -62,14 +62,24 @@ class User < ApplicationRecord
   end
 
   # How this reader is named back to themselves — "Google as maya@example.com",
-  # or just "Google" when the provider handed over no address (Apple's Hide My
-  # Email can, and a reader who declined the scope will).
+  # or just "Google" when there's no real address to show: the provider handed
+  # over none (a reader who declined the scope), or Apple's Hide My Email
+  # handed over a `@privaterelay.appleid.com` forwarding address instead of
+  # withholding one. That address is real and mail sent to it works, but it
+  # names Apple's relay, not the reader — printing it back to them reads as a
+  # bug, not a confirmation (found against the corner screen).
   #
   # One method because two screens print it: the corner, where the account is
   # administered, and the foot of the collection. They were two copies differing
   # in whitespace, and the day one gains a detail the other silently disagrees
   # on the page a reader opens in order to delete their account.
   def signed_in_summary
-    email.present? ? "#{provider_name} as #{email}" : provider_name
+    nameable_email? ? "#{provider_name} as #{email}" : provider_name
+  end
+
+  private
+
+  def nameable_email?
+    email.present? && !email.end_with?("@privaterelay.appleid.com")
   end
 end
