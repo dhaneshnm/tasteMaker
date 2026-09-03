@@ -22,9 +22,10 @@ class CornersTest < ActionDispatch::IntegrationTest
 
   # `.corner` is the only thing scoping this page's tight top padding and
   # dash-free ornament (decisions/0025) away from the ten-plus other screens
-  # that share `.page--empty`/`.ornament`. Drop this class from `<main>` and
-  # the CSS falls silently back to the shared 4-8rem clamp — no visual test
-  # would catch it, so the class itself is the forcing function.
+  # that share `.page--empty`/`.ornament`. This only proves the class name
+  # survives on `<main>` — an `assert_select` reads markup, not the cascade,
+  # so it cannot tell a live selector from a typo'd or deleted one.
+  # `test/system/corners_test.rb` is what actually checks the CSS applies.
   test "the corner scopes its spacing override, not the shared classes" do
     get corner_path
 
