@@ -1589,17 +1589,19 @@ html.zoom-open body { overflow: hidden; }
   color: var(--ink);
 }
 
-/* The quiet controls under it. `column-gap` rather than a margin between
- * siblings, for the reason `.legal` records: an adjacent-sibling rule only
- * works for exactly two, and the account state already has two while the
- * device state has one. */
+/* The quiet controls under it. `gap` rather than a margin between siblings,
+ * for the reason `.legal` records: an adjacent-sibling rule only works for
+ * exactly two, and the account state already has two while the device state
+ * has one. Both axes, not just `column-gap` — two doors wrap to stacked rows
+ * under Dynamic Type or a narrow phone, and a column-only gap left the
+ * stacked pair touching border-to-border (found against this same screen). */
 .coda__doors,
 .corner__doors {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  column-gap: 1.4rem;
+  gap: 1.4rem;
 }
 
 /* ISSUE-002, found by /qa 2026-08-17. The bottom margin is the fix and it is
