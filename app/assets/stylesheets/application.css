@@ -1571,6 +1571,19 @@ html.zoom-open body { overflow: hidden; }
  * new product.
  */
 
+/* `.corner` names `<main>` here alone — not a third borrowed-vs-owned class,
+ * a scope. `.page--empty` and `.ornament` are shared by five other screens
+ * (the empty archive/collection/gallery, the 404), and a straight edit to
+ * either would have moved all of them. Reviewed and approved against `/you`
+ * alone, on a design-canvas mock, 2026-09-03 (`decisions/0025`, mock:
+ * https://claude.ai/code/artifact/7f7d1116-e13e-45b4-bb72-31bef553e15d):
+ * a tight top instead of the shared class's centering pad, and no flanking
+ * dashes on the ornament — `letter-spacing` goes with the dashes it was
+ * spacing, or the lone ✦ sits off-centre by half its trailing letter-space. */
+.corner.page--empty { padding-top: clamp(1.5rem, 5vw, 2.5rem); }
+.corner .ornament { letter-spacing: normal; }
+.corner .ornament::before, .corner .ornament::after { content: none; }
+
 /* The sentence the page is built around. Three of the four states are a reader
  * standing in front of a decision, and this is the decision said plainly.
  *

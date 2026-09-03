@@ -20,6 +20,17 @@ class CornersTest < ActionDispatch::IntegrationTest
     assert_select ".signin__door", count: 2
   end
 
+  # `.corner` is the only thing scoping this page's tight top padding and
+  # dash-free ornament (decisions/0025) away from the ten-plus other screens
+  # that share `.page--empty`/`.ornament`. Drop this class from `<main>` and
+  # the CSS falls silently back to the shared 4-8rem clamp — no visual test
+  # would catch it, so the class itself is the forcing function.
+  test "the corner scopes its spacing override, not the shared classes" do
+    get corner_path
+
+    assert_select "main.page.page--empty.corner"
+  end
+
   test "the corner is private and never stored" do
     get corner_path
 
@@ -191,13 +202,23 @@ class CornersTest < ActionDispatch::IntegrationTest
     assert_select ".coda__line--ask", text: "This phone is still settling in."
   end
 
-  test "a versioned shell holding works is told what signing in costs" do
+  test "a versioned shell holding one work is invited to sign in, singular" do
     token = register_device
     Favorite.create!(painting: paintings(:sunflowers), collector_digest: Device.digest(token))
 
     get corner_path, headers: { "User-Agent" => NEW_SHELL }
 
-    assert_select ".coda__note", /stop belonging to this\s+phone/
+    assert_select ".coda__line--ask", text: "Sign in to save your kept work to your account."
+  end
+
+  test "a versioned shell holding several works is invited to sign in, plural" do
+    token = register_device
+    Favorite.create!(painting: paintings(:sunflowers), collector_digest: Device.digest(token))
+    Favorite.create!(painting: paintings(:harbour), collector_digest: Device.digest(token))
+
+    get corner_path, headers: { "User-Agent" => NEW_SHELL }
+
+    assert_select ".coda__line--ask", text: "Sign in to save your kept works to your account."
   end
 
   # ---- the daily knock (story 0010) ----------------------------------------

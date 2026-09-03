@@ -16,7 +16,7 @@
     compass, because it is the one that is `private, no-store`. %>
 <%= render "shared/masthead", label: "Your corner", here: nil, locked: @locked %>
 
-<main class="page page--empty">
+<main class="page page--empty corner">
   <%# One ornament, not four. Every branch below opened with this same line —
       the `case` is about what each state SAYS, and the divider is not part of
       that. %>
@@ -34,13 +34,10 @@
         quiet-line voice here for that reason — "signed in with Google" set at
         display size would be theatre. %>
     <p class="coda__line">Kept with your account.</p>
-    <p class="coda__note">
-      Signed in with <%= current_user.signed_in_summary %>. Your
-      <%= pluralize(@kept_count, "kept work") %>
-      <%= @kept_count == 1 ? "travels" : "travel" %> with the account, not with
-      any one device.
-    </p>
-    <p class="coda__note">No other settings live here yet.</p>
+    <%# Used to also say the kept-work count travels with the account, not the
+        device, and "No other settings live here yet." Both cut, 2026-09-03 —
+        decisions/0025. %>
+    <p class="coda__note">Signed in with <%= current_user.signed_in_summary %>.</p>
 
     <div class="corner__doors">
       <%= button_to "Sign out", session_path, method: :delete,
@@ -70,28 +67,28 @@
         The bookmark under each artwork keeps it here, and what you keep lives
         with this phone.
       </p>
+    <% elsif @doors %>
+      <p class="coda__line coda__line--ask">
+        Sign in to save your kept <%= @kept_count == 1 ? "work" : "works" %> to
+        your account.
+      </p>
     <% else %>
       <p class="coda__line coda__line--ask">
         <%= pluralize(@kept_count, "work") %>
         <%= @kept_count == 1 ? "is" : "are" %> kept on this phone.
       </p>
       <p class="coda__note">
-        <% if @doors %>
-          Sign in and they move to your account. They stop belonging to this
-          phone — sign out afterwards and this phone's collection is empty until
-          you sign back in. Nothing is deleted.
-        <% else %>
-          They live with this phone and nothing else. They survive deleting and
-          reinstalling the app. They do not survive a new phone.
-        <% end %>
+        They live with this phone and nothing else. They survive deleting and
+        reinstalling the app. They do not survive a new phone.
       </p>
     <% end %>
 
-    <%# The doors, and only from a shell that can actually open one. The
-        consequence is stated above rather than inside the button: a reader who
-        taps has already decided, and persona 6's whole complaint is being told
-        afterwards. `native: true` renders links rather than forms, because the
-        shell intercepts a navigation and cannot intercept a form submit. %>
+    <%# The doors, and only from a shell that can actually open one. The line
+        above dropped its consequence paragraph (2026-09-03, mock-approved —
+        see decisions/0025) for a plain CTA; persona 6's "told afterwards"
+        complaint is a live risk again if this page ever regains a reason to
+        say more here. `native: true` renders links rather than forms, because
+        the shell intercepts a navigation and cannot intercept a form submit. %>
     <% if @doors %>
       <%= render "sessions/doors", native: true %>
     <% end %>
@@ -135,17 +132,18 @@
       Device-scoped, not state-scoped — the same reason `@push_capable` asks
       `current_device` directly rather than `@state`. Renders for :account and
       :device alike, whichever one holds a Device row on this phone; nothing
-      for :shell or :signed_out, which have no row to carry a token. %>
+      for :shell or :signed_out, which have no row to carry a token.
+
+      Used to carry a status line above each control ("The daily notification
+      is on." / "Notify when today's artwork is ready.") — cut, 2026-09-03,
+      as redundant with what the button/link itself already says
+      (decisions/0025). %>
   <% if @push_capable %>
-    <% if current_device.apns_token.present? %>
-      <p class="coda__note">The daily notification is on.</p>
-      <div class="corner__doors">
+    <div class="corner__doors">
+      <% if current_device.apns_token.present? %>
         <%= button_to "Turn off the daily notification", push_registration_path, method: :delete,
               class: "caps-link push__disable", form_class: "push__form" %>
-      </div>
-    <% else %>
-      <p class="coda__note">Notify when today's artwork is ready.</p>
-      <div class="corner__doors">
+      <% else %>
         <%# Native only — the shell intercepts this navigation
             (PushRouteDecisionHandler) before it becomes a request; the
             `you/push/enable` route itself only ever answers a stray browser
@@ -154,8 +152,8 @@
             handlers hook into Turbo's own navigation, not a plain link. %>
         <%= link_to "Get the daily notification", push_enable_path,
               class: "caps-link push__enable", data: { turbo: false } %>
-      </div>
-    <% end %>
+      <% end %>
+    </div>
   <% end %>
 
   <%= render "shared/legal" %>
