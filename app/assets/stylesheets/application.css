@@ -1777,6 +1777,7 @@ html.zoom-open body { overflow: hidden; }
   font-size: 1.02rem;
   line-height: 1.6;
   color: var(--ink);
+  overflow-wrap: anywhere; /* one unbroken 280-char run must not widen the page */
 }
 .cmt__body--mine {
   font-style: italic;
@@ -1832,9 +1833,19 @@ html.zoom-open body { overflow: hidden; }
    * controller's scrollHeight measure everywhere else). */
   resize: none;
   overflow: hidden;
+  overflow-wrap: anywhere;
   field-sizing: content;
 }
-.sit__input:focus { outline: none; border-bottom-color: var(--gold); }
+/* Writing: the hairline closes into a box so a wrapped answer reads as
+ * the field it is (owner, 2026-09-15 — a lone underline beneath three
+ * lines of text no longer says "you can type here"). Idle, the line stays. */
+.sit__input:focus {
+  outline: none;
+  border: 1px solid var(--hairline);
+  border-bottom-color: var(--gold);
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
 .sit__input::placeholder { color: var(--ink-faint); font-style: italic; opacity: 1; }
 
 /* The autosave whisper — the only acknowledgment the page ever gives. */

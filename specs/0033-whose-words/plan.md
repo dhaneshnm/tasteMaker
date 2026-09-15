@@ -755,3 +755,12 @@ fires two repaints after the swap — a field cleared inside that window read as
 already saved, and Enter never wrote the deletion (the pre-existing isolated
 flake in "an emptied line and Enter takes the answer back"). Resync moved to
 `inputTargetConnected`/`inputTargetDisconnected`, synchronous at the swap.
+Second owner pass (2026-09-15, local): tap-to-edit now focuses the field with
+the caret after the last word (`inputTargetConnected`, `?edit=1` reloads only);
+the whisper counts down from 40 characters out and says "280 · full" at the
+limit, because a full `maxlength` field drops keystrokes silently; and on
+focus the hairline closes into a box — owner direction: a wrapped answer
+should look like the field it is. Idle, the single line stays.
+Also: `overflow-wrap: anywhere` on the comment and the composer — one unbroken
+280-character run widened the page sideways, and a tap on the comment could
+land beside it (found as a system-test click that hit `<html>`).
