@@ -145,6 +145,33 @@ class SitTest < ApplicationSystemTestCase
     assert_equal daily_picks(:today).sit_prompt, impression.prompt
   end
 
+  test "a long answer wraps and stays wholly visible, the composer growing to fit" do
+    sign_in_as_reader
+    visit root_path
+    page.execute_script("try { localStorage.clear() } catch (e) {}")
+    visit root_path
+
+    assert_selector "textarea.sit__input", wait: 3
+    one_line_height = page.evaluate_script("document.querySelector('.sit__input').offsetHeight")
+
+    long = ("the eye goes to the gold first, then the red, then the small hands " * 4).strip
+    find(".sit__input").fill_in(with: long)
+
+    # Grown past one row, and nothing hidden: the field is as tall as its
+    # text, so no word scrolls off (an <input> would have clipped this).
+    assert page.evaluate_script(
+      "document.querySelector('.sit__input').offsetHeight"
+    ) > one_line_height
+    assert page.evaluate_script(
+      "(() => { const t = document.querySelector('.sit__input'); return t.clientHeight >= t.scrollHeight })()"
+    ), "composer clips its own text"
+
+    # Enter still sets it down as one line of prose — no newline slipped in.
+    find(".sit__input").send_keys(:enter)
+    assert_selector ".cmt__body--mine", text: long, wait: 3
+    assert_equal long, Impression.last.body
+  end
+
   test "Enter sets the line down: the comment replaces the composer" do
     sign_in_as_reader
     visit root_path
@@ -219,6 +246,51 @@ class SitTest < ApplicationSystemTestCase
       })()
     })
     assert_equal "steady as it goes", saved
+  end
+
+  test "tap-to-edit lands the caret after the last word, in a focused field" do
+    sign_in_as_reader
+    visit root_path
+    page.execute_script("try { localStorage.clear() } catch (e) {}")
+    visit root_path
+
+    # The day's first composer arrives with the page and never steals focus.
+    assert_selector ".sit__input", wait: 3
+    assert_not page.evaluate_script("document.activeElement === document.querySelector('.sit__input')")
+
+    find(".sit__input").fill_in(with: "the gold first")
+    find(".sit__input").send_keys(:enter)
+    assert_selector ".cmt__edit", wait: 3
+
+    find(".cmt__edit").click
+    assert_selector ".sit__input", wait: 3
+    assert page.evaluate_script("document.activeElement === document.querySelector('.sit__input')"),
+      "edit reload did not focus the field"
+    assert_equal "the gold first".length,
+      page.evaluate_script("document.querySelector('.sit__input').selectionStart")
+  end
+
+  test "the whisper counts down inside the last 40 characters and names a full field" do
+    sign_in_as_reader
+    visit root_path
+    page.execute_script("try { localStorage.clear() } catch (e) {}")
+    visit root_path
+
+    field = find(".sit__input", wait: 3)
+    field.fill_in(with: "a" * 200)
+    assert_no_text "left"
+    field.fill_in(with: "a" * 250)
+    assert_selector ".sit__saved", text: /30 left/i
+    field.fill_in(with: "a" * 280)
+    assert_selector ".sit__saved", text: /280 · full/i
+    field.send_keys(:tab)
+    assert_selector ".sit__saved", text: /280 · full/i, wait: 3 # Saved never paints over it
+
+    # Set down and reopened: the full field says so before any keystroke.
+    field.send_keys(:enter)
+    assert_selector ".cmt__edit", wait: 3
+    find(".cmt__edit").click
+    assert_selector ".sit__saved", text: /280 · full/i, wait: 3
   end
 
   test "an emptied line and Enter takes the answer back" do

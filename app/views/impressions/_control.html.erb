@@ -52,12 +52,19 @@
             never the label itself. %>
         <%= form_with url: impression_path(painting), method: :post,
               class: "sit__form", data: { turbo: false } do %>
-          <input type="text" name="body" class="sit__input"
-                 maxlength="280" value="<%= impression&.body %>"
-                 aria-labelledby="sit-prompt"
-                 placeholder="Write here — even one line will do."
-                 data-autosave-target="input"
-                 data-action="input->autosave#changed keydown->autosave#keydown blur->autosave#blurred">
+          <%# A textarea, not <input type=text>: a long line must wrap and
+              stay fully visible (an input scrolls it off sideways, and the
+              caret vanishes past the edge while editing). rows=1 keeps the
+              single-line look; autosave_controller grows it to fit. Enter
+              still commits — keydown preventDefault never lets a newline
+              in, so the body stays one line of prose. Content sits on the
+              open-tag line: HTML drops a leading newline in a textarea. %>
+          <textarea name="body" class="sit__input" rows="1"
+                    maxlength="280"
+                    aria-labelledby="sit-prompt"
+                    placeholder="Write here — even one line will do."
+                    data-autosave-target="input"
+                    data-action="input->autosave#changed keydown->autosave#keydown blur->autosave#blurred"><%= impression&.body %></textarea>
           <p class="sit__saved" aria-live="polite" data-autosave-target="status"
              data-saved-copy="Saved"></p>
         <% end %>

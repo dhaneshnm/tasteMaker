@@ -26,31 +26,78 @@ export default class extends Controller {
   // Mounted once, on the persistent frame — `connect()` fires only for
   // THIS controller's own lifecycle, never again on the child-content
   // swaps that carry it between composer, comment, and back. `this.saved`
-  // has to resync on every one of those swaps too (`turbo:frame-load`
-  // fires for each), or a tap-to-edit reopen leaves it stale from before
-  // the prefill: a reader who edits, changes nothing, and hits Enter would
-  // otherwise read as dirty and fire a needless write.
+  // resyncs through the target callbacks instead: `inputTargetConnected`
+  // runs synchronously the moment the composer's field enters the DOM,
+  // and `inputTargetDisconnected` clears it when the comment replaces the
+  // composer. (An earlier `turbo:frame-load` listener did this too late —
+  // Turbo fires it two repaints after the swap, and a reader (or a test)
+  // could clear the prefilled field inside that window, after which the
+  // late resync read the emptied field as "already saved" and Enter
+  // never wrote the deletion.)
   connect() {
-    this.resync()
-    this.onFrameLoad = () => this.resync()
-    this.element.addEventListener("turbo:frame-load", this.onFrameLoad)
     this.onFlush = () => this.flush()
     window.addEventListener("pagehide", this.onFlush)
   }
 
   disconnect() {
     clearTimeout(this.timer)
-    this.element.removeEventListener("turbo:frame-load", this.onFrameLoad)
     window.removeEventListener("pagehide", this.onFlush)
+  }
+
+  // Tap-to-edit lands the reader in the field, caret after the last word —
+  // not staring at a prefilled line they then have to tap into and hunt
+  // through (owner report, 2026-09-15). Only the `?edit=1` reload focuses:
+  // the day's first composer arrives with the page and must never steal
+  // focus, scroll, or a phone keyboard.
+  inputTargetConnected() {
+    this.resync()
+    if (!this.element.src?.includes("edit=1")) return
+    const el = this.inputTarget
+    el.focus()
+    el.setSelectionRange(el.value.length, el.value.length)
+  }
+
+  inputTargetDisconnected() {
+    this.saved = undefined
   }
 
   resync() {
     this.saved = this.hasInputTarget ? this.inputTarget.value.trim() : undefined
+    this.grow()
+    this.count() // a prefilled edit at the limit says so before the first keystroke
   }
 
   changed() {
+    this.grow()
+    this.count()
     clearTimeout(this.timer)
     this.timer = setTimeout(() => this.save(), 800)
+  }
+
+  // The 280 is a hard maxlength, and a full field silently drops every
+  // further keystroke — which reads as "typing is broken" (owner, on a
+  // field padded to the limit). The whisper names it from 40 characters
+  // out; before that it stays the empty/Saved line it always was.
+  count() {
+    if (!this.hasInputTarget || !this.hasStatusTarget) return
+    const max = Number(this.inputTarget.maxLength)
+    if (!(max > 0)) return
+    const left = max - this.inputTarget.value.length
+    if (left > 40) return
+    this.statusTarget.textContent = left === 0 ? `${max} · full` : `${left} left`
+  }
+
+  // The composer is a one-row textarea that must show every word: reset
+  // to auto so a deletion can shrink it, then size to the text. Browsers
+  // with `field-sizing: content` do this in CSS; the measure is harmless
+  // there and the whole fix elsewhere (Safari, as of this writing).
+  grow() {
+    if (!this.hasInputTarget) return
+    const el = this.inputTarget
+    el.style.height = "auto"
+    // border-box: the set height must cover the hairline too, or the last
+    // row sits one pixel under the border and scrolls.
+    el.style.height = `${el.scrollHeight + el.offsetHeight - el.clientHeight}px`
   }
 
   keydown(event) {
@@ -111,6 +158,7 @@ export default class extends Controller {
       if (resp.ok) {
         this.saved = body
         if (this.hasStatusTarget) this.statusTarget.textContent = this.statusTarget.dataset.savedCopy
+        this.count() // a near-limit count outranks "Saved" — keep it showing
       }
       return resp.ok
     } catch {

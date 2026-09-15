@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# BET.md threshold: "3 keywords ranked top 100 in App Store search." This is the
+# receipt for that number (R1) — the three terms are fixed in decisions/0026 and
+# the rank is read from the same iTunes Search API user-research/0004 used, not
+# from a phone (on-device search is personalised and cannot be logged).
+#
+# Caveat, stated once: the Search API is a proxy for the App Store's search
+# ranking, not the ranking itself. It is the best zero-cost instrument that
+# produces a repeatable number; a term is "ranked" when Tondo appears in its
+# first 100 results here, and the kill review reads this script's output.
+#
+# Usage: script/aso-rank            # table for SHIPLOG.md
+#        script/aso-rank --country gb
+
+require "json"
+require "net/http"
+require "uri"
+
+BUNDLE_ID = "com.dhaneshnm.tondo"
+THRESHOLD = 100
+TARGETS = [ "daily art", "one painting a day", "daily art history" ].freeze # decisions/0026
+WATCH   = [ "art history", "daily painting", "daily masterpiece" ].freeze  # context only, never counted
+
+country = ARGV.include?("--country") ? ARGV[ARGV.index("--country") + 1] : "us"
+
+def rank_for(term, country)
+  uri = URI("https://itunes.apple.com/search")
+  uri.query = URI.encode_www_form(term: term, country: country, entity: "software", limit: 200)
+  body = JSON.parse(Net::HTTP.get(uri))
+  results = body.fetch("results")
+  index = results.index { |r| r["bundleId"] == BUNDLE_ID }
+  [ index && index + 1, results.size ]
+end
+
+ranked = 0
+puts "| #{Time.now.strftime("%Y-%m-%d")} | term | rank (#{country}) | shelf |"
+puts "|---|---|---|---|"
+(TARGETS + WATCH).each do |term|
+  rank, shelf = rank_for(term, country)
+  target = TARGETS.include?(term)
+  ranked += 1 if target && rank && rank <= THRESHOLD
+  label = target ? term : "(#{term})"
+  puts "| | #{label} | #{rank || "not in top #{shelf}"} | #{shelf} |"
+end
+puts
+puts "Ranked top #{THRESHOLD}: #{ranked} of #{TARGETS.size} (BET.md needs 3)."
