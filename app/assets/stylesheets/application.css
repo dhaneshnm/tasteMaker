@@ -1823,9 +1823,16 @@ html.zoom-open body { overflow: hidden; }
   color: var(--ink);
   font: inherit;
   font-style: italic;
+  line-height: 1.5;
   padding: 0.45rem 2px 0.55rem 2px;
   min-height: var(--tap);
   box-sizing: border-box;
+  /* A textarea wearing an input's single line: no grip, no scrollbar —
+   * it grows to its text instead (field-sizing where supported, the
+   * controller's scrollHeight measure everywhere else). */
+  resize: none;
+  overflow: hidden;
+  field-sizing: content;
 }
 .sit__input:focus { outline: none; border-bottom-color: var(--gold); }
 .sit__input::placeholder { color: var(--ink-faint); font-style: italic; opacity: 1; }

@@ -739,3 +739,19 @@ one unit (OV7); `decisions/00XX` and the five DESIGN.md updates land during
 implementation, before ship (T5).
 
 NO UNRESOLVED DECISIONS
+
+## Deviation (2026-09-15) — composer is a textarea, not an input
+
+Owner report: a long answer disappears past the field's right edge once saved,
+and on tap-to-edit the caret is lost past the end — mobile and desktop alike.
+Cause: the composer was `<input type="text">`, which never wraps. Fix, no new
+surface: `<textarea rows="1">` styled identically (no grip, no scrollbar),
+grown to its text by `autosave_controller#grow` on every input and resync
+(`field-sizing: content` where the browser has it). Enter still `preventDefault`s
+and commits, so the body stays one line of prose. Test:
+`sit_test.rb` "a long answer wraps and stays wholly visible".
+Found while testing: `this.saved` resynced on `turbo:frame-load`, which Turbo
+fires two repaints after the swap — a field cleared inside that window read as
+already saved, and Enter never wrote the deletion (the pre-existing isolated
+flake in "an emptied line and Enter takes the answer back"). Resync moved to
+`inputTargetConnected`/`inputTargetDisconnected`, synchronous at the swap.

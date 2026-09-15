@@ -145,6 +145,33 @@ class SitTest < ApplicationSystemTestCase
     assert_equal daily_picks(:today).sit_prompt, impression.prompt
   end
 
+  test "a long answer wraps and stays wholly visible, the composer growing to fit" do
+    sign_in_as_reader
+    visit root_path
+    page.execute_script("try { localStorage.clear() } catch (e) {}")
+    visit root_path
+
+    assert_selector "textarea.sit__input", wait: 3
+    one_line_height = page.evaluate_script("document.querySelector('.sit__input').offsetHeight")
+
+    long = ("the eye goes to the gold first, then the red, then the small hands " * 4).strip
+    find(".sit__input").fill_in(with: long)
+
+    # Grown past one row, and nothing hidden: the field is as tall as its
+    # text, so no word scrolls off (an <input> would have clipped this).
+    assert page.evaluate_script(
+      "document.querySelector('.sit__input').offsetHeight"
+    ) > one_line_height
+    assert page.evaluate_script(
+      "(() => { const t = document.querySelector('.sit__input'); return t.clientHeight >= t.scrollHeight })()"
+    ), "composer clips its own text"
+
+    # Enter still sets it down as one line of prose — no newline slipped in.
+    find(".sit__input").send_keys(:enter)
+    assert_selector ".cmt__body--mine", text: long, wait: 3
+    assert_equal long, Impression.last.body
+  end
+
   test "Enter sets the line down: the comment replaces the composer" do
     sign_in_as_reader
     visit root_path

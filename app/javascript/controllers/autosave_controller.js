@@ -26,31 +26,54 @@ export default class extends Controller {
   // Mounted once, on the persistent frame — `connect()` fires only for
   // THIS controller's own lifecycle, never again on the child-content
   // swaps that carry it between composer, comment, and back. `this.saved`
-  // has to resync on every one of those swaps too (`turbo:frame-load`
-  // fires for each), or a tap-to-edit reopen leaves it stale from before
-  // the prefill: a reader who edits, changes nothing, and hits Enter would
-  // otherwise read as dirty and fire a needless write.
+  // resyncs through the target callbacks instead: `inputTargetConnected`
+  // runs synchronously the moment the composer's field enters the DOM,
+  // and `inputTargetDisconnected` clears it when the comment replaces the
+  // composer. (An earlier `turbo:frame-load` listener did this too late —
+  // Turbo fires it two repaints after the swap, and a reader (or a test)
+  // could clear the prefilled field inside that window, after which the
+  // late resync read the emptied field as "already saved" and Enter
+  // never wrote the deletion.)
   connect() {
-    this.resync()
-    this.onFrameLoad = () => this.resync()
-    this.element.addEventListener("turbo:frame-load", this.onFrameLoad)
     this.onFlush = () => this.flush()
     window.addEventListener("pagehide", this.onFlush)
   }
 
   disconnect() {
     clearTimeout(this.timer)
-    this.element.removeEventListener("turbo:frame-load", this.onFrameLoad)
     window.removeEventListener("pagehide", this.onFlush)
+  }
+
+  inputTargetConnected() {
+    this.resync()
+  }
+
+  inputTargetDisconnected() {
+    this.saved = undefined
   }
 
   resync() {
     this.saved = this.hasInputTarget ? this.inputTarget.value.trim() : undefined
+    this.grow()
   }
 
   changed() {
+    this.grow()
     clearTimeout(this.timer)
     this.timer = setTimeout(() => this.save(), 800)
+  }
+
+  // The composer is a one-row textarea that must show every word: reset
+  // to auto so a deletion can shrink it, then size to the text. Browsers
+  // with `field-sizing: content` do this in CSS; the measure is harmless
+  // there and the whole fix elsewhere (Safari, as of this writing).
+  grow() {
+    if (!this.hasInputTarget) return
+    const el = this.inputTarget
+    el.style.height = "auto"
+    // border-box: the set height must cover the hairline too, or the last
+    // row sits one pixel under the border and scrolls.
+    el.style.height = `${el.scrollHeight + el.offsetHeight - el.clientHeight}px`
   }
 
   keydown(event) {

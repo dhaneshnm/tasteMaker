@@ -65,7 +65,7 @@ class ImpressionsTest < ActionDispatch::IntegrationTest
     get impression_control_path(@painting, edit: "1")
 
     assert_includes response.body, "<form"
-    assert_includes response.body, 'value="half a thought"'
+    assert_includes response.body, ">half a thought</textarea>"
   end
 
   test "on an archived painting the line is read-only, never tap-to-edit" do
